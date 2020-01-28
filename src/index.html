@@ -1,17 +1,20 @@
 <html>
 <head>
+<script src="Equates.js"></script>
 <script src="Pair.js"></script>
 <script src="Sally.js"></script>
 </head>
 <body>
 <script>
-var x = 5;
-alert(x);
-alert(!x);
-if (x) alert("value");
-x = 0;
-if (!x) alert("no value");
-if (x) alert("value");
+var x = 0x01;
+switch(x) {
+    case 0x00:
+        alert('0');
+        break;
+    case 0x01:
+        alert('1');
+        break;
+}    
 </script>
 </body>
 </html>
