@@ -38,11 +38,11 @@ var sally_s = 0;
 var sally_pc = new Pair();
 
 //static byte sally_opcode;
-var sally_opcode;
+var sally_opcode = 0;
 //static pair sally_address;
 var sally_address = new Pair();
 //static uint sally_cycles;
-var sally_cycles;
+var sally_cycles = 0;
 
 // Whether the last operation resulted in a half cycle. (needs to be taken 
 // into consideration by ProSystem when cycle counting). This can occur when
