@@ -407,13 +407,17 @@ cartridge_Load = function(data, size) {
 
   //cartridge_buffer = new byte[cartridge_size];
   cartridge_buffer = new Array();
+  var hashstr = "";
   //for (int index = 0; index < cartridge_size; index++) {
   for (var index = 0; index < cartridge_size; index++) {
     cartridge_buffer[index] = data[index + offset];
+    hashstr += String.fromCharCode(cartridge_buffer[index]);
   }
 
-  // TODO: JS, add hash calculation
   //cartridge_digest = hash_Compute(cartridge_buffer, cartridge_size); 
+  cartridge_digest = md5(hashstr);  
+  console.log("cartridge_digest: %s", cartridge_digest);
+
   return true;
 }
 
