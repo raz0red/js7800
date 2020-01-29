@@ -23,6 +23,8 @@
 // Cartridge.cpp
 // ----------------------------------------------------------------------------
 
+
+var HBLANK_DEFAULT = 34;
 var CARTRIDGE_TYPE_NORMAL = 0;
 var CARTRIDGE_TYPE_SUPERCART = 1;
 var CARTRIDGE_TYPE_SUPERCART_LARGE = 2;
@@ -38,35 +40,35 @@ var CARTRIDGE_WSYNC_MASK = 2;
 var CARTRIDGE_CYCLE_STEALING_MASK = 1;
 
 //std::string cartridge_title;
-var cartridge_title;
+var cartridge_title = "";
 //std::string cartridge_description;
-var cartridge_description;
+var cartridge_description = "";
 //std::string cartridge_year;
-var cartridge_year;
+var cartridge_year = "";
 //std::string cartridge_maker;
-var cartridge_maker;
+var cartridge_maker = "";
 //std::string cartridge_digest;
-var cartridge_digest;
+var cartridge_digest = "";
 //std::string cartridge_filename;
-var cartridge_filename;
+var cartridge_filename = "";
 //byte cartridge_type;
-var cartridge_type;
+var cartridge_type = 0;
 //byte cartridge_region;
-var cartridge_region;
+var cartridge_region = 0;
 //bool cartridge_pokey;
-var cartridge_pokey;
+var cartridge_pokey = false;
 //bool cartridge_pokey450;
-var cartridge_pokey450;
+var cartridge_pokey450 = false;
 //byte cartridge_controller[2] = {1, 1};
 var cartridge_controller = [1, 1];
 //byte cartridge_bank;
-var cartridge_bank;
+var cartridge_bank = 0;
 //uint cartridge_flags;
-var cartridge_flags;
+var cartridge_flags = 0;
 //int cartridge_crosshair_x;
-var cartridge_crosshair_x;
+var cartridge_crosshair_x = 0;
 //int cartridge_crosshair_y;
-var cartridge_crosshair_y;
+var cartridge_crosshair_y = 0;
 //bool cartridge_dualanalog = false;
 var cartridge_dualanalog = false;
 //bool cartridge_xm = false;
@@ -107,7 +109,7 @@ cartridge_HasHeader = function (header) {
   //for(int index = 0; index < 9; index++) {
   for (var index = 0; index < 9; index++) {
     //if (HEADER_ID[index] != header[index + 1]) {
-    if (HEADER_ID[index] != String.fromCharCode(header[index + 1])) {
+    if (HEADER_ID[index] != String.fromCharCode(header[index + 1])) {      
       return false;
     }
   }
@@ -332,7 +334,7 @@ cartridge_ReadHeader = function (header) {
   console.log("  pokey: %s", (cartridge_pokey ? "1" : "0"));
   console.log("  pokey450: %s", (cartridge_pokey450 ? "1" : "0"));
   console.log("  tv type: %s", cartridge_region ? "PAL" : "NTSC");
-  console.log("  Save device: [%x]%s%s", header[58],
+  console.log("  Save device: [%d]%s%s", header[58],
     ((header[58] & 0x02) ? " SaveKey/AtariVox" : ""),
     ((header[58] & 0x01) ? " HSC" : ""));
     console.log("  controller1: %d", cartridge_controller[0]);
@@ -373,6 +375,7 @@ cartridge_Load = function(data, size) {
   //uint offset = 0;
   var offset = 0;
   if (cartridge_HasHeader(header)) {
+    console.log("Found cartridge header");
     cartridge_ReadHeader(header);
     size -= 128;
     offset = 128;
@@ -393,6 +396,7 @@ cartridge_Load = function(data, size) {
     }
   }
   else {
+    console.log("Unable to find cartridge header");
     cartridge_size = size;
     // Attempt to guess the cartridge type based on its size
     cartridge_SetTypeBySize(size);
