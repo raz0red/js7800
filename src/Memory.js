@@ -216,12 +216,13 @@ memory_Write = function (address, data) {
 // WriteROM
 // ----------------------------------------------------------------------------
 //memory_WriteROM = function(word address, uint size, const byte* data) {
-memory_WriteROM = function (address, size, data) { // TODO: data will be array
+memory_WriteROM = function (address, size, data, offset) {
   //if((address + size) <= MEMORY_SIZE && data != NULL) {
   if ((address + size) <= MEMORY_SIZE && data != null) {
     //for(uint index = 0; index < size; index++) {
     for (var index = 0; index < size; index++) {
-      memory_ram[address + index] = data[index];
+      //memory_ram[address + index] = data[index];
+      memory_ram[address + index] = data[index + offset];
       memory_rom[address + index] = 1;
     }
   }
