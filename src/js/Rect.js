@@ -23,20 +23,20 @@
 // Rect.h
 // ----------------------------------------------------------------------------
 Rect = function (left, top, right, bottom) {
-    this.left = left;
-    this.top = top;
-    this.right = right;
-    this.bottom = bottom;
+  this.left = left;
+  this.top = top;
+  this.right = right;
+  this.bottom = bottom;
 
-    this.GetArea = function () {
-        return GetLength() * GetHeight();
-    }
+  this.GetArea = function () {
+    return GetLength() * GetHeight();
+  }
 
-    this.GetLength = function () {
-        return (this.right - this.left) + 1;
-    }
+  this.GetLength = function () {
+    return (this.right - this.left) + 1;
+  }
 
-    this.GetHeight = function () {
-        return (this.bottom - this.top) + 1;
-    }
+  this.GetHeight = function () {
+    return (this.bottom - this.top) + 1;
+  }
 };
