@@ -93,6 +93,9 @@ Pair = function () {
     this.setBH = function(val) {
         this._w = ((this._w & 0x00FF) | ((val << 8) & 0xFF00));
     }
+    this.bhPlusEqual = function(val) {
+        this.setBH(this.getBH() + val);
+    }
     this.clone = function () {
         var c = new Pair();
         c._w = this._w;
