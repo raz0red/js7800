@@ -50,7 +50,7 @@ var cartridge_maker = "";
 //std::string cartridge_digest;
 var cartridge_digest = "";
 //std::string cartridge_filename;
-var cartridge_filename = "";
+//var cartridge_filename = "";
 //byte cartridge_type;
 var cartridge_type = 0;
 //byte cartridge_region;
@@ -611,94 +611,6 @@ cartridge_Release = function() {
     cartridge_hsc_enabled = false;
   }
 }
-
-// ----------------------------------------------------------------------------
-// Load
-// ----------------------------------------------------------------------------
-
-// uint cartridge_Read(std:: string filename, byte ** outData) {
-
-//   byte * data = NULL;
-//   uint size = archive_GetUncompressedFileSize(filename);
-//   if (size == 0) {
-//     FILE * file = fopen(filename.c_str(), "rb");
-//     if (file == NULL) {
-//       logger_LogError("Failed to open the cartridge file " + filename + " for reading.", CARTRIDGE_SOURCE);
-//       return 0;
-//     }
-
-//     if (fseek(file, 0L, SEEK_END)) {
-//       fclose(file);
-//       logger_LogError("Failed to find the end of the cartridge file.", CARTRIDGE_SOURCE);
-//       return 0;
-//     }
-//     size = ftell(file);
-//     if (fseek(file, 0L, SEEK_SET)) {
-//       fclose(file);
-//       logger_LogError("Failed to find the size of the cartridge file.", CARTRIDGE_SOURCE);
-//       return 0;
-//     }
-
-//     data = new byte[size];
-//     if (fread(data, 1, size, file) != size && ferror(file)) {
-//       fclose(file);
-//       logger_LogError("Failed to read the cartridge data.", CARTRIDGE_SOURCE);
-//       cartridge_Release();
-//       delete [] data;
-//       return 0;
-//     }
-
-//     fclose(file);
-//   }
-//   else {
-//     data = new byte[size];
-//     archive_Uncompress(filename, data, size);
-//   }
-
-//   * outData = data;
-//   return size;
-// }
-
-// bool cartridge_Load(std:: string filename) {
-//   if (filename.empty() || filename.length() == 0) {
-//     logger_LogError("Cartridge filename is invalid.", CARTRIDGE_SOURCE);
-//     return false;
-//   }
-
-//   cartridge_Release();
-
-//   logger_LogInfo("Opening cartridge file " + filename + ".");
-
-//   byte * data = NULL;
-//   uint size = cartridge_Read(filename, & data);
-//   if (data == NULL) {
-//     return false;
-//   }
-
-//   if (!cartridge_Load(data, size)) {
-//     logger_LogError("Failed to load the cartridge data into memory.", CARTRIDGE_SOURCE);
-//     delete [] data;
-//     return false;
-//   }
-//   if (data != NULL) {
-//     delete [] data;
-//   }
-//   cartridge_filename = filename;
-
-//   return true;
-// }
-
-// bool cartridge_Load_buffer(char * rom_buffer, int rom_size) {
-//   cartridge_Release();
-//   byte * data = (byte *)rom_buffer;
-//   uint size = rom_size;
-
-//   if (!cartridge_Load(data, size)) {
-//     return false;
-//   }
-//   cartridge_filename = "";
-//   return true;
-// }
 
 // // The memory location of the high score cartridge SRAM
 // #define HS_SRAM_START 0x1000
