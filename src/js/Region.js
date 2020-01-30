@@ -206,8 +206,8 @@ var region_Reset = function () {
     prosystem_frequency = REGION_FREQUENCY_PAL;
     prosystem_scanlines = REGION_SCANLINES_PAL;
     //#ifndef WII    
-    tia_size = 624;
-    pokey_size = 624;
+    //tia_size = 624;
+    //pokey_size = 624;
     //#endif    
   }
   else {
@@ -218,8 +218,8 @@ var region_Reset = function () {
     prosystem_frequency = REGION_FREQUENCY_NTSC;
     prosystem_scanlines = REGION_SCANLINES_NTSC;
     //#ifndef WII    
-    tia_size = 524;
-    pokey_size = 524;
+    //tia_size = 524;
+    //pokey_size = 524;
     //#endif    
   }
   pokey_setSampleRate((prosystem_scanlines * prosystem_frequency) << 1);
