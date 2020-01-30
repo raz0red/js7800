@@ -1,5 +1,5 @@
 // http://www.myersdaily.org/joseph/javascript/md5-text.html
-// TODO: What is the license for this code?
+// TODO: Determine the license for this code (GPL?)
 
 function md5cycle(x, k) {
     var a = x[0], b = x[1], c = x[2], d = x[3];
