@@ -129,7 +129,7 @@ var SALLY_CYCLES = [
  * access the high score cartridge. By setting a flag, we know when to persist
  * changes to SRAM
  */
-sally_checkHighScoreSet = function () {
+function sally_checkHighScoreSet() {
   //if( sally_pc.w == 0x3fcf || sally_pc.w == 0x3ffd )
   if (sally_pc.getW() == 0x3fcf || sally_pc.getW() == 0x3ffd) {
     high_score_set = true;
@@ -139,7 +139,7 @@ sally_checkHighScoreSet = function () {
 // ----------------------------------------------------------------------------
 // Push
 // ----------------------------------------------------------------------------
-sally_Push = function (data) {
+function sally_Push(data) {
   memory_Write(sally_s + 256, data);
   sally_s--;
 }
@@ -147,7 +147,7 @@ sally_Push = function (data) {
 // ----------------------------------------------------------------------------
 // Pop
 // ----------------------------------------------------------------------------
-sally_Pop = function () {
+function sally_Pop() {
   sally_s++;
   return memory_Read(sally_s + 256);
 }
@@ -155,7 +155,7 @@ sally_Pop = function () {
 // ----------------------------------------------------------------------------
 // Flags
 // ----------------------------------------------------------------------------
-sally_Flags = function (data) {
+function sally_Flags(data) {
   if (!data) {
     sally_p |= SALLY_FLAG.Z;
   }
@@ -173,7 +173,7 @@ sally_Flags = function (data) {
 // ----------------------------------------------------------------------------
 // Branch
 // ----------------------------------------------------------------------------
-sally_Branch = function (branch) {
+function sally_Branch(branch) {
   if (branch) {
     //pair temp = sally_pc;
     var temp = sally_pc.clone();
@@ -192,7 +192,7 @@ sally_Branch = function (branch) {
 // ----------------------------------------------------------------------------
 // Delay
 // ----------------------------------------------------------------------------
-sally_Delay = function (delta) {
+function sally_Delay(delta) {
   //pair address1 = sally_address;
   var address1 = sally_address.clone();
   //pair address2 = sally_address;
@@ -208,7 +208,7 @@ sally_Delay = function (delta) {
 // ----------------------------------------------------------------------------
 // Absolute
 // ----------------------------------------------------------------------------
-sally_Absolute = function () {
+function sally_Absolute() {
   //sally_address.b.l = memory_Read(sally_pc.w++);
   sally_address.setBL(memory_Read(sally_pc.wPlusPlus()));
   //sally_address.b.h = memory_Read(sally_pc.w++);
@@ -218,7 +218,7 @@ sally_Absolute = function () {
 // ----------------------------------------------------------------------------
 // AbsoluteX
 // ----------------------------------------------------------------------------
-sally_AbsoluteX = function () {
+function sally_AbsoluteX() {
   //sally_address.b.l = memory_Read(sally_pc.w++);
   sally_address.setBL(memory_Read(sally_pc.wPlusPlus()));
   //sally_address.b.h = memory_Read(sally_pc.w++);
@@ -230,7 +230,7 @@ sally_AbsoluteX = function () {
 // ----------------------------------------------------------------------------
 // AbsoluteY
 // ----------------------------------------------------------------------------
-sally_AbsoluteY = function () {
+function sally_AbsoluteY() {
   //sally_address.b.l = memory_Read(sally_pc.w++);
   sally_address.setBL(memory_Read(sally_pc.wPlusPlus()));
   //sally_address.b.h = memory_Read(sally_pc.w++);
@@ -242,7 +242,7 @@ sally_AbsoluteY = function () {
 // ----------------------------------------------------------------------------
 // Immediate
 // ----------------------------------------------------------------------------
-sally_Immediate = function () {
+function sally_Immediate() {
   //sally_address.w = sally_pc.w++;
   sally_address.setW(sally_pc.wPlusPlus());
 }
@@ -250,7 +250,7 @@ sally_Immediate = function () {
 // ----------------------------------------------------------------------------
 // Indirect
 // ----------------------------------------------------------------------------
-sally_Indirect = function () {
+function sally_Indirect() {
   //pair base;
   var base = new Pair();
   //base.b.l = memory_Read(sally_pc.w++);
@@ -266,7 +266,7 @@ sally_Indirect = function () {
 // ----------------------------------------------------------------------------
 // IndirectX
 // ----------------------------------------------------------------------------
-sally_IndirectX = function () {
+function sally_IndirectX() {
   //sally_address.b.l = memory_Read(sally_pc.w++) + sally_x;
   sally_address.setBL(memory_Read(sally_pc.wPlusPlus())) + sally_x;
   //sally_address.b.h = memory_Read(sally_address.b.l + 1);
@@ -278,7 +278,7 @@ sally_IndirectX = function () {
 // ----------------------------------------------------------------------------
 // IndirectY
 // ----------------------------------------------------------------------------
-sally_IndirectY = function () {
+function sally_IndirectY() {
   //sally_address.b.l = memory_Read(sally_pc.w++);
   sally_address.setBL(memory_Read(sally_pc.wPlusPlus()));
   //sally_address.b.h = memory_Read(sally_address.b.l + 1);
@@ -292,7 +292,7 @@ sally_IndirectY = function () {
 // ----------------------------------------------------------------------------
 // Relative
 // ----------------------------------------------------------------------------
-sally_Relative = function () {
+function sally_Relative() {
   //sally_address.w = memory_Read(sally_pc.w++);
   sally_address.setW(memory_Read(sally_pc.wPlusPlus()));
 }
@@ -300,7 +300,7 @@ sally_Relative = function () {
 // ----------------------------------------------------------------------------
 // Zero Page
 // ----------------------------------------------------------------------------
-sally_ZeroPage = function () {
+function sally_ZeroPage() {
   //sally_address.w = memory_Read(sally_pc.w++);
   sally_address.setW(memory_Read(sally_pc.wPlusPlus()));
 }
@@ -308,7 +308,7 @@ sally_ZeroPage = function () {
 // ----------------------------------------------------------------------------
 // ZeroPageX
 // ----------------------------------------------------------------------------
-sally_ZeroPageX = function () {
+function sally_ZeroPageX() {
   //sally_address.w = memory_Read(sally_pc.w++);
   sally_address.setW(memory_Read(sally_pc.wPlusPlus()));
   //sally_address.b.l += sally_x;
@@ -318,7 +318,7 @@ sally_ZeroPageX = function () {
 // ----------------------------------------------------------------------------
 // ZeroPageY
 // ----------------------------------------------------------------------------
-sally_ZeroPageY = function () {
+function sally_ZeroPageY() {
   //sally_address.w = memory_Read(sally_pc.w++);
   sally_address.setW(memory_Read(sally_pc.wPlusPlus()));
   //sally_address.b.l += sally_y;
@@ -328,7 +328,7 @@ sally_ZeroPageY = function () {
 // ----------------------------------------------------------------------------
 // ADC
 // ----------------------------------------------------------------------------
-sally_ADC = function () {
+function sally_ADC() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
 
@@ -336,7 +336,7 @@ sally_ADC = function () {
     //word al = (sally_a & 15) + (data & 15) + (sally_p & SALLY_FLAG.C);
     var al = (sally_a & 15) + (data & 15) + (sally_p & SALLY_FLAG.C);
     //word ah = (sally_a >> 4) + (data >> 4);
-    var ah = (sally_a >> 4) + (data >> 4);
+    var ah = (sally_a >>> 4) + (data >>> 4);
 
     if (al > 9) {
       al += 6;
@@ -409,7 +409,7 @@ sally_ADC = function () {
 // ----------------------------------------------------------------------------
 // AND
 // ----------------------------------------------------------------------------
-sally_AND = function () {
+function sally_AND() {
   //sally_a &= memory_Read(sally_address.w);
   sally_a &= memory_Read(sally_address.getW());
   sally_Flags(sally_a);
@@ -418,7 +418,7 @@ sally_AND = function () {
 // ----------------------------------------------------------------------------
 // ASLA
 // ----------------------------------------------------------------------------
-sally_ASLA = function () {
+function sally_ASLA() {
   if (sally_a & 128) {
     sally_p |= SALLY_FLAG.C;
   }
@@ -433,7 +433,7 @@ sally_ASLA = function () {
 // ----------------------------------------------------------------------------
 // ASL
 // ----------------------------------------------------------------------------
-sally_ASL = function () {
+function sally_ASL() {
 
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
@@ -453,28 +453,28 @@ sally_ASL = function () {
 // ----------------------------------------------------------------------------
 // BCC
 // ----------------------------------------------------------------------------
-sally_BCC = function () {
+function sally_BCC() {
   sally_Branch(!(sally_p & SALLY_FLAG.C));
 }
 
 // ----------------------------------------------------------------------------
 // BCS
 // ----------------------------------------------------------------------------
-sally_BCS = function () {
+function sally_BCS() {
   sally_Branch(sally_p & SALLY_FLAG.C);
 }
 
 // ----------------------------------------------------------------------------
 // BEQ
 // ----------------------------------------------------------------------------
-sally_BEQ = function () {
+function sally_BEQ() {
   sally_Branch(sally_p & SALLY_FLAG.Z);
 }
 
 // ----------------------------------------------------------------------------
 // BIT
 // ----------------------------------------------------------------------------
-sally_BIT = function () {
+function sally_BIT() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
 
@@ -494,28 +494,28 @@ sally_BIT = function () {
 // ----------------------------------------------------------------------------
 // BMI
 // ----------------------------------------------------------------------------
-sally_BMI = function () {
+function sally_BMI() {
   sally_Branch(sally_p & SALLY_FLAG.N);
 }
 
 // ----------------------------------------------------------------------------
 // BNE
 // ----------------------------------------------------------------------------
-sally_BNE = function () {
+function sally_BNE() {
   sally_Branch(!(sally_p & SALLY_FLAG.Z));
 }
 
 // ----------------------------------------------------------------------------
 // BPL
 // ----------------------------------------------------------------------------
-sally_BPL = function () {
+function sally_BPL() {
   sally_Branch(!(sally_p & SALLY_FLAG.N));
 }
 
 // ----------------------------------------------------------------------------
 // BRK
 // ----------------------------------------------------------------------------
-sally_BRK = function () {
+function sally_BRK() {
   //sally_pc.w++;
   sally_pc.wPlusPlus();
   sally_p |= SALLY_FLAG.B;
@@ -536,49 +536,49 @@ sally_BRK = function () {
 // ----------------------------------------------------------------------------
 // BVC
 // ----------------------------------------------------------------------------
-sally_BVC = function () {
+function sally_BVC() {
   sally_Branch(!(sally_p & SALLY_FLAG.V));
 }
 
 // ----------------------------------------------------------------------------
 // BVS
 // ----------------------------------------------------------------------------
-sally_BVS = function () {
+function sally_BVS() {
   sally_Branch(sally_p & SALLY_FLAG.V);
 }
 
 // ----------------------------------------------------------------------------
 // CLC
 // ----------------------------------------------------------------------------
-sally_CLC = function () {
+function sally_CLC() {
   sally_p &= ~SALLY_FLAG.C;
 }
 
 // ----------------------------------------------------------------------------
 // CLD
 // ----------------------------------------------------------------------------
-sally_CLD = function () {
+function sally_CLD() {
   sally_p &= ~SALLY_FLAG.D;
 }
 
 // ----------------------------------------------------------------------------
 // CLI
 // ----------------------------------------------------------------------------
-sally_CLI = function () {
+function sally_CLI() {
   sally_p &= ~SALLY_FLAG.I;
 }
 
 // ----------------------------------------------------------------------------
 // CLV
 // ----------------------------------------------------------------------------
-sally_CLV = function () {
+function sally_CLV() {
   sally_p &= ~SALLY_FLAG.V;
 }
 
 // ----------------------------------------------------------------------------
 // CMP
 // ----------------------------------------------------------------------------
-sally_CMP = function () {
+function sally_CMP() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
 
@@ -595,7 +595,7 @@ sally_CMP = function () {
 // ----------------------------------------------------------------------------
 // CPX
 // ----------------------------------------------------------------------------
-sally_CPX = function () {
+function sally_CPX() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
 
@@ -612,7 +612,7 @@ sally_CPX = function () {
 // ----------------------------------------------------------------------------
 // CPY
 // ----------------------------------------------------------------------------
-sally_CPY = function () {
+function sally_CPY() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
 
@@ -629,7 +629,7 @@ sally_CPY = function () {
 // ----------------------------------------------------------------------------
 // DEC
 // ----------------------------------------------------------------------------
-sally_DEC = function () {
+function sally_DEC() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
   //memory_Write(sally_address.w, --data);
@@ -640,21 +640,21 @@ sally_DEC = function () {
 // ----------------------------------------------------------------------------
 // DEX
 // ----------------------------------------------------------------------------
-sally_DEX = function () {
+function sally_DEX() {
   sally_Flags(--sally_x);
 }
 
 // ----------------------------------------------------------------------------
 // DEY
 // ----------------------------------------------------------------------------
-sally_DEY = function () {
+function sally_DEY() {
   sally_Flags(--sally_y);
 }
 
 // ----------------------------------------------------------------------------
 // EOR
 // ----------------------------------------------------------------------------
-sally_EOR = function () {
+function sally_EOR() {
   //sally_a ^= memory_Read(sally_address.w);
   sally_a ^= memory_Read(sally_address.getW());
   sally_Flags(sally_a);
@@ -663,7 +663,7 @@ sally_EOR = function () {
 // ----------------------------------------------------------------------------
 // INC
 // ----------------------------------------------------------------------------
-sally_INC = function () {
+function sally_INC() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
   //memory_Write(sally_address.w, ++data);
@@ -674,21 +674,21 @@ sally_INC = function () {
 // ----------------------------------------------------------------------------
 // INX
 // ----------------------------------------------------------------------------
-sally_INX = function () {
+function sally_INX() {
   sally_Flags(++sally_x);
 }
 
 // ----------------------------------------------------------------------------
 // INY
 // ----------------------------------------------------------------------------
-sally_INY = function () {
+function sally_INY() {
   sally_Flags(++sally_y);
 }
 
 // ----------------------------------------------------------------------------
 // JMP
 // ----------------------------------------------------------------------------
-sally_JMP = function () {
+function sally_JMP() {
   //sally_pc = sally_address;
   sally_pc = sally_address.clone();
 
@@ -699,7 +699,7 @@ sally_JMP = function () {
 // ----------------------------------------------------------------------------
 // JSR
 // ----------------------------------------------------------------------------
-sally_JSR = function () {
+function sally_JSR() {
   //sally_pc.w--;
   sally_pc.wMinusMinus();
   //sally_Push(sally_pc.b.h);
@@ -717,7 +717,7 @@ sally_JSR = function () {
 // ----------------------------------------------------------------------------
 // LDA
 // ----------------------------------------------------------------------------
-sally_LDA = function () {
+function sally_LDA() {
   //sally_a = memory_Read(sally_address.w);
   sally_a = memory_Read(sally_address.getW());
   sally_Flags(sally_a);
@@ -726,7 +726,7 @@ sally_LDA = function () {
 // ----------------------------------------------------------------------------
 // LDX
 // ----------------------------------------------------------------------------
-sally_LDX = function () {
+function sally_LDX() {
   //sally_x = memory_Read(sally_address.w);
   sally_x = memory_Read(sally_address.getW());
   sally_Flags(sally_x);
@@ -735,7 +735,7 @@ sally_LDX = function () {
 // ----------------------------------------------------------------------------
 // LDY
 // ----------------------------------------------------------------------------
-sally_LDY = function () {
+function sally_LDY() {
   //sally_y = memory_Read(sally_address.w);
   sally_y = memory_Read(sally_address.getW());
   sally_Flags(sally_y);
@@ -744,25 +744,25 @@ sally_LDY = function () {
 // ----------------------------------------------------------------------------
 // LSRA
 // ----------------------------------------------------------------------------
-sally_LSRA = function () {
+function sally_LSRA() {
   sally_p &= ~SALLY_FLAG.C;
   sally_p |= sally_a & 1;
 
-  sally_a >>= 1;
+  sally_a >>>= 1;
   sally_Flags(sally_a);
 }
 
 // ----------------------------------------------------------------------------
 // LSR
 // ----------------------------------------------------------------------------
-sally_LSR = function () {
+function sally_LSR() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
 
   sally_p &= ~SALLY_FLAG.C;
   sally_p |= data & 1;
 
-  data >>= 1;
+  data >>>= 1;
   //memory_Write(sally_address.w, data);
   memory_Write(sally_address.getW(), data);
   sally_Flags(data);
@@ -771,13 +771,13 @@ sally_LSR = function () {
 // ----------------------------------------------------------------------------
 // NOP
 // ----------------------------------------------------------------------------
-sally_NOP = function () {
+function sally_NOP() {
 }
 
 // ----------------------------------------------------------------------------
 // ORA
 // ----------------------------------------------------------------------------
-sally_ORA = function () {
+function sally_ORA() {
   //sally_a |= memory_Read(sally_address.w);
   sally_a |= memory_Read(sally_address.getW());
   sally_Flags(sally_a);
@@ -786,21 +786,21 @@ sally_ORA = function () {
 // ----------------------------------------------------------------------------
 // PHA
 // ----------------------------------------------------------------------------
-sally_PHA = function () {
+function sally_PHA() {
   sally_Push(sally_a);
 }
 
 // ----------------------------------------------------------------------------
 // PHP
 // ----------------------------------------------------------------------------
-sally_PHP = function () {
+function sally_PHP() {
   sally_Push(sally_p);
 }
 
 // ----------------------------------------------------------------------------
 // PLA
 // ----------------------------------------------------------------------------
-sally_PLA = function () {
+function sally_PLA() {
   sally_a = sally_Pop();
   sally_Flags(sally_a);
 }
@@ -808,14 +808,14 @@ sally_PLA = function () {
 // ----------------------------------------------------------------------------
 // PLP
 // ----------------------------------------------------------------------------
-sally_PLP = function () {
+function sally_PLP() {
   sally_p = sally_Pop();
 }
 
 // ----------------------------------------------------------------------------
 // ROLA
 // ----------------------------------------------------------------------------
-sally_ROLA = function () {
+function sally_ROLA() {
   //byte temp = sally_p;
   var temp = sally_p;
 
@@ -834,7 +834,7 @@ sally_ROLA = function () {
 // ----------------------------------------------------------------------------
 // ROL
 // ----------------------------------------------------------------------------
-sally_ROL = function () {
+function sally_ROL() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
   //byte temp = sally_p;
@@ -857,14 +857,14 @@ sally_ROL = function () {
 // ----------------------------------------------------------------------------
 // RORA
 // ----------------------------------------------------------------------------
-sally_RORA = function () {
+function sally_RORA() {
   //byte temp = sally_p;
   var temp = sally_p;
 
   sally_p &= ~SALLY_FLAG.C;
   sally_p |= sally_a & 1;
 
-  sally_a >>= 1;
+  sally_a >>>= 1;
   if (temp & SALLY_FLAG.C) {
     sally_a |= 128;
   }
@@ -875,7 +875,7 @@ sally_RORA = function () {
 // ----------------------------------------------------------------------------
 // ROR
 // ----------------------------------------------------------------------------
-sally_ROR = function () {
+function sally_ROR() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
   //byte temp = sally_p;
@@ -884,7 +884,7 @@ sally_ROR = function () {
   sally_p &= ~SALLY_FLAG.C;
   sally_p |= data & 1;
 
-  data >>= 1;
+  data >>>= 1;
   if (temp & 1) {
     data |= 128;
   }
@@ -897,7 +897,7 @@ sally_ROR = function () {
 // ----------------------------------------------------------------------------
 // RTI
 // ----------------------------------------------------------------------------
-sally_RTI = function () {
+function sally_RTI() {
   sally_p = sally_Pop();
   //sally_pc.b.l = sally_Pop();
   sally_pc.setBL(sally_Pop());
@@ -908,7 +908,7 @@ sally_RTI = function () {
 // ----------------------------------------------------------------------------
 // RTS
 // ----------------------------------------------------------------------------
-sally_RTS = function () {
+function sally_RTS() {
   //sally_pc.b.l = sally_Pop();
   sally_pc.setBL(sally_Pop());
   //sally_pc.b.h = sally_Pop();
@@ -920,7 +920,7 @@ sally_RTS = function () {
 // // ----------------------------------------------------------------------------
 // SBC
 // ----------------------------------------------------------------------------
-sally_SBC = function () {
+function sally_SBC() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
 
@@ -928,7 +928,7 @@ sally_SBC = function () {
     //word al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
     var al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
     //word ah = (sally_a >> 4) - (data >> 4);
-    var ah = (sally_a >> 4) - (data >> 4);
+    var ah = (sally_a >>> 4) - (data >>> 4);
 
     if (al > 9) {
       al -= 6;
@@ -996,28 +996,28 @@ sally_SBC = function () {
 // ----------------------------------------------------------------------------
 // SEC
 // ----------------------------------------------------------------------------
-sally_SEC = function () {
+function sally_SEC() {
   sally_p |= SALLY_FLAG.C;
 }
 
 // ----------------------------------------------------------------------------
 // SED
 // ----------------------------------------------------------------------------
-sally_SED = function () {
+function sally_SED() {
   sally_p |= SALLY_FLAG.D;
 }
 
 // ----------------------------------------------------------------------------
 // SEI
 // ----------------------------------------------------------------------------
-sally_SEI = function () {
+function sally_SEI() {
   sally_p |= SALLY_FLAG.I;
 }
 
 // ----------------------------------------------------------------------------
 // STA
 // ----------------------------------------------------------------------------
-sally_STA = function () {
+function sally_STA() {
   //memory_Write(sally_address.w, sally_a);
   memory_Write(sally_address.getW(), sally_a);
 }
@@ -1025,7 +1025,7 @@ sally_STA = function () {
 // ----------------------------------------------------------------------------
 // STX
 // ----------------------------------------------------------------------------
-sally_stx = function () {
+function sally_stx() {
   //memory_Write(sally_address.w, sally_x);
   memory_Write(sally_address.getW(), sally_x);
 }
@@ -1033,7 +1033,7 @@ sally_stx = function () {
 // ----------------------------------------------------------------------------
 // STY
 // ----------------------------------------------------------------------------
-sally_STY = function () {
+function sally_STY() {
   //memory_Write(sally_address.w, sally_y);
   memory_Write(sally_address.getW(), sally_y);
 }
@@ -1041,7 +1041,7 @@ sally_STY = function () {
 // ----------------------------------------------------------------------------
 // TAX
 // ----------------------------------------------------------------------------
-sally_TAX = function () {
+function sally_TAX() {
   sally_x = sally_a;
   sally_Flags(sally_x);
 }
@@ -1049,7 +1049,7 @@ sally_TAX = function () {
 // ----------------------------------------------------------------------------
 // TAY
 // ----------------------------------------------------------------------------
-sally_TAY = function () {
+function sally_TAY() {
   sally_y = sally_a;
   sally_Flags(sally_y);
 }
@@ -1057,7 +1057,7 @@ sally_TAY = function () {
 // ----------------------------------------------------------------------------
 // TSX
 // ----------------------------------------------------------------------------
-sally_TSX = function () {
+function sally_TSX() {
   sally_x = sally_s;
   sally_Flags(sally_x);
 }
@@ -1065,7 +1065,7 @@ sally_TSX = function () {
 // ----------------------------------------------------------------------------
 // TXA
 // ----------------------------------------------------------------------------
-sally_TXA = function () {
+function sally_TXA() {
   sally_a = sally_x;
   sally_Flags(sally_a);
 }
@@ -1073,14 +1073,14 @@ sally_TXA = function () {
 // ----------------------------------------------------------------------------
 // TXS
 // ----------------------------------------------------------------------------
-sally_TXS = function () {
+function sally_TXS() {
   sally_s = sally_x;
 }
 
 // ----------------------------------------------------------------------------
 // TYA
 // ----------------------------------------------------------------------------
-sally_TYA = function () {
+function sally_TYA() {
   sally_a = sally_y;
   sally_Flags(sally_a);
 }
@@ -1088,7 +1088,7 @@ sally_TYA = function () {
 // ----------------------------------------------------------------------------
 // Reset
 // ----------------------------------------------------------------------------
-sally_Reset = function () {
+function sally_Reset() {
   sally_a = 0;
   sally_x = 0;
   sally_y = 0;
@@ -1101,7 +1101,7 @@ sally_Reset = function () {
 // ----------------------------------------------------------------------------
 // ExecuteInstruction
 // ----------------------------------------------------------------------------
-sally_ExecuteInstruction = function () {
+function sally_ExecuteInstruction() {
   /*
     __label__ 
   l_0x00, l_0x01, l_0x02, l_0x03, l_0x04, l_0x05, l_0x06, l_0x07, l_0x08,
@@ -1188,6 +1188,8 @@ sally_ExecuteInstruction = function () {
   */
 
   //goto *a_jump_table[sally_opcode];
+
+  //console.log("Opcode:%d", sally_opcode);
 
   switch (sally_opcode) {
     //l_0x00:
@@ -2167,7 +2169,7 @@ sally_ExecuteInstruction = function () {
 // ----------------------------------------------------------------------------
 // ExecuteRES
 // ----------------------------------------------------------------------------
-sally_ExecuteRES = function () {
+function sally_ExecuteRES() {
   sally_p = SALLY_FLAG.I | SALLY_FLAG.R | SALLY_FLAG.Z;
   //sally_pc.b.l = memory_ram[SALLY_RES.L];
   sally_pc.setBL(memory_ram[SALLY_RES.L]);
@@ -2179,7 +2181,7 @@ sally_ExecuteRES = function () {
 // ----------------------------------------------------------------------------
 // ExecuteNMI
 // ----------------------------------------------------------------------------
-sally_ExecuteNMI = function () {
+function sally_ExecuteNMI() {
   //sally_Push(sally_pc.b.h);
   sally_Push(sally_pc.getBH());
   //sally_Push(sally_pc.b.l);
@@ -2197,7 +2199,7 @@ sally_ExecuteNMI = function () {
 // ----------------------------------------------------------------------------
 // Execute IRQ
 // ----------------------------------------------------------------------------
-sally_ExecuteIRQ = function () {
+function sally_ExecuteIRQ() {
   if (!(sally_p & SALLY_FLAG.I)) {
     //sally_Push(sally_pc.b.h);
     sally_Push(sally_pc.getBH());

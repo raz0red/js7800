@@ -40,6 +40,7 @@ var maria_visibleArea = new Rect(0, 26, 319, 248);
 var maria_scanline = 1;
 
 //byte* maria_surface = 0; // TODO JS
+var maria_surface = null;
 
 //static byte maria_lineRAM[MARIA_LINERAM_SIZE];
 var maria_lineRAM = new Array(MARIA_LINERAM_SIZE);
@@ -68,7 +69,7 @@ var maria_wmode = 0;
 // StoreCell
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte data) {
-maria_StoreCell = function (data) {
+function maria_StoreCell(data) {
   if (maria_horizontal < MARIA_LINERAM_SIZE) {
     if (data) {
       maria_lineRAM[maria_horizontal] = maria_palette | data;
@@ -88,7 +89,7 @@ maria_StoreCell = function (data) {
 // StoreCell
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte high, byte low) {  
-maria_StoreCell = function (high, low) {
+function maria_StoreCell(high, low) {
   if (maria_horizontal < MARIA_LINERAM_SIZE) {
     if (low || high) {
       maria_lineRAM[maria_horizontal] = maria_palette & 16 | high | low;
@@ -108,7 +109,7 @@ maria_StoreCell = function (high, low) {
 // IsHolyDMA
 // ----------------------------------------------------------------------------
 //static inline bool maria_IsHolyDMA( ) {
-maria_IsHolyDMA = function () {
+function maria_IsHolyDMA() {
   //if(maria_pp.w > 32767) {
   if (maria_pp.getW() > 32767) {
     //if(maria_h16 && (maria_pp.w & 4096)) {
@@ -129,7 +130,7 @@ maria_IsHolyDMA = function () {
 //extern byte atari_pal8[256];
 
 //static inline byte maria_GetColor(byte data) {  
-maria_GetColor = function (data) {
+function maria_GetColor(data) {
   if (data & 3) {
     return atari_pal8[memory_ram[BACKGRND + data]];
   }
@@ -142,7 +143,7 @@ maria_GetColor = function (data) {
 // StoreGraphic
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreGraphic( ) {
-maria_StoreGraphic = function () {
+function maria_StoreGraphic() {
   //byte data = memory_ram[maria_pp.w];
   var data = memory_ram[maria_pp.getW()];
   if (maria_wmode) {
@@ -154,8 +155,8 @@ maria_StoreGraphic = function () {
       maria_horizontal += 2;
     }
     else {
-      maria_StoreCell((data & 12), (data & 192) >> 6);
-      maria_StoreCell((data & 48) >> 4, (data & 3) << 2);
+      maria_StoreCell((data & 12), (data & 192) >>> 6);
+      maria_StoreCell((data & 48) >>> 4, (data & 3) << 2);
     }
   }
   else {
@@ -169,9 +170,9 @@ maria_StoreGraphic = function () {
       maria_horizontal += 4;
     }
     else {
-      maria_StoreCell((data & 192) >> 6);
-      maria_StoreCell((data & 48) >> 4);
-      maria_StoreCell((data & 12) >> 2);
+      maria_StoreCell((data & 192) >>> 6);
+      maria_StoreCell((data & 48) >>> 4);
+      maria_StoreCell((data & 12) >>> 2);
       maria_StoreCell(data & 3);
     }
   }
@@ -183,7 +184,7 @@ maria_StoreGraphic = function () {
 // WriteLineRAM
 // ----------------------------------------------------------------------------
 //static inline void maria_WriteLineRAM(byte * buffer) {
-maria_WriteLineRAM = function(buffer) {  // TODO JS: What is buffer?
+function maria_WriteLineRAM(buffer) {  // TODO JS: What is buffer?
   //byte rmode = memory_ram[CTRL] & 3;
   var rmode = memory_ram[CTRL] & 3;
   if (rmode == 0) {
@@ -214,14 +215,14 @@ maria_WriteLineRAM = function(buffer) {  // TODO JS: What is buffer?
     var pixel = 0;
     //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
     for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 16) | ((maria_lineRAM[index + 0] & 8) >> 3) | ((maria_lineRAM[index + 0] & 2)));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 16) | ((maria_lineRAM[index + 0] & 4) >> 2) | ((maria_lineRAM[index + 0] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 1] & 16) | ((maria_lineRAM[index + 1] & 8) >> 3) | ((maria_lineRAM[index + 1] & 2)));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 1] & 16) | ((maria_lineRAM[index + 1] & 4) >> 2) | ((maria_lineRAM[index + 1] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 16) | ((maria_lineRAM[index + 2] & 8) >> 3) | ((maria_lineRAM[index + 2] & 2)));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 16) | ((maria_lineRAM[index + 2] & 4) >> 2) | ((maria_lineRAM[index + 2] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 8) >> 3) | ((maria_lineRAM[index + 3] & 2)));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 4) >> 2) | ((maria_lineRAM[index + 3] & 1) << 1));
+      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 16) | ((maria_lineRAM[index + 0] & 8) >>> 3) | ((maria_lineRAM[index + 0] & 2)));
+      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 16) | ((maria_lineRAM[index + 0] & 4) >>> 2) | ((maria_lineRAM[index + 0] & 1) << 1));
+      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 1] & 16) | ((maria_lineRAM[index + 1] & 8) >>> 3) | ((maria_lineRAM[index + 1] & 2)));
+      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 1] & 16) | ((maria_lineRAM[index + 1] & 4) >>> 2) | ((maria_lineRAM[index + 1] & 1) << 1));
+      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 16) | ((maria_lineRAM[index + 2] & 8) >>> 3) | ((maria_lineRAM[index + 2] & 2)));
+      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 16) | ((maria_lineRAM[index + 2] & 4) >>> 2) | ((maria_lineRAM[index + 2] & 1) << 1));
+      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 8) >>> 3) | ((maria_lineRAM[index + 3] & 2)));
+      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 4) >>> 2) | ((maria_lineRAM[index + 3] & 1) << 1));
     }
   }
   else if (rmode == 3) {
@@ -246,7 +247,7 @@ maria_WriteLineRAM = function(buffer) {  // TODO JS: What is buffer?
 // StoreLineRAM
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreLineRAM() {
-maria_StoreLineRAM = function() {  
+function maria_StoreLineRAM() {  
   //for (int index = 0; index < MARIA_LINERAM_SIZE; index++) {
   for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
     maria_lineRAM[index] = 0;
@@ -268,7 +269,7 @@ maria_StoreLineRAM = function() {
     if (mode & 31) {
       maria_cycles += 8; // Maria cycles (Header 4 byte)
       //maria_palette = (memory_ram[maria_dp.w + 1] & 224) >> 3;
-      maria_palette = (memory_ram[maria_dp.getW() + 1] & 224) >> 3;
+      maria_palette = (memory_ram[maria_dp.getW() + 1] & 224) >>> 3;
       //maria_horizontal = memory_ram[maria_dp.w + 3];
       maria_horizontal = memory_ram[maria_dp.getW() + 3];
       //width = memory_ram[maria_dp.w + 1] & 31;
@@ -280,7 +281,7 @@ maria_StoreLineRAM = function() {
     else {
       maria_cycles += 12; // Maria cycles (Header 5 byte)
       //maria_palette = (memory_ram[maria_dp.w + 3] & 224) >> 3;
-      maria_palette = (memory_ram[maria_dp.getW() + 3] & 224) >> 3;
+      maria_palette = (memory_ram[maria_dp.getW() + 3] & 224) >>> 3;
       //maria_horizontal = memory_ram[maria_dp.w + 4];
       maria_horizontal = memory_ram[maria_dp.getW() + 4];
       //indirect = memory_ram[maria_dp.w + 1] & 32;
@@ -332,7 +333,7 @@ maria_StoreLineRAM = function() {
 // Reset
 // ----------------------------------------------------------------------------
 //void maria_Reset() {
-  maria_Reset = function() {
+function maria_Reset() {
   if (!maria_surface) maria_surface = js_get_blit_addr(); // TODO JS: What to do here?
   maria_scanline = 1;
   //for (int index = 0; index < MARIA_SURFACE_SIZE; index++) {
@@ -365,7 +366,7 @@ maria_StoreLineRAM = function() {
 // RenderScanline
 // ----------------------------------------------------------------------------
 //uint maria_RenderScanline() {
-maria_RenderScanline = function() {  
+function maria_RenderScanline() {  
   maria_cycles = 0;
 
   //
@@ -450,7 +451,7 @@ maria_RenderScanline = function() {
 // Clear
 // ----------------------------------------------------------------------------
 //void maria_Clear() {
-maria_Clear = function() {
+function maria_Clear() {
   if (!maria_surface) maria_surface = js_get_blit_addr(); // TODO JS: What to do here
   //for (int index = 0; index < MARIA_SURFACE_SIZE; index++) {
   for (var index = 0; index < MARIA_SURFACE_SIZE; index++) {

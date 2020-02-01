@@ -38,7 +38,7 @@ var hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
 // ----------------------------------------------------------------------------
 // Reset
 // ----------------------------------------------------------------------------
-memory_Reset = function () {
+function memory_Reset() {
   //uint index;
   var index;
   for (index = 0; index < MEMORY_SIZE; index++) {
@@ -56,7 +56,7 @@ memory_Reset = function () {
 // ----------------------------------------------------------------------------
 // Read
 // ----------------------------------------------------------------------------
-memory_Read = function (address) {
+function memory_Read(address) {
   //byte tmp_byte;
   var tmp_byte;
 
@@ -96,7 +96,7 @@ memory_Read = function (address) {
 // ----------------------------------------------------------------------------
 // Write
 // ----------------------------------------------------------------------------
-memory_Write = function (address, data) {
+function memory_Write(address, data) {
   if (cartridge_xm &&
     ((address >= 0x0470 && address < 0x0480) ||
       ((xm_pokey_enabled && (address >= 0x0450 && address < 0x0470)) ||
@@ -216,7 +216,7 @@ memory_Write = function (address, data) {
 // WriteROM
 // ----------------------------------------------------------------------------
 //memory_WriteROM = function(word address, uint size, const byte* data) {
-memory_WriteROM = function (address, size, data, offset) {
+function memory_WriteROM(address, size, data, offset) {
   //if((address + size) <= MEMORY_SIZE && data != NULL) {
   if ((address + size) <= MEMORY_SIZE && data != null) {
     //for(uint index = 0; index < size; index++) {
@@ -232,7 +232,7 @@ memory_WriteROM = function (address, size, data, offset) {
 // ClearROM
 // ----------------------------------------------------------------------------
 //void memory_ClearROM(word address, uint size) {
-memory_ClearROM = function (address, size) {
+function memory_ClearROM(address, size) {
   if ((address + size) <= MEMORY_SIZE) {
     //for(uint index = 0; index < size; index++) {
     for (var index = 0; index < size; index++) {
@@ -250,6 +250,6 @@ get_memory_ram()
 }
 */
 
-get_memory_ram = function () {
+function get_memory_ram() {
   return memory_ram;
 }

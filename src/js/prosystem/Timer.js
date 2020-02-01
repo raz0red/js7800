@@ -34,7 +34,7 @@ var timer_frameTime = 0;
 // Initialize
 // ----------------------------------------------------------------------------
 //void timer_Initialize( ) {
-timer_Initialize = function() {
+function timer_Initialize() {
   timer_Reset();
 }
 
@@ -42,7 +42,7 @@ timer_Initialize = function() {
 // Reset
 // ----------------------------------------------------------------------------
 //void timer_Reset( ) {
-timer_Reset = function () {
+function timer_Reset() {
   //timer_frameTime = (1000.0 / (double)prosystem_frequency) * 1000;
   timer_frameTime = (1000.0 / prosystem_frequency) * 1000;
   //timer_currentTime = ((uInt64)SDL_GetTicks()) * 1000;
@@ -54,7 +54,7 @@ timer_Reset = function () {
 // IsTime
 // ----------------------------------------------------------------------------
 ///bool timer_IsTime( ) {
-timer_IsTime = function () {
+function timer_IsTime() {
   //timer_currentTime = ((uInt64)SDL_GetTicks()) * 1000;
   timer_currentTime = (Date.now()) * 1000;
 
@@ -66,12 +66,12 @@ timer_IsTime = function () {
 }
 
 /*
-timer_test = function() {
+function timer_test() {
   prosystem_frequency = 60;
   timer_Reset();
   for (var i = 0; i < 10000; i++) {
     console.log(timer_IsTime());
   }
 }
+timer_test();
 */
-

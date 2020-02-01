@@ -42,7 +42,7 @@ var database_enabled = false;
 // Load
 // ----------------------------------------------------------------------------
 //bool database_Load(std::string digest) {    
-database_Load = function (digest) {
+function database_Load(digest) {
   return false;
   //   cart_in_db = false;
   //   if(database_enabled) {

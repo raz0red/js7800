@@ -83,7 +83,7 @@ var tia_soundCntr = 0;
 // ProcessChannel
 // ----------------------------------------------------------------------------
 //static void tia_ProcessChannel(byte channel) {
-tia_ProcessChannel = function (channel) {
+function tia_ProcessChannel(channel) {
   tia_poly5Cntr[channel]++;
   if (tia_poly5Cntr[channel] == TIA_POLY5_SIZE) {
     tia_poly5Cntr[channel] = 0;
@@ -118,7 +118,7 @@ tia_ProcessChannel = function (channel) {
 // Reset
 // ----------------------------------------------------------------------------
 //void tia_Reset() {
-tia_Reset = function() {  
+function tia_Reset() {  
   tia_soundCntr = 0;
   //for (int index = 0; index < 2; index++) {
   for (var index = 0; index < 2; index++) {
@@ -139,7 +139,7 @@ tia_Reset = function() {
 // Clear
 // ----------------------------------------------------------------------------
 //void tia_Clear() {
-tia_Clear = function() {  
+function tia_Clear() {  
   tia_soundCntr = 0;
   //memset(tia_buffer, 0, TIA_BUFFER_SIZE);
 
@@ -153,7 +153,7 @@ tia_Clear = function() {
 // SetRegister
 // ----------------------------------------------------------------------------
 //void tia_SetRegister(word address, byte data) {
-tia_SetRegister = function(address, data) {
+function tia_SetRegister(address, data) {
   //byte channel;
   var channel = 0;
   //byte frequency;
@@ -211,7 +211,7 @@ tia_SetRegister = function(address, data) {
 // Process
 // --------------------------------------------------------------------------------------
 //void tia_Process(uint length) {
-tia_Process = function(length) {  
+function tia_Process(length) {  
   //for (uint index = 0; index < length; index++) {
   for (var index = 0; index < length; index++) {    
     if (tia_counter[0] > 1) {

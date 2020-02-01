@@ -45,7 +45,7 @@ var xm_pokey_enabled = false;
 var xm_mem_enabled = false;
 
 //void xm_Reset() {
-xm_Reset = function () {
+function xm_Reset() {
   //memset(xm_ram, 0, XM_RAM_SIZE);
   xm_ram = new Array(XM_RAM_SIZE);
   xm_bank = 0;
@@ -55,7 +55,7 @@ xm_Reset = function () {
 }
 
 //byte xm_Read(word address) {
-xm_Read = function (address) {
+function xm_Read(address) {
   if (xm_pokey_enabled && (address >= 0x0450 && address < 0x0460)) {
     //byte b = pokey_GetRegister(0x4000 + (address - 0x0450));
     var b = pokey_GetRegister(0x4000 + (address - 0x0450));
@@ -79,7 +79,7 @@ xm_Read = function (address) {
 }
 
 //void xm_Write(word address, byte data) {
-xm_Write = function(address, data) {  
+function xm_Write(address, data) {  
   if (xm_pokey_enabled && (address >= 0x0450 && address < 0x0460)) {
     //console.log("Wrote to Pokey1: %d %d", address, data);
     pokey_SetRegister(0x4000 + (address - 0x0450), data);

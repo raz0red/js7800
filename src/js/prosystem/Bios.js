@@ -33,7 +33,7 @@ var bios_enabled = false;
 // Load
 // ----------------------------------------------------------------------------
 //bool bios_Load(std:: string filename) {
-bios_Load = function(filename) {  
+function bios_Load(filename) {  
   // if (filename.empty() || filename.length() == 0) {
   //   logger_LogError("Bios filename is invalid.", BIOS_SOURCE);
   //   return false;
@@ -88,7 +88,7 @@ bios_Load = function(filename) {
 // IsLoaded
 // ----------------------------------------------------------------------------
 //bool bios_IsLoaded() {
-bios_IsLoaded = function() {  
+function bios_IsLoaded() {  
   //   return (bios_data != NULL)? true: false;
   return false;
 }
@@ -97,7 +97,7 @@ bios_IsLoaded = function() {
 // Release
 // ----------------------------------------------------------------------------
 //void bios_Release() {
-bios_Release = function() {  
+function bios_Release() {  
   // if (bios_data) {
   //   delete [] bios_data;
   //   bios_size = 0;
@@ -109,7 +109,7 @@ bios_Release = function() {
 // Store
 // ----------------------------------------------------------------------------
 //void bios_Store() {
-bios_Store = function() {  
+function bios_Store() {  
   // if (bios_data != NULL && bios_enabled) {
   //   memory_WriteROM(65536 - bios_size, bios_size, bios_data);
   // }

@@ -197,7 +197,7 @@ var REGION_PALETTE_PAL = [
 // Reset
 // ----------------------------------------------------------------------------
 //void region_Reset( ) {
-var region_Reset = function () {
+function region_Reset() {
   if (region_type == REGION_PAL || (region_type == REGION_AUTO && cartridge_region == REGION_PAL)) {
     maria_displayArea = REGION_DISPLAY_AREA_PAL;
     maria_visibleArea = REGION_VISIBLE_AREA_PAL;

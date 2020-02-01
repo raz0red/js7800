@@ -103,7 +103,7 @@ var cartridge_size = 0;
 // HasHeader
 // ----------------------------------------------------------------------------
 //static bool cartridge_HasHeader(const byte* header) {
-cartridge_HasHeader = function (header) {
+function cartridge_HasHeader(header) {
   //const char HEADER_ID[ ] = {"ATARI7800"};
   var HEADER_ID = ['A', 'T', 'A', 'R', 'I', '7', '8', '0', '0'];
   //for(int index = 0; index < 9; index++) {
@@ -122,7 +122,7 @@ cartridge_HasHeader = function (header) {
 // Header for CC2 hack
 // ----------------------------------------------------------------------------
 //static bool cartridge_CC2(const byte* header) {
-cartridge_CC2 = function (header) {
+function cartridge_CC2(header) {
   //const char HEADER_ID[ ] = {">>"};
   var HEADER_ID = ['>', '>'];
   //for(int index = 0; index < 2; index++) {
@@ -139,7 +139,7 @@ cartridge_CC2 = function (header) {
 // GetBank
 // ----------------------------------------------------------------------------
 //static uint cartridge_GetBank(byte bank) {
-cartridge_GetBank = function (bank) {
+function cartridge_GetBank(bank) {
   if ((cartridge_type == CARTRIDGE_TYPE_SUPERCART ||
     cartridge_type == CARTRIDGE_TYPE_SUPERCART_ROM ||
     cartridge_type == CARTRIDGE_TYPE_SUPERCART_RAM) && cartridge_size <= 65536) {
@@ -154,7 +154,7 @@ cartridge_GetBank = function (bank) {
 // GetBankOffset
 // ----------------------------------------------------------------------------
 //static uint cartridge_GetBankOffset(byte bank) {
-cartridge_GetBankOffset = function (bank) {
+function cartridge_GetBankOffset(bank) {
   return cartridge_GetBank(bank) * 16384;
 }
 
@@ -162,12 +162,10 @@ cartridge_GetBankOffset = function (bank) {
 // WriteBank
 // ----------------------------------------------------------------------------
 //static void cartridge_WriteBank(word address, byte bank) {
-cartridge_WriteBank = function (address, bank) {
+function cartridge_WriteBank(address, bank) {
 
-  /*
-  console.log("Bank switch: %d, %d, max:%d", 
-      address, cartridge_GetBank(bank), cartridge_size / 16384);    
-  */
+  //  console.log("Bank switch: %d, %d, max:%d", 
+  //      address, cartridge_GetBank(bank), cartridge_size / 16384);      
 
   //uint offset = cartridge_GetBankOffset(bank);
   var offset = cartridge_GetBankOffset(bank);
@@ -179,7 +177,7 @@ cartridge_WriteBank = function (address, bank) {
 }
 
 //static void cartridge_SetTypeBySize(uint size) {
-cartridge_SetTypeBySize = function (size) {
+function cartridge_SetTypeBySize(size) {
   if (size <= 0x10000) {
     //int old_type = cartridge_type;
     var old_type = cartridge_type;
@@ -207,7 +205,7 @@ cartridge_SetTypeBySize = function (size) {
 // ReadHeader
 // ----------------------------------------------------------------------------
 //static void cartridge_ReadHeader(const byte* header) {
-cartridge_ReadHeader = function (header) {
+function cartridge_ReadHeader(header) {
   console.log("Reading cartridge header");
 
   //char temp[33] = { 0};
@@ -267,7 +265,7 @@ cartridge_ReadHeader = function (header) {
   cartridge_controller[1] = header[56];
   cartridge_region = header[57];
   cartridge_flags = 0;
-  cartridge_xm = (header[63] & 1) ? true : false;
+  cartridge_xm = (header[63] & 1) ? true : false;  
   cartridge_hsc_enabled = header[58] & 0x01;
 
   // Wii: Updates to header interpretation
@@ -349,7 +347,7 @@ cartridge_ReadHeader = function (header) {
 // Load
 // ----------------------------------------------------------------------------
 //static bool cartridge_Load(const byte* data, uint size) {
-cartridge_Load = function(data, size) {
+function cartridge_Load(data, size) {
   if (size <= 128) {
     console.log("Cartridge data is invalid.");
     return false;
@@ -425,7 +423,7 @@ cartridge_Load = function(data, size) {
 // Store
 // ----------------------------------------------------------------------------
 //void cartridge_Store() {
-cartridge_Store = function() {
+function cartridge_Store() {
   switch (cartridge_type) {
     case CARTRIDGE_TYPE_NORMAL:
       //memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer,);
@@ -500,7 +498,7 @@ cartridge_Store = function() {
 // Write
 // ----------------------------------------------------------------------------
 //void cartridge_Write(word address, byte data) {
-cartridge_Write = function(address, data) {  
+function cartridge_Write(address, data) {  
   //console.log("Cartridge write: %d, %d", address, data);
   switch (cartridge_type) {
     case CARTRIDGE_TYPE_SUPERCART:
@@ -536,7 +534,7 @@ cartridge_Write = function(address, data) {
 // StoreBank
 // ----------------------------------------------------------------------------
 //void cartridge_StoreBank(byte bank) {
-cartridge_StoreBank = function(bank) {  
+function cartridge_StoreBank(bank) {  
   switch (cartridge_type) {
     case CARTRIDGE_TYPE_SUPERCART:
       cartridge_WriteBank(32768, bank);
@@ -563,7 +561,7 @@ cartridge_StoreBank = function(bank) {
 // IsLoaded
 // ----------------------------------------------------------------------------
 //bool cartridge_IsLoaded() {
-cartridge_IsLoaded = function() {
+function cartridge_IsLoaded() {
   //return (cartridge_buffer != NULL) ? true : false;
   return (cartridge_buffer != null) ? true : false;
 }
@@ -572,7 +570,7 @@ cartridge_IsLoaded = function() {
 // Release
 // ----------------------------------------------------------------------------
 //void cartridge_Release() {
-cartridge_Release = function() {
+function cartridge_Release() {
   high_score_cart_loaded = false;
 
   //if (cartridge_buffer != NULL) {

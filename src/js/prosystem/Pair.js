@@ -23,7 +23,6 @@
 // Pair.h
 // ----------------------------------------------------------------------------
 
-
 /*
 typedef unsigned char byte;
 typedef unsigned short word;
@@ -88,7 +87,7 @@ Pair = function () {
         this.setBL(this.getBL() + val);
     }
     this.getBH = function () {
-        return (this._w & 0xFF00) >> 8;
+        return (this._w & 0xFF00) >>> 8;
     }
     this.setBH = function(val) {
         this._w = ((this._w & 0x00FF) | ((val << 8) & 0xFF00));

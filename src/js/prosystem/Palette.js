@@ -129,7 +129,7 @@ var palette_data = [
 // Load
 // ----------------------------------------------------------------------------
 //void palette_Load(const byte* data) {
-palette_Load = function (data) {
+function palette_Load(data) {
   //for(int index = 0; index < PALETTE_SIZE; index++) {
   for (var index = 0; index < PALETTE_SIZE; index++) {
     palette_data[index] = data[index];

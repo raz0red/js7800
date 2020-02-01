@@ -1,80 +1,94 @@
 <html>
 
 <head>
-    <script src="js/Bios.js" type="text/javascript"></script>        
-    <script src="js/Database.js" type="text/javascript"></script>        
-    <script src="js/Timer.js" type="text/javascript"></script>    
-    <script src="js/Rect.js" type="text/javascript"></script>
-    <script src="js/Region.js" type="text/javascript"></script>
-    <script src="js/Palette.js" type="text/javascript"></script>
-    <script src="js/Equates.js" type="text/javascript"></script>
-    <script src="js/Memory.js" type="text/javascript"></script>
-    <script src="js/Pair.js" type="text/javascript"></script>
-    <script src="js/Sally.js" type="text/javascript"></script>
-    <script src="js/Riot.js" type="text/javascript"></script>
-    <script src="js/Cartridge.js" type="text/javascript"></script>
-    <script src="js/Tia.js" type="text/javascript"></script>    
-    <script src="js/Maria.js" type="text/javascript"></script>    
-    <script src="js/ExpansionModule.js" type="text/javascript"></script>    
-    <script src="js/3rdparty/jquery-min.js" type="text/javascript"></script>
-    <script src="js/3rdparty/md5.js" type="text/javascript"></script>
-</hea
-d>
+  <script src="js/prosystem/Bios.js" type="text/javascript"></script>
+  <script src="js/prosystem/Pokey.js" type="text/javascript"></script>
+  <script src="js/prosystem/Sound.js" type="text/javascript"></script>
+  <script src="js/prosystem/Database.js" type="text/javascript"></script>
+  <script src="js/prosystem/Timer.js" type="text/javascript"></script>
+  <script src="js/prosystem/Rect.js" type="text/javascript"></script>
+  <script src="js/prosystem/Region.js" type="text/javascript"></script>
+  <script src="js/prosystem/Palette.js" type="text/javascript"></script>
+  <script src="js/prosystem/Equates.js" type="text/javascript"></script>
+  <script src="js/prosystem/Memory.js" type="text/javascript"></script>
+  <script src="js/prosystem/Pair.js" type="text/javascript"></script>
+  <script src="js/prosystem/Sally.js" type="text/javascript"></script>
+  <script src="js/prosystem/Riot.js" type="text/javascript"></script>
+  <script src="js/prosystem/Cartridge.js" type="text/javascript"></script>
+  <script src="js/prosystem/Tia.js" type="text/javascript"></script>
+  <script src="js/prosystem/Maria.js" type="text/javascript"></script>
+  <script src="js/prosystem/ProSystem.js" type="text/javascript"></script>
+  <script src="js/prosystem/ExpansionModule.js" type="text/javascript"></script>
+  <script src="js/js_atari.js" type="text/javascript"></script>
+  <script src="js/3rdparty/jquery-min.js" type="text/javascript"></script>
+  <script src="js/3rdparty/md5.js" type="text/javascript"></script>
+</head>
 
 <body>
-    <script>        
-        function dropHandler(ev) {
-            ev.preventDefault();
-            var file = null;
-            if (ev.dataTransfer.items) {
-                for (var i = 0; i < ev.dataTransfer.items.length; i++) {
-                    if (ev.dataTransfer.items[i].kind === 'file') {
-                        file = ev.dataTransfer.items[i].getAsFile();
-                        break;
-                    }
-                }
-            } else {
-                for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-                    file = ev.dataTransfer.files[i];
-                    break;
-                }
-            }
-
-            if (file) {
-                if (file.size <= 1024 * 1024) /* 1024kb max */ {
-                    var reader = new FileReader();
-                    reader.readAsBinaryString(file);
-                    reader.onloadend = function () {
-                        var cart = new Array();
-                        for(var i = 0; i < reader.result.length; i++) {
-                            cart[i] = reader.result.charCodeAt(i);
-                        }
-                        cartridge_Load(cart, cart.length);
-                    }
-                } else {
-                    //$("#status").text("File too large.");
-                    alert('File too large'); // TODO: What to do with this?
-                }
-            }
+  <script>    
+    function dropHandler(ev) {
+      ev.preventDefault();
+      var file = null;
+      if (ev.dataTransfer.items) {
+        for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+          if (ev.dataTransfer.items[i].kind === 'file') {
+            file = ev.dataTransfer.items[i].getAsFile();
+            break;
+          }
         }
+      } else {
+        for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+          file = ev.dataTransfer.files[i];
+          break;
+        }
+      }
 
-        // Drag and drop
-        $('body').on('drop dragdrop', function (evt) {
-            evt.dataTransfer = evt.originalEvent.dataTransfer
-            dropHandler(evt);
-            event.preventDefault();
-        });
-        $('body').on('dragenter', function (event) {
-            event.preventDefault();
-            //$(this).css('border','10px dashed red');
-        });
-        $('body').on('dragleave', function () {
-            //$(this).css('background','red');
-        });
-        $('body').on('dragover', function (event) {
-            event.preventDefault();
-        });    
-    </script>
+      if (file) {
+        if (file.size <= 1024 * 1024) /* 1024kb max */ {
+          var reader = new FileReader();
+          reader.readAsBinaryString(file);
+          reader.onloadend = function () {
+            var cart = new Array();
+            for (var i = 0; i < reader.result.length; i++) {
+              cart[i] = reader.result.charCodeAt(i);
+            }
+            cartridge_Load(cart, cart.length);
+            /*
+            prosystem_Reset();
+            var input = new Array(1024);
+            var fc = 0;
+            for (var i = 0; i < 60 * 60; i++) {
+              prosystem_ExecuteFrame(input);
+              fc++;
+            }
+            console.log("fc:%d", fc);
+            */
+          }
+        } else {
+          //$("#status").text("File too large.");
+          alert('File too large'); // TODO: What to do with this?
+        }
+      }
+    }
+
+    // Drag and drop
+    $('body').on('drop dragdrop', function (evt) {
+      evt.dataTransfer = evt.originalEvent.dataTransfer
+      dropHandler(evt);
+      event.preventDefault();
+    });
+    $('body').on('dragenter', function (event) {
+      event.preventDefault();
+      //$(this).css('border','10px dashed red');
+    });
+    $('body').on('dragleave', function () {
+      //$(this).css('background','red');
+    });
+    $('body').on('dragover', function (event) {
+      event.preventDefault();
+    });    
+  </script>
+
 </body>
 
 </html>

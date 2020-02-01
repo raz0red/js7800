@@ -47,7 +47,7 @@ var riot_currentTime = 0;
 var riot_timer_count = 0;
 
 //void riot_Reset(void) {
-riot_Reset = function () {
+function riot_Reset() {
   riot_SetDRA(0);
   riot_SetDRB(0);
 
@@ -86,7 +86,7 @@ riot_Reset = function () {
 // | 16       | Console      | Right Difficulty
 // +----------+--------------+-------------------------------------------------
 //void riot_SetInput(const byte* input) {
-riot_SetInput = function (input) { // TODO JS: Input will be array
+function riot_SetInput(input) { // TODO JS: Input will be array
 
   /*gdement: 	Comments are messy, but wanted to document how this all works.
   Changed this routine to support 1 vs 2 button modes.
@@ -129,7 +129,8 @@ riot_SetInput = function (input) { // TODO JS: Input will be array
 
   memory_ram[SWCHB] = ((~memory_ram[CTLSWB]) | riot_drb);	/*SWCHB as driven by RIOT*/
 
-  if (input != NULL) {
+  //if (input != NULL) {
+  if (input != null) {
     /*now the console switches can force certain bits to ground:*/
     if (input[0x0c]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x01;
     if (input[0x0d]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x02;
@@ -209,12 +210,12 @@ riot_SetInput = function (input) { // TODO JS: Input will be array
 * These are distinct from what you see when reading SWCHA/SWCHB.
 ***********************************************************************************/
 //void riot_SetDRA(byte data) {
-riot_SetDRA = function (data) {
+function riot_SetDRA(data) {
   riot_dra = data;
 }
 
 //void riot_SetDRB(byte data) {
-riot_SetDRB = function (data) {
+function riot_SetDRB(data) {
   riot_drb = data;
 
   // Make changes to joystick buttons immediately. This was added to make 
@@ -227,7 +228,7 @@ riot_SetDRB = function (data) {
 // SetTimer
 // ----------------------------------------------------------------------------
 //void riot_SetTimer(word timer, byte intervals) {
-riot_SetTimer = function (timer, intervals) {
+function riot_SetTimer(timer, intervals) {
   riot_timer = timer;
   riot_intervals = intervals;
   switch (timer) {
@@ -261,7 +262,7 @@ riot_SetTimer = function (timer, intervals) {
 // UpdateTimer
 // ----------------------------------------------------------------------------
 //void riot_UpdateTimer(byte cycles) {
-riot_UpdateTimer = function (cycles) {
+function riot_UpdateTimer(cycles) {
   riot_currentTime -= cycles;
   if (!riot_elapsed && riot_currentTime > 0) {
     memory_Write(INTIM, riot_currentTime / riot_clocks);
