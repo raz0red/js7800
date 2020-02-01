@@ -26,6 +26,8 @@
 
 <body>
   <script>    
+    var HALT = false;
+
     function dropHandler(ev) {
       ev.preventDefault();
       var file = null;
@@ -53,16 +55,23 @@
               cart[i] = reader.result.charCodeAt(i);
             }
             cartridge_Load(cart, cart.length);
-            /*
             prosystem_Reset();
             var input = new Array(1024);
             var fc = 0;
-            for (var i = 0; i < 60 * 60; i++) {
+            var start = Date.now();
+            var frames = 60 * 60;
+            for (var i = 0; i < frames && !HALT; i++) {
               prosystem_ExecuteFrame(input);
               fc++;
+              console.log("frame:%d", fc);
+              //sally_debug_count = 5;
+              sally_invalid_opcode_count = 1;
             }
-            console.log("fc:%d", fc);
-            */
+
+            var elapsed = Date.now() - start;
+            console.log("fc:%d %f %f", fc, 
+              (elapsed/1000.0),
+              (1000.0/(elapsed/frames)));
           }
         } else {
           //$("#status").text("File too large.");

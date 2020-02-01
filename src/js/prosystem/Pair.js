@@ -56,7 +56,7 @@ Pair = function () {
     this.wMinusMinus = function() {
         var curr = this._w;
         this._w--;
-        return curr;
+        return curr;        
     }
     this.wPlusEqual = function(val) {
         this._w += val;
@@ -84,7 +84,12 @@ Pair = function () {
         this._w = ((this._w & 0xFF00) | (val & 0x00FF));
     }
     this.blPlusEqual = function(val) {
-        this.setBL(this.getBL() + val);
+        var v = this.getBL() + val;
+        if(v > 255) {
+            //console.log("blPlusEqual > 255: %d", v);
+            v -= 256;
+        } 
+        this.setBL(v);
     }
     this.getBH = function () {
         return (this._w & 0xFF00) >>> 8;
@@ -93,7 +98,12 @@ Pair = function () {
         this._w = ((this._w & 0x00FF) | ((val << 8) & 0xFF00));
     }
     this.bhPlusEqual = function(val) {
-        this.setBH(this.getBH() + val);
+        var v = this.getBH() + val;
+        if(v > 255) {
+            //console.log("bhPlusEqual > 255: %d", v);
+            v -= 256;
+        } 
+        this.setBH(v);
     }
     this.clone = function () {
         var c = new Pair();

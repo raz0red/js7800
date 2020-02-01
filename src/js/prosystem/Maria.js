@@ -184,13 +184,13 @@ function maria_StoreGraphic() {
 // WriteLineRAM
 // ----------------------------------------------------------------------------
 //static inline void maria_WriteLineRAM(byte * buffer) {
-function maria_WriteLineRAM(buffer) {  // TODO JS: What is buffer?
+function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
   //byte rmode = memory_ram[CTRL] & 3;
   var rmode = memory_ram[CTRL] & 3;
   if (rmode == 0) {
     // 160A/B
     //int pixel = 0;
-    var pixel = 0;
+    var pixel = offset;
     //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
     for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
       //word color;
@@ -414,11 +414,12 @@ function maria_RenderScanline() {
       }
     }
     else if (maria_scanline >= maria_visibleArea.top && maria_scanline <= maria_visibleArea.bottom) {
-      maria_WriteLineRAM(maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
+      //maria_WriteLineRAM(maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
+      maria_WriteLineRAM(maria_surface, ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
     }
     if (maria_scanline != maria_displayArea.bottom) {
       //maria_dp.b.l = memory_ram[maria_dpp.w + 2];
-      maria_dp.setBL(memory_ram[maria_dpp.get() + 2]);
+      maria_dp.setBL(memory_ram[maria_dpp.getW() + 2]);
       //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
       maria_dp.setBH(memory_ram[maria_dpp.getW() + 1]);
       maria_StoreLineRAM();

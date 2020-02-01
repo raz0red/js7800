@@ -164,14 +164,14 @@ function cartridge_GetBankOffset(bank) {
 //static void cartridge_WriteBank(word address, byte bank) {
 function cartridge_WriteBank(address, bank) {
 
-  //  console.log("Bank switch: %d, %d, max:%d", 
-  //      address, cartridge_GetBank(bank), cartridge_size / 16384);      
+  console.log("Bank switch: %d, %d, max:%d",
+    address, cartridge_GetBank(bank), ((cartridge_size / 16384)>>0));      
 
   //uint offset = cartridge_GetBankOffset(bank);
   var offset = cartridge_GetBankOffset(bank);
   if (offset < cartridge_size) {
     //memory_WriteROM(address, 16384, cartridge_buffer + offset);
-    memory_WriteROM(address, 16384, offset); // JS: Just pass the offset
+    memory_WriteROM(address, 16384, cartridge_buffer, offset); // JS: Just pass the offset
     cartridge_bank = bank;
   }
 }
@@ -296,7 +296,7 @@ function cartridge_ReadHeader(header) {
       //int old_type = cartridge_type;
       var old_type = cartridge_type;
       cartridge_type = CARTRIDGE_TYPE_NORMAL_RAM;
-      net_print_string("Update: (0x04) bit2: %d, %d", old_type, cartridge_type);
+      console.log("Update: (0x04) bit2: %d, %d", old_type, cartridge_type);
     } else {
       // Attempt to determine the cartridge type based on its size
       cartridge_SetTypeBySize(cartridge_size);

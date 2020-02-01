@@ -246,7 +246,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     // If a WSYNC was performed and the current cycle count is less than
     // the cycles per scanline, add those cycles to current timers.
-    if (wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
+    if (wsync_scanline && (prosystem_cycles < CYCLES_PER_SCANLINE)) {
       if (riot_timing) {
         riot_UpdateTimer((CYCLES_PER_SCANLINE - prosystem_cycles) >>> 2);
       }

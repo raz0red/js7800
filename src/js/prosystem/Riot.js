@@ -265,7 +265,7 @@ function riot_SetTimer(timer, intervals) {
 function riot_UpdateTimer(cycles) {
   riot_currentTime -= cycles;
   if (!riot_elapsed && riot_currentTime > 0) {
-    memory_Write(INTIM, riot_currentTime / riot_clocks);
+    memory_Write(INTIM, ((riot_currentTime / riot_clocks) >> 0));
   }
   else {
     if (riot_elapsed) {

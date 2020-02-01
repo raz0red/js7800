@@ -159,7 +159,7 @@ var SKCTL = 0;
 //byte RANDOM;
 var RANDOM = 0;
 
-//int pokey_debug_count = 100;
+var pokey_debug_count = 100;
 
 //byte POT_input[8] = {228, 228, 228, 228, 228, 228, 228, 228};
 var POT_input = new Array(228, 228, 228, 228, 228, 228, 228, 228);
@@ -204,7 +204,7 @@ function pokey_setSampleRate(rate) {
 // ----------------------------------------------------------------------------
 //void pokey_Reset() {
 function pokey_Reset() {
-  //pokey_debug_count = 100;
+  pokey_debug_count = 100;
 
   pot_scanline = 0;
   pokey_soundCntr = 0;
@@ -277,8 +277,9 @@ function pokey_Scanline() {
 
 //byte pokey_GetRegister(word address) {
 function pokey_GetRegister(address) {
-  // if ((pokey_debug_count--) > 0)
-  //   console.log("pokey_getRegister: %d", address);
+  if ((pokey_debug_count--) > 0)
+     console.log("pokey_getRegister: %d", address);
+     
   //byte data = 0;
   var data = 0;
 
@@ -341,8 +342,8 @@ function pokey_GetRegister(address) {
 // ----------------------------------------------------------------------------
 //void pokey_SetRegister(word address, byte value) {
 function pokey_SetRegister(address, value) {
-  // if ((pokey_debug_count--) > 0)
-  //   console.log("pokey_setRegister: %d %d", address, value);
+  if ((pokey_debug_count--) > 0)
+    console.log("pokey_setRegister: %d %d", address, value);
 
   //byte channelMask;
   var channelMask = 0;

@@ -141,14 +141,19 @@ function sally_checkHighScoreSet() {
 // ----------------------------------------------------------------------------
 function sally_Push(data) {
   memory_Write(sally_s + 256, data);
+  //sally_s--;
   sally_s--;
+  if(sally_s < 0) sally_s = 255;
 }
 
 // ----------------------------------------------------------------------------
 // Pop
 // ----------------------------------------------------------------------------
 function sally_Pop() {
+  //sally_s++;
   sally_s++;
+  if (sally_s > 255) sally_s = 0;
+
   return memory_Read(sally_s + 256);
 }
 
@@ -268,7 +273,7 @@ function sally_Indirect() {
 // ----------------------------------------------------------------------------
 function sally_IndirectX() {
   //sally_address.b.l = memory_Read(sally_pc.w++) + sally_x;
-  sally_address.setBL(memory_Read(sally_pc.wPlusPlus())) + sally_x;
+  sally_address.setBL(memory_Read(sally_pc.wPlusPlus()) + sally_x);
   //sally_address.b.h = memory_Read(sally_address.b.l + 1);
   sally_address.setBH(memory_Read(sally_address.getBL() + 1));
   //sally_address.b.l = memory_Read(sally_address.b.l);
@@ -641,14 +646,21 @@ function sally_DEC() {
 // DEX
 // ----------------------------------------------------------------------------
 function sally_DEX() {
-  sally_Flags(--sally_x);
+  //sally_Flags(--sally_x);
+  --sally_x;
+  if(sally_x < 0) sally_x = 255;  
+  sally_Flags(sally_x);
 }
 
 // ----------------------------------------------------------------------------
 // DEY
 // ----------------------------------------------------------------------------
 function sally_DEY() {
-  sally_Flags(--sally_y);
+  //sally_Flags(--sally_y);
+
+  --sally_y;
+  if(sally_y < 0) sally_y = 255;
+  sally_Flags(sally_y);  
 }
 
 // ----------------------------------------------------------------------------
@@ -675,14 +687,22 @@ function sally_INC() {
 // INX
 // ----------------------------------------------------------------------------
 function sally_INX() {
-  sally_Flags(++sally_x);
+  //sally_Flags(++sally_x);
+
+  ++sally_x;
+  if(sally_x > 255) sally_x = 0;
+  sally_Flags(sally_x);  
 }
 
 // ----------------------------------------------------------------------------
 // INY
 // ----------------------------------------------------------------------------
 function sally_INY() {
-  sally_Flags(++sally_y);
+  // sally_Flags(++sally_y);
+
+  ++sally_y;
+  if(sally_y > 255) sally_y = 0;
+  sally_Flags(sally_y);  
 }
 
 // ----------------------------------------------------------------------------
@@ -1020,6 +1040,11 @@ function sally_SEI() {
 function sally_STA() {
   //memory_Write(sally_address.w, sally_a);
   memory_Write(sally_address.getW(), sally_a);
+  
+  if(sally_address.getW() < 0) {
+    console.log("sally_STA: %d, %d", sally_address.getW(), sally_a);
+    HALT=true;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -1096,7 +1121,14 @@ function sally_Reset() {
   sally_s = 0;
   //sally_pc.w = 0;
   sally_pc.setW(0);
+
+  sally_debug_count = 100;
+  sally_invalid_opcode_count = 1;
 }
+
+
+var sally_debug_count = 100;
+var sally_invalid_opcode_count = 1;
 
 // ----------------------------------------------------------------------------
 // ExecuteInstruction
@@ -1173,6 +1205,20 @@ function sally_ExecuteInstruction() {
   //sally_opcode = memory_Read(sally_pc.w++);
   sally_opcode = memory_Read(sally_pc.wPlusPlus());
   sally_cycles = SALLY_CYCLES[sally_opcode];
+  
+  if(!sally_opcode) {
+    if (sally_invalid_opcode_count-- > 0 ) {
+      console.log("Invalid Opcode!!!: sally_pc:%d", sally_pc.getW()); 
+    }
+    return 0;
+
+    // if(!HALT) {
+    //   console.log("Invalid Opcode!!!: sally_pc:%d", sally_pc.getW()); 
+    //   HALT = true;
+    // }
+
+    // return 5000;
+  }  
 
   /*
   #ifdef LOWTRACE
@@ -1188,8 +1234,11 @@ function sally_ExecuteInstruction() {
   */
 
   //goto *a_jump_table[sally_opcode];
-
-  //console.log("Opcode:%d", sally_opcode);
+  
+  if(sally_debug_count-->0) {
+    console.log("Opcode:%s %d %d %d %d", sally_opcode.toString(16), 
+      sally_cycles, prosystem_cycles, CYCLES_PER_SCANLINE, maria_scanline);
+  }
 
   switch (sally_opcode) {
     //l_0x00:
