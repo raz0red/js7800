@@ -1241,25 +1241,15 @@ function sally_ExecuteInstruction() {
   half_cycle = false;
 
   //sally_opcode = memory_Read(sally_pc.w++);
-  sally_opcode = memory_Read(sally_pc.wPlusPlus());
+  var opcodeMem = sally_pc.wPlusPlus()
+  sally_opcode = memory_Read(opcodeMem);
   sally_cycles = SALLY_CYCLES[sally_opcode];
-
-  /*
-  #ifdef LOWTRACE
-  sprintf( msg, "Exec: %x, cycles: %d", sally_opcode, sally_cycles );
-  logger_LogInfo( msg );
-  #endif
-  */
-
-  /*
-  char message[255];
-  sprintf( message, "opcode: %d %d", sally_opcode, sally_cycles );
-  logger_LogDebug( message );
-  */
 
   //goto *a_jump_table[sally_opcode];
 
-  if (sally_debug_count-- > 0) {
+  if (sally_cycles === undefined) {
+    console.error("Unknown opcode: %d", opcodeMem);
+  } else if (sally_debug_count-- > 0) {
     console.log("Opcode:%s %d %d %d %d", sally_opcode.toString(16),
       sally_cycles, prosystem_cycles, CYCLES_PER_SCANLINE, maria_scanline);
   }
