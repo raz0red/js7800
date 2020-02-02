@@ -140,21 +140,18 @@ function sally_checkHighScoreSet() {
 // Push
 // ----------------------------------------------------------------------------
 function sally_Push(data) {
-  memory_Write(sally_s + 256, data);
+  memory_Write((sally_s + 256) & 0xFFFF, data);
   //sally_s--;
-  sally_s--;
-  if(sally_s < 0) sally_s = 255;
+  sally_s = (sally_s - 1) & 0xFF;
 }
 
 // ----------------------------------------------------------------------------
 // Pop
 // ----------------------------------------------------------------------------
 function sally_Pop() {
-  //sally_s++;
-  sally_s++;
-  if (sally_s > 255) sally_s = 0;
-
-  return memory_Read(sally_s + 256);
+  //sally_s++;  
+  sally_s = (sally_s + 1) & 0xFF;
+  return memory_Read((sally_s + 256) & 0xFFFF);
 }
 
 // ----------------------------------------------------------------------------
@@ -165,13 +162,15 @@ function sally_Flags(data) {
     sally_p |= SALLY_FLAG.Z;
   }
   else {
-    sally_p &= ~SALLY_FLAG.Z;
+    //sally_p &= ~SALLY_FLAG.Z;
+    sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
   }
   if (data & 128) {
     sally_p |= SALLY_FLAG.N;
   }
   else {
-    sally_p &= ~SALLY_FLAG.N;
+    //sally_p &= ~SALLY_FLAG.N;
+    sally_p = (sally_p & ~SALLY_FLAG.N) & 0xFF;
   }
 }
 
@@ -339,48 +338,56 @@ function sally_ADC() {
 
   if (sally_p & SALLY_FLAG.D) {
     //word al = (sally_a & 15) + (data & 15) + (sally_p & SALLY_FLAG.C);
-    var al = (sally_a & 15) + (data & 15) + (sally_p & SALLY_FLAG.C);
+    var al = ((sally_a & 15) + (data & 15) + (sally_p & SALLY_FLAG.C)) & 0xFFFF;
     //word ah = (sally_a >> 4) + (data >> 4);
-    var ah = (sally_a >>> 4) + (data >>> 4);
+    var ah = ((sally_a >>> 4) + (data >>> 4)) & 0xFFFF;
 
     if (al > 9) {
-      al += 6;
-      ah++;
+      //al += 6;
+      al = (al + 6) & 0xFFFF;
+      //ah++;
+      ah = (ah + 1) & 0xFFFF;
     }
 
     if (!(sally_a + data + (sally_p & SALLY_FLAG.C))) {
       sally_p |= SALLY_FLAG.Z;
     }
     else {
-      sally_p &= ~SALLY_FLAG.Z;
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
     }
 
     if ((ah & 8) != 0) {
       sally_p |= SALLY_FLAG.N;
     }
     else {
-      sally_p &= ~SALLY_FLAG.N;
+      //sally_p &= ~SALLY_FLAG.N;
+      sally_p = (sally_p & ~SALLY_FLAG.N) & 0xFF;
     }
 
     if (~(sally_a ^ data) & ((ah << 4) ^ sally_a) & 128) {
       sally_p |= SALLY_FLAG.V;
     }
     else {
-      sally_p &= ~SALLY_FLAG.V;
+      //sally_p &= ~SALLY_FLAG.V;
+      sally_p = (sally_p & ~SALLY_FLAG.V) & 0xFF;
     }
 
     if (ah > 9) {
-      ah += 6;
+      //ah += 6;
+      ah = (ah + 6) & 0xFFFF;
     }
 
     if (ah > 15) {
       sally_p |= SALLY_FLAG.C;
     }
     else {
-      sally_p &= ~SALLY_FLAG.C;
+      //sally_p &= ~SALLY_FLAG.C;
+      sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
     }
 
-    sally_a = (ah << 4) | (al & 15);
+    //sally_a = (ah << 4) | (al & 15);
+    sally_a = ((ah << 4) | (al & 15)) & 0xFF;
   }
   else {
     //pair temp;
@@ -393,7 +400,8 @@ function sally_ADC() {
       sally_p |= SALLY_FLAG.C;
     }
     else {
-      sally_p &= ~SALLY_FLAG.C;
+      //sally_p &= ~SALLY_FLAG.C;
+      sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
     }
 
     //if(~(sally_a ^ data) & (sally_a ^ temp.b.l) & 128) {
@@ -401,7 +409,8 @@ function sally_ADC() {
       sally_p |= SALLY_FLAG.V;
     }
     else {
-      sally_p &= ~SALLY_FLAG.V;
+      //sally_p &= ~SALLY_FLAG.V;
+      sally_p = (sally_p & ~SALLY_FLAG.V) & 0xFF;
     }
 
     //sally_Flags(temp.b.l);
@@ -428,10 +437,12 @@ function sally_ASLA() {
     sally_p |= SALLY_FLAG.C;
   }
   else {
-    sally_p &= ~SALLY_FLAG.C;
+    //sally_p &= ~SALLY_FLAG.C;
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   }
 
-  sally_a <<= 1;
+  //sally_a <<= 1;
+  sally_a = (sally_a << 1) & 0xFF;
   sally_Flags(sally_a);
 }
 
@@ -447,10 +458,12 @@ function sally_ASL() {
     sally_p |= SALLY_FLAG.C;
   }
   else {
-    sally_p &= ~SALLY_FLAG.C;
+    //sally_p &= ~SALLY_FLAG.C;
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   }
 
-  data <<= 1;
+  //data <<= 1;
+  data = (data << 1) & 0xFF;
   memory_Write(sally_address.getW(), data);
   sally_Flags(data);
 }
@@ -487,11 +500,14 @@ function sally_BIT() {
     sally_p |= SALLY_FLAG.Z;
   }
   else {
-    sally_p &= ~SALLY_FLAG.Z;
+    //sally_p &= ~SALLY_FLAG.Z;
+    sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
   }
 
-  sally_p &= ~SALLY_FLAG.V;
-  sally_p &= ~SALLY_FLAG.N;
+  //sally_p &= ~SALLY_FLAG.V;
+  sally_p = (sally_p & ~SALLY_FLAG.V) & 0xFF;
+  //sally_p &= ~SALLY_FLAG.N;
+  sally_p = (sally_p & ~SALLY_FLAG.N) & 0xFF;
   sally_p |= data & 64;
   sally_p |= data & 128;
 }
@@ -556,28 +572,32 @@ function sally_BVS() {
 // CLC
 // ----------------------------------------------------------------------------
 function sally_CLC() {
-  sally_p &= ~SALLY_FLAG.C;
+  //sally_p &= ~SALLY_FLAG.C;
+  sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
 }
 
 // ----------------------------------------------------------------------------
 // CLD
 // ----------------------------------------------------------------------------
 function sally_CLD() {
-  sally_p &= ~SALLY_FLAG.D;
+  //sally_p &= ~SALLY_FLAG.D;
+  sally_p = (sally_p & ~SALLY_FLAG.D) & 0xFF;
 }
 
 // ----------------------------------------------------------------------------
 // CLI
 // ----------------------------------------------------------------------------
 function sally_CLI() {
-  sally_p &= ~SALLY_FLAG.I;
+  //sally_p &= ~SALLY_FLAG.I;
+  sally_p = (sally_p & ~SALLY_FLAG.I) & 0xFF;
 }
 
 // ----------------------------------------------------------------------------
 // CLV
 // ----------------------------------------------------------------------------
 function sally_CLV() {
-  sally_p &= ~SALLY_FLAG.V;
+  //sally_p &= ~SALLY_FLAG.V;
+  sally_p = (sally_p & ~SALLY_FLAG.V) & 0xFF;
 }
 
 // ----------------------------------------------------------------------------
@@ -591,10 +611,13 @@ function sally_CMP() {
     sally_p |= SALLY_FLAG.C;
   }
   else {
-    sally_p &= ~SALLY_FLAG.C;
+    //sally_p &= ~SALLY_FLAG.C;
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
+
   }
 
-  sally_Flags(sally_a - data);
+  //sally_Flags(sally_a - data);
+  sally_Flags((sally_a - data) & 0xFF);
 }
 
 // ----------------------------------------------------------------------------
@@ -608,10 +631,12 @@ function sally_CPX() {
     sally_p |= SALLY_FLAG.C;
   }
   else {
-    sally_p &= ~SALLY_FLAG.C;
+    //sally_p &= ~SALLY_FLAG.C;
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   }
 
-  sally_Flags(sally_x - data);
+  //sally_Flags(sally_x - data);
+  sally_Flags((sally_x - data) & 0xFF);
 }
 
 // ----------------------------------------------------------------------------
@@ -625,10 +650,12 @@ function sally_CPY() {
     sally_p |= SALLY_FLAG.C;
   }
   else {
-    sally_p &= ~SALLY_FLAG.C;
+    //sally_p &= ~SALLY_FLAG.C;
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   }
 
-  sally_Flags(sally_y - data);
+  //sally_Flags(sally_y - data);
+  sally_Flags((sally_y - data) & 0xFF);
 }
 
 // ----------------------------------------------------------------------------
@@ -638,7 +665,9 @@ function sally_DEC() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
   //memory_Write(sally_address.w, --data);
-  memory_Write(sally_address.getW(), --data);
+  data = ((data - 1) & 0xFF);
+  //memory_Write(sally_address.getW(), --data);
+  memory_Write(sally_address.getW(), data);
   sally_Flags(data);
 }
 
@@ -647,8 +676,7 @@ function sally_DEC() {
 // ----------------------------------------------------------------------------
 function sally_DEX() {
   //sally_Flags(--sally_x);
-  --sally_x;
-  if(sally_x < 0) sally_x = 255;  
+  sally_x = (sally_x - 1) & 0xFF;
   sally_Flags(sally_x);
 }
 
@@ -657,10 +685,8 @@ function sally_DEX() {
 // ----------------------------------------------------------------------------
 function sally_DEY() {
   //sally_Flags(--sally_y);
-
-  --sally_y;
-  if(sally_y < 0) sally_y = 255;
-  sally_Flags(sally_y);  
+  sally_y = (sally_y - 1) & 0xFF;
+  sally_Flags(sally_y);
 }
 
 // ----------------------------------------------------------------------------
@@ -688,10 +714,8 @@ function sally_INC() {
 // ----------------------------------------------------------------------------
 function sally_INX() {
   //sally_Flags(++sally_x);
-
-  ++sally_x;
-  if(sally_x > 255) sally_x = 0;
-  sally_Flags(sally_x);  
+  sally_x = (sally_x + 1) & 0xFF;
+  sally_Flags(sally_x);
 }
 
 // ----------------------------------------------------------------------------
@@ -699,10 +723,8 @@ function sally_INX() {
 // ----------------------------------------------------------------------------
 function sally_INY() {
   // sally_Flags(++sally_y);
-
-  ++sally_y;
-  if(sally_y > 255) sally_y = 0;
-  sally_Flags(sally_y);  
+  sally_y = (sally_y + 1) & 0xFF;
+  sally_Flags(sally_y);
 }
 
 // ----------------------------------------------------------------------------
@@ -765,10 +787,12 @@ function sally_LDY() {
 // LSRA
 // ----------------------------------------------------------------------------
 function sally_LSRA() {
-  sally_p &= ~SALLY_FLAG.C;
+  //sally_p &= ~SALLY_FLAG.C;
+  sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   sally_p |= sally_a & 1;
 
-  sally_a >>>= 1;
+  //sally_a >>>= 1;
+  sally_a = (sally_a >>> 1) & 0xFF;
   sally_Flags(sally_a);
 }
 
@@ -779,10 +803,12 @@ function sally_LSR() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
 
-  sally_p &= ~SALLY_FLAG.C;
+  //sally_p &= ~SALLY_FLAG.C;
+  sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   sally_p |= data & 1;
 
-  data >>>= 1;
+  //data >>>= 1;
+  data = (data >>> 1) & 0xFF;
   //memory_Write(sally_address.w, data);
   memory_Write(sally_address.getW(), data);
   sally_Flags(data);
@@ -843,10 +869,12 @@ function sally_ROLA() {
     sally_p |= SALLY_FLAG.C;
   }
   else {
-    sally_p &= ~SALLY_FLAG.C;
+    //sally_p &= ~SALLY_FLAG.C;
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   }
 
-  sally_a <<= 1;
+  //sally_a <<= 1;
+  sally_a = (sally_a << 1) & 0xFF;
   sally_a |= temp & SALLY_FLAG.C;
   sally_Flags(sally_a);
 }
@@ -864,10 +892,12 @@ function sally_ROL() {
     sally_p |= SALLY_FLAG.C;
   }
   else {
-    sally_p &= ~SALLY_FLAG.C;
+    //sally_p &= ~SALLY_FLAG.C;
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   }
 
-  data <<= 1;
+  //data <<= 1;
+  data = (data << 1) & 0xFF;
   data |= temp & 1;
   //memory_Write(sally_address.w, data);
   memory_Write(sally_address.getW(), data);
@@ -881,10 +911,12 @@ function sally_RORA() {
   //byte temp = sally_p;
   var temp = sally_p;
 
-  sally_p &= ~SALLY_FLAG.C;
+  //sally_p &= ~SALLY_FLAG.C;
+  sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   sally_p |= sally_a & 1;
 
-  sally_a >>>= 1;
+  //sally_a >>>= 1;
+  sally_a = (sally_a >>> 1) & 0xFF;
   if (temp & SALLY_FLAG.C) {
     sally_a |= 128;
   }
@@ -901,10 +933,12 @@ function sally_ROR() {
   //byte temp = sally_p;
   var temp = sally_p;
 
-  sally_p &= ~SALLY_FLAG.C;
+  //sally_p &= ~SALLY_FLAG.C;
+  sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
   sally_p |= data & 1;
 
-  data >>>= 1;
+  //data >>>= 1;
+  data = (data >>> 1) & 0xFF;
   if (temp & 1) {
     data |= 128;
   }
@@ -946,17 +980,20 @@ function sally_SBC() {
 
   if (sally_p & SALLY_FLAG.D) {
     //word al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
-    var al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
+    var al = ((sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C)) & 0xFFFF;
     //word ah = (sally_a >> 4) - (data >> 4);
-    var ah = (sally_a >>> 4) - (data >>> 4);
+    var ah = ((sally_a >>> 4) - (data >>> 4)) & 0xFFFF;
 
     if (al > 9) {
-      al -= 6;
-      ah--;
+      //al -= 6;
+      al = (al - 6) & 0xFFFF;
+      //ah--;
+      ah = (ah - 1) & 0xFFFF;
     }
 
     if (ah > 9) {
-      ah -= 6;
+      //ah -= 6;
+      ah = (ah - 6) & 0xFFFF;
     }
 
     //pair temp;
@@ -969,7 +1006,8 @@ function sally_SBC() {
       sally_p |= SALLY_FLAG.C;
     }
     else {
-      sally_p &= ~SALLY_FLAG.C;
+      //sally_p &= ~SALLY_FLAG.C;
+      sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
     }
 
     //if((sally_a ^ data) & (sally_a ^ temp.b.l) & 128) {
@@ -977,12 +1015,14 @@ function sally_SBC() {
       sally_p |= SALLY_FLAG.V;
     }
     else {
-      sally_p &= ~SALLY_FLAG.V;
+      //sally_p &= ~SALLY_FLAG.V;
+      sally_p = (sally_p & ~SALLY_FLAG.V) & 0xFF;
     }
 
     //sally_Flags(temp.b.l);
     sally_Flags(temp.getBL());
-    sally_a = (ah << 4) | (al & 15);
+    //sally_a = (ah << 4) | (al & 15);
+    sally_a = ((ah << 4) | (al & 15)) & 0xFF;
   }
   else {
     //pair temp;
@@ -995,7 +1035,8 @@ function sally_SBC() {
       sally_p |= SALLY_FLAG.C;
     }
     else {
-      sally_p &= ~SALLY_FLAG.C;
+      //sally_p &= ~SALLY_FLAG.C;
+      sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
     }
 
     //if((sally_a ^ data) & (sally_a ^ temp.b.l) & 128) {
@@ -1003,7 +1044,8 @@ function sally_SBC() {
       sally_p |= SALLY_FLAG.V;
     }
     else {
-      sally_p &= ~SALLY_FLAG.V;
+      //sally_p &= ~SALLY_FLAG.V;
+      sally_p = (sally_p & ~SALLY_FLAG.V) & 0xFF;
     }
 
     //sally_Flags(temp.b.l);
@@ -1040,10 +1082,9 @@ function sally_SEI() {
 function sally_STA() {
   //memory_Write(sally_address.w, sally_a);
   memory_Write(sally_address.getW(), sally_a);
-  
-  if(sally_address.getW() < 0) {
-    console.log("sally_STA: %d, %d", sally_address.getW(), sally_a);
-    HALT=true;
+  if (sally_address.getW() < 0) {
+    console.error("sally_STA: %d, %d", sally_address.getW(), sally_a);
+    HALT = true;
   }
 }
 
@@ -1123,12 +1164,9 @@ function sally_Reset() {
   sally_pc.setW(0);
 
   sally_debug_count = 100;
-  sally_invalid_opcode_count = 1;
 }
 
-
 var sally_debug_count = 100;
-var sally_invalid_opcode_count = 1;
 
 // ----------------------------------------------------------------------------
 // ExecuteInstruction
@@ -1205,20 +1243,6 @@ function sally_ExecuteInstruction() {
   //sally_opcode = memory_Read(sally_pc.w++);
   sally_opcode = memory_Read(sally_pc.wPlusPlus());
   sally_cycles = SALLY_CYCLES[sally_opcode];
-  
-  if(!sally_opcode) {
-    if (sally_invalid_opcode_count-- > 0 ) {
-      console.log("Invalid Opcode!!!: sally_pc:%d", sally_pc.getW()); 
-    }
-    return 0;
-
-    // if(!HALT) {
-    //   console.log("Invalid Opcode!!!: sally_pc:%d", sally_pc.getW()); 
-    //   HALT = true;
-    // }
-
-    // return 5000;
-  }  
 
   /*
   #ifdef LOWTRACE
@@ -1234,9 +1258,9 @@ function sally_ExecuteInstruction() {
   */
 
   //goto *a_jump_table[sally_opcode];
-  
-  if(sally_debug_count-->0) {
-    console.log("Opcode:%s %d %d %d %d", sally_opcode.toString(16), 
+
+  if (sally_debug_count-- > 0) {
+    console.log("Opcode:%s %d %d %d %d", sally_opcode.toString(16),
       sally_cycles, prosystem_cycles, CYCLES_PER_SCANLINE, maria_scanline);
   }
 
@@ -2235,7 +2259,8 @@ function sally_ExecuteNMI() {
   sally_Push(sally_pc.getBH());
   //sally_Push(sally_pc.b.l);
   sally_Push(sally_pc.getBL());
-  sally_p &= ~SALLY_FLAG.B;
+  //sally_p &= ~SALLY_FLAG.B;
+  sally_p = (sally_p & ~SALLY_FLAG.B) & 0xFF;
   sally_Push(sally_p);
   sally_p |= SALLY_FLAG.I;
   //sally_pc.b.l = memory_ram[SALLY_NMI.L];
@@ -2254,7 +2279,8 @@ function sally_ExecuteIRQ() {
     sally_Push(sally_pc.getBH());
     //sally_Push(sally_pc.b.l);
     sally_Push(sally_pc.getBL());
-    sally_p &= ~SALLY_FLAG.B;
+    //sally_p &= ~SALLY_FLAG.B;
+    sally_p = (sally_p & ~SALLY_FLAG.B) & 0xFF;
     sally_Push(sally_p);
     sally_p |= SALLY_FLAG.I;
     //sally_pc.b.l = memory_ram[SALLY_IRQ.L];
@@ -2264,3 +2290,4 @@ function sally_ExecuteIRQ() {
   }
   return 7;
 }
+

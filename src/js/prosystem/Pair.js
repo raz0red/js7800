@@ -48,21 +48,21 @@ typedef Pair pair;
 // TODO: Handle overflow (plus plus, plus equal, minus equal, set)
 Pair = function () {
     this._w = 0;
-    this.wPlusPlus = function() {
+    this.wPlusPlus = function () {
         var curr = this._w;
-        this._w++;
+        this.setW(this._w + 1);
         return curr;
     }
-    this.wMinusMinus = function() {
+    this.wMinusMinus = function () {
         var curr = this._w;
-        this._w--;
-        return curr;        
+        this.setW(this._w - 1);
+        return curr;
     }
-    this.wPlusEqual = function(val) {
-        this._w += val;
+    this.wPlusEqual = function (val) {
+        this.setW(this._w + val);
     }
-    this.wMinusEqual = function(val) {
-        this._w -= val;
+    this.wMinusEqual = function (val) {
+        this.setW(this._w - val);
     }
     this.setW = function (val) {
         this._w = val & 0xFFFF;
@@ -73,37 +73,27 @@ Pair = function () {
     this.getBL = function () {
         return this._w & 0x00FF;
     }
-    this.getBLSigned = function() {
+    this.getBLSigned = function () {
         var bl = this.getBL();
-        if((bl & 0x80) > 0) {
+        if ((bl & 0x80) > 0) {
             return bl - 0x100;
         }
         return bl;
     }
-    this.setBL = function(val) {
+    this.setBL = function (val) {
         this._w = ((this._w & 0xFF00) | (val & 0x00FF));
     }
-    this.blPlusEqual = function(val) {
-        var v = this.getBL() + val;
-        if(v > 255) {
-            //console.log("blPlusEqual > 255: %d", v);
-            v -= 256;
-        } 
-        this.setBL(v);
+    this.blPlusEqual = function (val) {
+        this.setBL(this.getBL() + val);
     }
     this.getBH = function () {
         return (this._w & 0xFF00) >>> 8;
     }
-    this.setBH = function(val) {
+    this.setBH = function (val) {
         this._w = ((this._w & 0x00FF) | ((val << 8) & 0xFF00));
     }
-    this.bhPlusEqual = function(val) {
-        var v = this.getBH() + val;
-        if(v > 255) {
-            //console.log("bhPlusEqual > 255: %d", v);
-            v -= 256;
-        } 
-        this.setBH(v);
+    this.bhPlusEqual = function (val) {
+        this.setBH(this.getBH() + val);
     }
     this.clone = function () {
         var c = new Pair();

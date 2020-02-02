@@ -56,7 +56,7 @@ function memory_Reset() {
 // ----------------------------------------------------------------------------
 // Read
 // ----------------------------------------------------------------------------
-function memory_Read(address) {
+function _memory_Read(address) {
   //byte tmp_byte;
   var tmp_byte;
 
@@ -93,10 +93,24 @@ function memory_Read(address) {
   }
 }
 
+//byte memory_Read(word address) {
+function memory_Read(address) {
+  var data = _memory_Read(address);
+  if (data < 0) {
+    console.error("Less than zero memory read: %d %d", address, data);
+  }
+  return data;
+}
+
 // ----------------------------------------------------------------------------
 // Write
 // ----------------------------------------------------------------------------
+//void memory_Write(word address, byte data) {
 function memory_Write(address, data) {
+  if (data < 0) {
+    console.error("Less than zero memory write: %d %d", address, data);
+  }
+
   if (cartridge_xm &&
     ((address >= 0x0470 && address < 0x0480) ||
       ((xm_pokey_enabled && (address >= 0x0450 && address < 0x0470)) ||

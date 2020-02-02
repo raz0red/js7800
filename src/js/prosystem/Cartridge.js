@@ -109,7 +109,7 @@ function cartridge_HasHeader(header) {
   //for(int index = 0; index < 9; index++) {
   for (var index = 0; index < 9; index++) {
     //if (HEADER_ID[index] != header[index + 1]) {
-    if (HEADER_ID[index] != String.fromCharCode(header[index + 1])) {      
+    if (HEADER_ID[index] != String.fromCharCode(header[index + 1])) {
       return false;
     }
   }
@@ -164,8 +164,10 @@ function cartridge_GetBankOffset(bank) {
 //static void cartridge_WriteBank(word address, byte bank) {
 function cartridge_WriteBank(address, bank) {
 
+  /*
   console.log("Bank switch: %d, %d, max:%d",
     address, cartridge_GetBank(bank), ((cartridge_size / 16384)>>0));      
+  */
 
   //uint offset = cartridge_GetBankOffset(bank);
   var offset = cartridge_GetBankOffset(bank);
@@ -265,7 +267,7 @@ function cartridge_ReadHeader(header) {
   cartridge_controller[1] = header[56];
   cartridge_region = header[57];
   cartridge_flags = 0;
-  cartridge_xm = (header[63] & 1) ? true : false;  
+  cartridge_xm = (header[63] & 1) ? true : false;
   cartridge_hsc_enabled = header[58] & 0x01;
 
   // Wii: Updates to header interpretation
@@ -335,8 +337,8 @@ function cartridge_ReadHeader(header) {
   console.log("  Save device: [%d]%s%s", header[58],
     ((header[58] & 0x02) ? " SaveKey/AtariVox" : ""),
     ((header[58] & 0x01) ? " HSC" : ""));
-    console.log("  controller1: %d", cartridge_controller[0]);
-    console.log("  controller2: %d", cartridge_controller[1]);
+  console.log("  controller1: %d", cartridge_controller[0]);
+  console.log("  controller2: %d", cartridge_controller[1]);
   console.log("  cartridge_type 53: %d", header[53]);
   console.log("  cartridge_type 54: %d", header[54]);
   console.log("  cartridge_size: %d", cartridge_size);
@@ -413,7 +415,7 @@ function cartridge_Load(data, size) {
   }
 
   //cartridge_digest = hash_Compute(cartridge_buffer, cartridge_size); 
-  cartridge_digest = md5(hashstr);  
+  cartridge_digest = md5(hashstr);
   console.log("cartridge_digest: %s", cartridge_digest);
 
   return true;
@@ -498,7 +500,7 @@ function cartridge_Store() {
 // Write
 // ----------------------------------------------------------------------------
 //void cartridge_Write(word address, byte data) {
-function cartridge_Write(address, data) {  
+function cartridge_Write(address, data) {
   //console.log("Cartridge write: %d, %d", address, data);
   switch (cartridge_type) {
     case CARTRIDGE_TYPE_SUPERCART:
@@ -534,7 +536,7 @@ function cartridge_Write(address, data) {
 // StoreBank
 // ----------------------------------------------------------------------------
 //void cartridge_StoreBank(byte bank) {
-function cartridge_StoreBank(bank) {  
+function cartridge_StoreBank(bank) {
   switch (cartridge_type) {
     case CARTRIDGE_TYPE_SUPERCART:
       cartridge_WriteBank(32768, bank);

@@ -70,6 +70,7 @@ var maria_wmode = 0;
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte data) {
 function maria_StoreCell(data) {
+  data &= 0xFF;
   if (maria_horizontal < MARIA_LINERAM_SIZE) {
     if (data) {
       maria_lineRAM[maria_horizontal] = maria_palette | data;
@@ -90,6 +91,8 @@ function maria_StoreCell(data) {
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte high, byte low) {  
 function maria_StoreCell(high, low) {
+  high &= 0xFF;
+  low &= 0xFF;
   if (maria_horizontal < MARIA_LINERAM_SIZE) {
     if (low || high) {
       maria_lineRAM[maria_horizontal] = maria_palette & 16 | high | low;
@@ -131,6 +134,7 @@ function maria_IsHolyDMA() {
 
 //static inline byte maria_GetColor(byte data) {  
 function maria_GetColor(data) {
+  data &= 0xFF;
   if (data & 3) {
     return atari_pal8[memory_ram[BACKGRND + data]];
   }
@@ -247,7 +251,7 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
 // StoreLineRAM
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreLineRAM() {
-function maria_StoreLineRAM() {  
+function maria_StoreLineRAM() {
   //for (int index = 0; index < MARIA_LINERAM_SIZE; index++) {
   for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
     maria_lineRAM[index] = 0;
@@ -269,19 +273,20 @@ function maria_StoreLineRAM() {
     if (mode & 31) {
       maria_cycles += 8; // Maria cycles (Header 4 byte)
       //maria_palette = (memory_ram[maria_dp.w + 1] & 224) >> 3;
-      maria_palette = (memory_ram[maria_dp.getW() + 1] & 224) >>> 3;
+      maria_palette = ((memory_ram[maria_dp.getW() + 1] & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 3];
       maria_horizontal = memory_ram[maria_dp.getW() + 3];
       //width = memory_ram[maria_dp.w + 1] & 31;
       width = memory_ram[maria_dp.getW() + 1] & 31;
-      width = ((~width) & 31) + 1;
+      //width = ((~width) & 31) + 1;
+      width = (((~width) & 31) + 1) & 0xFF;
       //maria_dp.w += 4;
       maria_dp.wPlusEqual(4);
     }
     else {
       maria_cycles += 12; // Maria cycles (Header 5 byte)
       //maria_palette = (memory_ram[maria_dp.w + 3] & 224) >> 3;
-      maria_palette = (memory_ram[maria_dp.getW() + 3] & 224) >>> 3;
+      maria_palette = ((memory_ram[maria_dp.getW() + 3] & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 4];
       maria_horizontal = memory_ram[maria_dp.getW() + 4];
       //indirect = memory_ram[maria_dp.w + 1] & 32;
@@ -290,7 +295,8 @@ function maria_StoreLineRAM() {
       maria_wmode = memory_ram[maria_dp.getW() + 1] & 128;
       //width = memory_ram[maria_dp.w + 3] & 31;
       width = memory_ram[maria_dp.getW() + 3] & 31;
-      width = (width == 0) ? 32 : ((~width) & 31) + 1;
+      //width = (width == 0) ? 32 : ((~width) & 31) + 1;
+      width = ((width == 0) ? 32 : ((~width) & 31) + 1) & 0xFF;
       //maria_dp.w += 5;
       maria_dp.wPlusEqual(5);
     }
@@ -366,7 +372,7 @@ function maria_Reset() {
 // RenderScanline
 // ----------------------------------------------------------------------------
 //uint maria_RenderScanline() {
-function maria_RenderScanline() {  
+function maria_RenderScanline() {
   maria_cycles = 0;
 
   //
@@ -381,11 +387,11 @@ function maria_RenderScanline() {
     //byte * bgstart = maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength());
     bgstart_idx = ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength());
     //for (uint index = 0; index < MARIA_LINERAM_SIZE; index++ ) {
-    for (var index = 0; index < MARIA_LINERAM_SIZE; index++ ) {
-        //* bgstart++ = bgcolor;
-        maria_surface[bgstart_idx++] = bgcolor;
-        //* bgstart++ = bgcolor;
-        maria_surface[bgstart_idx++] = bgcolor;
+    for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
+      //* bgstart++ = bgcolor;
+      maria_surface[bgstart_idx++] = bgcolor;
+      //* bgstart++ = bgcolor;
+      maria_surface[bgstart_idx++] = bgcolor;
     }
   }
 
@@ -408,7 +414,7 @@ function maria_RenderScanline() {
       //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
       maria_dp.setBH(memory_ram[maria_dpp.getW() + 1]);
       //if (memory_ram[maria_dpp.w] & 128) {
-      if (memory_ram[maria_dpp.getW()] & 128) {        
+      if (memory_ram[maria_dpp.getW()] & 128) {
         maria_cycles += 20; // Maria cycles (NMI)  /*29, 16, 20*/
         sally_ExecuteNMI();
       }
@@ -459,9 +465,3 @@ function maria_Clear() {
     maria_surface[index] = 0;
   }
 }
-
-
-
-
-
-

@@ -94,16 +94,25 @@ function riot_SetInput(input) { // TODO JS: Input will be array
   SWCHA is directionals.  SWCHB is console switches and button mode.
   button signals are in high bits of INPT0-5.*/
 
-  memory_ram[SWCHA] = ((~memory_ram[CTLSWA]) | riot_dra);	/*SWCHA as driven by RIOT*/
+  //memory_ram[SWCHA] = ((~memory_ram[CTLSWA]) | riot_dra);	/*SWCHA as driven by RIOT*/
+  memory_ram[SWCHA] = (((~memory_ram[CTLSWA]) | riot_dra) & 0xFF);	/*SWCHA as driven by RIOT*/
   /*now console switches will force bits to ground:*/
-  if (input[0x00]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x80;
-  if (input[0x01]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x40;
-  if (input[0x02]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x20;
-  if (input[0x03]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x10;
-  if (input[0x06]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x08;
-  if (input[0x07]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x04;
-  if (input[0x08]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x02;
-  if (input[0x09]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x01;
+  //if (input[0x00]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x80;
+  if (input[0x00]) memory_ram[SWCHA] = (memory_ram[SWCHA] & ~0x80) & 0xFF;
+  //if (input[0x01]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x40;
+  if (input[0x01]) memory_ram[SWCHA] = (memory_ram[SWCHA] & ~0x40) & 0xFF;
+  //if (input[0x02]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x20;
+  if (input[0x02]) memory_ram[SWCHA] = (memory_ram[SWCHA] & ~0x20) & 0xFF;
+  //if (input[0x03]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x10;
+  if (input[0x03]) memory_ram[SWCHA] = (memory_ram[SWCHA] & ~0x10) & 0xFF;
+  //if (input[0x06]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x08;
+  if (input[0x06]) memory_ram[SWCHA] = (memory_ram[SWCHA] & ~0x08) & 0xFF;
+  //if (input[0x07]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x04;
+  if (input[0x07]) memory_ram[SWCHA] = (memory_ram[SWCHA] & ~0x04) & 0xFF;
+  //if (input[0x08]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x02;
+  if (input[0x08]) memory_ram[SWCHA] = (memory_ram[SWCHA] & ~0x02) & 0xFF;
+  //if (input[0x09]) memory_ram[SWCHA] = memory_ram[SWCHA] & ~0x01;
+  if (input[0x09]) memory_ram[SWCHA] = (memory_ram[SWCHA] & ~0x01) & 0xFF;
 
   /*Switches can always push the appropriate bit of SWCHA to ground, as in above code block.
   In addition, RIOT can be configured to drive ground even when switch is open.
@@ -127,16 +136,22 @@ function riot_SetInput(input) { // TODO JS: Input will be array
   From the default state after boot, simply changing CTLSWB to 1 will result in 2 button mode.
   Some games rely on this, and don't actually store anything to SWCHB.*/
 
-  memory_ram[SWCHB] = ((~memory_ram[CTLSWB]) | riot_drb);	/*SWCHB as driven by RIOT*/
+  //memory_ram[SWCHB] = ((~memory_ram[CTLSWB]) | riot_drb);	/*SWCHB as driven by RIOT*/
+  memory_ram[SWCHB] = (((~memory_ram[CTLSWB]) | riot_drb) & 0xFF);	/*SWCHB as driven by RIOT*/
 
   //if (input != NULL) {
   if (input != null) {
     /*now the console switches can force certain bits to ground:*/
-    if (input[0x0c]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x01;
-    if (input[0x0d]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x02;
-    if (input[0x0e]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x08;
-    if (input[0x0f]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x40;
-    if (input[0x10]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x80;
+    //if (input[0x0c]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x01;
+    if (input[0x0c]) memory_ram[SWCHB] = (memory_ram[SWCHB] & ~0x01) & 0xFF;
+    //if (input[0x0d]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x02;
+    if (input[0x0d]) memory_ram[SWCHB] = (memory_ram[SWCHB] & ~0x02) & 0xFF;
+    //if (input[0x0e]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x08;
+    if (input[0x0e]) memory_ram[SWCHB] = (memory_ram[SWCHB] & ~0x08) & 0xFF;
+    //if (input[0x0f]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x40;
+    if (input[0x0f]) memory_ram[SWCHB] = (memory_ram[SWCHB] & ~0x40) & 0xFF;
+    //if (input[0x10]) memory_ram[SWCHB] = memory_ram[SWCHB] & ~0x80;
+    if (input[0x10]) memory_ram[SWCHB] = (memory_ram[SWCHB] & ~0x80) & 0xFF;
   }
 
   /*When in 1 button mode, only the legacy 2600 button signal is active.  The others stay off.
@@ -220,8 +235,10 @@ function riot_SetDRB(data) {
 
   // Make changes to joystick buttons immediately. This was added to make 
   // The high score cart work properly with Asteroids
-  memory_ram[SWCHB] &= (~0x14);
-  memory_ram[SWCHB] |= (((~memory_ram[CTLSWB]) | riot_drb) & 0x14);
+  //memory_ram[SWCHB] &= (~0x14);
+  memory_ram[SWCHB] = (memory_ram[SWCHB] & (~0x14)) & 0xFF;
+  //memory_ram[SWCHB] |= (((~memory_ram[CTLSWB]) | riot_drb) & 0x14);
+  memory_ram[SWCHB] = (memory_ram[SWCHB] | (((~memory_ram[CTLSWB]) | riot_drb) & 0x14)) & 0xFF;
 }
 
 // ----------------------------------------------------------------------------
@@ -270,7 +287,8 @@ function riot_UpdateTimer(cycles) {
   else {
     if (riot_elapsed) {
       if (riot_currentTime >= -255) {
-        memory_Write(INTIM, riot_currentTime);
+        //memory_Write(INTIM, riot_currentTime);
+        memory_Write(INTIM, (riot_currentTime & 0xFF));
       }
       else {
         memory_Write(INTIM, 0);
