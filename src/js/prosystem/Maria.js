@@ -69,7 +69,7 @@ var maria_wmode = 0;
 // StoreCell
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte data) {
-function maria_StoreCell(data) {
+function maria_StoreCell1(data) {
   if (maria_horizontal < MARIA_LINERAM_SIZE) {
     if (data) {
       maria_lineRAM[maria_horizontal] = maria_palette | data;
@@ -89,7 +89,7 @@ function maria_StoreCell(data) {
 // StoreCell
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte high, byte low) {  
-function maria_StoreCell(high, low) {
+function maria_StoreCell2(high, low) {
   if (maria_horizontal < MARIA_LINERAM_SIZE) {
     if (low || high) {
       maria_lineRAM[maria_horizontal] = maria_palette & 16 | high | low;
@@ -158,8 +158,8 @@ function maria_StoreGraphic() {
       maria_horizontal += 2;
     }
     else {
-      maria_StoreCell((data & 12), (data & 192) >>> 6);
-      maria_StoreCell((data & 48) >>> 4, (data & 3) << 2);
+      maria_StoreCell2((data & 12), (data & 192) >>> 6);
+      maria_StoreCell2((data & 48) >>> 4, (data & 3) << 2);
     }
   }
   else {
@@ -173,10 +173,10 @@ function maria_StoreGraphic() {
       maria_horizontal += 4;
     }
     else {
-      maria_StoreCell((data & 192) >>> 6);
-      maria_StoreCell((data & 48) >>> 4);
-      maria_StoreCell((data & 12) >>> 2);
-      maria_StoreCell(data & 3);
+      maria_StoreCell1((data & 192) >>> 6);
+      maria_StoreCell1((data & 48) >>> 4);
+      maria_StoreCell1((data & 12) >>> 2);
+      maria_StoreCell1(data & 3);
     }
   }
   //maria_pp.w++;
