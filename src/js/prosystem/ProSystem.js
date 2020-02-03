@@ -176,7 +176,6 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       (prosystem_cycles %= CYCLES_PER_SCANLINE) >> 0;
       prosystem_extra_cycles = 0;
     }
-
     else {
       prosystem_extra_cycles = ((prosystem_cycles % CYCLES_PER_SCANLINE) >> 0);
       dbg_saved_cycles += prosystem_extra_cycles;
@@ -205,7 +204,8 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
       if (memory_ram[WSYNC] && wsync) {
         dbg_wsync_count++; // debug
-        memory_ram[WSYNC] = false;
+        //memory_ram[WSYNC] = false;
+        memory_ram[WSYNC] = 0;
         wsync_scanline = true;
         break;
       }
@@ -238,7 +238,8 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
       if (memory_ram[WSYNC] && wsync) {
         dbg_wsync_count++; // debug
-        memory_ram[WSYNC] = false;
+        //memory_ram[WSYNC] = false;
+        memory_ram[WSYNC] = 0;
         wsync_scanline = true;
         break;
       }

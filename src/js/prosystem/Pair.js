@@ -45,7 +45,6 @@ typedef Pair pair;
 #endif
 */
 
-// TODO: Handle overflow (plus plus, plus equal, minus equal, set)
 Pair = function () {
     this._w = 0;
     this.wPlusPlus = function () {
@@ -81,7 +80,7 @@ Pair = function () {
         return bl;
     }
     this.setBL = function (val) {
-        this._w = ((this._w & 0xFF00) | (val & 0x00FF));
+        this.setW(((this._w & 0xFF00) | (val & 0x00FF)));
     }
     this.blPlusEqual = function (val) {
         this.setBL(this.getBL() + val);
@@ -90,7 +89,7 @@ Pair = function () {
         return (this._w & 0xFF00) >>> 8;
     }
     this.setBH = function (val) {
-        this._w = ((this._w & 0x00FF) | ((val << 8) & 0xFF00));
+        this.setW(((this._w & 0x00FF) | ((val << 8) & 0xFF00)));
     }
     this.bhPlusEqual = function (val) {
         this.setBH(this.getBH() + val);

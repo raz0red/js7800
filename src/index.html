@@ -25,9 +25,12 @@
 </head>
 
 <body>
+  <canvas style="border: 1px solid black" id="screen" width="320" height="300"></canvas>
   <script>
     var HALT = false;
 
+    js_atari_init();
+    
     function dropHandler(ev) {
       ev.preventDefault();
       var file = null;
@@ -54,24 +57,7 @@
             for (var i = 0; i < reader.result.length; i++) {
               cart[i] = reader.result.charCodeAt(i);
             }
-            cartridge_Load(cart, cart.length);
-            prosystem_Reset();
-            var input = new Array(1024);
-            var start = Date.now();
-            var fc = 0;
-            for (var i = 60 * 60; i > 0 && !HALT; i--) {
-              prosystem_ExecuteFrame(input);
-              fc++;
-              if ((fc % 1000) == 0) {
-                var elapsed = Date.now() - start;
-                console.log("fc:%d %f %f", fc,
-                  (elapsed / 1000.0),
-                  (1000.0 / (elapsed / fc)));
-                start = Date.now();
-                fc = 0;
-              }
-              //sally_debug_count = 5;
-            }
+            js_atari_start_emulation(cart);
           }
         } else {
           //$("#status").text("File too large.");

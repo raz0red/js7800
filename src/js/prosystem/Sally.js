@@ -1248,7 +1248,7 @@ function sally_ExecuteInstruction() {
   //goto *a_jump_table[sally_opcode];
 
   if (sally_cycles === undefined) {
-    console.error("Unknown opcode: %d", opcodeMem);
+    console.error("Unknown opcode, mem location: %d, %d", opcodeMem, sally_opcode.toString(16));
   } else if (sally_debug_count-- > 0) {
     console.log("Opcode:%s %d %d %d %d", sally_opcode.toString(16),
       sally_cycles, prosystem_cycles, CYCLES_PER_SCANLINE, maria_scanline);

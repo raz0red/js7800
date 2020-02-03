@@ -70,7 +70,6 @@ var maria_wmode = 0;
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte data) {
 function maria_StoreCell(data) {
-  data &= 0xFF;
   if (maria_horizontal < MARIA_LINERAM_SIZE) {
     if (data) {
       maria_lineRAM[maria_horizontal] = maria_palette | data;
@@ -91,8 +90,6 @@ function maria_StoreCell(data) {
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte high, byte low) {  
 function maria_StoreCell(high, low) {
-  high &= 0xFF;
-  low &= 0xFF;
   if (maria_horizontal < MARIA_LINERAM_SIZE) {
     if (low || high) {
       maria_lineRAM[maria_horizontal] = maria_palette & 16 | high | low;
@@ -136,10 +133,12 @@ function maria_IsHolyDMA() {
 function maria_GetColor(data) {
   data &= 0xFF;
   if (data & 3) {
-    return atari_pal8[memory_ram[BACKGRND + data]];
+    //return atari_pal8[memory_ram[BACKGRND + data]];
+    return memory_ram[BACKGRND + data];
   }
   else {
-    return atari_pal8[memory_ram[BACKGRND]];
+    // return atari_pal8[memory_ram[BACKGRND]];
+    return memory_ram[BACKGRND];
   }
 }
 
@@ -216,7 +215,7 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
   else if (rmode == 2) {
     // 320B/D
     //int pixel = 0;
-    var pixel = 0;
+    var pixel = offset;
     //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
     for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 16) | ((maria_lineRAM[index + 0] & 8) >>> 3) | ((maria_lineRAM[index + 0] & 2)));
@@ -232,7 +231,7 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
   else if (rmode == 3) {
     // 320A/C
     //int pixel = 0;
-    var pixel = 0;
+    var pixel = offset;
     //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
     for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 30));
@@ -380,8 +379,8 @@ function maria_RenderScanline() {
   //
   if (((memory_ram[CTRL] & 96) != 64) &&
     maria_scanline >= maria_visibleArea.top &&
-    maria_scanline <= maria_visibleArea.bottom &&
-    (!lightgun_enabled || wii_lightgun_flash)) {
+    maria_scanline <= maria_visibleArea.bottom /*&&
+    (!lightgun_enabled || wii_lightgun_flash)*/) {
     //byte bgcolor = maria_GetColor(0);
     var bgcolor = maria_GetColor(0);
     //byte * bgstart = maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength());
@@ -433,7 +432,7 @@ function maria_RenderScanline() {
       if (maria_offset < 0) {
         maria_cycles += 10; // Maria cycles (Last line of zone) ( /*20*/ 
         //maria_dpp.w += 3;
-        maria_dpp.wPlusPlus(3);
+        maria_dpp.wPlusEqual(3);
         //maria_h08 = memory_ram[maria_dpp.w] & 32;
         maria_h08 = memory_ram[maria_dpp.getW()] & 32;
         //maria_h16 = memory_ram[maria_dpp.w] & 64;
@@ -459,7 +458,7 @@ function maria_RenderScanline() {
 // ----------------------------------------------------------------------------
 //void maria_Clear() {
 function maria_Clear() {
-  if (!maria_surface) maria_surface = js_get_blit_addr(); // TODO JS: What to do here
+  if (!maria_surface) maria_surface = js_atari_get_blit_addr();
   //for (int index = 0; index < MARIA_SURFACE_SIZE; index++) {
   for (var index = 0; index < MARIA_SURFACE_SIZE; index++) {
     maria_surface[index] = 0;

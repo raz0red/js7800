@@ -99,7 +99,7 @@ function memory_Read(address) {
   if (data < 0) {
     console.error("Less than zero memory read: %d %d", address, data);
   }
-  return data;
+  return data & 0xFF; // TODO: is this necessary?
 }
 
 // ----------------------------------------------------------------------------
@@ -107,6 +107,7 @@ function memory_Read(address) {
 // ----------------------------------------------------------------------------
 //void memory_Write(word address, byte data) {
 function memory_Write(address, data) {
+  data &= 0xFF; // TODO: Is this necessary
   if (data < 0) {
     console.error("Less than zero memory write: %d %d", address, data);
   }
@@ -137,7 +138,8 @@ function memory_Write(address, data) {
     switch (address) {
       case WSYNC:
         if (!(cartridge_flags & 128)) {
-          memory_ram[WSYNC] = true;
+          //memory_ram[WSYNC] = true;
+          memory_ram[WSYNC] = 1;
         }
         break;
       case INPTCTRL:

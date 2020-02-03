@@ -406,7 +406,7 @@ function cartridge_Load(data, size) {
   console.log("cartridge_size: %d", cartridge_size);
 
   //cartridge_buffer = new byte[cartridge_size];
-  cartridge_buffer = new Array();
+  cartridge_buffer = new Array(cartridge_size);
   var hashstr = "";
   //for (int index = 0; index < cartridge_size; index++) {
   for (var index = 0; index < cartridge_size; index++) {
