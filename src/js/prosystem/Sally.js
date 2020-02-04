@@ -666,7 +666,6 @@ function sally_DEC() {
   var data = memory_Read(sally_address.getW());
   //memory_Write(sally_address.w, --data);
   data = ((data - 1) & 0xFF);
-  //memory_Write(sally_address.getW(), --data);
   memory_Write(sally_address.getW(), data);
   sally_Flags(data);
 }
@@ -1952,8 +1951,8 @@ function sally_ExecuteInstruction() {
       sally_Immediate();
       sally_SBC();
       return sally_cycles;
-    //l_0xec:
-    case 0xec:
+    //l_0xea:
+    case 0xea:
       sally_NOP();
       return sally_cycles;
     //l_0xec:

@@ -164,7 +164,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       memory_ram[MSTAT] = 128;
     }
 
-    // Was a WSYNC performed withing the current scanline?
+    // Was a WSYNC performed within the current scanline?
     //bool wsync_scanline = false;
     var wsync_scanline = false;
 

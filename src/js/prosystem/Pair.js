@@ -70,7 +70,7 @@ Pair = function () {
         return this._w;
     }
     this.getBL = function () {
-        return this._w & 0x00FF;
+        return this._w & 0xFF;
     }
     this.getBLSigned = function () {
         var bl = this.getBL();
@@ -80,7 +80,7 @@ Pair = function () {
         return bl;
     }
     this.setBL = function (val) {
-        this.setW(((this._w & 0xFF00) | (val & 0x00FF)));
+        this.setW(((this._w & 0xFF00) | (val & 0xFF)));
     }
     this.blPlusEqual = function (val) {
         this.setBL(this.getBL() + val);
@@ -89,7 +89,7 @@ Pair = function () {
         return (this._w & 0xFF00) >>> 8;
     }
     this.setBH = function (val) {
-        this.setW(((this._w & 0x00FF) | ((val << 8) & 0xFF00)));
+        this.setW(((this._w & 0xFF) | ((val << 8) & 0xFF00)));
     }
     this.bhPlusEqual = function (val) {
         this.setBH(this.getBH() + val);

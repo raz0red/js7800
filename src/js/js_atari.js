@@ -64,7 +64,13 @@ function start_emu(cart) {
       fc++;      
       if ((fc % 240) == 0) {
         var elapsed = Date.now() - start;
-        console.log("fps:%f", (1000.0 / (elapsed / fc)));
+        console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d", 
+          (1000.0 / (elapsed / fc)).toFixed(2),     
+          (riot_timer_count % 1000),     
+          dbg_wsync ? 1 : 0,
+          dbg_wsync_count,
+          dbg_cycle_stealing ? 1 : 0,
+          dbg_maria_cycles, dbg_p6502_cycles, dbg_saved_cycles);
         start = Date.now();
         fc = 0;
       }
