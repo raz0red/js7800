@@ -288,7 +288,7 @@ function riot_UpdateTimer(cycles) {
     if (riot_elapsed) {
       if (riot_currentTime >= -255) {
         //memory_Write(INTIM, riot_currentTime);
-        memory_Write(INTIM, riot_currentTime);
+        memory_Write(INTIM, riot_currentTime & 0xFF);
       }
       else {
         memory_Write(INTIM, 0);

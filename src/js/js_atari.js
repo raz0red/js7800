@@ -40,8 +40,9 @@ var atari_pal8 = new Array(256);
 
 var start_cart = null;
 
-function start_emu() {
+function start_emu() {  
   cartridge_Load(start_cart, start_cart.length);
+  js_atari_init();
   js_atari_init_palette8();
   prosystem_Reset();
   var input = new Array(1024);
@@ -124,9 +125,9 @@ function js_atari_init() {
 
   // set alpha to opaque 
   for (var i = 3; i < atari_image_data.length - 3; i += 4) {
-    //atari_image_data[i - 3] = 0x00;
-    //atari_image_data[i - 2] = 0x00;
-    //atari_image_data[i - 1] = 0x00;
+    atari_image_data[i - 3] = 0x11;
+    atari_image_data[i - 2] = 0x11;
+    atari_image_data[i - 1] = 0x11;
     atari_image_data[i] = 0xFF;
   }
   atari_ctx.putImageData(atari_image, 0, 0);

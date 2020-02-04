@@ -82,7 +82,8 @@ function maria_StoreCell1(data) {
       }
     }
   }
-  maria_horizontal++;
+  //maria_horizontal++;
+  maria_horizontal = (maria_horizontal + 1) & 0xFF;
 }
 
 // ----------------------------------------------------------------------------
@@ -102,7 +103,8 @@ function maria_StoreCell2(high, low) {
       }
     }
   }
-  maria_horizontal++;
+  //maria_horizontal++;
+  maria_horizontal = (maria_horizontal + 1) & 0xFF;
 }
 
 // ----------------------------------------------------------------------------
@@ -155,7 +157,8 @@ function maria_StoreGraphic() {
       //       maria_StoreCell(0, 0);
       //       maria_StoreCell(0, 0);
       // #endif      
-      maria_horizontal += 2;
+      //maria_horizontal += 2;
+      maria_horizontal = (maria_horizontal + 2) & 0xFF;
     }
     else {
       maria_StoreCell2((data & 12), (data & 192) >>> 6);
@@ -170,7 +173,8 @@ function maria_StoreGraphic() {
       //       maria_StoreCell(0);
       //       maria_StoreCell(0);
       // #endif      
-      maria_horizontal += 4;
+      //maria_horizontal += 4;
+      maria_horizontal = (maria_horizontal + 4) & 0xFF;
     }
     else {
       maria_StoreCell1((data & 192) >>> 6);

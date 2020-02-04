@@ -99,7 +99,7 @@ function memory_Read(address) {
   if (data < 0) {
     console.error("Less than zero memory read: %d %d", address, data);
   }
-  return data & 0xFF; // TODO: is this necessary?
+  return data;
 }
 
 // ----------------------------------------------------------------------------
@@ -107,7 +107,6 @@ function memory_Read(address) {
 // ----------------------------------------------------------------------------
 //void memory_Write(word address, byte data) {
 function memory_Write(address, data) {
-  data &= 0xFF; // TODO: Is this necessary
   if (data < 0) {
     console.error("Less than zero memory write: %d %d", address, data);
   }

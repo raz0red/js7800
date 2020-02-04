@@ -705,7 +705,8 @@ function sally_INC() {
   //byte data = memory_Read(sally_address.w);
   var data = memory_Read(sally_address.getW());
   //memory_Write(sally_address.w, ++data);
-  memory_Write(sally_address.getW(), ++data);
+  data = (data + 1) & 0xFF;
+  memory_Write(sally_address.getW(), data);
   sally_Flags(data);
 }
 
