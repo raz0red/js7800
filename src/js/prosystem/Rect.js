@@ -27,16 +27,19 @@ Rect = function (left, top, right, bottom) {
   this.top = top;
   this.right = right;
   this.bottom = bottom;
+  this.length = (this.right - this.left) + 1;
+  this.height = (this.bottom - this.top) + 1;
+  this.area = this.length * this.height;
 
   this.GetArea = function () {
-    return GetLength() * GetHeight();
+    return this.area;
   }
 
   this.GetLength = function () {
-    return (this.right - this.left) + 1;
+    return this.length;
   }
 
   this.GetHeight = function () {
-    return (this.bottom - this.top) + 1;
+    return this.height;
   }
 };

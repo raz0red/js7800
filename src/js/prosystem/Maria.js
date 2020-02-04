@@ -194,10 +194,10 @@ function maria_StoreGraphic() {
 function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
   //byte rmode = memory_ram[CTRL] & 3;
   var rmode = memory_ram[CTRL] & 3;
+  var pixel = offset;
   if (rmode == 0) {
     // 160A/B
-    //int pixel = 0;
-    var pixel = offset;
+    //int pixel = 0;    
     //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
     for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
       //word color;
@@ -219,7 +219,6 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
   else if (rmode == 2) {
     // 320B/D
     //int pixel = 0;
-    var pixel = offset;
     //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
     for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 16) | ((maria_lineRAM[index + 0] & 8) >>> 3) | ((maria_lineRAM[index + 0] & 2)));
@@ -235,7 +234,6 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
   else if (rmode == 3) {
     // 320A/C
     //int pixel = 0;
-    var pixel = offset;
     //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
     for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 30));

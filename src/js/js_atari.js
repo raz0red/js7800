@@ -31,37 +31,35 @@ var atari_image;
 var atari_image_data;
 /** The palette */
 var atari_pal8 = new Array(256);
+/** The keyboard data */
+var atari_keyboard_data = new Array(19);
+/** The refresh callback id */
+var atari_refresh_callback_id = null;
 
-
-//
-// TODO: Rework all of this startup and running code, just temporary
-//       for initial testing...
-//
-
-var start_cart = null;
-
-function start_emu() {  
-  cartridge_Load(start_cart, start_cart.length);
+function start_emu(cart) {  
+  js_reset_keyboard_data();
+  cartridge_Load(cart, cart.length);
   js_atari_init();
   js_atari_init_palette8();
   prosystem_Reset();
-  var input = new Array(1024);
   var start = Date.now();
   var fc = 0;
 
   timer_Reset();
   var f = function () {    
-    //wii_atari_update_keys(keyboard_data);
     if (prosystem_active && !prosystem_paused) {
 
-      prosystem_ExecuteFrame(input);
+      js_atari_update_keys(atari_keyboard_data);
+      prosystem_ExecuteFrame(atari_keyboard_data);
       
       //VIDEO_WaitVSync();
       js_atari_flip_image();
+      //sound_Store();
       
       timer_IsTime();
       var wait = ((timer_nextTime - timer_currentTime) / 1000)>>0;
-      setTimeout(function () { f(); }, (wait > 0 ? wait : 0));
+      atari_refresh_callback_id = 
+        setTimeout(function () { f(); }, (wait > 0 ? wait : 0));
 
       fc++;      
       if ((fc % 240) == 0) {
@@ -72,17 +70,17 @@ function start_emu() {
       }
     }
   };
-  setTimeout(f, 15);
+  atari_refresh_callback_id = setTimeout(f, 15);
 }
 
 function js_atari_start_emulation(cart) {  
-  start_cart = cart;
+  if (atari_refresh_callback_id) {
+    clearTimeout(atari_refresh_callback_id);
+  }    
   if (prosystem_active) {
     prosystem_Close();
-    setTimeout(function () { start_emu(); }, 100);
-  }  else {
-    start_emu();
   }
+  start_emu(cart);
 }
 
 function js_atari_flip_image() {
@@ -151,4 +149,49 @@ function js_atari_init_palette8() {
 
 function js_atari_get_blit_addr() {
   return blit_surface;
+}
+
+function js_atari_update_keys(keyboard_data) {
+  // | 12       | Console      | Reset
+  keyboard_data[12] = 0;
+  // | 13       | Console      | Select
+  keyboard_data[13] = 0;
+  // | 14       | Console      | Pause
+  keyboard_data[14] = 0;
+
+  js_atari_update_joystick(0, keyboard_data);
+  js_atari_update_joystick(1, keyboard_data);
+}
+
+function js_atari_update_joystick(joyIndex, keyboard_data) {
+  var offset = (joyIndex == 0 ? 0 : 6);
+
+  // | 00 06     | Joystick 1 2 | Right
+  keyboard_data[0 + offset] = 0;
+  // | 01 07     | Joystick 1 2 | Left
+  keyboard_data[1 + offset] = 0;
+  // | 02 08     | Joystick 1 2 | Down
+  keyboard_data[2 + offset] = 0;
+  // | 03 09     | Joystick 1 2 | Up
+  keyboard_data[3 + offset] = 0;
+  // | 04 10     | Joystick 1 2 | Button 1
+  keyboard_data[5 + offset] = 0;
+  // | 05 11     | Joystick 1 2 | Button 2
+  keyboard_data[4 + offset] = 0;
+  // | 15       | Console      | Left Difficulty
+  //keyboard_data[15] = 0;
+  // | 16       | Console      | Right Difficulty
+  //keyboard_data[16] = 0; 
+}
+
+function js_reset_keyboard_data() {
+  for (var idx = 0; idx < atari_keyboard_data.length; idx++) {
+    atari_keyboard_data[idx] = 0;
+  }
+
+  // Left difficulty switch defaults to off
+  atari_keyboard_data[15] = cartridge_left_switch;
+
+  // Right difficulty switch defaults to on
+  atari_keyboard_data[16] = cartridge_right_switch;
 }
