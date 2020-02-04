@@ -157,6 +157,13 @@ function js_atari_get_blit_addr() {
   return blit_surface;
 }
 
+var leftHeld = false;
+var rightHeld = false;
+var upHeld = false;
+var downHeld = false;
+var aHeld = false;
+var bHeld = false;
+
 function js_atari_update_keys(keyboard_data) {
   // | 12       | Console      | Reset
   keyboard_data[12] = 0;
@@ -171,19 +178,19 @@ function js_atari_update_keys(keyboard_data) {
 
 function js_atari_update_joystick(joyIndex, keyboard_data) {
   var offset = (joyIndex == 0 ? 0 : 6);
-
+  
   // | 00 06     | Joystick 1 2 | Right
-  keyboard_data[0 + offset] = 0;
+  keyboard_data[0 + offset] = !joyIndex ? rightHeld : 0;
   // | 01 07     | Joystick 1 2 | Left
-  keyboard_data[1 + offset] = 0;
+  keyboard_data[1 + offset] = !joyIndex ? leftHeld : 0;
   // | 02 08     | Joystick 1 2 | Down
-  keyboard_data[2 + offset] = 0;
+  keyboard_data[2 + offset] = !joyIndex ? downHeld : 0;
   // | 03 09     | Joystick 1 2 | Up
-  keyboard_data[3 + offset] = 0;
+  keyboard_data[3 + offset] = !joyIndex ? upHeld : 0;
   // | 04 10     | Joystick 1 2 | Button 1
-  keyboard_data[5 + offset] = 0;
+  keyboard_data[4 + offset] = !joyIndex ? aHeld : 0;
   // | 05 11     | Joystick 1 2 | Button 2
-  keyboard_data[4 + offset] = 0;
+  keyboard_data[5 + offset] = !joyIndex ? bHeld : 0;
   // | 15       | Console      | Left Difficulty
   //keyboard_data[15] = 0;
   // | 16       | Console      | Right Difficulty
@@ -200,4 +207,38 @@ function js_reset_keyboard_data() {
 
   // Right difficulty switch defaults to on
   atari_keyboard_data[16] = cartridge_right_switch;
+}
+
+function js_atari_key_event(event, down) {
+  var handled = true;
+  switch (event.keyCode) {
+    case 37:
+    case 76:
+      leftHeld = down;
+      break;
+    case 38:
+    case 80:
+      upHeld = down;
+      break;
+    case 39:
+    case 222:
+      rightHeld = down;
+      break;
+    case 40:
+    case 59:
+    case 186:
+      downHeld = down;
+      break;
+    case 90:
+      aHeld = down;
+      break;
+    case 88:
+      bHeld = down;
+      break;
+    default:
+      handled = false;
+  }
+  if (handled && event.preventDefault) {
+    event.preventDefault();
+  }
 }
