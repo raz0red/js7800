@@ -105,7 +105,7 @@ var pokey_size = (POKEY_BUFFER_SIZE - 512); // 524
 //static uint pokey_frequency = 1787520;
 var pokey_frequency = 1787520;
 //static uint pokey_sampleRate = 31440;
-var pokey_sampleRate = 31440;
+var pokey_sampleRate = 44100;
 //static uint pokey_soundCntr = 0;
 var pokey_soundCntr = 0;
 //static byte pokey_audf[4];
@@ -196,7 +196,8 @@ function rand_init(rng, size, left, right, add) {
 
 //void pokey_setSampleRate(uint rate) {
 function pokey_setSampleRate(rate) {
-  pokey_sampleRate = rate;
+  console.log('set pokey sample rate: %d', rate);
+  //pokey_sampleRate = rate;
 }
 
 // ----------------------------------------------------------------------------

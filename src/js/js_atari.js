@@ -307,11 +307,11 @@ function js_atari_init_audio() {
     atari_audio_ctx = window.AudioContext ?
       new window.AudioContext({ sampleRate: SAMPLE_RATE }) :
       new window.webkitAudioContext();
-    atari_audio_node = atari_audio_ctx.createScriptProcessor(1024, 0, 1);
+    atari_audio_node = atari_audio_ctx.createScriptProcessor(512, 0, 1);
     atari_audio_node.onaudioprocess = function (e) {
       var dst = e.outputBuffer.getChannelData(0);
       var done = 0;
-      var len = 1024;
+      var len = 512;
       while ((mixtail != mixhead) && (done < len)) {
         dst[done++] = atari_mixbuffer[mixtail++];
         if (mixtail == SOUNDBUFSIZE)
