@@ -4,6 +4,8 @@ var NTSC_ATARI_BLIT_TOP_Y = 2;
 var NTSC_ATARI_HEIGHT = 240;
 var PAL_ATARI_BLIT_TOP_Y = 26;
 var PAL_ATARI_HEIGHT = 240;
+var SAMPLE_RATE = 44100;
+var SOUNDBUFSIZE = 8192;
 
 var blit_surface = new Array(ATARI_WIDTH * ATARI_BLIT_HEIGHT);
 
@@ -35,8 +37,12 @@ var atari_pal8 = new Array(256);
 var atari_keyboard_data = new Array(19);
 /** The refresh callback id */
 var atari_refresh_callback_id = null;
+/** The audio context */
+var atari_audio_ctx = null;
+/** The audio node */
+var atari_audio_node = null;
 
-function start_emu(cart) {  
+function start_emu(cart) {
   js_reset_keyboard_data();
   cartridge_Load(cart, cart.length);
   js_atari_init();
@@ -46,27 +52,27 @@ function start_emu(cart) {
   var fc = 0;
 
   timer_Reset();
-  var f = function () {    
+  var f = function () {
     if (prosystem_active && !prosystem_paused) {
 
       js_atari_update_keys(atari_keyboard_data);
       prosystem_ExecuteFrame(atari_keyboard_data);
-      
+
       //VIDEO_WaitVSync();
       js_atari_flip_image();
-      //sound_Store();
-      
+      sound_Store();
+
       timer_IsTime();
-      var wait = ((timer_nextTime - timer_currentTime) / 1000)>>0;
-      atari_refresh_callback_id = 
+      var wait = ((timer_nextTime - timer_currentTime) / 1000) >> 0;
+      atari_refresh_callback_id =
         setTimeout(function () { f(); }, (wait > 0 ? wait : 0));
 
-      fc++;      
+      fc++;
       if ((fc % 240) == 0) {
         var elapsed = Date.now() - start;
-        console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d", 
-          (1000.0 / (elapsed / fc)).toFixed(2),     
-          (riot_timer_count % 1000),     
+        console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
+          (1000.0 / (elapsed / fc)).toFixed(2),
+          (riot_timer_count % 1000),
           dbg_wsync ? 1 : 0,
           dbg_wsync_count,
           dbg_cycle_stealing ? 1 : 0,
@@ -79,10 +85,10 @@ function start_emu(cart) {
   atari_refresh_callback_id = setTimeout(f, 15);
 }
 
-function js_atari_start_emulation(cart) {  
+function js_atari_start_emulation(cart) {
   if (atari_refresh_callback_id) {
     clearTimeout(atari_refresh_callback_id);
-  }    
+  }
   if (prosystem_active) {
     prosystem_Close();
   }
@@ -94,7 +100,7 @@ function js_atari_flip_image() {
     (cartridge_region == REGION_PAL ? PAL_ATARI_HEIGHT : NTSC_ATARI_HEIGHT);
   var atari_offsety =
     (cartridge_region == REGION_PAL ? PAL_ATARI_BLIT_TOP_Y
-                                    : NTSC_ATARI_BLIT_TOP_Y);
+      : NTSC_ATARI_BLIT_TOP_Y);
 
   var offsetx = 0;
   var offsety = ((ATARI_BLIT_HEIGHT - atari_height) / 2) >> 0;
@@ -106,21 +112,24 @@ function js_atari_flip_image() {
   for (y = 0; y < atari_height; y++) {
     start = startoffset + (y * ATARI_WIDTH);
     src = 0;
-    dst = (((y + offsety) * ATARI_WIDTH)*4) + (offsetx*4);
+    dst = (((y + offsety) * ATARI_WIDTH) * 4) + (offsetx * 4);
     for (x = 0; x < ATARI_WIDTH; x++) {
-        var cidx = blitpixels[start + src];
-        var color = atari_pal8[cidx];     
-        backpixels[dst++] = color[0];
-        backpixels[dst++] = color[1];
-        backpixels[dst++] = color[2];
-        dst++;
-        src++;
+      var cidx = blitpixels[start + src];
+      var color = atari_pal8[cidx];
+      backpixels[dst++] = color[0];
+      backpixels[dst++] = color[1];
+      backpixels[dst++] = color[2];
+      dst++;
+      src++;
     }
   }
   atari_ctx.putImageData(atari_image, 0, 0);
 }
 
 function js_atari_init() {
+  // Audio
+  js_atari_init_audio();
+
   // Graphics
   atari_canvas = document.getElementById('screen');
   atari_ctx = atari_canvas.getContext('2d');
@@ -181,7 +190,7 @@ function js_atari_update_keys(keyboard_data) {
   // | 15       | Console      | Left Difficulty
   keyboard_data[15] = leftDiffSet;
   // | 16       | Console      | Right Difficulty
-  keyboard_data[16] = rightDiffSet;   
+  keyboard_data[16] = rightDiffSet;
 
   js_atari_update_joystick(0, keyboard_data);
   js_atari_update_joystick(1, keyboard_data);
@@ -189,7 +198,7 @@ function js_atari_update_keys(keyboard_data) {
 
 function js_atari_update_joystick(joyIndex, keyboard_data) {
   var offset = (joyIndex == 0 ? 0 : 6);
-  
+
   // | 00 06     | Joystick 1 2 | Right
   keyboard_data[0 + offset] = !joyIndex ? rightHeld && !(leftHeld && leftLast) : 0;
   // | 01 07     | Joystick 1 2 | Left
@@ -197,7 +206,7 @@ function js_atari_update_joystick(joyIndex, keyboard_data) {
   // | 02 08     | Joystick 1 2 | Down
   keyboard_data[2 + offset] = !joyIndex ? downHeld && !(upHeld && upLast) : 0;
   // | 03 09     | Joystick 1 2 | Up
-  keyboard_data[3 + offset] = !joyIndex ? upHeld && !(downHeld && !upLast)  : 0;
+  keyboard_data[3 + offset] = !joyIndex ? upHeld && !(downHeld && !upLast) : 0;
   // | 04 10     | Joystick 1 2 | Button 1
   keyboard_data[4 + offset] = !joyIndex ? aHeld : 0;
   // | 05 11     | Joystick 1 2 | Button 2
@@ -222,7 +231,7 @@ function js_reset_keyboard_data() {
 function js_atari_key_event(event, down) {
 
   var code = event.keyCode;
-  
+
   handled = true;
   switch (code) {
     case 0x25:
@@ -234,7 +243,7 @@ function js_atari_key_event(event, down) {
       if (down) upLast = true;
       break;
     case 0x27:
-      rightHeld = down; 
+      rightHeld = down;
       if (down) leftLast = false;
       break;
     case 0x28:
@@ -253,7 +262,7 @@ function js_atari_key_event(event, down) {
     case 0x72:
       selectHeld = down;
       break;
-    case 0x73: 
+    case 0x73:
       pauseHeld = down;
       break;
     case 0x74:
@@ -272,8 +281,51 @@ function js_atari_key_event(event, down) {
     default:
       handled = false;
   }
-  
+
   if (handled && event.preventDefault) {
     event.preventDefault();
   }
 }
+
+
+var atari_mixbuffer = new Array(SOUNDBUFSIZE);
+var mixhead = 0;
+var mixtail = 0;
+
+function js_storeSound(sample, length) {
+  for (var i = 0; i < length; i++) {
+    var v = sample[i] & 0xFF;
+    atari_mixbuffer[mixhead++] = v / 255.0; /* ((v >= 0) ? v-128 : v+128) / 128;*/
+    if (mixhead == SOUNDBUFSIZE)
+      mixhead = 0;
+  }
+}
+
+function js_atari_init_audio() {
+  console.log('init audio');
+  if (!atari_audio_ctx && (window.AudioContext || window.webkitAudioContext)) {
+    atari_audio_ctx = window.AudioContext ?
+      new window.AudioContext({ sampleRate: SAMPLE_RATE }) :
+      new window.webkitAudioContext();
+    atari_audio_node = atari_audio_ctx.createScriptProcessor(1024, 0, 1);
+    atari_audio_node.onaudioprocess = function (e) {
+      var dst = e.outputBuffer.getChannelData(0);
+      var done = 0;
+      var len = 1024;
+      while ((mixtail != mixhead) && (done < len)) {
+        dst[done++] = atari_mixbuffer[mixtail++];
+        if (mixtail == SOUNDBUFSIZE)
+          mixtail = 0;
+      }
+      while (done < len) {
+        dst[done++] = 0;
+      }
+    }
+    atari_audio_node.connect(atari_audio_ctx.destination);
+    var resumeFunc =
+      function () { if (atari_audio_ctx.state !== 'running') atari_audio_ctx.resume(); }
+    document.documentElement.addEventListener("keydown", resumeFunc);
+    document.documentElement.addEventListener("click", resumeFunc);
+  }
+}
+

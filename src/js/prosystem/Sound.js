@@ -51,8 +51,8 @@ var MAX_BUFFER_SIZE = 8192;
 var sound_format = {
   wFormatTag: 0,
   nChannels: 1,
-  nSamplesPerSec: 48000,
-  nAvgBytesPerSec: 48000,
+  nSamplesPerSec: SAMPLE_RATE,
+  nAvgBytesPerSec: SAMPLE_RATE,
   nBlockAlign: 1,
   wBitsPerSample: 8,
   cbSize: 0
@@ -60,14 +60,6 @@ var sound_format = {
 
 //static bool sound_muted = false;
 var sound_muted = false;
-
-// static void wii_storeSound( byte* sample, int length )
-// {
-//   PlaySound( (u8*)sample, length );        
-// }
-function js_storeSound(sample, length) {
-  // TODO JS:
-}
 
 // ----------------------------------------------------------------------------
 // GetSampleLength
@@ -158,7 +150,7 @@ function sound_Store() {
   }
 
   //uint length = 48000 / prosystem_frequency; /* sound_GetSampleLength(sound_format.nSamplesPerSec, prosystem_frame, prosystem_frequency); */ /* 48000 / prosystem_frequency */
-  var length = (48000 / prosystem_frequency) >> 0;
+  var length = (SAMPLE_RATE / prosystem_frequency) >> 0;
   sound_Resample(tia_buffer, sample, length);
   tia_Clear(); // WII
 
