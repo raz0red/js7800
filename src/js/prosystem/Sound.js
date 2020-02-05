@@ -145,21 +145,28 @@ function sound_Store() {
   //memset(sample, 0, MAX_BUFFER_SIZE);
 
   // TODO JS: This seems unnecessary
+  /*
   for (var i = 0; i < MAX_BUFFER_SIZE; i++) {
     sample[i] = 0;
   }
+  */
 
-  //uint length = 48000 / prosystem_frequency; /* sound_GetSampleLength(sound_format.nSamplesPerSec, prosystem_frame, prosystem_frequency); */ /* 48000 / prosystem_frequency */
+  //uint length = 48000 / prosystem_frequency; /* 
+  
+  //length = sound_GetSampleLength(sound_format.nSamplesPerSec, prosystem_frame, prosystem_frequency);  /* 48000 / prosystem_frequency */
   var length = (SAMPLE_RATE / prosystem_frequency) >> 0;
+  //console.log(length);  
   sound_Resample(tia_buffer, sample, length);
   tia_Clear(); // WII
 
   if (pokey) {
     //memset(pokeySample, 0, MAX_BUFFER_SIZE);
     // TODO JS: This seems unnecessary
+    /*
     for (var i = 0; i < MAX_BUFFER_SIZE; i++) {
       pokeySample[i] = 0;
     }
+    */
 
     sound_Resample(pokey_buffer, pokeySample, length);
     //for (uint index = 0; index < length; index++) {
@@ -216,7 +223,7 @@ function sound_Store() {
 // ----------------------------------------------------------------------------
 //bool sound_Play() {
 function sound_Play() {  
-  ResetAudio();
+  //ResetAudio();
   return true;
 }
 
@@ -225,7 +232,7 @@ function sound_Play() {
 // ----------------------------------------------------------------------------
 //bool sound_Stop() {
 function sound_Stop() {  
-  StopAudio();
+  //StopAudio();
   return true;
 }
 
@@ -252,7 +259,7 @@ function sound_GetSampleRate() {
 // ----------------------------------------------------------------------------
 //bool sound_SetMuted(bool muted) {
 function sound_SetMuted(muted) {  
-  if (sound_muted != muted) {
+  if (sound_muted != muted) {    
     if (!muted) {
       if (!sound_Play()) {
         return false;

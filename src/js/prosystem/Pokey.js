@@ -105,7 +105,7 @@ var pokey_size = (POKEY_BUFFER_SIZE - 512); // 524
 //static uint pokey_frequency = 1787520;
 var pokey_frequency = 1787520;
 //static uint pokey_sampleRate = 31440;
-var pokey_sampleRate = 44100;
+var pokey_sampleRate = SAMPLE_RATE; // rate;;
 //static uint pokey_soundCntr = 0;
 var pokey_soundCntr = 0;
 //static byte pokey_audf[4];
@@ -159,7 +159,7 @@ var SKCTL = 0;
 //byte RANDOM;
 var RANDOM = 0;
 
-var pokey_debug_count = 100;
+var pokey_debug_count = 0; //100;
 
 //byte POT_input[8] = {228, 228, 228, 228, 228, 228, 228, 228};
 var POT_input = new Array(228, 228, 228, 228, 228, 228, 228, 228);
@@ -196,8 +196,8 @@ function rand_init(rng, size, left, right, add) {
 
 //void pokey_setSampleRate(uint rate) {
 function pokey_setSampleRate(rate) {
-  console.log('set pokey sample rate: %d', rate);
-  //pokey_sampleRate = rate;
+  pokey_sampleRate = SAMPLE_RATE; // rate;
+  console.log('set pokey sample rate: %d', pokey_sampleRate);
 }
 
 // ----------------------------------------------------------------------------
@@ -205,7 +205,7 @@ function pokey_setSampleRate(rate) {
 // ----------------------------------------------------------------------------
 //void pokey_Reset() {
 function pokey_Reset() {
-  pokey_debug_count = 100;
+  pokey_debug_count =  0; //100;
 
   pot_scanline = 0;
   pokey_soundCntr = 0;
@@ -260,6 +260,8 @@ function pokey_Reset() {
   r17 = 0;
   random_scanline_counter = 0;
   prev_random_scanline_counter = 0;
+
+  pokey_Clear(true);
 }
 
 /* Called prior to each frame */
@@ -654,12 +656,13 @@ function pokey_Process(length) {
 // Clear
 // ----------------------------------------------------------------------------
 //void pokey_Clear() {
-function pokey_Clear() {
-  pokey_soundCntr = 0;
-  // TODO JS: This seems unnecessary
+function pokey_Clear(flush) {
+  pokey_soundCntr = 0;  
   //memset(pokey_buffer, 0, POKEY_BUFFER_SIZE);
-  for (var i = 0; i < POKEY_BUFFER_SIZE; i++) {
-    pokey_buffer[i] = 0;
+  if (flush) {
+    for (var i = 0; i < POKEY_BUFFER_SIZE; i++) {
+      pokey_buffer[i] = 0;
+    }
   }
 }
 

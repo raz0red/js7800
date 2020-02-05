@@ -132,20 +132,20 @@ function tia_Reset() {
     tia_poly5Cntr[index] = 0;
     tia_poly9Cntr[index] = 0;
   }
-  tia_Clear();
+  tia_Clear(true);
 }
 
 // ----------------------------------------------------------------------------
 // Clear
 // ----------------------------------------------------------------------------
 //void tia_Clear() {
-function tia_Clear() {  
+function tia_Clear(flush) {  
   tia_soundCntr = 0;
   //memset(tia_buffer, 0, TIA_BUFFER_SIZE);
-
-  // TODO JS: Remove this? Seems unnecessary
-  for(var i = 0; i < TIA_BUFFER_SIZE; i++) {
-    tia_buffer[i] = 0;
+  if (flush) {
+    for(var i = 0; i < TIA_BUFFER_SIZE; i++) {
+      tia_buffer[i] = 0;
+    }
   }
 }
 

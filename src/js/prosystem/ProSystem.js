@@ -60,8 +60,6 @@ function prosystem_Reset() {
     sally_Reset(); // WII
     region_Reset();
     tia_Clear();
-    tia_Reset();
-    pokey_Clear();
     pokey_Reset();
     xm_Reset();
 
@@ -293,7 +291,9 @@ function prosystem_Close() {
   maria_Clear();
   memory_Reset();
   tia_Reset();
-  tia_Clear();
+  tia_Clear(true);  
+  pokey_Reset();
+  pokey_Clear(true);
 }
 
 // byte * loc_buffer = 0;

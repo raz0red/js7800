@@ -1163,10 +1163,10 @@ function sally_Reset() {
   //sally_pc.w = 0;
   sally_pc.setW(0);
 
-  sally_debug_count = 100;
+  sally_debug_count = 0; // 100;
 }
 
-var sally_debug_count = 100;
+var sally_debug_count = 0; //100;
 
 // ----------------------------------------------------------------------------
 // ExecuteInstruction
