@@ -157,20 +157,31 @@ function js_atari_get_blit_addr() {
   return blit_surface;
 }
 
+var leftLast = false;
 var leftHeld = false;
 var rightHeld = false;
+var upLast = false;
 var upHeld = false;
 var downHeld = false;
 var aHeld = false;
 var bHeld = false;
+var resetHeld = false;
+var selectHeld = false;
+var pauseHeld = false;
+var leftDiffSet = false;
+var rightDiffSet = false;
 
 function js_atari_update_keys(keyboard_data) {
   // | 12       | Console      | Reset
-  keyboard_data[12] = 0;
+  keyboard_data[12] = resetHeld;
   // | 13       | Console      | Select
-  keyboard_data[13] = 0;
+  keyboard_data[13] = selectHeld;
   // | 14       | Console      | Pause
-  keyboard_data[14] = 0;
+  keyboard_data[14] = pauseHeld;
+  // | 15       | Console      | Left Difficulty
+  keyboard_data[15] = leftDiffSet;
+  // | 16       | Console      | Right Difficulty
+  keyboard_data[16] = rightDiffSet;   
 
   js_atari_update_joystick(0, keyboard_data);
   js_atari_update_joystick(1, keyboard_data);
@@ -180,21 +191,17 @@ function js_atari_update_joystick(joyIndex, keyboard_data) {
   var offset = (joyIndex == 0 ? 0 : 6);
   
   // | 00 06     | Joystick 1 2 | Right
-  keyboard_data[0 + offset] = !joyIndex ? rightHeld : 0;
+  keyboard_data[0 + offset] = !joyIndex ? rightHeld && !(leftHeld && leftLast) : 0;
   // | 01 07     | Joystick 1 2 | Left
-  keyboard_data[1 + offset] = !joyIndex ? leftHeld : 0;
+  keyboard_data[1 + offset] = !joyIndex ? leftHeld && !(rightHeld && !leftLast) : 0;
   // | 02 08     | Joystick 1 2 | Down
-  keyboard_data[2 + offset] = !joyIndex ? downHeld : 0;
+  keyboard_data[2 + offset] = !joyIndex ? downHeld && !(upHeld && upLast) : 0;
   // | 03 09     | Joystick 1 2 | Up
-  keyboard_data[3 + offset] = !joyIndex ? upHeld : 0;
+  keyboard_data[3 + offset] = !joyIndex ? upHeld && !(downHeld && !upLast)  : 0;
   // | 04 10     | Joystick 1 2 | Button 1
   keyboard_data[4 + offset] = !joyIndex ? aHeld : 0;
   // | 05 11     | Joystick 1 2 | Button 2
   keyboard_data[5 + offset] = !joyIndex ? bHeld : 0;
-  // | 15       | Console      | Left Difficulty
-  //keyboard_data[15] = 0;
-  // | 16       | Console      | Right Difficulty
-  //keyboard_data[16] = 0; 
 }
 
 function js_reset_keyboard_data() {
@@ -203,41 +210,69 @@ function js_reset_keyboard_data() {
   }
 
   // Left difficulty switch defaults to off
-  atari_keyboard_data[15] = cartridge_left_switch;
+  leftDiffSet = cartridge_left_switch;
 
   // Right difficulty switch defaults to on
-  atari_keyboard_data[16] = cartridge_right_switch;
+  rightDiffSet = cartridge_right_switch;
+
+  leftLast = false;
+  upLast = false;
 }
 
 function js_atari_key_event(event, down) {
-  var handled = true;
-  switch (event.keyCode) {
-    case 37:
-    case 76:
+
+  var code = event.keyCode;
+  
+  handled = true;
+  switch (code) {
+    case 0x25:
       leftHeld = down;
+      if (down) leftLast = true;
       break;
-    case 38:
-    case 80:
+    case 0x26:
       upHeld = down;
+      if (down) upLast = true;
       break;
-    case 39:
-    case 222:
-      rightHeld = down;
+    case 0x27:
+      rightHeld = down; 
+      if (down) leftLast = false;
       break;
-    case 40:
-    case 59:
-    case 186:
+    case 0x28:
       downHeld = down;
+      if (down) upLast = false;
       break;
-    case 90:
+    case 0x5A:
       aHeld = down;
       break;
-    case 88:
+    case 0x58:
       bHeld = down;
+      break;
+    case 0x71:
+      resetHeld = down;
+      break;
+    case 0x72:
+      selectHeld = down;
+      break;
+    case 0x73: 
+      pauseHeld = down;
+      break;
+    case 0x74:
+      if (!down) {
+        leftDiffSet ^= 1;
+      }
+      break;
+    case 0x75:
+      if (!down) {
+        rightDiffSet ^= 1;
+      }
+      break;
+    case 0x70:
+      // Ignore F1 keys, annoying to have browser open tab
       break;
     default:
       handled = false;
   }
+  
   if (handled && event.preventDefault) {
     event.preventDefault();
   }

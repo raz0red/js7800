@@ -58,8 +58,14 @@ function timer_IsTime() {
   //timer_currentTime = ((uInt64)SDL_GetTicks()) * 1000;
   timer_currentTime = (Date.now()) * 1000;
 
-  if (timer_currentTime >= timer_nextTime) {
-    timer_nextTime += timer_frameTime;
+  var remaining = timer_nextTime - timer_currentTime;
+  if (remaining <= 0) {
+    if (remaining < -timer_frameTime)  {
+      timer_nextTime = timer_currentTime + timer_frameTime;  
+      console.log("Resetting next time: %d (%d)", -remaining, timer_frameTime);   
+    } else {
+      timer_nextTime += timer_frameTime;     
+    }      
     return true;
   }
   return false;
