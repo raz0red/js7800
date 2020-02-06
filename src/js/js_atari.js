@@ -42,17 +42,34 @@ var atari_audio_ctx = null;
 /** The audio node */
 var atari_audio_node = null;
 
+
+/* Function to open fullscreen mode */
+function openFullscreen(elem) {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.mozRequestFullScreen) { /* Firefox */
+    elem.mozRequestFullScreen();
+  } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE/Edge */
+    elem.msRequestFullscreen();
+  }
+}
+
 function start_emu(cart) {
+
   js_reset_keyboard_data();
   cartridge_Load(cart, cart.length);
   js_atari_init();
   js_atari_init_palette8();
   prosystem_Reset();
+
   var start = Date.now();
   var fc = 0;
+  var frameTicks = (1000.0 / prosystem_frequency) >> 0;
+  var adjustTolerance = (frameTicks*1000);
 
-  timer_Reset();
-  var f = function () {
+  var f = function () {    
     if (prosystem_active && !prosystem_paused) {
 
       js_atari_update_keys(atari_keyboard_data);
@@ -61,11 +78,15 @@ function start_emu(cart) {
       //VIDEO_WaitVSync();
       js_atari_flip_image();
       sound_Store();
-
-      timer_IsTime();
-      var wait = ((timer_nextTime - timer_currentTime) / 1000) >> 0;
-      atari_refresh_callback_id =
-        setTimeout(function () { f(); }, (wait > 0 ? wait : 0));
+      
+      nextTimestamp += frameTicks;    
+      var now = Date.now();          
+      if ((nextTimestamp + adjustTolerance) < now) {
+        nextTimestamp = now;
+        console.log("adjusted next timestamp.");
+      } 
+      setTimeout(function() { requestAnimationFrame(f); }, 
+        (nextTimestamp - now));
 
       fc++;
       if ((fc % 240) == 0) {
@@ -82,7 +103,8 @@ function start_emu(cart) {
       }
     }
   };
-  atari_refresh_callback_id = setTimeout(f, 15);
+  var nextTimestamp = Date.now() + frameTicks;
+  setTimeout(requestAnimationFrame(f), frameTicks);
 }
 
 function js_atari_start_emulation(cart) {
@@ -92,7 +114,8 @@ function js_atari_start_emulation(cart) {
   if (prosystem_active) {
     prosystem_Close();
   }
-  start_emu(cart);
+
+  setTimeout(function() { start_emu(cart); }, 200);
 }
 
 function js_atari_flip_image() {
@@ -286,7 +309,6 @@ function js_atari_key_event(event, down) {
     event.preventDefault();
   }
 }
-
 
 var atari_mixbuffer = new Array(SOUNDBUFSIZE);
 var mixhead = 0;
