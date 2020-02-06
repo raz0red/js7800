@@ -4,8 +4,8 @@ var NTSC_ATARI_BLIT_TOP_Y = 2;
 var NTSC_ATARI_HEIGHT = 240;
 var PAL_ATARI_BLIT_TOP_Y = 26;
 var PAL_ATARI_HEIGHT = 240;
-var SAMPLE_RATE = 44100;
-var SOUNDBUFSIZE = 8192;
+var SAMPLE_RATE = 48000;
+var SOUNDBUFSIZE = 8192 << 1;
 
 var blit_surface = new Array(ATARI_WIDTH * ATARI_BLIT_HEIGHT);
 
@@ -311,17 +311,15 @@ function js_atari_init_audio() {
     atari_audio_node.onaudioprocess = function (e) {
       var dst = e.outputBuffer.getChannelData(0);
       var done = 0;
-      var len = 1024;
+      var len = dst.length;
       while ((mixtail != mixhead) && (done < len)) {
         dst[done++] = atari_mixbuffer[mixtail++];
         if (mixtail == SOUNDBUFSIZE)
           mixtail = 0;
       }
-      /*
       while (done < len) {
         dst[done++] = 0;
       }
-      */
     }
     atari_audio_node.connect(atari_audio_ctx.destination);
     var resumeFunc =

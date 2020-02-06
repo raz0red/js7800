@@ -153,8 +153,8 @@ function sound_Store() {
 
   //uint length = 48000 / prosystem_frequency; /* 
   
-  //length = sound_GetSampleLength(sound_format.nSamplesPerSec, prosystem_frame, prosystem_frequency);  /* 48000 / prosystem_frequency */
-  var length = (SAMPLE_RATE / prosystem_frequency) >> 0;
+  length = sound_GetSampleLength(sound_format.nSamplesPerSec, prosystem_frame, prosystem_frequency);  /* 48000 / prosystem_frequency */
+  //var length = (SAMPLE_RATE / prosystem_frequency) >> 0;
   //console.log(length);  
   sound_Resample(tia_buffer, sample, length);
   tia_Clear(); // WII

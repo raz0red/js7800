@@ -196,7 +196,7 @@ function rand_init(rng, size, left, right, add) {
 
 //void pokey_setSampleRate(uint rate) {
 function pokey_setSampleRate(rate) {
-  pokey_sampleRate = SAMPLE_RATE; // rate;
+  pokey_sampleRate = rate; // rate;
   console.log('set pokey sample rate: %d', pokey_sampleRate);
 }
 
