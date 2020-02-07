@@ -39,198 +39,212 @@
 // Tia.cpp
 // ----------------------------------------------------------------------------
 
-var TIA_BUFFER_SIZE = 2048; // WII
+js7800.Tia = (function () {
 
-var TIA_POLY4_SIZE = 15;
-var TIA_POLY5_SIZE = 31;
-var TIA_POLY9_SIZE = 511;
+  var TIA_BUFFER_SIZE = 2048; // WII
 
-//byte tia_buffer[TIA_BUFFER_SIZE] = {0};
-var tia_buffer = new Array(TIA_BUFFER_SIZE);
-//uint tia_size = TIA_BUFFER_SIZE;
-var tia_size = TIA_BUFFER_SIZE;
+  var TIA_POLY4_SIZE = 15;
+  var TIA_POLY5_SIZE = 31;
+  var TIA_POLY9_SIZE = 511;
 
-//static const byte TIA_POLY4[ ] = {1,1,0,1,1,1,0,0,0,0,1,0,1,0,0};
-var TIA_POLY4 = [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0];
-//static const byte TIA_POLY5[ ] = {0,0,1,0,1,1,0,0,1,1,1,1,1,0,0,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,1};
-var TIA_POLY5 = [0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1];
-//static const byte TIA_POLY9[ ] = {0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,0,1,0,1,0,0,1,1,1,1,1,0,0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,0,0,1,0,0,1,1,1,1,0,1,0,0,0,0,1,1,0,1,1,0,0,0,1,0,0,0,1,1,1,1,0,1,0,1,1,0,1,0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,1,1,0,0,1,1,0,0,0,1,1,0,1,0,0,0,1,1,0,0,1,1,1,1,0,0,1,0,0,0,1,1,1,0,0,1,1,0,1,0,1,1,0,1,1,0,1,0,0,1,0,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,0,0,0,0,1,1,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,1,1,0,0,0,0,1,0,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,0,1,1,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,1,1,1,0,0,0,1,1,1,0,0,0,1,0,0,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,0,1,0,1,1,1,1,0,0,1,0,1,0,1,1,1,0,0,0,0,0,1,1,0,1,1,0,0,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,1,1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,0,0,1,1,0,1,0,0,1,0,0,0,1,0,0,1,0,1,0,0,0,1,1,0,1,0,0,0,0,0,1,1,1,1,0,0,1,0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,1,0,0,0,1,1,0,1,1,1,0,0,0,1,0,1,0,0,1,0,1,0,1,0,1,1,1,0,0,1,0,1,1,0,0,1,1,1,1,1,0,0,0,1,1,0};
-var TIA_POLY9 = [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0];
-//static const byte TIA_DIV31[ ] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0};
-var TIA_DIV31 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-//static byte tia_volume[2] = {0};
-var tia_volume = [0, 0];
-//static byte tia_counterMax[2] = {0};
-var tia_counterMax = [0, 0];
-//static byte tia_counter[2] = {0};
-var tia_counter = [0, 0];
-//static byte tia_audc[2] = {0};
-var tia_audc = [0, 0];
-//static byte tia_audf[2] = {0};
-var tia_audf = [0, 0];
-//static byte tia_audv[2] = {0};
-var tia_audv = [0, 0];
-//static uint tia_poly4Cntr[2] = {0};
-var tia_poly4Cntr = [0, 0];
-//static uint tia_poly5Cntr[2] = {0};
-var tia_poly5Cntr = [0, 0];
-//static uint tia_poly9Cntr[2] = {0};
-var tia_poly9Cntr = [0, 0];
-//static uint tia_soundCntr = 0;
-var tia_soundCntr = 0;
+  //byte tia_buffer[TIA_BUFFER_SIZE] = {0};
+  var tia_buffer = new Array(TIA_BUFFER_SIZE);
+  //uint tia_size = TIA_BUFFER_SIZE;
+  var tia_size = TIA_BUFFER_SIZE;
 
-// ----------------------------------------------------------------------------
-// ProcessChannel
-// ----------------------------------------------------------------------------
-//static void tia_ProcessChannel(byte channel) {
-function tia_ProcessChannel(channel) {
-  tia_poly5Cntr[channel]++;
-  if (tia_poly5Cntr[channel] == TIA_POLY5_SIZE) {
-    tia_poly5Cntr[channel] = 0;
-  }
-  if (((tia_audc[channel] & 2) == 0) || (((tia_audc[channel] & 1) == 0) && TIA_DIV31[tia_poly5Cntr[channel]]) || (((tia_audc[channel] & 1) == 1) && TIA_POLY5[tia_poly5Cntr[channel]])) {
-    if (tia_audc[channel] & 4) {
-      tia_volume[channel] = (!tia_volume[channel]) ? tia_audv[channel] : 0;
+  //static const byte TIA_POLY4[ ] = {1,1,0,1,1,1,0,0,0,0,1,0,1,0,0};
+  var TIA_POLY4 = [1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0];
+  //static const byte TIA_POLY5[ ] = {0,0,1,0,1,1,0,0,1,1,1,1,1,0,0,0,1,1,0,1,1,1,0,1,0,1,0,0,0,0,1};
+  var TIA_POLY5 = [0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1];
+  //static const byte TIA_POLY9[ ] = {0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,1,1,1,0,0,1,0,1,0,0,1,1,1,1,1,0,0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,0,0,1,0,0,1,1,1,1,0,1,0,0,0,0,1,1,0,1,1,0,0,0,1,0,0,0,1,1,1,1,0,1,0,1,1,0,1,0,1,0,0,0,0,1,1,0,1,0,1,0,0,0,1,0,1,0,0,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,1,1,0,0,1,1,0,0,0,1,1,0,1,0,0,0,1,1,0,0,1,1,1,1,0,0,1,0,0,0,1,1,1,0,0,1,1,0,1,0,1,1,0,1,1,0,1,0,0,1,0,0,1,1,1,1,1,1,0,1,1,1,1,0,1,1,0,0,0,0,1,1,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,1,1,0,0,0,0,1,0,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,0,1,1,1,0,1,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0,0,0,0,1,1,1,0,0,0,1,1,1,0,0,1,1,0,0,1,0,0,1,0,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,1,1,1,0,0,0,1,1,1,0,0,0,1,0,0,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,0,1,0,1,1,1,1,0,0,1,0,1,0,1,1,1,0,0,0,0,0,1,1,0,1,1,0,0,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,0,0,1,0,1,1,1,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,0,0,1,1,0,1,0,0,1,0,0,0,1,0,0,1,0,1,0,0,0,1,1,0,1,0,0,0,0,0,1,1,1,1,0,0,1,0,0,1,0,1,1,1,1,1,1,1,0,1,0,0,1,0,0,0,1,1,0,1,1,1,0,0,0,1,0,1,0,0,1,0,1,0,1,0,1,1,1,0,0,1,0,1,1,0,0,1,1,1,1,1,0,0,0,1,1,0};
+  var TIA_POLY9 = [0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0];
+  //static const byte TIA_DIV31[ ] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0};
+  var TIA_DIV31 = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  //static byte tia_volume[2] = {0};
+  var tia_volume = [0, 0];
+  //static byte tia_counterMax[2] = {0};
+  var tia_counterMax = [0, 0];
+  //static byte tia_counter[2] = {0};
+  var tia_counter = [0, 0];
+  //static byte tia_audc[2] = {0};
+  var tia_audc = [0, 0];
+  //static byte tia_audf[2] = {0};
+  var tia_audf = [0, 0];
+  //static byte tia_audv[2] = {0};
+  var tia_audv = [0, 0];
+  //static uint tia_poly4Cntr[2] = {0};
+  var tia_poly4Cntr = [0, 0];
+  //static uint tia_poly5Cntr[2] = {0};
+  var tia_poly5Cntr = [0, 0];
+  //static uint tia_poly9Cntr[2] = {0};
+  var tia_poly9Cntr = [0, 0];
+  //static uint tia_soundCntr = 0;
+  var tia_soundCntr = 0;
+
+  // ----------------------------------------------------------------------------
+  // ProcessChannel
+  // ----------------------------------------------------------------------------
+  //static void tia_ProcessChannel(byte channel) {
+  function tia_ProcessChannel(channel) {
+    tia_poly5Cntr[channel]++;
+    if (tia_poly5Cntr[channel] == TIA_POLY5_SIZE) {
+      tia_poly5Cntr[channel] = 0;
     }
-    else if (tia_audc[channel] & 8) {
-      if (tia_audc[channel] == 8) {
-        tia_poly9Cntr[channel]++;
-        if (tia_poly9Cntr[channel] == TIA_POLY9_SIZE) {
-          tia_poly9Cntr[channel] = 0;
+    if (((tia_audc[channel] & 2) == 0) || (((tia_audc[channel] & 1) == 0) && TIA_DIV31[tia_poly5Cntr[channel]]) || (((tia_audc[channel] & 1) == 1) && TIA_POLY5[tia_poly5Cntr[channel]])) {
+      if (tia_audc[channel] & 4) {
+        tia_volume[channel] = (!tia_volume[channel]) ? tia_audv[channel] : 0;
+      }
+      else if (tia_audc[channel] & 8) {
+        if (tia_audc[channel] == 8) {
+          tia_poly9Cntr[channel]++;
+          if (tia_poly9Cntr[channel] == TIA_POLY9_SIZE) {
+            tia_poly9Cntr[channel] = 0;
+          }
+          tia_volume[channel] = (TIA_POLY9[tia_poly9Cntr[channel]]) ? tia_audv[channel] : 0;
         }
-        tia_volume[channel] = (TIA_POLY9[tia_poly9Cntr[channel]]) ? tia_audv[channel] : 0;
+        else {
+          tia_volume[channel] = (TIA_POLY5[tia_poly5Cntr[channel]]) ? tia_audv[channel] : 0;
+        }
       }
       else {
-        tia_volume[channel] = (TIA_POLY5[tia_poly5Cntr[channel]]) ? tia_audv[channel] : 0;
+        tia_poly4Cntr[channel]++;
+        if (tia_poly4Cntr[channel] == TIA_POLY4_SIZE) {
+          tia_poly4Cntr[channel] = 0;
+        }
+        tia_volume[channel] = (TIA_POLY4[tia_poly4Cntr[channel]]) ? tia_audv[channel] : 0;
       }
+    }
+  }
+
+  // ----------------------------------------------------------------------------
+  // Reset
+  // ----------------------------------------------------------------------------
+  //void tia_Reset() {
+  function tia_Reset() {
+    tia_soundCntr = 0;
+    //for (int index = 0; index < 2; index++) {
+    for (var index = 0; index < 2; index++) {
+      tia_volume[index] = 0;
+      tia_counterMax[index] = 0;
+      tia_counter[index] = 0;
+      tia_audc[index] = 0;
+      tia_audf[index] = 0;
+      tia_audv[index] = 0;
+      tia_poly4Cntr[index] = 0;
+      tia_poly5Cntr[index] = 0;
+      tia_poly9Cntr[index] = 0;
+    }
+    tia_Clear(true);
+  }
+
+  // ----------------------------------------------------------------------------
+  // Clear
+  // ----------------------------------------------------------------------------
+  //void tia_Clear() {
+  function tia_Clear(flush) {
+    tia_soundCntr = 0;
+    //memset(tia_buffer, 0, TIA_BUFFER_SIZE);
+    if (flush) {
+      for (var i = 0; i < TIA_BUFFER_SIZE; i++) {
+        tia_buffer[i] = 0;
+      }
+    }
+  }
+
+  // ----------------------------------------------------------------------------
+  // SetRegister
+  // ----------------------------------------------------------------------------
+  //void tia_SetRegister(word address, byte data) {
+  function tia_SetRegister(address, data) {
+    //byte channel;
+    var channel = 0;
+    //byte frequency;
+    var frequency = 0;
+
+    switch (address) {
+      case AUDC0:
+        tia_audc[0] = data & 15;
+        channel = 0;
+        break;
+      case AUDC1:
+        tia_audc[1] = data & 15;
+        channel = 1;
+        break;
+      case AUDF0:
+        tia_audf[0] = data & 31;
+        channel = 0;
+        break;
+      case AUDF1:
+        tia_audf[1] = data & 31;
+        channel = 1;
+        break;
+      case AUDV0:
+        tia_audv[0] = (data & 15) << 2;
+        channel = 0;
+        break;
+      case AUDV1:
+        tia_audv[1] = (data & 15) << 2;
+        channel = 1;
+        break;
+      default:
+        return;
+    }
+
+    if (tia_audc[channel] == 0) {
+      frequency = 0;
+      tia_volume[channel] = tia_audv[channel];
     }
     else {
-      tia_poly4Cntr[channel]++;
-      if (tia_poly4Cntr[channel] == TIA_POLY4_SIZE) {
-        tia_poly4Cntr[channel] = 0;
+      frequency = (tia_audf[channel] + 1) & 0xFF;
+      if (tia_audc[channel] > 11) {
+        //frequency *= 3;
+        frequency = (frequency * 3) & 0xFF;
       }
-      tia_volume[channel] = (TIA_POLY4[tia_poly4Cntr[channel]]) ? tia_audv[channel] : 0;
     }
-  }
-}
 
-// ----------------------------------------------------------------------------
-// Reset
-// ----------------------------------------------------------------------------
-//void tia_Reset() {
-function tia_Reset() {  
-  tia_soundCntr = 0;
-  //for (int index = 0; index < 2; index++) {
-  for (var index = 0; index < 2; index++) {
-    tia_volume[index] = 0;
-    tia_counterMax[index] = 0;
-    tia_counter[index] = 0;
-    tia_audc[index] = 0;
-    tia_audf[index] = 0;
-    tia_audv[index] = 0;
-    tia_poly4Cntr[index] = 0;
-    tia_poly5Cntr[index] = 0;
-    tia_poly9Cntr[index] = 0;
-  }
-  tia_Clear(true);
-}
-
-// ----------------------------------------------------------------------------
-// Clear
-// ----------------------------------------------------------------------------
-//void tia_Clear() {
-function tia_Clear(flush) {  
-  tia_soundCntr = 0;
-  //memset(tia_buffer, 0, TIA_BUFFER_SIZE);
-  if (flush) {
-    for(var i = 0; i < TIA_BUFFER_SIZE; i++) {
-      tia_buffer[i] = 0;
-    }
-  }
-}
-
-// ----------------------------------------------------------------------------
-// SetRegister
-// ----------------------------------------------------------------------------
-//void tia_SetRegister(word address, byte data) {
-function tia_SetRegister(address, data) {
-  //byte channel;
-  var channel = 0;
-  //byte frequency;
-  var frequency = 0;
-
-  switch (address) {
-    case AUDC0:
-      tia_audc[0] = data & 15;
-      channel = 0;
-      break;
-    case AUDC1:
-      tia_audc[1] = data & 15;
-      channel = 1;
-      break;
-    case AUDF0:
-      tia_audf[0] = data & 31;
-      channel = 0;
-      break;
-    case AUDF1:
-      tia_audf[1] = data & 31;
-      channel = 1;
-      break;
-    case AUDV0:
-      tia_audv[0] = (data & 15) << 2;
-      channel = 0;
-      break;
-    case AUDV1:
-      tia_audv[1] = (data & 15) << 2;
-      channel = 1;
-      break;
-    default:
-      return;
-  }
-
-  if (tia_audc[channel] == 0) {
-    frequency = 0;
-    tia_volume[channel] = tia_audv[channel];
-  }
-  else {
-    frequency = tia_audf[channel] + 1;
-    if (tia_audc[channel] > 11) {
-      frequency *= 3;
+    if (frequency != tia_counterMax[channel]) {
+      tia_counterMax[channel] = frequency;
+      if (tia_counter[channel] == 0 || frequency == 0) {
+        tia_counter[channel] = frequency;
+      }
     }
   }
 
-  if (frequency != tia_counterMax[channel]) {
-    tia_counterMax[channel] = frequency;
-    if (tia_counter[channel] == 0 || frequency == 0) {
-      tia_counter[channel] = frequency;
+  // --------------------------------------------------------------------------------------
+  // Process
+  // --------------------------------------------------------------------------------------
+  //void tia_Process(uint length) {
+  function tia_Process(length) {
+    //for (uint index = 0; index < length; index++) {
+    for (var index = 0; index < length; index++) {
+      if (tia_counter[0] > 1) {
+        tia_counter[0]--;
+      }
+      else if (tia_counter[0] == 1) {
+        tia_counter[0] = tia_counterMax[0];
+        tia_ProcessChannel(0);
+      }
+      if (tia_counter[1] > 1) {
+        tia_counter[1]--;
+      }
+      else if (tia_counter[1] == 1) {
+        tia_counter[1] = tia_counterMax[1];
+        tia_ProcessChannel(1);
+      }
+      tia_buffer[tia_soundCntr++] = (tia_volume[0] + tia_volume[1]) & 0xFF;
+      if (tia_soundCntr >= tia_size) {
+        tia_soundCntr = 0;
+      }
     }
   }
-}
 
-// --------------------------------------------------------------------------------------
-// Process
-// --------------------------------------------------------------------------------------
-//void tia_Process(uint length) {
-function tia_Process(length) {  
-  //for (uint index = 0; index < length; index++) {
-  for (var index = 0; index < length; index++) {    
-    if (tia_counter[0] > 1) {
-      tia_counter[0]--;
-    }
-    else if (tia_counter[0] == 1) {
-      tia_counter[0] = tia_counterMax[0];
-      tia_ProcessChannel(0);
-    }
-    if (tia_counter[1] > 1) {
-      tia_counter[1]--;
-    }
-    else if (tia_counter[1] == 1) {
-      tia_counter[1] = tia_counterMax[1];
-      tia_ProcessChannel(1);
-    }
-    tia_buffer[tia_soundCntr++] = tia_volume[0] + tia_volume[1];
-    if (tia_soundCntr >= tia_size) {
-      tia_soundCntr = 0;
-    }
+  return {
+    Clear: tia_Clear,
+    Process: tia_Process,
+    SetRegister: tia_SetRegister,
+    Reset: tia_Reset,
+    buffer: tia_buffer
   }
-}
+})();
+
+

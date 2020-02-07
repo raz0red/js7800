@@ -71,7 +71,7 @@ function _memory_Read(address) {
   if (cartridge_pokey && (
     (!cartridge_pokey450 && (address >= 0x4000 && address <= 0x400f)) ||
     (cartridge_pokey450 && (address >= 0x0450 && address < 0x0470)))) {
-    return pokey_GetRegister(
+    return js7800.Pokey.GetRegister(
       cartridge_pokey450 ? 0x4000 + (address - 0x0450) : address);
   }
 
@@ -122,7 +122,7 @@ function memory_Write(address, data) {
   if (cartridge_pokey && (
     (!cartridge_pokey450 && (address >= 0x4000 && address <= 0x400f)) ||
     (cartridge_pokey450 && (address >= 0x0450 && address < 0x0470)))) {
-    pokey_SetRegister(
+    js7800.Pokey.SetRegister(
       (cartridge_pokey450 ? 0x4000 + (address - 0x0450) : address), data);
     return;
   }
@@ -162,22 +162,22 @@ function memory_Write(address, data) {
       case INPT5:
         break;
       case AUDC0:
-        tia_SetRegister(AUDC0, data);
+        js7800.Tia.SetRegister(AUDC0, data);
         break;
       case AUDC1:
-        tia_SetRegister(AUDC1, data);
+        js7800.Tia.SetRegister(AUDC1, data);
         break;
       case AUDF0:
-        tia_SetRegister(AUDF0, data);
+        js7800.Tia.SetRegister(AUDF0, data);
         break;
       case AUDF1:
-        tia_SetRegister(AUDF1, data);
+        js7800.Tia.SetRegister(AUDF1, data);
         break;
       case AUDV0:
-        tia_SetRegister(AUDV0, data);
+        js7800.Tia.SetRegister(AUDV0, data);
         break;
       case AUDV1:
-        tia_SetRegister(AUDV1, data);
+        js7800.Tia.SetRegister(AUDV1, data);
         break;
 
       case SWCHB:

@@ -32,10 +32,10 @@ var MARIA_LINERAM_SIZE = 160;
 //extern bool lightgun_enabled;
 
 //rect maria_displayArea = {0, 16, 319, 258};
-var maria_displayArea = new Rect(0, 16, 319, 258);
+var maria_displayArea = new js7800.Rect(0, 16, 319, 258);
 
 //rect maria_visibleArea = {0, 26, 319, 248};
-var maria_visibleArea = new Rect(0, 26, 319, 248);
+var maria_visibleArea = new js7800.Rect(0, 26, 319, 248);
 //word  maria_scanline = 1;
 var maria_scanline = 1;
 

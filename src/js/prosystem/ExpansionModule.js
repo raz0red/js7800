@@ -58,12 +58,12 @@ function xm_Reset() {
 function xm_Read(address) {
   if (xm_pokey_enabled && (address >= 0x0450 && address < 0x0460)) {
     //byte b = pokey_GetRegister(0x4000 + (address - 0x0450));
-    var b = pokey_GetRegister(0x4000 + (address - 0x0450));
+    var b = js7800.Pokey.GetRegister(0x4000 + (address - 0x0450));
     //console.log("Read from Pokey1: %d %d", address, b);
     return b;
   } else if (xm_pokey_enabled && (address >= 0x0460 && address < 0x0470)) {
     //byte b = pokey_GetRegister(0x4000 + (address - 0x0460));
-    var b = pokey_GetRegister(0x4000 + (address - 0x0460));
+    var b = js7800.Pokey.GetRegister(0x4000 + (address - 0x0460));
     //console.log("Read from Pokey2: %d %d", address, b);
     return b;
   } else if (xm_mem_enabled && (address >= 0x4000 && address < 0x8000)) {
@@ -82,10 +82,10 @@ function xm_Read(address) {
 function xm_Write(address, data) {  
   if (xm_pokey_enabled && (address >= 0x0450 && address < 0x0460)) {
     //console.log("Wrote to Pokey1: %d %d", address, data);
-    pokey_SetRegister(0x4000 + (address - 0x0450), data);
+    js7800.Pokey.SetRegister(0x4000 + (address - 0x0450), data);
   } else if (xm_pokey_enabled && (address >= 0x0460 && address < 0x0470)) {
     //console.log("Wrote to Pokey2: %x %d", address, data);
-    pokey_SetRegister(0x4000 + (address - 0x0460), data);
+    js7800.Pokey.SetRegister(0x4000 + (address - 0x0460), data);
   } else if (xm_mem_enabled && (address >= 0x4000 && address < 0x8000)) {
     //console.log("Wrote to XM RAM: %d %d", address, data);
     xm_ram[(xm_bank * 0x4000) + (address - 0x4000)] = data;

@@ -48,6 +48,7 @@ var MAX_BUFFER_SIZE = 8192;
 // static const WAVEFORMATEX SOUND_DEFAULT_FORMAT = {WAVE_FORMAT_PCM, 1, 48000, 48000, 1, 8, 0};
 // static WAVEFORMATEX sound_format = SOUND_DEFAULT_FORMAT;
 
+/*
 var sound_format = {
   wFormatTag: 0,
   nChannels: 1,
@@ -57,6 +58,7 @@ var sound_format = {
   wBitsPerSample: 8,
   cbSize: 0
 };
+*/
 
 //static bool sound_muted = false;
 var sound_muted = false;
@@ -82,7 +84,7 @@ function sound_GetSampleLength(length, unit, unitMax) {
 //static void sound_Resample(const byte* source, byte* target, int length) {
 function sound_Resample(source, target, length) {
   //int measurement = sound_format.nSamplesPerSec;
-  var measurement = sound_format.nSamplesPerSec;
+  var measurement = SAMPLE_RATE;
   //int sourceIndex = 0;
   var sourceIndex = 0;
   //int targetIndex = 0;
@@ -96,7 +98,7 @@ function sound_Resample(source, target, length) {
       measurement -= max;
     } else {
       sourceIndex++;
-      measurement += sound_format.nSamplesPerSec;
+      measurement += SAMPLE_RATE;
     }
   }
 }
@@ -153,11 +155,11 @@ function sound_Store() {
 
   //uint length = 48000 / prosystem_frequency; /* 
   
-  length = sound_GetSampleLength(sound_format.nSamplesPerSec, prosystem_frame, prosystem_frequency);  /* 48000 / prosystem_frequency */
+  length = sound_GetSampleLength(SAMPLE_RATE, prosystem_frame, prosystem_frequency);  /* 48000 / prosystem_frequency */
   //var length = (SAMPLE_RATE / prosystem_frequency) >> 0;
   //console.log(length);  
-  sound_Resample(tia_buffer, sample, length);
-  tia_Clear(); // WII
+  sound_Resample(js7800.Tia.buffer, sample, length);
+  js7800.Tia.Clear(); // WII
 
   if (pokey) {
     //memset(pokeySample, 0, MAX_BUFFER_SIZE);
@@ -168,7 +170,7 @@ function sound_Store() {
     }
     */
 
-    sound_Resample(pokey_buffer, pokeySample, length);
+    sound_Resample(js7800.Pokey.buffer, pokeySample, length);
     //for (uint index = 0; index < length; index++) {
     for (var index = 0; index < length; index++) {      
       //#ifdef TRACE_SOUND
@@ -198,7 +200,7 @@ function sound_Store() {
       sample[index] = (sample[index] * 0.75) >> 0; //>> 1;
     }
   }
-  pokey_Clear(); // WII
+  js7800.Pokey.Clear(); // WII
 
   //wii_storeSound(sample, length);
   js_storeSound(sample, length);
@@ -240,19 +242,23 @@ function sound_Stop() {
 // SetSampleRate
 // ----------------------------------------------------------------------------
 //bool sound_SetSampleRate(uint rate) {
+/*
 function sound_SetSampleRate(rate) {  
   sound_format.nSamplesPerSec = rate;
   sound_format.nAvgBytesPerSec = rate;
   return sound_SetFormat(sound_format);
 }
+*/
 
 // ----------------------------------------------------------------------------
 // GetSampleRate
 // ----------------------------------------------------------------------------
 //uint sound_GetSampleRate() {
+/*
 function sound_GetSampleRate() {  
   return sound_format.nSamplesPerSec;
 }
+*/
 
 // ----------------------------------------------------------------------------
 // SetMuted

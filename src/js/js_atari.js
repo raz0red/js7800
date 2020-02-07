@@ -1,3 +1,8 @@
+
+// The root object
+var js7800 = {};
+
+
 var ATARI_WIDTH = 320;
 var ATARI_BLIT_HEIGHT = 300;
 var NTSC_ATARI_BLIT_TOP_Y = 2;
@@ -68,9 +73,9 @@ function start_emu(cart) {
   var start = Date.now();
   var fc = 0;
   var frameTicks = (1000.0 / prosystem_frequency) >> 0;
-  var adjustTolerance = (frameTicks*1000);
+  var adjustTolerance = (frameTicks * 1000);
 
-  var f = function () {    
+  var f = function () {
     if (prosystem_active && !prosystem_paused) {
 
       js_atari_update_keys(atari_keyboard_data);
@@ -79,14 +84,14 @@ function start_emu(cart) {
       //VIDEO_WaitVSync();
       js_atari_flip_image();
       sound_Store();
-      
-      nextTimestamp += frameTicks;    
-      var now = Date.now();          
+
+      nextTimestamp += frameTicks;
+      var now = Date.now();
       if ((nextTimestamp + adjustTolerance) < now) {
         nextTimestamp = now;
         console.log("adjusted next timestamp.");
-      } 
-      setTimeout(function() { requestAnimationFrame(f); }, 
+      }
+      setTimeout(function () { requestAnimationFrame(f); },
         (nextTimestamp - now));
 
       fc++;
@@ -105,7 +110,7 @@ function start_emu(cart) {
     }
   };
   var nextTimestamp = Date.now() + frameTicks;
-  setTimeout(requestAnimationFrame(f), frameTicks);
+  setTimeout(function () { requestAnimationFrame(f) }, frameTicks);
 }
 
 function js_atari_start_emulation(cart) {
@@ -116,14 +121,16 @@ function js_atari_start_emulation(cart) {
     prosystem_Close();
   }
 
-  setTimeout(function() { start_emu(cart); }, 200);
+  setTimeout(function () { start_emu(cart); }, 200);
 }
 
 function js_atari_flip_image() {
+  var Region = js7800.Region;
+
   var atari_height =
-    (cartridge_region == REGION_PAL ? PAL_ATARI_HEIGHT : NTSC_ATARI_HEIGHT);
+    (cartridge_region == Region.REGION_PAL ? PAL_ATARI_HEIGHT : NTSC_ATARI_HEIGHT);
   var atari_offsety =
-    (cartridge_region == REGION_PAL ? PAL_ATARI_BLIT_TOP_Y
+    (cartridge_region == Region.REGION_PAL ? PAL_ATARI_BLIT_TOP_Y
       : NTSC_ATARI_BLIT_TOP_Y);
 
   var offsetx = 0;
@@ -171,11 +178,12 @@ function js_atari_init() {
 }
 
 function js_atari_init_palette8() {
+  var Region = js7800.Region;
   var palette = null;
-  if (cartridge_region == REGION_PAL) {
-    palette = REGION_PALETTE_PAL;
+  if (cartridge_region == Region.REGION_PAL) {
+    palette = Region.REGION_PALETTE_PAL;
   } else {
-    palette = REGION_PALETTE_NTSC;
+    palette = Region.REGION_PALETTE_NTSC;
   }
 
   for (var index = 0; index < 256; index++) {
@@ -318,19 +326,22 @@ var mixtail = 0;
 function js_storeSound(sample, length) {
   for (var i = 0; i < length; i++) {
     var v = sample[i] & 0xFF;
-    atari_mixbuffer[mixhead++] = v / 255.0; /* ((v >= 0) ? v-128 : v+128) / 128;*/
+    atari_mixbuffer[mixhead++] = v / 256; //((v >= 0) ? v-128 : v+128) / 128;
     if (mixhead == SOUNDBUFSIZE)
       mixhead = 0;
   }
 }
 
-function js_atari_init_audio() {  
+function js_atari_init_audio() {
   if (!atari_audio_ctx && (window.AudioContext || window.webkitAudioContext)) {
     console.log('init audio');
     atari_audio_ctx = window.AudioContext ?
       new window.AudioContext({ sampleRate: SAMPLE_RATE }) :
       new window.webkitAudioContext();
-    atari_audio_node = atari_audio_ctx.createScriptProcessor(1024, 0, 1);
+    if (atari_audio_ctx.sampleRate) {
+      SAMPLE_RATE = atari_audio_ctx.sampleRate;
+    }
+    atari_audio_node = atari_audio_ctx.createScriptProcessor(2048, 0, 1);
     atari_audio_node.onaudioprocess = function (e) {
       var dst = e.outputBuffer.getChannelData(0);
       var done = 0;

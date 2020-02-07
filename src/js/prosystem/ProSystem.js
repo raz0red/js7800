@@ -58,9 +58,9 @@ function prosystem_Reset() {
     prosystem_paused = false;
     prosystem_frame = 0;
     sally_Reset(); // WII
-    region_Reset();
-    tia_Clear();
-    pokey_Reset();
+    js7800.Region.Reset();
+    js7800.Tia.Clear();
+    js7800.Pokey.Reset();
     xm_Reset();
 
     memory_Reset();
@@ -144,7 +144,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   dbg_maria_cycles = 0; // debug
   dbg_p6502_cycles = 0; // debug    
 
-  if (cartridge_pokey || cartridge_xm) pokey_Frame();
+  if (cartridge_pokey || cartridge_xm) js7800.Pokey.Frame();
 
   for (maria_scanline = 1; maria_scanline <= prosystem_scanlines; maria_scanline++) {
     //#if 0      
@@ -255,12 +255,12 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     // If lightgun is enabled, check to see if it should be fired
     if (lightgun) prosystem_FireLightGun();
 
-    tia_Process(2);
+    js7800.Tia.Process(2);
     if (cartridge_pokey || cartridge_xm) {
-      pokey_Process(2);
+      js7800.Pokey.Process(2);
     }
 
-    if (cartridge_pokey || cartridge_xm) pokey_Scanline();
+    if (cartridge_pokey || cartridge_xm)  js7800.Pokey.Scanline();
   }
 
   prosystem_frame++;
@@ -290,10 +290,10 @@ function prosystem_Close() {
   maria_Reset();
   maria_Clear();
   memory_Reset();
-  tia_Reset();
-  tia_Clear(true);  
-  pokey_Reset();
-  pokey_Clear(true);
+  js7800.Tia.Reset();
+  js7800.Tia.Clear(true);  
+  js7800.Pokey.Reset();
+  js7800.Pokey.Clear(true);
 }
 
 // byte * loc_buffer = 0;
