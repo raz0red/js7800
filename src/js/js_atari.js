@@ -232,13 +232,13 @@ function js_atari_update_joystick(joyIndex, keyboard_data) {
   var offset = (joyIndex == 0 ? 0 : 6);
 
   // | 00 06     | Joystick 1 2 | Right
-  keyboard_data[0 + offset] = !joyIndex ? rightHeld && !(leftHeld && leftLast) : 0;
+  keyboard_data[0 + offset] = !joyIndex ? rightHeld && !(leftHeld && !leftLast) : 0;
   // | 01 07     | Joystick 1 2 | Left
-  keyboard_data[1 + offset] = !joyIndex ? leftHeld && !(rightHeld && !leftLast) : 0;
+  keyboard_data[1 + offset] = !joyIndex ? leftHeld && !(rightHeld && leftLast) : 0;
   // | 02 08     | Joystick 1 2 | Down
-  keyboard_data[2 + offset] = !joyIndex ? downHeld && !(upHeld && upLast) : 0;
+  keyboard_data[2 + offset] = !joyIndex ? downHeld && !(upHeld && !upLast) : 0;
   // | 03 09     | Joystick 1 2 | Up
-  keyboard_data[3 + offset] = !joyIndex ? upHeld && !(downHeld && !upLast) : 0;
+  keyboard_data[3 + offset] = !joyIndex ? upHeld && !(downHeld && upLast) : 0;
   // | 04 10     | Joystick 1 2 | Button 1
   keyboard_data[4 + offset] = !joyIndex ? aHeld : 0;
   // | 05 11     | Joystick 1 2 | Button 2
