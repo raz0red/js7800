@@ -4,6 +4,7 @@ var NTSC_ATARI_BLIT_TOP_Y = 2;
 var NTSC_ATARI_HEIGHT = 240;
 var PAL_ATARI_BLIT_TOP_Y = 26;
 var PAL_ATARI_HEIGHT = 240;
+var ATARI_CANVAS_HEIGHT = 240;
 var SAMPLE_RATE = 48000;
 var SOUNDBUFSIZE = 8192 << 1;
 
@@ -126,7 +127,7 @@ function js_atari_flip_image() {
       : NTSC_ATARI_BLIT_TOP_Y);
 
   var offsetx = 0;
-  var offsety = ((ATARI_BLIT_HEIGHT - atari_height) / 2) >> 0;
+  var offsety = ((ATARI_CANVAS_HEIGHT - atari_height) / 2) >> 0;
 
   var src = 0, dst = 0, start = 0, x = 0, y = 0;
   var backpixels = atari_image_data;
@@ -156,14 +157,14 @@ function js_atari_init() {
   // Graphics
   atari_canvas = document.getElementById('screen');
   atari_ctx = atari_canvas.getContext('2d');
-  atari_image = atari_ctx.getImageData(0, 0, ATARI_WIDTH, ATARI_BLIT_HEIGHT);
+  atari_image = atari_ctx.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
   atari_image_data = atari_image.data;
 
   // set alpha to opaque 
   for (var i = 3; i < atari_image_data.length - 3; i += 4) {
-    atari_image_data[i - 3] = 0x11;
-    atari_image_data[i - 2] = 0x11;
-    atari_image_data[i - 1] = 0x11;
+    atari_image_data[i - 3] = 0;
+    atari_image_data[i - 2] = 0;
+    atari_image_data[i - 1] = 0;
     atari_image_data[i] = 0xFF;
   }
   atari_ctx.putImageData(atari_image, 0, 0);

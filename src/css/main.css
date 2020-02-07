@@ -1,12 +1,19 @@
 body {
-    background-color:#111111;
+    /*background-color:#E0DFE3;*/
+    background-color:#1D1D1D;
+
     font-family: Arial, Helvetica, sans-serif;
     font-size: 11px;
-    margin: 0px;
+    margin: 30px 0 0 0;
 }
 
 #screen {    
     margin:auto;
     width:548;
-    height:600;
+    height:480;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4), 0 6px 20px 0 rgba(0, 0, 0, 0.39);
+    border-radius: 20px;
+    background: #000;
+    padding: 20px;
+
 }
