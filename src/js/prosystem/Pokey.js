@@ -40,6 +40,7 @@
 // ----------------------------------------------------------------------------
 
 js7800.Pokey = (function () {
+  'use strict';
 
   var POKEY_BUFFER_SIZE = 2048; // WII
   var POKEY_AUDF1 = 0x4000;
@@ -98,6 +99,8 @@ js7800.Pokey = (function () {
   var POKEY_CHANNEL4 = 3;
   var POKEY_SAMPLE = 4;
   var SK_RESET = 0x03;
+
+  var CYCLES_PER_SCANLINE = null;
 
   //byte pokey_buffer[POKEY_BUFFER_SIZE] = {0};
   var pokey_buffer = new Array(POKEY_BUFFER_SIZE);
@@ -216,7 +219,7 @@ js7800.Pokey = (function () {
     //for (int index = 0; index < POKEY_POLY17_SIZE; index++) {
     for (var index = 0; index < POKEY_POLY17_SIZE; index++) {
       //pokey_poly17[index] = rand() & 1;
-      pokey_poly17[index] = (Math.random() * 2) >> 0;
+      pokey_poly17[index] = (Math.random() * 2) | 0;
     }
     pokey_polyAdjust = 0;
     pokey_poly04Cntr = 0;
@@ -224,7 +227,7 @@ js7800.Pokey = (function () {
     pokey_poly17Cntr = 0;
 
     //pokey_sampleMax = ((uint)pokey_frequency << 8) / pokey_sampleRate;
-    pokey_sampleMax = ((pokey_frequency << 8) / pokey_sampleRate) >> 0;
+    pokey_sampleMax = ((pokey_frequency << 8) / pokey_sampleRate) | 0;
 
     //pokey_sampleCount[0] = 0;
     //pokey_sampleCount[1] = 0;
@@ -312,15 +315,17 @@ js7800.Pokey = (function () {
       case POKEY_RANDOM:
         //ullong curr_scanline_counter =
         var curr_scanline_counter =
-          (random_scanline_counter + prosystem_cycles + prosystem_extra_cycles);
+          (random_scanline_counter +
+            js7800.ProSystem.GetCycles() +
+            js7800.ProSystem.GetExtraCycles());
 
         if (SKCTL & SK_RESET) {
           //ullong adjust = ((curr_scanline_counter - prev_random_scanline_counter) >> 2);
           var adjust = ((curr_scanline_counter - prev_random_scanline_counter) >>> 2);
           //r9 = (uint)((adjust + r9) % 0x001ff);
-          r9 = ((adjust + r9) % 0x001ff) >> 0;
+          r9 = ((adjust + r9) % 0x001ff) | 0;
           //r17 = (uint)((adjust + r17) % 0x1ffff);
-          r17 = ((adjust + r17) % 0x1ffff) >> 0;
+          r17 = ((adjust + r17) % 0x1ffff) | 0;
         }
         else {
           r9 = 0;
@@ -531,21 +536,21 @@ js7800.Pokey = (function () {
       ((val & 0x000000ff) << 24) |
       ((val & 0x0000ff00) << 8) |
       ((val & 0x00ff0000) >>> 8) |
-      ((val & 0xff000000) >>> 24)) >>> 0;
+      ((val & 0xff000000) >>> 24)) | 0;
   }
 
   function bswap3b(val) {
-    return (((val & 0x0000ff00) << 8) | ((val & 0x00ff0000) >>> 8) | ((val & 0xff000000) >>> 24)) >>> 0;
+    return (((val & 0x0000ff00) << 8) | ((val & 0x00ff0000) >>> 8) | ((val & 0xff000000) >>> 24)) | 0;
   }
 
   function bswap3bt(val) {
-    return (((val & 0x000000ff) << 24) | ((val & 0x0000ff00) << 8) | ((val & 0x00ff0000) >>> 8)) >>> 0;
+    return (((val & 0x000000ff) << 24) | ((val & 0x0000ff00) << 8) | ((val & 0x00ff0000) >>> 8)) | 0;
   }
 
   function getSampleCntrPtrB() {
     return bswap(
       ((bswap3b(pokey_sampleCount_0) & 0x00FFFFFF) << 8) |
-      (pokey_sampleCount_1 & 0x000000FF)) >>> 0;
+      (pokey_sampleCount_1 & 0x000000FF)) | 0;
   }
 
   function updateSampleCntrPtrB(val) {
@@ -678,6 +683,7 @@ js7800.Pokey = (function () {
     SetSampleRate: pokey_setSampleRate,
     Frame: pokey_Frame,
     Scanline: pokey_Scanline,
+    SetCyclesPerScanline: function (cycles) { CYCLES_PER_SCANLINE = cycles; },
     buffer: pokey_buffer
   }
 })();

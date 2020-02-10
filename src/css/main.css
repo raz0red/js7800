@@ -1,10 +1,16 @@
 body {
     /*background-color:#E0DFE3;*/
-    background-color:#181818;
+    background-color:#1E1E1E;
 
     font-family: Arial, Helvetica, sans-serif;
     font-size: 11px;
     margin: 30px 0 0 0;
+}
+
+
+#container {
+    position: relative;
+    text-align: center;
 }
 
 #screen {    
@@ -15,4 +21,13 @@ body {
     border-radius: 16px;
     background: #000;
     padding: 20px;
+}
+
+#logo {
+    left:50%;
+    top:50%;
+    -webkit-transform: translate(-50%, -50%);
+     -moz-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    position:absolute;  
 }

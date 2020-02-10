@@ -45,58 +45,61 @@ typedef Pair pair;
 #endif
 */
 
-Pair = function () {
-    this._w = 0;
-    this.wPlusPlus = function () {
-        var curr = this._w;
-        this.setW(this._w + 1);
-        return curr;
-    }
-    this.wMinusMinus = function () {
-        var curr = this._w;
-        this.setW(this._w - 1);
-        return curr;
-    }
-    this.wPlusEqual = function (val) {
-        this.setW(this._w + val);
-    }
-    this.wMinusEqual = function (val) {
-        this.setW(this._w - val);
-    }
-    this.setW = function (val) {
-        this._w = val & 0xFFFF;
-    }
-    this.getW = function () {
-        return this._w;
-    }
-    this.getBL = function () {
-        return this._w & 0xFF;
-    }
-    this.getBLSigned = function () {
-        var bl = this.getBL();
-        if ((bl & 0x80) > 0) {
-            return bl - 0x100;
+js7800.Pair = (function () {
+    'use strict';
+
+    var Pair = function () {
+        this._w = 0;
+        this.wPlusPlus = function () {
+            var curr = this._w;
+            this.setW(this._w + 1);
+            return curr;
         }
-        return bl;
+        this.wMinusMinus = function () {
+            var curr = this._w;
+            this.setW(this._w - 1);
+            return curr;
+        }
+        this.wPlusEqual = function (val) {
+            this.setW(this._w + val);
+        }
+        this.wMinusEqual = function (val) {
+            this.setW(this._w - val);
+        }
+        this.setW = function (val) {
+            this._w = val & 0xFFFF;
+        }
+        this.getW = function () {
+            return this._w;
+        }
+        this.getBL = function () {
+            return this._w & 0xFF;
+        }
+        this.getBLSigned = function () {
+            var bl = this.getBL();
+            if ((bl & 0x80) > 0) {
+                return bl - 0x100;
+            }
+            return bl;
+        }
+        this.setBL = function (val) {
+            this.setW(((this._w & 0xFF00) | (val & 0xFF)));
+        }
+        this.blPlusEqual = function (val) {
+            this.setBL(this.getBL() + val);
+        }
+        this.getBH = function () {
+            return (this._w & 0xFF00) >>> 8;
+        }
+        this.setBH = function (val) {
+            this.setW(((this._w & 0xFF) | ((val << 8) & 0xFF00)));
+        }
+        this.bhPlusEqual = function (val) {
+            this.setBH(this.getBH() + val);
+        }
+       this.copy = function(pair) {
+           this._w = pair._w;
+       }
     }
-    this.setBL = function (val) {
-        this.setW(((this._w & 0xFF00) | (val & 0xFF)));
-    }
-    this.blPlusEqual = function (val) {
-        this.setBL(this.getBL() + val);
-    }
-    this.getBH = function () {
-        return (this._w & 0xFF00) >>> 8;
-    }
-    this.setBH = function (val) {
-        this.setW(((this._w & 0xFF) | ((val << 8) & 0xFF00)));
-    }
-    this.bhPlusEqual = function (val) {
-        this.setBH(this.getBH() + val);
-    }
-    this.clone = function () {
-        var c = new Pair();
-        c._w = this._w;
-        return c;
-    }
-}
+    return Pair;
+})();

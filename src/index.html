@@ -2,36 +2,37 @@
 
 <head>
   <link rel="stylesheet" type="text/css" href="css/main.css">
-  <script src="js/js_atari.js" type="text/javascript"></script>
-  <script src="js/prosystem/Bios.js" type="text/javascript"></script>
-  <script src="js/prosystem/Pokey.js" type="text/javascript"></script>
-  <script src="js/prosystem/Sound.js" type="text/javascript"></script>
-  <script src="js/prosystem/Database.js" type="text/javascript"></script>
-  <script src="js/prosystem/Rect.js" type="text/javascript"></script>
-  <script src="js/prosystem/Region.js" type="text/javascript"></script>
-  <script src="js/prosystem/Palette.js" type="text/javascript"></script>
-  <script src="js/prosystem/Equates.js" type="text/javascript"></script>
-  <script src="js/prosystem/Memory.js" type="text/javascript"></script>
+  <script src="js/js_atari_root.js" type="text/javascript"></script>
   <script src="js/prosystem/Pair.js" type="text/javascript"></script>
-  <script src="js/prosystem/Sally.js" type="text/javascript"></script>
-  <script src="js/prosystem/Riot.js" type="text/javascript"></script>
-  <script src="js/prosystem/Cartridge.js" type="text/javascript"></script>
+  <script src="js/prosystem/Rect.js" type="text/javascript"></script>
+  <script src="js/prosystem/Bios.js" type="text/javascript"></script>
+  <script src="js/prosystem/Cartridge.js" type="text/javascript"></script>  
+  <script src="js/prosystem/Pokey.js" type="text/javascript"></script>
   <script src="js/prosystem/Tia.js" type="text/javascript"></script>
-  <script src="js/prosystem/Maria.js" type="text/javascript"></script>
-  <script src="js/prosystem/ProSystem.js" type="text/javascript"></script>
+  <script src="js/prosystem/Riot.js" type="text/javascript"></script>
   <script src="js/prosystem/ExpansionModule.js" type="text/javascript"></script>  
+  <script src="js/prosystem/Memory.js" type="text/javascript"></script>    
+  <script src="js/prosystem/Sound.js" type="text/javascript"></script>
+  <script src="js/prosystem/Database.js" type="text/javascript"></script>  
+  <script src="js/prosystem/Palette.js" type="text/javascript"></script> 
+  <script src="js/prosystem/Sally.js" type="text/javascript"></script>   
+  <script src="js/prosystem/Maria.js" type="text/javascript"></script>    
+  <script src="js/prosystem/Region.js" type="text/javascript"></script>    
+  <script src="js/prosystem/ProSystem.js" type="text/javascript"></script>  
+  <script src="js/js_atari.js" type="text/javascript"></script>
   <script src="js/3rdparty/jquery-min.js" type="text/javascript"></script>
   <script src="js/3rdparty/md5.js" type="text/javascript"></script>
 </head>
 
 <body>
-  <div style="text-align: center">
+  <div id="container">
     <canvas id="screen" width="320" height="240"></canvas>
+    <div id="logo"><img src="images/Atari_7800_Logo.png"/></div>    
   </div>
-  <script>
+  <script>    
     $(document).ready(function () {
 
-      js_atari_init();
+      js7800.init();
 
       function dropHandler(ev) {
         ev.preventDefault();
@@ -51,7 +52,7 @@
         }
 
         if (file) {
-          if (file.size <= 1024 * 1024) /* 1024kb max */ {
+          if (file.size <= 1024 * 1024) /* 1mb max */ {
             var reader = new FileReader();
             reader.readAsBinaryString(file);
             reader.onloadend = function () {
@@ -59,7 +60,7 @@
               for (var i = 0; i < reader.result.length; i++) {
                 cart[i] = reader.result.charCodeAt(i);
               }
-              js_atari_start_emulation(cart);
+              js7800.startEmulation(cart);
             }
           } else {
             //$("#status").text("File too large.");
@@ -76,10 +77,6 @@
       });
       $('body').on('dragenter', function (event) {
         event.preventDefault();
-        //$(this).css('border','10px dashed red');
-      });
-      $('body').on('dragleave', function () {
-        //$(this).css('background','red');
       });
       $('body').on('dragover', function (event) {
         event.preventDefault();
@@ -87,12 +84,12 @@
 
       document.onkeydown =
         function (event) {
-          js_atari_key_event(event, true);
+          js7800.keyEvent(event, true);
         };
 
       document.onkeyup =
         function (event) {
-          js_atari_key_event(event, false);
+          js7800.keyEvent(event, false);
         };
     });
   </script>

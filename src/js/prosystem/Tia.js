@@ -40,6 +40,14 @@
 // ----------------------------------------------------------------------------
 
 js7800.Tia = (function () {
+  'use strict';
+
+  var AUDC0       = 21;
+  var AUDC1       = 22;
+  var AUDF0       = 23;
+  var AUDF1       = 24;
+  var AUDV0       = 25;
+  var AUDV1       = 26;  
 
   var TIA_BUFFER_SIZE = 2048; // WII
 

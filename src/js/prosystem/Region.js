@@ -24,19 +24,24 @@
 // ----------------------------------------------------------------------------
 
 js7800.Region = (function () {
+  'use strict';
+
+  var Rect = js7800.Rect;
+  var Palette = js7800.Palette;
+  var Maria = js7800.Maria;
+  var Cartridge = js7800.Cartridge;  
 
   var REGION_NTSC = 0;
   var REGION_PAL = 1;
   var REGION_AUTO = 2;
 
-
   //byte region_type = REGION_AUTO;
   var region_type = REGION_AUTO;
 
   //static const rect REGION_DISPLAY_AREA_NTSC = {0, 16, 319, 258};
-  var REGION_DISPLAY_AREA_NTSC = new js7800.Rect(0, 16, 319, 258);
+  var REGION_DISPLAY_AREA_NTSC = new Rect(0, 16, 319, 258);
   //static const rect REGION_VISIBLE_AREA_NTSC = {0, 26, 319, 250};
-  var REGION_VISIBLE_AREA_NTSC = new js7800.Rect(0, 26, 319, 250);
+  var REGION_VISIBLE_AREA_NTSC = new Rect(0, 26, 319, 250);
 
   //static const byte REGION_FREQUENCY_NTSC = 60;
   var REGION_FREQUENCY_NTSC = 60;
@@ -44,9 +49,9 @@ js7800.Region = (function () {
   var REGION_SCANLINES_NTSC = 262;
 
   //static const rect REGION_DISPLAY_AREA_PAL = {0, 16, 319, 308};
-  var REGION_DISPLAY_AREA_PAL = new js7800.Rect(0, 16, 319, 308);
+  var REGION_DISPLAY_AREA_PAL = new Rect(0, 16, 319, 308);
   //static const rect REGION_VISIBLE_AREA_PAL = {0, 26, 319, 297};
-  var REGION_VISIBLE_AREA_PAL = new js7800.Rect(0, 26, 319, 297);
+  var REGION_VISIBLE_AREA_PAL = new Rect(0, 26, 319, 297);
   //static const byte REGION_FREQUENCY_PAL = 50;
   var REGION_FREQUENCY_PAL = 50;
   //static const word REGION_SCANLINES_PAL = 312;
@@ -200,31 +205,36 @@ js7800.Region = (function () {
   // ----------------------------------------------------------------------------
   //void region_Reset( ) {
   function region_Reset() {
-    if (region_type == REGION_PAL || (region_type == REGION_AUTO && cartridge_region == REGION_PAL)) {
-      maria_displayArea = REGION_DISPLAY_AREA_PAL;
-      maria_visibleArea = REGION_VISIBLE_AREA_PAL;
-      if (palette_default)
-        palette_Load(REGION_PALETTE_PAL);  // Added check for default - bberlin
-      prosystem_frequency = REGION_FREQUENCY_PAL;
-      prosystem_scanlines = REGION_SCANLINES_PAL;
+    var ProSystem = js7800.ProSystem;    
+    if (region_type == REGION_PAL || (region_type == REGION_AUTO &&
+      Cartridge.GetRegion() == REGION_PAL)) {
+      //maria_displayArea = REGION_DISPLAY_AREA_PAL;
+      Maria.displayArea.Copy(REGION_DISPLAY_AREA_PAL);
+      //maria_visibleArea = REGION_VISIBLE_AREA_PAL;
+      Maria.visibleArea.Copy(REGION_VISIBLE_AREA_PAL);
+      if (Palette.default)
+        Palette.Load(REGION_PALETTE_PAL);  // Added check for default - bberlin
+      ProSystem.SetFrequency(REGION_FREQUENCY_PAL);
+      ProSystem.SetScanlines(REGION_SCANLINES_PAL);
       //#ifndef WII    
       //tia_size = 624;
       //pokey_size = 624;
       //#endif    
     }
     else {
-      maria_displayArea = REGION_DISPLAY_AREA_NTSC;
-      maria_visibleArea = REGION_VISIBLE_AREA_NTSC;
-      if (palette_default)
-        palette_Load(REGION_PALETTE_NTSC);  // Added check for default - bberlin
-      prosystem_frequency = REGION_FREQUENCY_NTSC;
-      prosystem_scanlines = REGION_SCANLINES_NTSC;
+      //maria_displayArea = REGION_DISPLAY_AREA_NTSC;
+      Maria.displayArea.Copy(REGION_DISPLAY_AREA_NTSC);
+      //maria_visibleArea = REGION_VISIBLE_AREA_NTSC;
+      Maria.visibleArea.Copy(REGION_VISIBLE_AREA_NTSC);
+      if (Palette.default)
+        Palette.Load(REGION_PALETTE_NTSC);  // Added check for default - bberlin
+      ProSystem.SetFrequency(REGION_FREQUENCY_NTSC);
+      ProSystem.SetScanlines(REGION_SCANLINES_NTSC);
       //#ifndef WII    
       //tia_size = 524;
       //pokey_size = 524;
       //#endif    
-    }
-    js7800.Pokey.SetSampleRate(SAMPLE_RATE);
+    }    
   }
 
   return {

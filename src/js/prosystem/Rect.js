@@ -24,16 +24,23 @@
 // ----------------------------------------------------------------------------
 
 js7800.Rect = (function () {
+  'use strict';
 
-  function Rect(left, top, right, bottom) {
-    this.left = left;
-    this.top = top;
-    this.right = right;
-    this.bottom = bottom;
-    this.length = (this.right - this.left) + 1;
-    this.height = (this.bottom - this.top) + 1;
-    this.area = this.length * this.height;
-
+  function Rect(left, top, right, bottom) {    
+    this.Update = function(left, top, right, bottom) {
+      this.left = left;
+      this.top = top;
+      this.right = right;
+      this.bottom = bottom;
+      this.length = (this.right - this.left) + 1;
+      this.height = (this.bottom - this.top) + 1;
+      this.area = this.length * this.height;  
+    }
+    
+    this.Copy = function(rect) {
+      this.Update(rect.left, rect.top, rect.right, rect.bottom);
+    }    
+    
     this.GetArea = function () {
       return this.area;
     }
@@ -45,8 +52,9 @@ js7800.Rect = (function () {
     this.GetHeight = function () {
       return this.height;
     }
-  };
 
+    this.Update(left, top, right, bottom);
+  };
 
   return Rect;
 })();
