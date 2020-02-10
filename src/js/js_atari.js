@@ -197,10 +197,12 @@
 
     // Graphics
     Maria.SetSurface(blit_surface);
-    atari_canvas = document.getElementById('screen');
-    atari_ctx = atari_canvas.getContext('2d');
-    atari_image = atari_ctx.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
-    atari_image_data = atari_image.data;
+    if (!atari_canvas) {
+      atari_canvas = document.getElementById('screen');
+      atari_ctx = atari_canvas.getContext('2d');
+      atari_image = atari_ctx.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
+      atari_image_data = atari_image.data;
+    }
 
     // set alpha to opaque 
     for (var i = 3; i < atari_image_data.length - 3; i += 4) {
@@ -211,22 +213,24 @@
     }
     atari_ctx.putImageData(atari_image, 0, 0);
 
-    (function loop() {
-      if (!screen_noise) return;
-      noise(atari_ctx);
-      requestAnimationFrame(loop)
-    })()
+    if (screen_noise) {
+      (function loop() {
+        if (!screen_noise) return;
+        noise(atari_ctx);
+        requestAnimationFrame(loop)
+      })();
 
-    function noise(ctx) {
-      var len = atari_image_data.length - 1;
-      for (var i = 3; i < atari_image_data.length - 3; i += 4) {
-        var v = Math.random() < 0.5 ? 0 : 255;
-        atari_image_data[i - 3] = v;
-        atari_image_data[i - 2] = v;
-        atari_image_data[i - 1] = v;
-        atari_image_data[i] = 0x30;
+      function noise(ctx) {
+        var len = atari_image_data.length - 1;
+        for (var i = 3; i < atari_image_data.length - 3; i += 4) {
+          var v = Math.random() < 0.5 ? 0 : 255;
+          atari_image_data[i - 3] = v;
+          atari_image_data[i - 2] = v;
+          atari_image_data[i - 1] = v;
+          atari_image_data[i] = 0x30;
+        }
+        ctx.putImageData(atari_image, 0, 0);
       }
-      ctx.putImageData(atari_image, 0, 0);
     }
   }
 
