@@ -27,12 +27,12 @@ js7800.Sally = (function () {
   'use strict';
 
   var Pair = js7800.Pair;
-  var Riot = js7800.Riot;
-  var riot_INPT4 = Riot.INPT4;
   var Memory = js7800.Memory;
   var memory_Read = Memory.Read;
   var memory_Write = Memory.Write;
   var memory_ram = Memory.ram;
+
+  var INPT4 = 12;
 
   //byte sally_a = 0;
   var sally_a = 0;
@@ -1384,7 +1384,7 @@ js7800.Sally = (function () {
         // hit detection loop. This should be extended to take into consideration
         // all RIOT and TIA accesses.
         //if (sally_address.w == INPT4) {
-        if (sally_address.getW() == riot_INPT4) {
+        if (sally_address.getW() == INPT4) {
           half_cycle = true;
         }
         return sally_cycles;

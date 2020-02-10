@@ -33,7 +33,6 @@ js7800.ProSystem = (function () {
   var pokey_Process = Pokey.Process;
   var pokey_Scanline = Pokey.Scanline;
   var Riot = js7800.Riot;
-  var riot_INPT4 = Riot.INPT4;
   var riot_SetInput = Riot.SetInput;
   var riot_IsTimingEnabled = Riot.IsTimingEnabled;
   var riot_UpdateTimer = Riot.UpdateTimer;
@@ -50,6 +49,7 @@ js7800.ProSystem = (function () {
   var Cartridge = js7800.Cartridge;  
   var Sound = js7800.Sound;
 
+  var INPT4 = 12;
   var WSYNC = 36;
   var MSTAT = 40;
   var CTRL = 60;
@@ -136,10 +136,10 @@ js7800.ProSystem = (function () {
       (maria_scanline <= (lightgun_scanline + 3))) &&
       // (prosystem_cycles >= ((int)lightgun_cycle ) - 1 ) )
       (prosystem_cycles >= (lightgun_cycle | 0) - 1)) {
-      memory_ram[riot_INPT4] &= 0x7f;
+      memory_ram[INPT4] &= 0x7f;
     }
     else {
-      memory_ram[riot_INPT4] |= 0x80;
+      memory_ram[INPT4] |= 0x80;
     }
   }
 

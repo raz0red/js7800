@@ -339,7 +339,6 @@ js7800.Riot = (function () {
     SetMemory: function(Memory) {
       memory_ram = Memory.ram;
       memory_Write = Memory.Write;
-    },
-    INPT4: INPT4
+    }
   }
 })();

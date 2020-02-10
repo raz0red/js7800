@@ -100,7 +100,7 @@ js7800.Pokey = (function () {
   var POKEY_SAMPLE = 4;
   var SK_RESET = 0x03;
 
-  var CYCLES_PER_SCANLINE = null;
+  var CYCLES_PER_SCANLINE = 0;
 
   //byte pokey_buffer[POKEY_BUFFER_SIZE] = {0};
   var pokey_buffer = new Array(POKEY_BUFFER_SIZE);
