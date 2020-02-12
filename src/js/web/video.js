@@ -87,10 +87,10 @@ js7800.web.video = (function () {
       image = context.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
       imageData = image.data;
     }
-    setAlphaOpaque();
+    clearCanvas();
   }
 
-  function setAlphaOpaque() {
+  function clearCanvas() {
     // set alpha to opaque 
     for (var i = 3; i < imageData.length - 3; i += 4) {
       imageData[i - 3] = 0;
@@ -105,7 +105,7 @@ js7800.web.video = (function () {
     if (displaySnow) {
       (function loop() {
         if (!displaySnow) {
-          setAlphaOpaque();
+          clearCanvas();
           return;
         } 
         snow(context);

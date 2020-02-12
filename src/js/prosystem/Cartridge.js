@@ -625,7 +625,8 @@ js7800.Cartridge = (function () {
     GetHblank: function() { return cartridge_hblank; },
     GetLeftSwitch: function() { return cartridge_left_switch; },
     GetRightSwitch: function() { return cartridge_right_switch; },
-    SetMemory: function(Memory) {
+    init: function() {
+      var Memory = js7800.Memory;
       memory_WriteROM = Memory.WriteROM;
       memory_ClearROM = Memory.ClearROM;
     },

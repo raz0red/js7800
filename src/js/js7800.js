@@ -142,14 +142,15 @@
     if (!initialized) {
       initialized = true;
 
+      // ProSystem
+      Sound.init();
+      Riot.init();
+      Cartridge.init();
+      // Web
       WebAudio.init();
       WebVideo.init();
       WebDrop.init();
-      WebInput.init(keyboardData);
-
-      Sound.SetProSystem(ProSystem);
-      Riot.SetMemory(Memory);
-      Cartridge.SetMemory(Memory);
+      WebInput.init(keyboardData);            
 
       WebVideo.startScreenSnow();
       $("#logo").fadeIn("slow");

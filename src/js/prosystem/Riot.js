@@ -336,7 +336,8 @@ js7800.Riot = (function () {
     SetTimer: riot_SetTimer,
     IsTimingEnabled: (function() { return riot_timing; }),
     GetTimerCount: (function() { return riot_timer_count; }),
-    SetMemory: function(Memory) {
+    init: function() {
+      var Memory = js7800.Memory;
       memory_ram = Memory.ram;
       memory_Write = Memory.Write;
     }

@@ -324,11 +324,11 @@ js7800.Sound = (function () {
       prosystem_sampleRate = rate; 
     },
     SetStoreSoundCallback: function(callback) { store_sound_callback = callback },
-    SetProSystem: function(ProSystem) {
-      prosystem_GetFrame = ProSystem.GetFrame;
-    },
     OnCartridgeLoaded: function() {
       cartridge_pokey = Cartridge.IsPokeyEnabled();
+    },
+    init: function() {
+      prosystem_GetFrame = js7800.ProSystem.GetFrame;
     }
   }
 })();
