@@ -57,6 +57,7 @@ js7800.web.audio = (function () {
         function () { if (audioCtx.state !== 'running') audioCtx.resume(); }
       document.documentElement.addEventListener("keydown", resumeFunc);
       document.documentElement.addEventListener("click", resumeFunc);
+      window.addEventListener("gamepadconnected", resumeFunc);
     }
   }
 

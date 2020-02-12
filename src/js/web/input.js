@@ -1,7 +1,8 @@
 js7800.web.input = (function () {
   'use strict';
 
-  var Cartridge = js7800.Cartridge;  
+  var Cartridge = js7800.Cartridge;
+  var Pad = js7800.web.pad;
 
   /** Cartridge shadow */
   var cartridgeLeftSwitch = 1;
@@ -24,10 +25,12 @@ js7800.web.input = (function () {
   var keyboardData = null;
 
   function updateInput() {
+    Pad.poll();
+
     // | 12       | Console      | Reset
-    keyboardData[12] = resetHeld;
+    keyboardData[12] = resetHeld || Pad.isReset(0);
     // | 13       | Console      | Select
-    keyboardData[13] = selectHeld;
+    keyboardData[13] = selectHeld || Pad.isSelect(0);
     // | 14       | Console      | Pause
     keyboardData[14] = pauseHeld;
     // | 15       | Console      | Left Difficulty
@@ -43,17 +46,17 @@ js7800.web.input = (function () {
     var offset = (joyIndex == 0 ? 0 : 6);
 
     // | 00 06     | Joystick 1 2 | Right
-    keyboardData[0 + offset] = !joyIndex ? rightHeld && !(leftHeld && leftLast) : 0;
+    keyboardData[0 + offset] = !joyIndex ? (rightHeld || Pad.isRight(joyIndex)) && !(leftHeld && leftLast) : 0;
     // | 01 07     | Joystick 1 2 | Left
-    keyboardData[1 + offset] = !joyIndex ? leftHeld && !(rightHeld && !leftLast) : 0;
+    keyboardData[1 + offset] = !joyIndex ? (leftHeld || Pad.isLeft(joyIndex)) && !(rightHeld && !leftLast) : 0;
     // | 02 08     | Joystick 1 2 | Down
-    keyboardData[2 + offset] = !joyIndex ? downHeld && !(upHeld && upLast) : 0;
+    keyboardData[2 + offset] = !joyIndex ? (downHeld || Pad.isDown(joyIndex)) && !(upHeld && upLast) : 0;
     // | 03 09     | Joystick 1 2 | Up
-    keyboardData[3 + offset] = !joyIndex ? upHeld && !(downHeld && !upLast) : 0;
+    keyboardData[3 + offset] = !joyIndex ? (upHeld || Pad.isUp(joyIndex)) && !(downHeld && !upLast) : 0;
     // | 04 10     | Joystick 1 2 | Button 1
-    keyboardData[4 + offset] = !joyIndex ? aHeld : 0;
+    keyboardData[4 + offset] = !joyIndex ? (aHeld || Pad.isButton1(joyIndex)) : 0;
     // | 05 11     | Joystick 1 2 | Button 2
-    keyboardData[5 + offset] = !joyIndex ? bHeld : 0;
+    keyboardData[5 + offset] = !joyIndex ? (bHeld || Pad.isButton2(joyIndex)) : 0;
   }
 
   function resetKeyboardData() {
@@ -129,8 +132,8 @@ js7800.web.input = (function () {
     }
   }
 
-  return {    
-    init: function(kbData) {
+  return {
+    init: function (kbData) {
       keyboardData = kbData;
       document.onkeydown =
         function (event) {
@@ -142,9 +145,9 @@ js7800.web.input = (function () {
           keyEvent(event, false);
         };
     },
-    onCartridgeLoaded: function() {
+    onCartridgeLoaded: function () {
       cartridgeLeftSwitch = Cartridge.GetLeftSwitch();
-      cartridgeRightSwitch = Cartridge.GetRightSwitch();    
+      cartridgeRightSwitch = Cartridge.GetRightSwitch();
     },
     resetKeyboardData: resetKeyboardData,
     updateInput: updateInput
