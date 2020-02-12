@@ -12,6 +12,20 @@ js7800.web.pad = (function () {
 
   var gamepads = [];
 
+  function isAnalogDir(index, axesIndex, gt, value) {
+    if (gamepads.length > index) {
+      var pad = gamepads[index];
+      if (pad && pad.axes) {
+        var axes = pad.axes;
+        if(axes.length > axesIndex) {
+          return gt ? axes[axesIndex] > value : axes[axesIndex] < value;
+        }
+      }
+    }
+
+    return false;
+  }
+
   function isPressed(index, buttonIndex) {
     var index = 0;
     if (gamepads.length > index) {
@@ -41,7 +55,19 @@ js7800.web.pad = (function () {
     isButton1: function(index) { return isPressed(index, B1)},
     isButton2: function(index) { return isPressed(index, B2)},
     isReset: function(index) { return isPressed(index, START)},
-    isSelect: function(index) { return isPressed(index, BACK)}
+    isSelect: function(index) { return isPressed(index, BACK)},
+    isAnalogLeft: function(index, stickIndex) { 
+      return isAnalogDir(index, stickIndex << 1, false, -.5);
+     },
+    isAnalogRight: function(index, stickIndex) { 
+      return isAnalogDir(index, stickIndex << 1, true, .5); 
+    },
+    isAnalogUp: function(index, stickIndex) { 
+      return isAnalogDir(index, (stickIndex << 1) + 1, false, -.5); 
+    },
+    isAnalogDown: function(index, stickIndex) { 
+      return isAnalogDir(index, (stickIndex << 1) + 1, true, .5); 
+    },
   }
 })();
 

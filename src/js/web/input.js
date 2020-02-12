@@ -46,13 +46,21 @@ js7800.web.input = (function () {
     var offset = (joyIndex == 0 ? 0 : 6);
 
     // | 00 06     | Joystick 1 2 | Right
-    keyboardData[0 + offset] = !joyIndex ? (rightHeld || Pad.isRight(joyIndex)) && !(leftHeld && leftLast) : 0;
+    keyboardData[0 + offset] = !joyIndex ?
+      (rightHeld || Pad.isRight(joyIndex) || Pad.isAnalogRight(joyIndex, 0)) && !(leftHeld && leftLast) :
+      Pad.isAnalogRight(0, 1); // Dual analog
     // | 01 07     | Joystick 1 2 | Left
-    keyboardData[1 + offset] = !joyIndex ? (leftHeld || Pad.isLeft(joyIndex)) && !(rightHeld && !leftLast) : 0;
+    keyboardData[1 + offset] = !joyIndex ?
+      (leftHeld || Pad.isLeft(joyIndex) || Pad.isAnalogLeft(joyIndex, 0)) && !(rightHeld && !leftLast) :
+      Pad.isAnalogLeft(0, 1); // Dual analog
     // | 02 08     | Joystick 1 2 | Down
-    keyboardData[2 + offset] = !joyIndex ? (downHeld || Pad.isDown(joyIndex)) && !(upHeld && upLast) : 0;
+    keyboardData[2 + offset] = !joyIndex ?
+      (downHeld || Pad.isDown(joyIndex) || Pad.isAnalogDown(joyIndex, 0)) && !(upHeld && upLast) :
+      Pad.isAnalogDown(0, 1); // Dual analog
     // | 03 09     | Joystick 1 2 | Up
-    keyboardData[3 + offset] = !joyIndex ? (upHeld || Pad.isUp(joyIndex)) && !(downHeld && !upLast) : 0;
+    keyboardData[3 + offset] = !joyIndex ?
+      (upHeld || Pad.isUp(joyIndex) || Pad.isAnalogUp(joyIndex, 0)) && !(downHeld && !upLast) :
+      Pad.isAnalogUp(0, 1); // Dual analog
     // | 04 10     | Joystick 1 2 | Button 1
     keyboardData[4 + offset] = !joyIndex ? (aHeld || Pad.isButton1(joyIndex)) : 0;
     // | 05 11     | Joystick 1 2 | Button 2
