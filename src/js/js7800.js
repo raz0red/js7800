@@ -17,6 +17,7 @@
   var WebDrop = webPkg.drop;
   var updateInput = WebInput.updateInput;
   var flipImage = WebVideo.flipImage;
+  var WebKb = webPkg.kb;
 
   /** The 7800 scanline that the lightgun is currently at */
   //int lightgun_scanline = 0;
@@ -66,7 +67,7 @@
     Sound.OnCartridgeLoaded();
     // Web
     WebVideo.onCartidgeLoaded();
-    WebInput.onCartridgeLoaded();
+    WebKb.onCartridgeLoaded();
 
     init();
     ProSystem.Reset();
@@ -150,7 +151,8 @@
       WebAudio.init();
       WebVideo.init();
       WebDrop.init();
-      WebInput.init(keyboardData);            
+      WebKb.init();
+      WebInput.init(keyboardData);         
 
       WebVideo.startScreenSnow();
       $("#logo").fadeIn("slow");

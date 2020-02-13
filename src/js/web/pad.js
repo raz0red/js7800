@@ -48,26 +48,42 @@ js7800.web.pad = (function () {
 
   return {
     poll: poll,
-    isLeft: function(index) { return isPressed(index, LEFT)},
-    isRight: function(index) { return isPressed(index, RIGHT)},
-    isUp: function(index) { return isPressed(index, UP)},
-    isDown: function(index) { return isPressed(index, DOWN)},
+    isDigitalLeft: function(index) { return isPressed(index, LEFT)},
+    isDigitalRight: function(index) { return isPressed(index, RIGHT)},
+    isDigitalUp: function(index) { return isPressed(index, UP)},
+    isDigitalDown: function(index) { return isPressed(index, DOWN)},
     isButton1: function(index) { return isPressed(index, B1)},
     isButton2: function(index) { return isPressed(index, B2)},
     isReset: function(index) { return isPressed(index, START)},
     isSelect: function(index) { return isPressed(index, BACK)},
     isAnalogLeft: function(index, stickIndex) { 
-      return isAnalogDir(index, stickIndex << 1, false, -.5);
+      return (stickIndex !== undefined) && 
+        isAnalogDir(index, stickIndex << 1, false, -.5);
      },
     isAnalogRight: function(index, stickIndex) { 
-      return isAnalogDir(index, stickIndex << 1, true, .5); 
+      return (stickIndex !== undefined) && 
+        isAnalogDir(index, stickIndex << 1, true, .5); 
     },
     isAnalogUp: function(index, stickIndex) { 
-      return isAnalogDir(index, (stickIndex << 1) + 1, false, -.5); 
+      return (stickIndex !== undefined) && 
+        isAnalogDir(index, (stickIndex << 1) + 1, false, -.5); 
     },
     isAnalogDown: function(index, stickIndex) { 
-      return isAnalogDir(index, (stickIndex << 1) + 1, true, .5); 
+      return (stickIndex !== undefined) && 
+        isAnalogDir(index, (stickIndex << 1) + 1, true, .5); 
     },
+    isLeft: function(index, stickIndex) {
+      return this.isDigitalLeft(index) || this.isAnalogLeft(index, stickIndex);
+    },
+    isRight: function(index, stickIndex) {
+      return this.isDigitalRight(index) || this.isAnalogRight(index, stickIndex);
+    },
+    isUp: function(index, stickIndex) {
+      return this.isDigitalUp(index) || this.isAnalogUp(index, stickIndex);
+    },
+    isDown: function(index, stickIndex) {
+      return this.isDigitalDown(index) || this.isAnalogDown(index, stickIndex);
+    }
   }
 })();
 
