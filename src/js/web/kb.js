@@ -90,37 +90,44 @@ js7800.web.kb = (function () {
   var cartridgeLeftSwitch = 1;
   var cartridgeRightSwitch = 0;
 
+  var f1Code = Keys.KEY_F1.code;
+  var f2Code = Keys.KEY_F2.code;
+  var f3Code = Keys.KEY_F3.code;
+  var f4Code = Keys.KEY_F4.code;
+  var f5Code = Keys.KEY_F5.code;
+  var f6Code = Keys.KEY_F6.code;
+  
   function keyEvent(event, down) {
     var code = event.keyCode;
     var handled = false;
 
     if (!p1KeyMap.handleKeyCode(code, down)) {
       switch (code) {
-        case Keys.KEY_F2.code:
+        case f2Code:
           resetHeld = down;
           handled = true;
           break;
-        case Keys.KEY_F3.code:
+        case f3Code:
           selectHeld = down;
           handled = true;
           break;
-        case Keys.KEY_F4.code:
+        case f4Code:
           pauseHeld = down;
           handled = true;
           break;
-        case Keys.KEY_F5.code:
+        case f5Code:
           if (!down) {
             leftDiffSet ^= 1;
           }
           handled = true;
           break;
-        case Keys.KEY_F6.code:
+        case f6Code:
           if (!down) {
             rightDiffSet ^= 1;
           }
           handled = true;
           break;
-        case Keys.KEY_F1.code:
+        case f1Code:
           // Ignore F1 keys, annoying to have browser open tab
           handled = true;
           break;
