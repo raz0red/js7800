@@ -3,6 +3,7 @@ js7800.web.kb = (function () {
 
   var Cartridge = js7800.Cartridge;
   var Keys = js7800.web.keys.Keys;
+  var Video = js7800.web.video;
 
   var KeyboardMapping = function (leftKey, rightKey, upKey, downKey, b1Key, b2Key) {
     var leftKey = leftKey;
@@ -96,7 +97,8 @@ js7800.web.kb = (function () {
   var f4Code = Keys.KEY_F4.code;
   var f5Code = Keys.KEY_F5.code;
   var f6Code = Keys.KEY_F6.code;
-  
+  var f9Code = Keys.KEY_F9.code;
+
   function keyEvent(event, down) {
     var code = event.keyCode;
     var handled = false;
@@ -129,6 +131,12 @@ js7800.web.kb = (function () {
           break;
         case f1Code:
           // Ignore F1 keys, annoying to have browser open tab
+          handled = true;
+          break;
+        case f9Code:
+          if (down) {
+            Video.fullScreen();
+          }
           handled = true;
           break;
       }

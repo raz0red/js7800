@@ -13,6 +13,11 @@ js7800.web.video = (function () {
   var PAL_ATARI_HEIGHT = 240;
   var ATARI_CANVAS_HEIGHT = 240;
 
+  var HxW_AR = 1.1416;
+  var WxH_AR = 0.876;
+  var DEFAULT_WIDTH = 548;
+  var DEFAULT_HEIGHT = 480;
+
   /** Snow */
   var displaySnow = true;
 
@@ -22,6 +27,8 @@ js7800.web.video = (function () {
   var canvas = null;
   /** The atari context */
   var context = null;
+  /** The controls div */
+  var controlsDiv = null;
   /** The atari image data */
   var image;
   /** The atari image data */
@@ -86,8 +93,10 @@ js7800.web.video = (function () {
       context = canvas.getContext('2d');
       image = context.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
       imageData = image.data;
+      controlsDiv = document.getElementById('controls');
     }
     clearCanvas();
+    resizeCanvas();
   }
 
   function clearCanvas() {
@@ -125,61 +134,44 @@ js7800.web.video = (function () {
     }
   }
 
-  // function fakeCRT() {
-  //   var glcanvas, source, srcctx, texture, w, h, hw, hh, w75;
+  function resizeCanvas() {
+    var fullScreen = document.fullscreenElement;
+    if (fullScreen) {
+      var height = window.innerHeight - controlsDiv.offsetHeight;
+      var width = window.innerWidth;
 
-  //   // Try to create a WebGL canvas (will fail if WebGL isn't supported)
-  //   try {
-  //     glcanvas = fx.canvas();
-  //   } catch (e) { return; }
+      var newHeight = height;
+      var newWidth = newHeight * HxW_AR;
+      if (newWidth > width) {
+        newWidth = width;
+        newHeight = newWidth * WxH_AR;
+      }      
+      canvas.style.width = newWidth + "px";
+      canvas.style.height = newHeight + "px";
+    } else {
+      canvas.style.width = DEFAULT_WIDTH + "px";
+      canvas.style.height = DEFAULT_HEIGHT + "px";
+    }
+  }
 
-  //   // Assumes the first canvas tag in the document is the 2D game, but
-  //   // obviously we could supply a specific canvas element here.
-  //   source = canvas;
-  //   srcctx = context;
-
-  //   // This tells glfx what to use as a source image
-  //   texture = glcanvas.texture(source);
-
-  //   // Just setting up some details to tweak the bulgePinch effect
-  //   w = source.width;
-  //   h = source.height;
-  //   hw = w / 2;
-  //   hh = h / 2;
-  //   w75 = w * 0.75;
-
-  //   // Hide the source 2D canvas and put the WebGL Canvas in its place
-  //   source.parentNode.insertBefore(glcanvas, source);
-  //   source.style.display = 'none';
-  //   glcanvas.className = source.className;
-  //   glcanvas.id = source.id;
-  //   source.id = 'old_' + source.id;
-
-  //   // It is pretty silly to setup a separate animation timer loop here, but
-  //   // this lets us avoid monkeying with the source game's code.
-  //   // It would make way more sense to do the following directly in the source
-  //   // game's draw function in terms of performance.
-  //   setInterval(function () {
-  //     // Give the source scanlines
-  //     //srcctx.drawImage(lines, 0, 0, w, h);
-
-  //     // Load the latest source frame
-  //     texture.loadContentsOf(source);
-
-  //     // Apply WebGL magic
-  //     glcanvas.draw(texture)
-  //       .bulgePinch(hw, hh, w75, 0.12)
-  //       .vignette(0.25, 0.74)
-  //       .update();
-  //   }, Math.floor(1000 / 40));
-  // }  
+  window.addEventListener("resize", function() {
+    resizeCanvas();
+  });
 
   return {
     init: init,
     flipImage: flipImage,
     startScreenSnow: startSnow,
-    stopScreenSnow: function() { 
-      displaySnow = false; },
+    stopScreenSnow: function() { displaySnow = false; },
+    fullScreen: function () {
+      var fsContainer = document.getElementById("fullscreen-container");
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        fsContainer.requestFullscreen();
+      }
+      resizeCanvas();
+    },
     onCartidgeLoaded: function() {
       cartridgeRegion = Cartridge.GetRegion();
       initPalette8();

@@ -41,21 +41,6 @@
 
   var initialized = false;
 
-  /* Function to open fullscreen mode */
-  /*  
-    function openFullscreen(elem) {
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      } else if (elem.mozRequestFullScreen) { // Firefox 
-        elem.mozRequestFullScreen();
-      } else if (elem.webkitRequestFullscreen) { // Chrome, Safari & Opera 
-        elem.webkitRequestFullscreen();
-      } else if (elem.msRequestFullscreen) { // IE/Edge 
-        elem.msRequestFullscreen();
-      }    
-    }
-  */
-
   function startEmu(cart) {
 
     WebInput.resetKeyboardData();
@@ -152,7 +137,7 @@
       WebVideo.init();
       WebDrop.init();
       WebKb.init();
-      WebInput.init(keyboardData);         
+      WebInput.init(keyboardData);
 
       WebVideo.startScreenSnow();
       $("#logo").fadeIn("slow");
