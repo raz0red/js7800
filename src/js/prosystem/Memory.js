@@ -36,6 +36,11 @@ js7800.Memory = (function () {
   var riot_SetDRA = Riot.SetDRA
   var riot_SetTimer = Riot.SetTimer
   var Xm = js7800.Xm;
+  var xm_IsPokeyEnabled = Xm.IsPokeyEnabled;
+  var xm_IsMemEnabled = Xm.IsMemEnabled;
+  var xm_Read = Xm.Read;
+  var xm_Write = Xm.Write;
+
   var Bios = js7800.Bios;
   var Cartridge = js7800.Cartridge;
 
@@ -107,9 +112,9 @@ js7800.Memory = (function () {
 
     if (cartridge_xm) {
       if ((address >= 0x0470 && address < 0x0480) ||
-        (Xm.IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
-        (Xm.IsMemEnabled && (address >= 0x4000 && address < 0x8000))) {
-        return Xm.Read(address);
+        (xm_IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
+        (xm_IsMemEnabled() && (address >= 0x4000 && address < 0x8000))) {
+        return xm_Read(address);
       }
     }
 
@@ -158,9 +163,9 @@ js7800.Memory = (function () {
 
     if (cartridge_xm &&
       ((address >= 0x0470 && address < 0x0480) ||
-        ((Xm.IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
-          (Xm.IsMemEnabled() && (address >= 0x4000 && address < 0x8000))))) {
-      Xm.Write(address, data);
+        ((xm_IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
+          (xm_IsMemEnabled() && (address >= 0x4000 && address < 0x8000))))) {
+      xm_Write(address, data);
       return;
     }
 
