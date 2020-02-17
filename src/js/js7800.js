@@ -9,6 +9,7 @@
   var Memory = js7800.Memory;
   var Sound = js7800.Sound;
   var soundStore = Sound.Store;
+  var Database = js7800.Database;
 
   var webPkg = js7800.web;
   var WebAudio = webPkg.audio;
@@ -43,8 +44,29 @@
 
   function startEmu(cart) {
 
-    WebInput.resetKeyboardData();
     Cartridge.Load(cart, cart.length);
+    var digest = Cartridge.GetDigest();
+    Database.Load(digest);
+
+    console.log("Final values:");
+    console.log("  Title: %s", Cartridge.GetTitle());
+    console.log("  Size: %d", Cartridge.GetSize());
+    console.log("  Digest: %s", digest);
+    console.log("  Type: %d", Cartridge.GetType());
+    console.log("  Pokey: %s", Cartridge.IsPokeyEnabled() ? "true" : "false");
+    console.log("  Pokey450: %s", Cartridge.IsPokey450Enabled() ? "true" : "false");
+    console.log("  Controller 1: %d", Cartridge.GetController1());
+    console.log("  Controller 2: %d", Cartridge.GetController2());
+    console.log("  Region: %s", Cartridge.GetRegion() == 1 ? "PAL" : "NTSC");
+    console.log("  Flags: %d", Cartridge.GetFlags());
+    console.log("  XM: %s", Cartridge.IsXmEnabled() ? "true" : "false");
+    console.log("  Right switch: %d", Cartridge.GetRightSwitch());
+    console.log("  Left switch: %d", Cartridge.GetLeftSwitch());
+    console.log("  Swap buttons: %s", Cartridge.IsSwapButtons() ? "true" : "false");
+    console.log("  Dual analog: %s", Cartridge.IsDualAnalog() ? "true" : "false");
+    console.log("  Hblank: %d", Cartridge.GetHblank());
+    console.log("  Crosshair X: %d", Cartridge.GetCrossX());
+    console.log("  Crosshair Y: %d", Cartridge.GetCrossY());
 
     // ProSystem
     Memory.OnCartridgeLoaded();
@@ -53,6 +75,8 @@
     // Web
     WebVideo.onCartidgeLoaded();
     WebKb.onCartridgeLoaded();
+    // Reset keyboard data
+    WebInput.resetKeyboardData();
 
     init();
     ProSystem.Reset();

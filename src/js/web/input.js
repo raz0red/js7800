@@ -2,6 +2,7 @@ js7800.web.input = (function () {
   'use strict';
 
   var Pad = js7800.web.pad;
+  var Cartridge = js7800.Cartridge;
   var Kb = js7800.web.kb;
 
   var p1KeyMap = Kb.p1KeyMap;
@@ -27,6 +28,7 @@ js7800.web.input = (function () {
 
   function updateJoystick(joyIndex, keyboardData) {
     var offset = (joyIndex == 0 ? 0 : 6);
+    var swap = Cartridge.IsSwapButtons();
 
     // | 00 06     | Joystick 1 2 | Right
     keyboardData[0 + offset] = !joyIndex ?
@@ -45,10 +47,10 @@ js7800.web.input = (function () {
       (p1KeyMap.isUp() || Pad.isUp(joyIndex, 0)) :
       Pad.isAnalogUp(0, 1); // Dual analog
     // | 04 10     | Joystick 1 2 | Button 1
-    keyboardData[4 + offset] = !joyIndex ? 
+    keyboardData[(swap ? 5 : 4) + offset] = !joyIndex ? 
       (p1KeyMap.isButton1() || Pad.isButton1(joyIndex)) : 0;
     // | 05 11     | Joystick 1 2 | Button 2
-    keyboardData[5 + offset] = !joyIndex ? 
+    keyboardData[(swap ? 4 : 5) + offset] = !joyIndex ? 
       (p1KeyMap.isButton2() || Pad.isButton2(joyIndex)) : 0;
   }
 
