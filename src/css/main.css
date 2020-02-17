@@ -54,7 +54,8 @@ body {
 }
 
 #controls {
-    border: 10px solid green; 
+    border-top:10px solid black;
+    background-color: #151515;
     height:30px; 
     margin-left:auto; 
     margin-right:auto;
