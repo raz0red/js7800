@@ -36,22 +36,22 @@ js7800.web.input = (function () {
     keyboardData[0 + offset] = 
       (joyIndex ? p2KeyMap.isRight() : p1KeyMap.isRight()) || 
       Pad.isRight(joyIndex, 0) ||
-      (dualanalog && joyindex && Pad.isAnalogRight(0, 1)); // Dual analog
+      (dualanalog && joyIndex && Pad.isAnalogRight(0, 1)); // Dual analog
     // | 01 07     | Joystick 1 2 | Left
     keyboardData[1 + offset] = 
       (joyIndex ? p2KeyMap.isLeft() : p1KeyMap.isLeft()) || 
       Pad.isLeft(joyIndex, 0) ||
-      (dualanalog && joyindex && Pad.isAnalogLeft(0, 1)); // Dual analog
+      (dualanalog && joyIndex && Pad.isAnalogLeft(0, 1)); // Dual analog
     // | 02 08     | Joystick 1 2 | Down
     keyboardData[2 + offset] = 
       (joyIndex ? p2KeyMap.isDown() : p1KeyMap.isDown())  || 
       Pad.isDown(joyIndex, 0) ||
-      (dualanalog && joyindex && Pad.isAnalogDown(0, 1)); // Dual analog
+      (dualanalog && joyIndex && Pad.isAnalogDown(0, 1)); // Dual analog
     // | 03 09     | Joystick 1 2 | Up
     keyboardData[3 + offset] = 
       (joyIndex ? p2KeyMap.isUp() : p1KeyMap.isUp()) || 
       Pad.isUp(joyIndex, 0) ||
-      (dualanalog && joyindex && Pad.isAnalogUp(0, 1)); // Dual analog
+      (dualanalog && joyIndex && Pad.isAnalogUp(0, 1)); // Dual analog
     // | 04 10     | Joystick 1 2 | Button 1
     keyboardData[(swap ? 5 : 4) + offset] = 
       (joyIndex ? p2KeyMap.isButton1() : p1KeyMap.isButton1()) || 
