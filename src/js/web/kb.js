@@ -73,12 +73,20 @@ js7800.web.kb = (function () {
   }
 
   var p1KeyMap = new KeyboardMapping(
-    Keys.KEY_LEFT.code, 
+    Keys.KEY_LEFT.code,
     Keys.KEY_RIGHT.code,
     Keys.KEY_UP.code,
-    Keys.KEY_DOWN.code, 
-    Keys.KEY_Z.code, 
+    Keys.KEY_DOWN.code,
+    Keys.KEY_Z.code,
     Keys.KEY_X.code);
+
+  var p2KeyMap = new KeyboardMapping(
+    Keys.KEY_J.code,
+    Keys.KEY_L.code,
+    Keys.KEY_I.code,
+    Keys.KEY_K.code,
+    Keys.KEY_N.code,
+    Keys.KEY_M.code);
 
   var resetHeld = false;
   var selectHeld = false;
@@ -103,7 +111,8 @@ js7800.web.kb = (function () {
     var code = event.keyCode;
     var handled = false;
 
-    if (!p1KeyMap.handleKeyCode(code, down)) {
+    if (!p1KeyMap.handleKeyCode(code, down) &&
+      !p2KeyMap.handleKeyCode(code, down)) {
       switch (code) {
         case f2Code:
           resetHeld = down;
@@ -169,8 +178,9 @@ js7800.web.kb = (function () {
       cartridgeRightSwitch = Cartridge.GetRightSwitch();
     },
     reset: function () {
-      // Reset player1 keyboard
+      // Reset key maps
       p1KeyMap.reset();
+      p2KeyMap.reset();
 
       // Left difficulty switch defaults to off
       leftDiffSet = cartridgeLeftSwitch;
@@ -178,7 +188,8 @@ js7800.web.kb = (function () {
       // Right difficulty switch defaults to on
       rightDiffSet = cartridgeRightSwitch;
     },
-    p1KeyMap: p1KeyMap
+    p1KeyMap: p1KeyMap,
+    p2KeyMap: p2KeyMap
   }
 })();
 

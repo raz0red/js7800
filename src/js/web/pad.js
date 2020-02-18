@@ -27,7 +27,6 @@ js7800.web.pad = (function () {
   }
 
   function isPressed(index, buttonIndex) {
-    var index = 0;
     if (gamepads.length > index) {
       var pad = gamepads[index];
       if (pad && pad.buttons) {
