@@ -52,8 +52,8 @@ js7800.web.mouse = (function () {
 
   function onMouseMove(event) {
     var rect = canvas.getBoundingClientRect();
-    var x = ((event.clientX - rect.left) / (canvas.scrollWidth / ATARI_WIDTH));
-    var y = ((event.clientY - rect.top) / (canvas.scrollHeight / ATARI_CANVAS_HEIGHT));
+    var x = (((event.clientX - rect.left) / (canvas.scrollWidth / ATARI_WIDTH))) | 0;
+    var y = (((event.clientY - rect.top) / (canvas.scrollHeight / ATARI_CANVAS_HEIGHT))) | 0;
     //console.log("%d, %d", x, y);
     x -= Cartridge.GetCrossX();
     y -= Cartridge.GetCrossY();
@@ -67,9 +67,9 @@ js7800.web.mouse = (function () {
     var yratio = scanlines / ATARI_CANVAS_HEIGHT;
     var xratio = LG_CYCLES_PER_SCANLINE / ATARI_WIDTH;
     lightGunScanline = ((y * yratio) +
-      (visibleArea.top - displayArea.top + 1) + yoffset);
+      (visibleArea.top - displayArea.top + 1) + yoffset) | 0;
     lightGunCycle =
-      (HBLANK_CYCLES + LG_CYCLES_INDENT + (x * xratio));
+      (HBLANK_CYCLES + LG_CYCLES_INDENT + (x * xratio)) | 0;
     if (lightGunCycle > CYCLES_PER_SCANLINE) {
       lightGunScanline++;
       lightGunCycle -= CYCLES_PER_SCANLINE;
