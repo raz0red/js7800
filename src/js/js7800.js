@@ -19,6 +19,7 @@
   var updateInput = WebInput.updateInput;
   var flipImage = WebVideo.flipImage;
   var WebKb = webPkg.kb;
+  var WebMouse = webPkg.mouse;
 
   /** The 7800 scanline that the lightgun is currently at */
   //int lightgun_scanline = 0;
@@ -75,8 +76,9 @@
     // Web
     WebVideo.onCartidgeLoaded();
     WebKb.onCartridgeLoaded();
+    WebMouse.onCartridgeLoaded();
     // Reset keyboard data
-    WebInput.resetKeyboardData();
+    WebInput.resetKeyboardData();    
 
     init();
     ProSystem.Reset();
@@ -89,6 +91,9 @@
     var adjustTolerance = (frameTicks * 1000);
     var isActive = ProSystem.IsActive;
     var isPaused = ProSystem.IsPaused;
+
+    // Enable mouse tracking if lightgun game
+    WebMouse.enableMouseTracking(Cartridge.IsLightGunEnabled());
 
     var f = function () {
       if (isActive() && !isPaused()) {

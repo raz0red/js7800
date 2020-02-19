@@ -47,6 +47,7 @@ js7800.ProSystem = (function () {
   var sally_ExecuteInstruction = Sally.ExecuteInstruction;
   var Bios = js7800.Bios;  
   var Cartridge = js7800.Cartridge;  
+  var isLightGunEnabled = Cartridge.IsLightGunEnabled;
   var Sound = js7800.Sound;
 
   var INPT4 = 12;
@@ -132,10 +133,11 @@ js7800.ProSystem = (function () {
    */
   //static void prosystem_FireLightGun()
   function prosystem_FireLightGun() {
-    if (((maria_scanline >= lightgun_scanline) &&
-      (maria_scanline <= (lightgun_scanline + 3))) &&
-      // (prosystem_cycles >= ((int)lightgun_cycle ) - 1 ) )
-      (prosystem_cycles >= (lightgun_cycle | 0) - 1)) {
+    var mouse = js7800.web.mouse;
+    var lightGunScanline = mouse.getLightGunScanline();
+    var lightGunCycle = mouse.getLightGunCycle();
+    if (((maria_scanline >= lightGunScanline) && (maria_scanline <= (lightGunScanline + 3))) &&
+      (prosystem_cycles >= ((lightGunCycle | 0) - 1))) {
       memory_ram[INPT4] &= 0x7f;
     }
     else {
@@ -182,7 +184,7 @@ js7800.ProSystem = (function () {
 
     // Is the lightgun enabled for the current frame?
     //bool lightgun =
-    var lightgun = false; // (lightgun_enabled && (memory_ram[CTRL] & 96) != 64);
+    var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
     riot_SetInput(input);
 
@@ -376,7 +378,8 @@ js7800.ProSystem = (function () {
       cartridge_flags = Cartridge.GetFlags();      
       cartridge_hblank = Cartridge.GetHblank();
     },
-    CYCLES_PER_SCANLINE: CYCLES_PER_SCANLINE
+    CYCLES_PER_SCANLINE: CYCLES_PER_SCANLINE,
+    HBLANK_CYCLES: HBLANK_CYCLES
   }
 })();
 

@@ -623,6 +623,7 @@ js7800.Cartridge = (function () {
     IsXmEnabled: function() { return cartridge_xm; },
     IsSwapButtons: function() { return cartridge_swap_buttons; },
     IsDualAnalog: function() { return cartridge_dualanalog; },
+    IsLightGunEnabled: function() { return cartridge_controller[0] == CARTRIDGE_CONTROLLER_LIGHTGUN; },
     GetFlags: function() { return cartridge_flags; },
     GetHblank: function() { return cartridge_hblank; },
     GetLeftSwitch: function() { return cartridge_left_switch; },

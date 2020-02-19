@@ -161,7 +161,14 @@ js7800.web.video = (function () {
   return {
     init: init,
     flipImage: flipImage,
-    startScreenSnow: startSnow,
+    startScreenSnow: startSnow,    
+    ATARI_WIDTH: ATARI_WIDTH,
+    ATARI_CANVAS_HEIGHT: ATARI_CANVAS_HEIGHT,
+    NTSC_ATARI_BLIT_TOP_Y: NTSC_ATARI_BLIT_TOP_Y,
+    PAL_ATARI_BLIT_TOP_Y: PAL_ATARI_BLIT_TOP_Y,
+    NTSC_ATARI_HEIGHT: NTSC_ATARI_HEIGHT,
+    PAL_ATARI_HEIGHT: PAL_ATARI_HEIGHT,
+    getCanvas: function() { return canvas; },
     stopScreenSnow: function() { displaySnow = false; },
     fullScreen: function () {
       var fsContainer = document.getElementById("fullscreen-container");
