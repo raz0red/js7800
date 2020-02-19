@@ -101,7 +101,7 @@ js7800.web.video = (function () {
 
   function clearCanvas() {
     // set alpha to opaque 
-    for (var i = 3; i < imageData.length - 3; i += 4) {
+    for (var i = 3; i < imageData.length; i += 4) {
       imageData[i - 3] = 0;
       imageData[i - 2] = 0;
       imageData[i - 1] = 0;
@@ -122,7 +122,7 @@ js7800.web.video = (function () {
       })();
 
       function snow(ctx) {
-        for (var i = 3; i < imageData.length - 3; i += 4) {
+        for (var i = 3; i < imageData.length; i += 4) {
           var v = Math.random() < 0.5 ? 0 : 255;
           imageData[i - 3] = v;
           imageData[i - 2] = v;
