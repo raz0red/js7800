@@ -3,7 +3,7 @@ js7800.web.video = (function () {
 
   var Maria = js7800.Maria;
   var Region = js7800.Region;
-  var Cartridge = js7800.Cartridge;  
+  var Cartridge = js7800.Cartridge;
 
   var ATARI_WIDTH = 320;
   var ATARI_BLIT_HEIGHT = 300;
@@ -116,7 +116,7 @@ js7800.web.video = (function () {
         if (!displaySnow) {
           clearCanvas();
           return;
-        } 
+        }
         snow(context);
         requestAnimationFrame(loop)
       })();
@@ -135,41 +135,43 @@ js7800.web.video = (function () {
   }
 
   function resizeCanvas() {
-    var fullScreen = document.fullscreenElement;
-    if (fullScreen) {
-      var height = window.innerHeight - controlsDiv.offsetHeight;
-      var width = window.innerWidth;
+    if (canvas) {
+      var fullScreen = document.fullscreenElement;
+      if (fullScreen) {
+        var height = window.innerHeight - controlsDiv.offsetHeight;
+        var width = window.innerWidth;
 
-      var newHeight = height;
-      var newWidth = newHeight * HxW_AR;
-      if (newWidth > width) {
-        newWidth = width;
-        newHeight = newWidth * WxH_AR;
-      }      
-      canvas.style.width = newWidth + "px";
-      canvas.style.height = newHeight + "px";
-    } else {
-      canvas.style.width = DEFAULT_WIDTH + "px";
-      canvas.style.height = DEFAULT_HEIGHT + "px";
+        var newHeight = height;
+        var newWidth = newHeight * HxW_AR;
+        if (newWidth > width) {
+          newWidth = width;
+          newHeight = newWidth * WxH_AR;
+        }
+        canvas.style.width = newWidth + "px";
+        canvas.style.height = newHeight + "px";
+      } else {
+        canvas.style.width = DEFAULT_WIDTH + "px";
+        canvas.style.height = DEFAULT_HEIGHT + "px";
+      }
     }
   }
 
-  window.addEventListener("resize", function() {
+  window.addEventListener("resize", function () {
     resizeCanvas();
   });
 
   return {
     init: init,
     flipImage: flipImage,
-    startScreenSnow: startSnow,    
+    startScreenSnow: startSnow,
     ATARI_WIDTH: ATARI_WIDTH,
     ATARI_CANVAS_HEIGHT: ATARI_CANVAS_HEIGHT,
     NTSC_ATARI_BLIT_TOP_Y: NTSC_ATARI_BLIT_TOP_Y,
     PAL_ATARI_BLIT_TOP_Y: PAL_ATARI_BLIT_TOP_Y,
     NTSC_ATARI_HEIGHT: NTSC_ATARI_HEIGHT,
     PAL_ATARI_HEIGHT: PAL_ATARI_HEIGHT,
-    getCanvas: function() { return canvas; },
-    stopScreenSnow: function() { displaySnow = false; },
+    getCanvas: function () { return canvas; },
+    stopScreenSnow: function () { displaySnow = false; },
     fullScreen: function () {
       var fsContainer = document.getElementById("fullscreen-container");
       if (document.fullscreenElement) {
@@ -179,7 +181,7 @@ js7800.web.video = (function () {
       }
       resizeCanvas();
     },
-    onCartidgeLoaded: function() {
+    onCartidgeLoaded: function () {
       cartridgeRegion = Cartridge.GetRegion();
       initPalette8();
     }
