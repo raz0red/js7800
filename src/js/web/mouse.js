@@ -60,7 +60,7 @@ js7800.web.mouse = (function () {
     var region = Cartridge.GetRegion();
     var yoffset =
       (region == REGION_NTSC ?
-        NTSC_ATARI_BLIT_TOP_Y : (PAL_ATARI_BLIT_TOP_Y - 28));
+        NTSC_ATARI_BLIT_TOP_Y : PAL_ATARI_BLIT_TOP_Y);
     var scanlines =
       (region == REGION_NTSC ?
         NTSC_ATARI_HEIGHT : PAL_ATARI_HEIGHT);
