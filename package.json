@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "start": "npm run webpack",
+    "webpack": "webpack"
+  },
+  "dependencies": {
+    "webpack": "^4.41.6"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.3.11"
+  }
+}

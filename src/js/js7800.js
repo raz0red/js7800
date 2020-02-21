@@ -1,41 +1,22 @@
-(function () {
-  'use strict';
+import * as WebMouse from "./web/mouse.js"
+import * as WebInput from "./web/input.js"
+import * as ProSystem from "./prosystem/ProSystem.js"
+import * as WebVideo from "./web/video.js"
+import * as Sound from "./prosystem/Sound.js"
+import * as WebAudio from "./web/audio.js"
+import * as WebKb from "./web/kb.js"
+import * as Memory from "./prosystem/Memory.js"
+import * as Cartridge from "./prosystem/Cartridge.js"
+import * as Database from "./prosystem/Database.js"
+import * as Riot from "./prosystem/Riot.js"
+import * as WebDrop from "./web/drop.js"
 
-  var Sound = js7800.Sound;
-  var Riot = js7800.Riot;
-  var ProSystem = js7800.ProSystem;
+;var js7800 = (function() {
   var executeFrame = ProSystem.ExecuteFrame;
-  var Cartridge = js7800.Cartridge;
-  var Memory = js7800.Memory;
-  var Sound = js7800.Sound;
   var soundStore = Sound.Store;
-  var Database = js7800.Database;
-
-  var webPkg = js7800.web;
-  var WebAudio = webPkg.audio;
-  var WebVideo = webPkg.video;
-  var WebInput = webPkg.input;
-  var WebDrop = webPkg.drop;
   var updateInput = WebInput.updateInput;
   var flipImage = WebVideo.flipImage;
-  var WebKb = webPkg.kb;
-  var WebMouse = webPkg.mouse;
 
-  /** The 7800 scanline that the lightgun is currently at */
-  //int lightgun_scanline = 0;
-  var lightgunScanline = 0;
-  /** The 7800 cycle that the lightgun is currently at */
-  //float lightgun_cycle = 0;
-  var lightgunCycle = 0;
-  /** Whether the lightgun is enabled for the current cartridge */
-  //bool lightgun_enabled = false; 
-  var lightgunEnabled = false;
-  /** Tracks the first time the lightgun is fired for the current cartridge */
-  //bool lightgun_first_fire = true;
-  var lightgunFirstFire = true;
-  /** Lightgun flash */
-  var lightgunFlash = false;
-  /** The refresh callback id */
   var atariRefreshCallbackId = null;
 
   /** The keyboard data */
@@ -169,11 +150,14 @@
       WebInput.init(keyboardData);
 
       WebVideo.startScreenSnow();
-      $("#logo").fadeIn("slow");
+      jQuery("#logo").fadeIn("slow");
     }
   }
 
-  js7800.init = init;
-  js7800.startEmulation = startEmulation;
+  return {
+    init: init,
+    startEmulation: startEmulation
+  }
 })();
-
+  
+window.js7800 = js7800;

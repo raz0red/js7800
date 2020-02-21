@@ -23,105 +23,104 @@
 // Bios.cpp
 // ----------------------------------------------------------------------------
 
-js7800.Bios = (function () {
-  'use strict';
+//bool bios_enabled = false;
+var bios_enabled = false;
 
-  //bool bios_enabled = false;
-  var bios_enabled = false;
+// std::string bios_filename;
+// static byte* bios_data = NULL;
+// static word bios_size = 0;
 
-  // std::string bios_filename;
-  // static byte* bios_data = NULL;
-  // static word bios_size = 0;
+// ----------------------------------------------------------------------------
+// Load
+// ----------------------------------------------------------------------------
+//bool bios_Load(std:: string filename) {
+function bios_Load(filename) {
+  // if (filename.empty() || filename.length() == 0) {
+  //   logger_LogError("Bios filename is invalid.", BIOS_SOURCE);
+  //   return false;
+  // }
 
-  // ----------------------------------------------------------------------------
-  // Load
-  // ----------------------------------------------------------------------------
-  //bool bios_Load(std:: string filename) {
-  function bios_Load(filename) {
-    // if (filename.empty() || filename.length() == 0) {
-    //   logger_LogError("Bios filename is invalid.", BIOS_SOURCE);
-    //   return false;
-    // }
+  // bios_Release();
+  // logger_LogInfo("Opening bios file " + filename + ".");
 
-    // bios_Release();
-    // logger_LogInfo("Opening bios file " + filename + ".");
+  // bios_size = archive_GetUncompressedFileSize(filename);
+  // if (bios_size == 0) {
+  //   FILE * file = fopen(filename.c_str(), "rb");
+  //   if (file == NULL) {
+  //     #ifndef WII
+  //     logger_LogError("Failed to open the bios file " + filename + " for reading.", BIOS_SOURCE);
+  //     #endif
+  //     return false;
+  //   }
 
-    // bios_size = archive_GetUncompressedFileSize(filename);
-    // if (bios_size == 0) {
-    //   FILE * file = fopen(filename.c_str(), "rb");
-    //   if (file == NULL) {
-    //     #ifndef WII
-    //     logger_LogError("Failed to open the bios file " + filename + " for reading.", BIOS_SOURCE);
-    //     #endif
-    //     return false;
-    //   }
+  //   if (fseek(file, 0, SEEK_END)) {
+  //     fclose(file);
+  //     logger_LogError("Failed to find the end of the bios file.", BIOS_SOURCE);
+  //     return false;
+  //   }
 
-    //   if (fseek(file, 0, SEEK_END)) {
-    //     fclose(file);
-    //     logger_LogError("Failed to find the end of the bios file.", BIOS_SOURCE);
-    //     return false;
-    //   }
+  //   bios_size = ftell(file);
+  //   if (fseek(file, 0, SEEK_SET)) {
+  //     fclose(file);
+  //     logger_LogError("Failed to find the size of the bios file.", BIOS_SOURCE);
+  //     return false;
+  //   }
 
-    //   bios_size = ftell(file);
-    //   if (fseek(file, 0, SEEK_SET)) {
-    //     fclose(file);
-    //     logger_LogError("Failed to find the size of the bios file.", BIOS_SOURCE);
-    //     return false;
-    //   }
+  //   bios_data = new byte[bios_size];
+  //   if (fread(bios_data, 1, bios_size, file) != bios_size && ferror(file)) {
+  //     fclose(file);
+  //     logger_LogError("Failed to read the bios data.", BIOS_SOURCE);
+  //     bios_Release();
+  //     return false;
+  //   }
 
-    //   bios_data = new byte[bios_size];
-    //   if (fread(bios_data, 1, bios_size, file) != bios_size && ferror(file)) {
-    //     fclose(file);
-    //     logger_LogError("Failed to read the bios data.", BIOS_SOURCE);
-    //     bios_Release();
-    //     return false;
-    //   }
+  //   fclose(file);
+  // }
+  // else {
+  //   bios_data = new byte[bios_size];
+  //   archive_Uncompress(filename, bios_data, bios_size);
+  // }
 
-    //   fclose(file);
-    // }
-    // else {
-    //   bios_data = new byte[bios_size];
-    //   archive_Uncompress(filename, bios_data, bios_size);
-    // }
+  // bios_filename = filename;
+  return true;
+}
 
-    // bios_filename = filename;
-    return true;
-  }
+// ----------------------------------------------------------------------------
+// IsLoaded
+// ----------------------------------------------------------------------------
+//bool bios_IsLoaded() {
+function bios_IsLoaded() {
+  //   return (bios_data != NULL)? true: false;
+  return false;
+}
 
-  // ----------------------------------------------------------------------------
-  // IsLoaded
-  // ----------------------------------------------------------------------------
-  //bool bios_IsLoaded() {
-  function bios_IsLoaded() {
-    //   return (bios_data != NULL)? true: false;
-    return false;
-  }
+// ----------------------------------------------------------------------------
+// Release
+// ----------------------------------------------------------------------------
+//void bios_Release() {
+function bios_Release() {
+  // if (bios_data) {
+  //   delete [] bios_data;
+  //   bios_size = 0;
+  //   bios_data = NULL;
+  // }
+}
 
-  // ----------------------------------------------------------------------------
-  // Release
-  // ----------------------------------------------------------------------------
-  //void bios_Release() {
-  function bios_Release() {
-    // if (bios_data) {
-    //   delete [] bios_data;
-    //   bios_size = 0;
-    //   bios_data = NULL;
-    // }
-  }
+// ----------------------------------------------------------------------------
+// Store
+// ----------------------------------------------------------------------------
+//void bios_Store() {
+function bios_Store() {
+  // if (bios_data != NULL && bios_enabled) {
+  //   memory_WriteROM(65536 - bios_size, bios_size, bios_data);
+  // }
+}
 
-  // ----------------------------------------------------------------------------
-  // Store
-  // ----------------------------------------------------------------------------
-  //void bios_Store() {
-  function bios_Store() {
-    // if (bios_data != NULL && bios_enabled) {
-    //   memory_WriteROM(65536 - bios_size, bios_size, bios_data);
-    // }
-  }
+function IsEnabled() { 
+  return bios_enabled;
+ }
 
-  return {
-    Store: bios_Store,
-    IsEnabled: function() { return bios_enabled; }
-  }
-})();
-
+export {
+  bios_Store as Store,
+  IsEnabled
+};

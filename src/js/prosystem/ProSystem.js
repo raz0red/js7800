@@ -23,365 +23,425 @@
 // ProSystem.cpp
 // ----------------------------------------------------------------------------
 
-js7800.ProSystem = (function () {
-  'use strict';
+import * as WebMouse from "../web/mouse.js"
+import * as Region from "./Region.js"
+import * as Sound from "./Sound.js"
+import * as Pokey from "./Pokey.js"
+import * as Xm from "./ExpansionModule.js"
+import * as Memory from "./Memory.js"
+import * as Cartridge from "./Cartridge.js"
+import * as Maria from "./Maria.js"
+import * as Riot from "./Riot.js"
+import * as Sally from "./Sally.js"
+import * as Tia from "./Tia.js"
+import * as Bios from "./Bios.js"
 
-  var Tia = js7800.Tia;
-  var Tia_Process = Tia.Process;
-  var Pokey = js7800.Pokey;
-  var pokey_Frame = Pokey.Frame;
-  var pokey_Process = Pokey.Process;
-  var pokey_Scanline = Pokey.Scanline;
-  var Riot = js7800.Riot;
-  var riot_SetInput = Riot.SetInput;
-  var riot_IsTimingEnabled = Riot.IsTimingEnabled;
-  var riot_UpdateTimer = Riot.UpdateTimer;
-  var Region = js7800.Region;
-  var Xm = js7800.Xm;
-  var Maria = js7800.Maria;
-  var maria_displayArea = Maria.displayArea;
-  var maria_RenderScanline = Maria.RenderScanline;
-  var Memory = js7800.Memory;
-  var memory_ram = Memory.ram;
-  var Sally = js7800.Sally;
-  var sally_ExecuteInstruction = Sally.ExecuteInstruction;
-  var Bios = js7800.Bios;  
-  var Cartridge = js7800.Cartridge;  
-  var isLightGunEnabled = Cartridge.IsLightGunEnabled;
-  var Sound = js7800.Sound;
+var Tia_Process = Tia.Process;
+var pokey_Frame = Pokey.Frame;
+var pokey_Process = Pokey.Process;
+var pokey_Scanline = Pokey.Scanline;
+var riot_SetInput = Riot.SetInput;
+var riot_IsTimingEnabled = Riot.IsTimingEnabled;
+var riot_UpdateTimer = Riot.UpdateTimer;
+var maria_displayArea = Maria.displayArea;
+var maria_RenderScanline = Maria.RenderScanline;
+var memory_ram = Memory.ram;
+var sally_ExecuteInstruction = Sally.ExecuteInstruction;
+var isLightGunEnabled = Cartridge.IsLightGunEnabled;
 
-  var INPT4 = 12;
-  var WSYNC = 36;
-  var MSTAT = 40;
-  var CTRL = 60;
+var INPT4 = 12;
+var WSYNC = 36;
+var MSTAT = 40;
+var CTRL = 60;
 
-  var CARTRIDGE_WSYNC_MASK = 2;
-  var CARTRIDGE_CYCLE_STEALING_MASK = 1;
+var CARTRIDGE_WSYNC_MASK = 2;
+var CARTRIDGE_CYCLE_STEALING_MASK = 1;
 
-  // The number of cycles per scan line
-  var CYCLES_PER_SCANLINE = 454;
-  // The number of cycles for HBLANK
-  var HBLANK_CYCLES = 136;
+// The number of cycles per scan line
+var CYCLES_PER_SCANLINE = 454;
+// The number of cycles for HBLANK
+var HBLANK_CYCLES = 136;
 
-  //bool prosystem_active = false;
-  var prosystem_active = false;
-  //bool prosystem_paused = false;
-  var prosystem_paused = false;
-  //word prosystem_frequency = 60;
-  var prosystem_frequency = 60;
-  //byte prosystem_frame = 0;
-  var prosystem_frame = 0;
-  //word prosystem_scanlines = 262;
-  var prosystem_scanlines = 262;
-  //uint prosystem_cycles = 0;
-  var prosystem_cycles = 0;
+//bool prosystem_active = false;
+var prosystem_active = false;
+//bool prosystem_paused = false;
+var prosystem_paused = false;
+//word prosystem_frequency = 60;
+var prosystem_frequency = 60;
+//byte prosystem_frame = 0;
+var prosystem_frame = 0;
+//word prosystem_scanlines = 262;
+var prosystem_scanlines = 262;
+//uint prosystem_cycles = 0;
+var prosystem_cycles = 0;
 
-  /** The current Maria scan line */
-  var maria_scanline = 1;
+/** The current Maria scan line */
+var maria_scanline = 1;
 
-  /** Shadow of Cartridge */  
-  var cartridge_pokey = false;
-  var cartridge_flags = 0;
-  var cartridge_xm = false;
-  var cartridge_hblank = 34;
+/** Shadow of Cartridge */
+var cartridge_pokey = false;
+var cartridge_flags = 0;
+var cartridge_xm = false;
+var cartridge_hblank = 34;
 
-  // Set the scanlines for Pokey
-  Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
-  
-  // Whether the last CPU operation resulted in a half cycle (need to take it
-  // into consideration)
-  //extern bool half_cycle;
+// Set the scanlines for Pokey
+Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
 
-  //#ifdef LOWTRACE
-  //static char msg[512];
-  //#endif
+// Whether the last CPU operation resulted in a half cycle (need to take it
+// into consideration)
+//extern bool half_cycle;
 
-  // ----------------------------------------------------------------------------
-  // Reset
-  // ----------------------------------------------------------------------------
-  //void prosystem_Reset() {
-  function prosystem_Reset() {
-    if (Cartridge.IsLoaded()) {
-      maria_scanline = 1;
-      prosystem_paused = false;
-      prosystem_frame = 0;
-      Sally.Reset(); // WII
-      Region.Reset();
-      Tia.Clear();
-      Pokey.Reset();
-      Xm.Reset();
+//#ifdef LOWTRACE
+//static char msg[512];
+//#endif
 
-      Memory.Reset();
-      Maria.Clear();
-      Maria.Reset();
-      Riot.Reset();
-      if (Bios.IsEnabled()) {
-        Bios.Store();
-      }
-      else {
-        Cartridge.Store();
-      }
-      // Load the high score cartridge
-      //cartridge_LoadHighScoreCart();
-      prosystem_cycles = Sally.ExecuteRES();
-      prosystem_active = true;
-    }
-  }
+// ----------------------------------------------------------------------------
+// Reset
+// ----------------------------------------------------------------------------
+//void prosystem_Reset() {
+function prosystem_Reset() {
+  if (Cartridge.IsLoaded()) {
+    maria_scanline = 1;
+    prosystem_paused = false;
+    prosystem_frame = 0;
+    Sally.Reset(); // WII
+    Region.Reset();
+    Tia.Clear();
+    Pokey.Reset();
+    Xm.Reset();
 
-  /*
-   * Strobe based on the current lightgun location
-   */
-  //static void prosystem_FireLightGun()
-  function prosystem_FireLightGun() {
-    var mouse = js7800.web.mouse;
-    var lightGunScanline = mouse.getLightGunScanline();
-    var lightGunCycle = mouse.getLightGunCycle();
-    if (((maria_scanline >= lightGunScanline) && (maria_scanline <= (lightGunScanline + 3))) &&
-      (prosystem_cycles >= ((lightGunCycle | 0) - 1))) {
-      memory_ram[INPT4] &= 0x7f;
+    Memory.Reset();
+    Maria.Clear();
+    Maria.Reset();
+    Riot.Reset();
+    if (Bios.IsEnabled()) {
+      Bios.Store();
     }
     else {
-      memory_ram[INPT4] |= 0x80;
+      Cartridge.Store();
     }
+    // Load the high score cartridge
+    //cartridge_LoadHighScoreCart();
+    prosystem_cycles = Sally.ExecuteRES();
+    prosystem_active = true;
   }
+}
 
-  //uint prosystem_extra_cycles = 0;
-  var prosystem_extra_cycles = 0;
+/*
+  * Strobe based on the current lightgun location
+  */
+//static void prosystem_FireLightGun()
+function prosystem_FireLightGun() {
+  //var mouse = js7800.web.mouse;
+  var lightGunScanline = WebMouse.getLightGunScanline();
+  var lightGunCycle = WebMouse.getLightGunCycle();
+  if (((maria_scanline >= lightGunScanline) && (maria_scanline <= (lightGunScanline + 3))) &&
+    (prosystem_cycles >= ((lightGunCycle | 0) - 1))) {
+    memory_ram[INPT4] &= 0x7f;
+  }
+  else {
+    memory_ram[INPT4] |= 0x80;
+  }
+}
 
-  //uint dbg_saved_cycles = 0;
-  var dbg_saved_cycles = 0;
-  //uint dbg_wsync_count = 0;
-  var dbg_wsync_count = 0;
-  //uint dbg_maria_cycles = 0;
-  var dbg_maria_cycles = 0;
-  //uint dbg_p6502_cycles = 0;
-  var dbg_p6502_cycles = 0;
-  //bool dbg_wsync;
-  var dbg_wsync = false;
-  //bool dbg_cycle_stealing;
-  var dbg_cycle_stealing = false;
+//uint prosystem_extra_cycles = 0;
+var prosystem_extra_cycles = 0;
 
-  // ----------------------------------------------------------------------------
-  // ExecuteFrame
-  // ----------------------------------------------------------------------------
+//uint dbg_saved_cycles = 0;
+var dbg_saved_cycles = 0;
+//uint dbg_wsync_count = 0;
+var dbg_wsync_count = 0;
+//uint dbg_maria_cycles = 0;
+var dbg_maria_cycles = 0;
+//uint dbg_p6502_cycles = 0;
+var dbg_p6502_cycles = 0;
+//bool dbg_wsync;
+var dbg_wsync = false;
+//bool dbg_cycle_stealing;
+var dbg_cycle_stealing = false;
 
-  //#if 0
-  //extern float wii_orient_roll;
-  //#endif
+// ----------------------------------------------------------------------------
+// ExecuteFrame
+// ----------------------------------------------------------------------------
 
-  //void prosystem_ExecuteFrame(const byte* input)
-  function prosystem_ExecuteFrame(input) // TODO: input is array
-  {
-    // Is WSYNC enabled for the current frame?
-    //bool wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
-    var wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
-    dbg_wsync = wsync;
+//#if 0
+//extern float wii_orient_roll;
+//#endif
 
-    // Is Maria cycle stealing enabled for the current frame?
-    //bool cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
-    var cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
-    dbg_cycle_stealing = cycle_stealing;
+//void prosystem_ExecuteFrame(const byte* input)
+function prosystem_ExecuteFrame(input) // TODO: input is array
+{
+  // Is WSYNC enabled for the current frame?
+  //bool wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
+  var wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
+  dbg_wsync = wsync;
 
-    // Is the lightgun enabled for the current frame?
-    //bool lightgun =
-    var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
+  // Is Maria cycle stealing enabled for the current frame?
+  //bool cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
+  var cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
+  dbg_cycle_stealing = cycle_stealing;
 
-    riot_SetInput(input);
+  // Is the lightgun enabled for the current frame?
+  //bool lightgun =
+  var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
-    prosystem_extra_cycles = 0;
-    dbg_saved_cycles = 0; // debug
-    dbg_wsync_count = 0;  // debug
-    dbg_maria_cycles = 0; // debug
-    dbg_p6502_cycles = 0; // debug    
+  riot_SetInput(input);
 
-    if (cartridge_pokey || cartridge_xm) pokey_Frame();
+  prosystem_extra_cycles = 0;
+  dbg_saved_cycles = 0; // debug
+  dbg_wsync_count = 0;  // debug
+  dbg_maria_cycles = 0; // debug
+  dbg_p6502_cycles = 0; // debug    
 
-    for (maria_scanline = 1; maria_scanline <= prosystem_scanlines; maria_scanline++) {
-      //#if 0      
-      //    if ((int)wii_orient_roll == maria_scanline) {
-      //  memory_ram[INPT2] &= 0x7f;
-      //} else {
-      //  memory_ram[INPT2] |= 0x80;
-      //}
-      //#endif
+  if (cartridge_pokey || cartridge_xm) pokey_Frame();
 
-      if (maria_scanline == maria_displayArea.top) {
-        memory_ram[MSTAT] = 0;
-      }
-      else if (maria_scanline == maria_displayArea.bottom) {
-        memory_ram[MSTAT] = 128;
-      }
+  for (maria_scanline = 1; maria_scanline <= prosystem_scanlines; maria_scanline++) {
+    //#if 0      
+    //    if ((int)wii_orient_roll == maria_scanline) {
+    //  memory_ram[INPT2] &= 0x7f;
+    //} else {
+    //  memory_ram[INPT2] |= 0x80;
+    //}
+    //#endif
 
-      // Was a WSYNC performed within the current scanline?
-      //bool wsync_scanline = false;
-      var wsync_scanline = false;
+    if (maria_scanline == maria_displayArea.top) {
+      memory_ram[MSTAT] = 0;
+    }
+    else if (maria_scanline == maria_displayArea.bottom) {
+      memory_ram[MSTAT] = 128;
+    }
 
-      //uint cycles = 0;
-      var cycles = 0;
+    // Was a WSYNC performed within the current scanline?
+    //bool wsync_scanline = false;
+    var wsync_scanline = false;
 
-      if (!cycle_stealing || (memory_ram[CTRL] & 96) != 64) {
-        // Exact cycle counts when Maria is disabled        
-        (prosystem_cycles %= CYCLES_PER_SCANLINE) | 0;
-        prosystem_extra_cycles = 0;
-      }
-      else {
-        prosystem_extra_cycles = ((prosystem_cycles % CYCLES_PER_SCANLINE) | 0);
-        dbg_saved_cycles += prosystem_extra_cycles;
+    //uint cycles = 0;
+    var cycles = 0;
 
-        // Some fudge for Maria cycles. Unfortunately Maria cycle counting
-        // isn't exact (This adds some extra cycles).
-        prosystem_cycles = 0;
+    if (!cycle_stealing || (memory_ram[CTRL] & 96) != 64) {
+      // Exact cycle counts when Maria is disabled        
+      (prosystem_cycles %= CYCLES_PER_SCANLINE) | 0;
+      prosystem_extra_cycles = 0;
+    }
+    else {
+      prosystem_extra_cycles = ((prosystem_cycles % CYCLES_PER_SCANLINE) | 0);
+      dbg_saved_cycles += prosystem_extra_cycles;
+
+      // Some fudge for Maria cycles. Unfortunately Maria cycle counting
+      // isn't exact (This adds some extra cycles).
+      prosystem_cycles = 0;
+    }
+
+    // If lightgun is enabled, check to see if it should be fired
+    if (lightgun) prosystem_FireLightGun();
+
+    while (prosystem_cycles < cartridge_hblank) {
+      cycles = sally_ExecuteInstruction();
+      prosystem_cycles += (cycles << 2);
+      if (half_cycle) prosystem_cycles += 2;
+
+      dbg_p6502_cycles += (cycles << 2); // debug
+
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer(cycles);
       }
 
       // If lightgun is enabled, check to see if it should be fired
       if (lightgun) prosystem_FireLightGun();
 
-      while (prosystem_cycles < cartridge_hblank) {
-        cycles = sally_ExecuteInstruction();
-        prosystem_cycles += (cycles << 2);
-        if (half_cycle) prosystem_cycles += 2;
-
-        dbg_p6502_cycles += (cycles << 2); // debug
-
-        if (riot_IsTimingEnabled()) {
-          riot_UpdateTimer(cycles);
-        }
-
-        // If lightgun is enabled, check to see if it should be fired
-        if (lightgun) prosystem_FireLightGun();
-
-        if (memory_ram[WSYNC] && wsync) {
-          dbg_wsync_count++; // debug
-          //memory_ram[WSYNC] = false;
-          memory_ram[WSYNC] = 0;
-          wsync_scanline = true;
-          break;
-        }
+      if (memory_ram[WSYNC] && wsync) {
+        dbg_wsync_count++; // debug
+        //memory_ram[WSYNC] = false;
+        memory_ram[WSYNC] = 0;
+        wsync_scanline = true;
+        break;
       }
+    }
 
-      cycles = maria_RenderScanline(maria_scanline);
+    cycles = maria_RenderScanline(maria_scanline);
 
-      if (cycle_stealing) {
-        prosystem_cycles += cycles;
-        dbg_maria_cycles += cycles; // debug
+    if (cycle_stealing) {
+      prosystem_cycles += cycles;
+      dbg_maria_cycles += cycles; // debug
 
-        if (riot_IsTimingEnabled()) {
-          riot_UpdateTimer(cycles >>> 2);
-        }
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer(cycles >>> 2);
       }
+    }
 
-      while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
-        cycles = sally_ExecuteInstruction();
-        prosystem_cycles += (cycles << 2);
-        if (half_cycle) prosystem_cycles += 2;
+    while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
+      cycles = sally_ExecuteInstruction();
+      prosystem_cycles += (cycles << 2);
+      if (half_cycle) prosystem_cycles += 2;
 
-        dbg_p6502_cycles += (cycles << 2); // debug
-
-        // If lightgun is enabled, check to see if it should be fired
-        if (lightgun) prosystem_FireLightGun();
-
-        if (riot_IsTimingEnabled()) {
-          riot_UpdateTimer(cycles);
-        }
-
-        if (memory_ram[WSYNC] && wsync) {
-          dbg_wsync_count++; // debug
-          //memory_ram[WSYNC] = false;
-          memory_ram[WSYNC] = 0;
-          wsync_scanline = true;
-          break;
-        }
-      }
-
-      // If a WSYNC was performed and the current cycle count is less than
-      // the cycles per scanline, add those cycles to current timers.
-      if (wsync_scanline && (prosystem_cycles < CYCLES_PER_SCANLINE)) {
-        if (riot_IsTimingEnabled()) {
-          riot_UpdateTimer((CYCLES_PER_SCANLINE - prosystem_cycles) >>> 2);
-        }
-        prosystem_cycles = CYCLES_PER_SCANLINE;
-      }
+      dbg_p6502_cycles += (cycles << 2); // debug
 
       // If lightgun is enabled, check to see if it should be fired
       if (lightgun) prosystem_FireLightGun();
 
-      Tia_Process(2);
-      if (cartridge_pokey || cartridge_xm) {
-        pokey_Process(2);
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer(cycles);
       }
 
-      if (cartridge_pokey || cartridge_xm) pokey_Scanline();
+      if (memory_ram[WSYNC] && wsync) {
+        dbg_wsync_count++; // debug
+        //memory_ram[WSYNC] = false;
+        memory_ram[WSYNC] = 0;
+        wsync_scanline = true;
+        break;
+      }
     }
 
-    prosystem_frame++;
-    if (prosystem_frame >= prosystem_frequency) {
-      prosystem_frame = 0;
+    // If a WSYNC was performed and the current cycle count is less than
+    // the cycles per scanline, add those cycles to current timers.
+    if (wsync_scanline && (prosystem_cycles < CYCLES_PER_SCANLINE)) {
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer((CYCLES_PER_SCANLINE - prosystem_cycles) >>> 2);
+      }
+      prosystem_cycles = CYCLES_PER_SCANLINE;
     }
-  }
 
-  // ----------------------------------------------------------------------------
-  // Pause
-  // ----------------------------------------------------------------------------
-  //void prosystem_Pause(bool pause) {
-  function prosystem_Pause(pause) {
-    if (prosystem_active) {
-      prosystem_paused = pause;
+    // If lightgun is enabled, check to see if it should be fired
+    if (lightgun) prosystem_FireLightGun();
+
+    Tia_Process(2);
+    if (cartridge_pokey || cartridge_xm) {
+      pokey_Process(2);
     }
+
+    if (cartridge_pokey || cartridge_xm) pokey_Scanline();
   }
 
-  // ----------------------------------------------------------------------------
-  // Close
-  // ----------------------------------------------------------------------------
-  //void prosystem_Close() {
-  function prosystem_Close() {
-    prosystem_active = false;
-    prosystem_paused = false;
-    Cartridge.Release();
-    Maria.Reset();
-    Maria.Clear();
-    Memory.Reset();
-    Tia.Reset();
-    Tia.Clear(true);
-    Pokey.Reset();
-    Pokey.Clear(true);
+  prosystem_frame++;
+  if (prosystem_frame >= prosystem_frequency) {
+    prosystem_frame = 0;
   }
+}
 
-  return {
-    Reset: prosystem_Reset,
-    Close: prosystem_Close,
-    ExecuteFrame: prosystem_ExecuteFrame,
-    IsActive: function () { return prosystem_active; },
-    IsPaused: function () { return prosystem_paused; },
-    GetFrequency: function () { return prosystem_frequency; },
-    SetFrequency: function (freq) {
-      prosystem_frequency = freq;
-      Sound.SetFrequency(freq);
-    },
-    GetFrame: function () { return prosystem_frame; },
-    GetScanlines: function () { return prosystem_scanlines; },
-    SetScanlines: function (lines) {
-      prosystem_scanlines = lines;
-      Sound.SetScanlines(lines);
-    },
-    GetCycles: function () { return prosystem_cycles; },
-    GetExtraCycles: function () { return prosystem_extra_cycles; },
-    GetDebugSavedCycles: function() { return dbg_saved_cycles; },
-    GetDebugWsyncCount: function() { return dbg_wsync_count; },
-    GetDebugMariaCycles: function() { return dbg_maria_cycles; },
-    GetDebug6502Cycles: function() { return dbg_p6502_cycles; },
-    GetDebugWsync: function() { return dbg_wsync; },
-    GetDebugCycleStealing: function() { return dbg_cycle_stealing; },
-    GetMariaScanline: function() { return maria_scanline; },  
-    OnCartridgeLoaded: function() {
-      cartridge_pokey = Cartridge.IsPokeyEnabled();
-      cartridge_xm = Cartridge.IsXmEnabled();
-      cartridge_flags = Cartridge.GetFlags();      
-      cartridge_hblank = Cartridge.GetHblank();
-    },
-    CYCLES_PER_SCANLINE: CYCLES_PER_SCANLINE,
-    HBLANK_CYCLES: HBLANK_CYCLES
+// ----------------------------------------------------------------------------
+// Pause
+// ----------------------------------------------------------------------------
+//void prosystem_Pause(bool pause) {
+function prosystem_Pause(pause) {
+  if (prosystem_active) {
+    prosystem_paused = pause;
   }
-})();
+}
+
+// ----------------------------------------------------------------------------
+// Close
+// ----------------------------------------------------------------------------
+//void prosystem_Close() {
+function prosystem_Close() {
+  prosystem_active = false;
+  prosystem_paused = false;
+  Cartridge.Release();
+  Maria.Reset();
+  Maria.Clear();
+  Memory.Reset();
+  Tia.Reset();
+  Tia.Clear(true);
+  Pokey.Reset();
+  Pokey.Clear(true);
+}
+
+function IsActive() { 
+  return prosystem_active; 
+}
+
+function IsPaused() { 
+  return prosystem_paused; 
+}
+
+function GetFrequency() { 
+  return prosystem_frequency; 
+}
+
+function SetFrequency(freq) {
+  prosystem_frequency = freq;
+  Sound.SetFrequency(freq);
+}
+
+function GetFrame() { 
+  return prosystem_frame; 
+}
+
+function GetScanlines() { 
+  return prosystem_scanlines; 
+}
+
+function SetScanlines(lines) {
+  prosystem_scanlines = lines;
+  Sound.SetScanlines(lines);
+}
+
+function GetCycles() { 
+  return prosystem_cycles; 
+}
+
+function GetExtraCycles() { 
+  return prosystem_extra_cycles; 
+}
+
+function GetDebugSavedCycles() { 
+  return dbg_saved_cycles; 
+}
+
+function GetDebugWsyncCount() { 
+  return dbg_wsync_count; 
+}
+
+function GetDebugMariaCycles() { 
+  return dbg_maria_cycles; 
+}
+
+function GetDebug6502Cycles() { 
+  return dbg_p6502_cycles; 
+}
+
+function GetDebugWsync() { 
+  return dbg_wsync; 
+}
+
+function GetDebugCycleStealing() { 
+  return dbg_cycle_stealing; 
+}
+
+function GetMariaScanline() { 
+  return maria_scanline; 
+}
+
+function OnCartridgeLoaded() {
+  cartridge_pokey = Cartridge.IsPokeyEnabled();
+  cartridge_xm = Cartridge.IsXmEnabled();
+  cartridge_flags = Cartridge.GetFlags();
+  cartridge_hblank = Cartridge.GetHblank();
+}
+
+export {
+  prosystem_Reset as Reset,
+  prosystem_Close as Close,
+  prosystem_ExecuteFrame as ExecuteFrame,
+  CYCLES_PER_SCANLINE,
+  HBLANK_CYCLES,
+  IsActive,
+  IsPaused,
+  GetFrequency,
+  SetFrequency,
+  GetFrame,
+  GetScanlines,
+  SetScanlines,
+  GetCycles,
+  GetExtraCycles,
+  GetDebugSavedCycles,
+  GetDebugWsyncCount,
+  GetDebugMariaCycles,
+  GetDebug6502Cycles,
+  GetDebugWsync,
+  GetDebugCycleStealing,
+  GetMariaScanline,
+  OnCartridgeLoaded
+};
 
 // byte * loc_buffer = 0;
 

@@ -7,10 +7,7 @@ var lineReader = readline.createInterface({
 });
 
 console.log(
-    "js7800.ProSystemDat = (function () {\n" +
-    "  'use strict'\n" +
-    "\n" +
-    "  var DATABASE = {");
+    "var DATABASE = {");
 
 var inEntry = false;
 var firstValue = true;
@@ -22,18 +19,18 @@ lineReader.on('line', function (line) {
     if (startBracket >= 0 && endBracket >= 0) {
         firstValue = true;
         if (inEntry) {
-            console.log("    },");
+            console.log("  },");
         } else {
             inEntry = true;
         }
-        console.log("    '" + line.substring(startBracket + 1, endBracket) + "': {");
+        console.log("  '" + line.substring(startBracket + 1, endBracket) + "': {");
     } else {
         var values = line.split("=");
         if (values.length == 2) {
             var value = values[1].replace("'", "\\'");
             value = value.replace('"', '\\"');
             console.log(
-                (!firstValue ? "      ," : "      ") + values[0].trim() + ": '" + value.trim() + "'");
+                (!firstValue ? "    ," : "    ") + values[0].trim() + ": '" + value.trim() + "'");
             firstValue = false;
         }
     }
@@ -41,10 +38,9 @@ lineReader.on('line', function (line) {
 
 lineReader.on('close', function () {
     if (inEntry) {
-        console.log("    }");
+        console.log("  }");
     }
     console.log(
-        "  }\n" +
-        "  return { DATABASE: DATABASE }\n" +
-        "})();");
+        "}\n\n" +
+        "export { DATABASE };");
 });
