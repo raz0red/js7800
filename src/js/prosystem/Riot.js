@@ -335,7 +335,6 @@ function GetTimerCount() {
 }
 
 function init() {
-  //var Memory = js7800.Memory;
   memory_ram = Memory.ram;
   memory_Write = Memory.Write;
 }

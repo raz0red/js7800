@@ -203,7 +203,6 @@ var REGION_PALETTE_PAL = [
 // ----------------------------------------------------------------------------
 //void region_Reset( ) {
 function region_Reset() {
-  //var ProSystem = js7800.ProSystem;    
   if (region_type == REGION_PAL || (region_type == REGION_AUTO &&
     Cartridge.GetRegion() == REGION_PAL)) {
     //maria_displayArea = REGION_DISPLAY_AREA_PAL;

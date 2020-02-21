@@ -25,6 +25,7 @@
 
 import * as Memory from "./Memory.js"
 import { Pair } from "./Pair.js"
+import * as ProSystem from "./ProSystem.js"
 
 var memory_Read = Memory.Read;
 var memory_Write = Memory.Write;
@@ -1273,9 +1274,9 @@ function sally_ExecuteInstruction() {
   } else if (sally_debug_count-- > 0) {
     console.log("Opcode:%s %d %d %d %d", sally_opcode.toString(16),
       sally_cycles,
-      js7800.ProSystem.GetCycles(),
-      js7800.ProSystem.CYCLES_PER_SCANLINE, 
-      js7800.ProSystem.GetMariaScanline());
+      ProSystem.GetCycles(),
+      ProSystem.CYCLES_PER_SCANLINE, 
+      ProSystem.GetMariaScanline());
   }
 
   switch (sally_opcode) {

@@ -132,7 +132,6 @@ function prosystem_Reset() {
   */
 //static void prosystem_FireLightGun()
 function prosystem_FireLightGun() {
-  //var mouse = js7800.web.mouse;
   var lightGunScanline = WebMouse.getLightGunScanline();
   var lightGunCycle = WebMouse.getLightGunCycle();
   if (((maria_scanline >= lightGunScanline) && (maria_scanline <= (lightGunScanline + 3))) &&

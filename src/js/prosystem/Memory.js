@@ -41,9 +41,6 @@ var xm_IsMemEnabled = Xm.IsMemEnabled;
 var xm_Read = Xm.Read;
 var xm_Write = Xm.Write;
 
-//var Bios = js7800.Bios;
-//var Cartridge = js7800.Cartridge;
-
 var INPTCTRL = 1;
 var INPT0 = 8;
 var INPT1 = 9;
