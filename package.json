@@ -1,9 +1,10 @@
 {
   "scripts": {
-    "start": "npm run webpack",
+    "start": "npm run dbConvert && npm run webpack",
     "webpack": "webpack",
     "webpackWatch": "webpack --watch",
-    "webpackDebug": "webpack -d --watch"
+    "webpackDebug": "webpack -d --watch",
+    "dbConvert": "node db/convert.js db/ProSystem.dat > src/js/prosystem/ProSystemDat.js"
   },
   "dependencies": {
     "webpack": "^4.41.6"

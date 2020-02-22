@@ -37,8 +37,8 @@ var DATABASE = {
     ,controller2: '2'
     ,region: '0'
     ,flags: '0'
-    ,crossx: '15'
-    ,crossy: '15'
+    ,crossx: '8'
+    ,crossy: '8'
   },
   'de3e9496cb7341f865f27e5a72c7f2f5': {
     title: 'Alien Brigade'
@@ -48,8 +48,8 @@ var DATABASE = {
     ,controller2: '2'
     ,region: '1'
     ,flags: '0'
-    ,crossx: '15'
-    ,crossy: '-20'
+    ,crossx: '10'
+    ,crossy: '-6'
   },
   '404f95103b70975a42cb09946dc3adca': {
     title: 'Apple Snaffle (Jul 17-Rev 24) (2009)'
@@ -120,7 +120,7 @@ var DATABASE = {
     ,region: '0'
     ,flags: '0'
     ,crossx: '0'
-    ,crossy: '10'
+    ,crossy: '8'
   },
   'babe2bc2976688bafb8b23c192658126': {
     title: 'Barnyard Blaster'
@@ -241,8 +241,8 @@ var DATABASE = {
     ,controller2: '2'
     ,region: '0'
     ,flags: '0'
-    ,crossx: '15'
-    ,crossy: '10'
+    ,crossx: '13'
+    ,crossy: '8'
   },
   '63db371d67a98daec547b2abd5e7aa95': {
     title: 'Crossbow'
@@ -253,7 +253,7 @@ var DATABASE = {
     ,region: '1'
     ,flags: '0'
     ,crossx: '15'
-    ,crossy: '5'
+    ,crossy: '7'
   },
   '179b76ff729d4849b8f66a502398acae': {
     title: 'Dark Chambers'
@@ -663,8 +663,8 @@ var DATABASE = {
     ,controller2: '2'
     ,region: '0'
     ,flags: '0'
-    ,crossx: '0'
-    ,crossy: '20'
+    ,crossx: '-2'
+    ,crossy: '12'
   },
   'c80155d7eec9e3dcb79aa6b83c9ccd1e': {
     title: 'Meltdown'
@@ -949,8 +949,8 @@ var DATABASE = {
     ,controller2: '2'
     ,region: '0'
     ,flags: '0'
-    ,crossx: '13'
-    ,crossy: '-13'
+    ,crossx: '5'
+    ,crossy: '-5'
   },
   '5469b4de0608f23a5c4f98f331c9e75f': {
     title: 'Sentinel'
@@ -960,8 +960,8 @@ var DATABASE = {
     ,controller2: '2'
     ,region: '1'
     ,flags: '0'
-    ,crossx: '20'
-    ,crossy: '25'
+    ,crossx: '15'
+    ,crossy: '20'
   },
   '2d643ac548c40e58c99d0fe433ba4ba0': {
     title: 'Sirius'
