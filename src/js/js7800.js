@@ -10,6 +10,8 @@ import * as Cartridge from "./prosystem/Cartridge.js"
 import * as Database from "./prosystem/Database.js"
 import * as Riot from "./prosystem/Riot.js"
 import * as WebDrop from "./web/drop.js"
+import 'fullscreen-api-polyfill'
+var jQuery = require('jquery')
 
 var executeFrame = ProSystem.ExecuteFrame;
 var soundStore = Sound.Store;
@@ -126,7 +128,7 @@ function startEmulation(cart) {
     ProSystem.Close();
   }
 
-  $("#logo").fadeOut("slow");
+  jQuery("#logo").fadeOut("slow");
   setTimeout(function () {
     WebVideo.stopScreenSnow();
     startEmu(cart);

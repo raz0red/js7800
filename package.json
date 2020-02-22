@@ -7,6 +7,8 @@
     "dbConvert": "node db/convert.js db/ProSystem.dat > src/js/prosystem/ProSystemDat.js"
   },
   "dependencies": {
+    "fullscreen-api-polyfill": "^1.1.2",
+    "jquery": "^3.4.1",
     "webpack": "^4.41.6"
   },
   "devDependencies": {
