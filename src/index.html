@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <title>JS7800: Atari 7800 Emulator</title>
   <link rel="stylesheet" type="text/css" href="css/main.css">
@@ -12,7 +13,7 @@
     <div id="border-container">
       <div id="fullscreen-container">
         <div id="inner-container">
-          <canvas id="screen" width="320" height="240"></canvas>
+          <div class="noselect"><canvas id="screen" width="320" height="240"></canvas></div>
           <div id="logo"><img alt="Atari 7800" src="images/Atari_7800_Logo.png" /></div>
         </div>
         <div id="controls"></div>
@@ -22,4 +23,5 @@
   <script>
     js7800.init();
   </script>
+
 </html>

@@ -7,6 +7,16 @@ body {
     margin: 30px 0 0 0;
 }
 
+.noselect {
+    -webkit-touch-callout: none;    /* iOS Safari */
+    -webkit-user-select: none;      /* Safari */
+    -khtml-user-select: none;       /* Konqueror HTML */
+    -moz-user-select: none;         /* Old versions of Firefox */
+    -ms-user-select: none;          /* Internet Explorer/Edge */
+    user-select: none;              /* Non-prefixed version, currently
+                                    supported by Chrome, Opera and Firefox */
+}
+
 #drop-div {    
     position:fixed;
     z-index: -999;               
@@ -41,8 +51,7 @@ body {
     height:480px;
     margin:auto;
     background: #000;
-    cursor: none;
-    
+    cursor: none;    
     /*image-rendering: optimizeSpeed;*/             /* Older versions of FF          */
     /*image-rendering: -moz-crisp-edges;*/          /* FF 6.0+                       */
     /*image-rendering: -webkit-optimize-contrast;*/ /* Safari                        */
