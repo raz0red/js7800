@@ -1,7 +1,9 @@
 {
   "scripts": {
     "start": "npm run webpack",
-    "webpack": "webpack"
+    "webpack": "webpack",
+    "webpackWatch": "webpack --watch",
+    "webpackDebug": "webpack -d --watch"
   },
   "dependencies": {
     "webpack": "^4.41.6"
