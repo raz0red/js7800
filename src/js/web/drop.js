@@ -36,18 +36,14 @@ function dropHandler(ev) {
 }
 
 function init() {
-  var dropEl = document.getElementById("drop-div");
   var ignore = function (event) {
     event.preventDefault();
   }
-  var els = [body, dropEl];
-  for (var i = 0; i < els.length; i++) {
-    var el = els[i];
-    el.addEventListener("drop", dropHandler);
-    el.addEventListener("dragdrop", dropHandler);
-    el.addEventListener("dragenter", ignore);
-    el.addEventListener("dragover", ignore);
-  }
+  var body = document.body;
+  body.addEventListener("drop", dropHandler);
+  body.addEventListener("dragdrop", dropHandler);
+  body.addEventListener("dragenter", ignore);
+  body.addEventListener("dragover", ignore);
 }
 
 export { init };
