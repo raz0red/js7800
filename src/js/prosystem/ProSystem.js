@@ -237,7 +237,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     while (prosystem_cycles < cartridge_hblank) {
       cycles = sally_ExecuteInstruction();
       prosystem_cycles += (cycles << 2);
-      if (half_cycle) prosystem_cycles += 2;
+      if (Sally.half_cycle) prosystem_cycles += 2;
 
       dbg_p6502_cycles += (cycles << 2); // debug
 
@@ -271,7 +271,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
       cycles = sally_ExecuteInstruction();
       prosystem_cycles += (cycles << 2);
-      if (half_cycle) prosystem_cycles += 2;
+      if (Sally.half_cycle) prosystem_cycles += 2;
 
       dbg_p6502_cycles += (cycles << 2); // debug
 

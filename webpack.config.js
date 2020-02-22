@@ -7,6 +7,9 @@ module.exports = {
   output: {
     filename: 'js7800-bundle.js',
     path: path.resolve(__dirname, 'src/js'),
+    libraryTarget: 'umd',
+    globalObject: 'this',
+    library: 'js7800'    
   }  
 };
 

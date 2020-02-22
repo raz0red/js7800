@@ -59,7 +59,7 @@ var sally_cycles = 0;
 // a TIA or RIOT are accessed (drops to 1.19Mhz when the TIA or RIOT chips 
 // are accessed)
 //bool half_cycle = false;
-window.half_cycle = false; // Global
+var half_cycle = false; // Global
 
 /*
 struct Flag {
@@ -2310,5 +2310,6 @@ export {
   sally_Reset as Reset,
   sally_ExecuteRES as ExecuteRES,
   sally_ExecuteInstruction as ExecuteInstruction,
-  sally_ExecuteNMI as ExecuteNMI
+  sally_ExecuteNMI as ExecuteNMI,
+  half_cycle
 };

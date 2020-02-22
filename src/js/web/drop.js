@@ -1,3 +1,4 @@
+import * as js7800 from "../js7800.js"
 
 function dropHandler(ev) {
   ev.preventDefault();
