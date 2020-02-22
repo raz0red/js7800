@@ -50,10 +50,13 @@ function init() {
       }
     }
     audioNode.connect(audioCtx.destination);
-    var resumeFunc =
+    var resumeFunc =    
       function () { if (audioCtx.state !== 'running') audioCtx.resume(); }
-    document.documentElement.addEventListener("keydown", resumeFunc);
-    document.documentElement.addEventListener("click", resumeFunc);
+    var docElement = document.documentElement;
+    docElement.addEventListener("keydown", resumeFunc);
+    docElement.addEventListener("click", resumeFunc);
+    docElement.addEventListener("drop", resumeFunc);
+    docElement.addEventListener("dragdrop", resumeFunc);
     window.addEventListener("gamepadconnected", resumeFunc);
   }
 }

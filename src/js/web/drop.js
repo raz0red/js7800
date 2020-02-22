@@ -1,5 +1,4 @@
 import * as js7800 from "../js7800.js"
-var jQuery = require('jquery')
 
 function dropHandler(ev) {
   ev.preventDefault();
@@ -37,17 +36,14 @@ function dropHandler(ev) {
 }
 
 function init() {
-  jQuery('#drop-div').on('drop dragdrop', function (evt) {
-    evt.dataTransfer = evt.originalEvent.dataTransfer
-    dropHandler(evt);
+  var dropEl = document.getElementById("drop-div");
+  var ignore = function(event) {
     event.preventDefault();
-  });
-  jQuery('#drop-div').on('dragenter', function (event) {
-    event.preventDefault();
-  });
-  jQuery('#drop-div').on('dragover', function (event) {
-    event.preventDefault();
-  });
+  }
+  dropEl.addEventListener("drop", dropHandler);
+  dropEl.addEventListener("dragdrop", dropHandler);
+  dropEl.addEventListener("dragenter", ignore);
+  dropEl.addEventListener("dragover", ignore);
 }
 
 export { init };
