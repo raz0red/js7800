@@ -11,7 +11,6 @@ import * as Database from "./prosystem/Database.js"
 import * as Riot from "./prosystem/Riot.js"
 import * as WebDrop from "./web/drop.js"
 import 'fullscreen-api-polyfill'
-var jQuery = require('jquery')
 
 var executeFrame = ProSystem.ExecuteFrame;
 var soundStore = Sound.Store;
@@ -128,7 +127,12 @@ function startEmulation(cart) {
     ProSystem.Close();
   }
 
-  jQuery("#logo").fadeOut("slow");
+  //jQuery("#logo").fadeOut("slow");
+  var logo = document.getElementById("logo");
+  if (logo) {
+    logo.style.display = "none";
+  }
+
   setTimeout(function () {
     WebVideo.stopScreenSnow();
     startEmu(cart);
@@ -151,7 +155,11 @@ function init() {
     WebInput.init(keyboardData);
 
     WebVideo.startScreenSnow();
-    jQuery("#logo").fadeIn("slow");
+    //jQuery("#logo").fadeIn("slow");
+    var logo = document.getElementById("logo");
+    if (logo) {
+      logo.style.display = "block";
+    }    
   }
 }
 
