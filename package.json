@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "npm run dbConvert && npm run webpack",
+    "dist": "npm run dbConvert && npm run webpack",
     "webpack": "webpack",
     "webpackWatch": "webpack --watch",
     "webpackDebug": "webpack -d --watch",
