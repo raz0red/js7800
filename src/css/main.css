@@ -7,9 +7,9 @@ body {
     margin: 30px 0 0 0;
 }
 
-#drop-div {
+#drop-div {    
     position:fixed;
-    z-index: 9999999999;               
+    z-index: -999;               
     left:0;
     top:0;
     width:100%;

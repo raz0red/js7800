@@ -37,13 +37,17 @@ function dropHandler(ev) {
 
 function init() {
   var dropEl = document.getElementById("drop-div");
-  var ignore = function(event) {
+  var ignore = function (event) {
     event.preventDefault();
   }
-  dropEl.addEventListener("drop", dropHandler);
-  dropEl.addEventListener("dragdrop", dropHandler);
-  dropEl.addEventListener("dragenter", ignore);
-  dropEl.addEventListener("dragover", ignore);
+  var els = [body, dropEl];
+  for (var i = 0; i < els.length; i++) {
+    var el = els[i];
+    el.addEventListener("drop", dropHandler);
+    el.addEventListener("dragdrop", dropHandler);
+    el.addEventListener("dragenter", ignore);
+    el.addEventListener("dragover", ignore);
+  }
 }
 
 export { init };
