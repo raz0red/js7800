@@ -79,12 +79,14 @@ function onMouseDown(event) {
   if (event.which == 1) {
     leftButtonDown = true;
   }
+  event.preventDefault();
 }
 
 function onMouseUp(event) {
   if (event.which == 1) {
     leftButtonDown = false;
   }
+  event.preventDefault();
 }
 
 function isLeftButtonDown() { 
