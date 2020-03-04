@@ -1,12 +1,16 @@
+const TerserPlugin = require('terser-webpack-plugin');
 const path = require('path');
+const fs = require('fs');
 
 module.exports = {
-  entry: [
-    path.resolve(__dirname, 'src/js/index.js')
-  ],
+  entry: {
+    /*"js7800": "./src/js/index.js",*/
+    "js7800.min": "./src/js/index.js"
+  },
+  devtool: "source-map",
   output: {
-    filename: 'js7800-bundle.js',
-    path: path.resolve(__dirname, 'src/js'),
+    filename: '[name].js',
+    path: path.resolve(__dirname, 'dist'),
     library: 'js7800',
     libraryTarget: 'umd',
     umdNamedDefine: true
@@ -29,4 +33,30 @@ module.exports = {
       }
     ],
   },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        test: /\.min\.js$/
+      }),
+    ]
+  },
+  plugins: [
+    {
+      apply: compiler => {
+        compiler.hooks.afterEmit.tap('AfterEmitPlugin', () => {
+          let src = path.resolve(__dirname, 'dist/js7800.min.js');
+          let dst = path.resolve(__dirname, 'example/js/js7800.min.js');
+          fs.copyFile(src, dst,
+            err => {
+              if (!err) {
+                console.log("Copied to example: " + src);
+              } else {
+                console.error("Failed copy to example: " + src)
+              }
+            });
+        });
+      }
+    }
+  ]
 };

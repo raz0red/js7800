@@ -142,6 +142,7 @@ function keyEvent(event, down) {
         // Ignore F1 keys, annoying to have browser open tab
         handled = true;
         break;
+      case f9Code:
       case f11Code:
         if (down) {
           Video.fullScreen();
