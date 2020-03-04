@@ -51,8 +51,8 @@ module.exports = {
             err => {
               if (!err) {
                 console.log("Copied to example: " + src);
-              } else {
-                console.error("Failed copy to example: " + src)
+              } else {                
+                throw "Failed copy to example: " + src
               }
             });
         });
