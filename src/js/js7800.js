@@ -10,12 +10,19 @@ import * as Cartridge from "./prosystem/Cartridge.js"
 import * as Database from "./prosystem/Database.js"
 import * as Riot from "./prosystem/Riot.js"
 import * as WebDrop from "./web/drop.js"
+
 import 'fullscreen-api-polyfill'
+
+import css from '../css/js7800.css'
+import logoImageSrc from '../images/Atari_7800_Logo.png'
 
 var executeFrame = ProSystem.ExecuteFrame;
 var soundStore = Sound.Store;
 var updateInput = WebInput.updateInput;
 var flipImage = WebVideo.flipImage;
+var canvas = null;
+var controlsDiv = null;
+var logoDiv = null;
 
 var atariRefreshCallbackId = null;
 
@@ -128,10 +135,7 @@ function startEmulation(cart) {
   }
 
   //jQuery("#logo").fadeOut("slow");
-  var logo = document.getElementById("logo");
-  if (logo) {
-    logo.style.display = "none";
-  }
+  logoDiv.style.display = "none";
 
   setTimeout(function () {
     WebVideo.stopScreenSnow();
@@ -139,9 +143,68 @@ function startEmulation(cart) {
   }, 200);
 }
 
-function init() {
+function addElements(id) {
+  var container = document.getElementById(id);
+  if (!container) {
+    throw "Unable to find element with id: " + id;
+  }
+
+  // border-container
+  var mainContainer = document.createElement("div");
+  mainContainer.className = mainContainer.id = "js7800";
+  mainContainer.style.width = WebVideo.DEFAULT_WIDTH + "px";
+  container.appendChild(mainContainer);
+
+  // fullscreen-container
+  var fullscreenContainer = document.createElement("div");
+  fullscreenContainer.id = "js7800__fullscreen-container";
+  mainContainer.appendChild(fullscreenContainer);
+
+  // inner-container
+  var innerContainer = document.createElement("div");
+  innerContainer.id = innerContainer.className = "js7800__inner-container";
+  fullscreenContainer.appendChild(innerContainer);
+
+  // no-select (wrapper)
+  var noSelectWrapper = document.createElement("div");
+  noSelectWrapper.className = "js7800_noselect";
+  innerContainer.appendChild(noSelectWrapper);
+
+  // canvas
+  canvas = document.createElement("canvas");
+  canvas.id = canvas.className = "js7800__screen";
+  canvas.width = WebVideo.ATARI_WIDTH;
+  canvas.height = WebVideo.ATARI_CANVAS_HEIGHT;
+  noSelectWrapper.appendChild(canvas);  
+
+  // logo
+  logoDiv = document.createElement("div");
+  logoDiv.id = logoDiv.className = "js7800__logo";
+  innerContainer.appendChild(logoDiv);
+
+  // image
+  var logoImage = document.createElement("img");
+  logoImage.src = logoImageSrc;
+  logoImage.alt = "Atari 7800";
+  logoDiv.appendChild(logoImage);
+
+  // controls
+  controlsDiv = document.createElement("div");
+  controlsDiv.id = controlsDiv.className = "js7800__controls";
+  fullscreenContainer.appendChild(controlsDiv);
+
+  // drop container
+  var dropDiv = document.createElement("div");
+  dropDiv.id = dropDiv.className = "js7800__drop-div";
+  mainContainer.appendChild(dropDiv);
+}
+
+function init(id) {
   if (!initialized) {
     initialized = true;
+
+    // Add the HTML elements
+    addElements(id);
 
     // ProSystem
     Sound.init();
@@ -149,17 +212,14 @@ function init() {
     Cartridge.init();
     // Web
     WebAudio.init();
-    WebVideo.init();
+    WebVideo.init(canvas, controlsDiv);
     WebDrop.init();
     WebKb.init();
     WebInput.init(keyboardData);
 
     WebVideo.startScreenSnow();
     //jQuery("#logo").fadeIn("slow");
-    var logo = document.getElementById("logo");
-    if (logo) {
-      logo.style.display = "block";
-    }    
+    logoDiv.style.display = "block";
   }
 }
 

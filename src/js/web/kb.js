@@ -105,6 +105,7 @@ var f4Code = Keys.KEY_F4.code;
 var f5Code = Keys.KEY_F5.code;
 var f6Code = Keys.KEY_F6.code;
 var f9Code = Keys.KEY_F9.code;
+var f11Code = Keys.KEY_F11.code;
 
 function keyEvent(event, down) {
   var code = event.keyCode;
@@ -141,7 +142,7 @@ function keyEvent(event, down) {
         // Ignore F1 keys, annoying to have browser open tab
         handled = true;
         break;
-      case f9Code:
+      case f11Code:
         if (down) {
           Video.fullScreen();
         }

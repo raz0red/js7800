@@ -24,7 +24,8 @@ var Keys = {
   KEY_F4: new Key(115, "F4"),
   KEY_F5: new Key(116, "F5"),
   KEY_F6: new Key(117, "F6"),
-  KEY_F9: new Key(120, "F9")    
+  KEY_F9: new Key(120, "F9"),
+  KEY_F11: new Key(122, "F11")    
 }
 
 export {

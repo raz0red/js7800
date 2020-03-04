@@ -28,11 +28,37 @@ lineReader.on('line', function (line) {
     } else {
       var values = line.split("=");
       if (values.length == 2) {
+        var key = values[0].trim();
+        if (key == 'controller1') 
+          key = 'c1';
+        else if (key == 'controller2') 
+          key = 'c2';
+        else if (key == 'pokey') 
+          key = 'p';
+        else if (key == 'pokey450') 
+          key = 'p4';
+        else if (key == 'title') 
+          key = 't';
+        else if (key == 'type') 
+          key = 'ty';
+        else if (key == 'region') 
+          key = 'r';
+        else if (key == 'flags') 
+          key = 'f';
+        else if (key == 'swapbuttons')
+          key = 'sb';                    
         var value = values[1].replace("'", "\\'");
         value = value.replace('"', '\\"');
-        console.log(
-          (!firstValue ? "    ," : "    ") + values[0].trim() + ": '" + value.trim() + "'");
-        firstValue = false;
+        if (value == 'true')
+          value = 't';
+        else if (value == 'false')
+          value = 'f';
+
+        if (key != 't') {
+          console.log(
+            (!firstValue ? "    ," : "    ") + key + ": '" + value.trim() + "'");
+          firstValue = false;
+        }
       }
     }
   }

@@ -1,0 +1,62 @@
+.js7800_noselect {
+  -webkit-touch-callout: none;  /* iOS Safari */
+  -webkit-user-select: none;    /* Safari */
+  -khtml-user-select: none;     /* Konqueror HTML */
+  -moz-user-select: none;       /* Old versions of Firefox */
+  -ms-user-select: none;        /* Internet Explorer/Edge */
+  user-select: none;            /* Non-prefixed version, currently
+                                   supported by Chrome, Opera and Firefox */
+}
+
+.js7800 {
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4), 0 6px 20px 0 rgba(0, 0, 0, 0.39);
+  border-radius: 16px;
+  background: #000;
+  padding: 20px;
+}
+
+.js7800__inner-container {
+  position: relative;
+  text-align: center;
+}
+
+.js7800__screen {
+  margin: auto;
+  background: #000;
+  cursor: none;
+  /*image-rendering: optimizeSpeed;*/             /* Older versions of FF          */
+  /*image-rendering: -moz-crisp-edges;*/          /* FF 6.0+                       */
+  /*image-rendering: -webkit-optimize-contrast;*/ /* Safari                        */
+  /*image-rendering: -o-crisp-edges;*/            /* OS X & Windows Opera (12.02+) */
+  image-rendering: pixelated;                 /* Awesome future-browsers       */
+  /*-ms-interpolation-mode: nearest-neighbor;*/   /* IE    */
+}
+
+.js7800__logo {
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  position: absolute;
+  display: none;
+}
+
+.js7800__controls {
+  border-top: 10px solid black;
+  background-color: #151515;
+  height: 30px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.js7800__drop-div {
+  position: fixed;
+  z-index: -999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}

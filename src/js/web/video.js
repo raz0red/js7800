@@ -83,14 +83,14 @@ function flipImage() {
   context.putImageData(image, 0, 0);
 }
 
-function init() {
+function init(canvasIn, controlsDivIn) {
   Maria.SetSurface(blitSurface);
   if (!canvas) {
-    canvas = document.getElementById('screen');
+    canvas = canvasIn;
+    controlsDiv = controlsDivIn;
     context = canvas.getContext('2d');
     image = context.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
     imageData = image.data;
-    controlsDiv = document.getElementById('controls');
   }
   clearCanvas();
   resizeCanvas();
@@ -166,7 +166,7 @@ function stopScreenSnow() {
 }
 
 function fullScreen() {
-  var fsContainer = document.getElementById("fullscreen-container");
+  var fsContainer = document.getElementById("js7800__fullscreen-container");
   if (document.fullscreenElement) {
     document.exitFullscreen();
   } else {
@@ -190,6 +190,8 @@ export {
   PAL_ATARI_BLIT_TOP_Y,
   NTSC_ATARI_HEIGHT,
   PAL_ATARI_HEIGHT,
+  DEFAULT_HEIGHT,
+  DEFAULT_WIDTH,
   getCanvas,
   stopScreenSnow,
   fullScreen,

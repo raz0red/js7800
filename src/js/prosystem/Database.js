@@ -43,37 +43,37 @@ function database_Load(digest) {
       cart_in_db = true;
       console.log(entry);
 
-      var title = entry['title'];
+      var title = entry['t'];
       if (title !== undefined) {
         Cartridge.SetTitle(title);
       }
-      var type = entry['type'];
+      var type = entry['ty'];
       if (type !== undefined) {
         Cartridge.SetType(parseInt(type));          
       }
-      var pokey = entry['pokey'];
+      var pokey = entry['p'];
       if (pokey !== undefined) {
-        Cartridge.SetPokey(pokey == 'true');
+        Cartridge.SetPokey(pokey == 't');
       }
-      var controller1 = entry['controller1'];
+      var controller1 = entry['c1'];
       if (controller1 !== undefined) {
         Cartridge.SetController1(parseInt(controller1));
       }
-      var controller2 = entry['controller2'];
+      var controller2 = entry['c2'];
       if (controller2 !== undefined) {
         Cartridge.SetController2(parseInt(controller2));
       }
-      var region = entry['region'];
+      var region = entry['r'];
       if (region !== undefined) {
         Cartridge.SetRegion(parseInt(region));
       }
-      var flags = entry['flags'];
+      var flags = entry['f'];
       if (flags !== undefined) {
         Cartridge.SetFlags(parseInt(flags));
       }
       var xm = entry['xm'];
       if (xm !== undefined) {
-        Cartridge.SetXm(xm == 'true');
+        Cartridge.SetXm(xm == 't');
       }
       var hblank = entry['hblank'];
       if (hblank !== undefined) {
@@ -89,11 +89,11 @@ function database_Load(digest) {
       }
       var dualanalog = entry['dualanalog'];
       if (dualanalog !== undefined) {
-        Cartridge.SetDualAnalog(dualanalog == 'true');
+        Cartridge.SetDualAnalog(dualanalog == 't');
       }
-      var pokey450 = entry['pokey450'];
+      var pokey450 = entry['p4'];
       if (pokey450 !== undefined) {
-        var enabled = pokey450 == 'true';
+        var enabled = pokey450 == 't';
         Cartridge.SetPokey450(enabled);
         if (enabled) {
           Cartridge.SetPokey(true);            
@@ -107,9 +107,9 @@ function database_Load(digest) {
       if (rightswitch !== undefined) {
         Cartridge.SetRightSwitch(parseInt(rightswitch));
       }
-      var swapbuttons = entry['swapbuttons'];
+      var swapbuttons = entry['sb'];
       if (swapbuttons !== undefined) {
-        Cartridge.SetSwapButtons(swapbuttons == 'true');
+        Cartridge.SetSwapButtons(swapbuttons == 't');
       }
     }      
     return cart_in_db;

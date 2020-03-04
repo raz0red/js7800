@@ -7,21 +7,11 @@
   <script src="js/js7800-bundle.js"></script>
 </head>
 
-<body>
-  <div id="drop-div"></div>
-  <div id="outer-container">
-    <div id="border-container">
-      <div id="fullscreen-container">
-        <div id="inner-container">
-          <div class="noselect"><canvas id="screen" width="320" height="240"></canvas></div>
-          <div id="logo"><img alt="Atari 7800" src="images/Atari_7800_Logo.png" /></div>
-        </div>
-        <div id="controls"></div>
-      </div>
-    </div>
-  </div>
+<body>  
+  <div id="outer-container"></div>
   <script>
-    js7800.init();
+    var emu = js7800.Main;
+    emu.init('outer-container');
   </script>
-
+</body>
 </html>
