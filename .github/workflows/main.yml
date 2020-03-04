@@ -38,3 +38,12 @@ jobs:
       with:
         name: example
         path: example    
+
+    - name: Deploy to GitHub pages
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: master
+        BRANCH: gh-pages
+        FOLDER: example        
