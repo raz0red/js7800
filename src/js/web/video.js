@@ -167,12 +167,10 @@ function stopScreenSnow() {
 
 function fullScreen() {
   var fsContainer = document.getElementById("js7800__fullscreen-container");
-  if (document.fullscreenElement) {
-    document.exitFullscreen();
-  } else {
+  if (!document.fullscreenElement) {
     fsContainer.requestFullscreen();
-  }
-  resizeCanvas();
+    setTimeout(resizeCanvas, 200);
+  }  
 }
 
 function onCartidgeLoaded() {

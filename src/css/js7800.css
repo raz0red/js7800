@@ -60,3 +60,9 @@
   width: 100%;
   height: 100%;
 }
+
+#js7800__fullscreen-container:-webkit-full-screen {
+  position:fixed;
+  width: 100%;
+  background-color: black;
+}
