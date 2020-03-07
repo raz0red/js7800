@@ -2,3 +2,4 @@
 - Edge: Double clicking in display area appears to cause text selection (may be resolved)
 - Better checks for start/stop emulations so 2 can't get started at once
 - Sometimes must disconnect/reconnect gamepad to be recognized
+- Hide the identifiers for the components (the names are too obvious and could be reused)
