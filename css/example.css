@@ -65,10 +65,12 @@ body {
 
 .cartselect select optgroup {
   font-weight: bold;
-  color: #ce2f37;
+  /*color: #ce2f37;*/
+  color: #777777;
 }
 
 .cartselect select option {
+  font-weight: normal;
   color: #BBBBBB;
 }
 
