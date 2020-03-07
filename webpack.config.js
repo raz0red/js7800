@@ -41,6 +41,12 @@ module.exports = {
       }),
     ]
   },
+  devServer: {
+    contentBase: path.join(__dirname, 'example'),
+    publicPath: '/js/',
+    compress: false,
+    port: 8000
+  },  
   plugins: [
     {
       apply: compiler => {

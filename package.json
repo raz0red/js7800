@@ -8,12 +8,14 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/raz0red/js7800.git"
-  },  
+  },
   "scripts": {
     "build": "npm run dbConvert && webpack",
     "prepublish": "npm run build",
     "webpackWatch": "webpack --watch",
     "webpackWatchDebug": "webpack -d --watch",
+    "devServer": "webpack-dev-server",
+    "devServerDebug": "webpack-dev-server -d",
     "dbConvert": "node db/convert.js db/ProSystem.dat > src/js/prosystem/ProSystemDat.js"
   },
   "dependencies": {
@@ -25,6 +27,7 @@
     "css-loader": "^3.4.2",
     "file-loader": "^5.1.0",
     "url-loader": "^3.0.0",
-    "webpack-cli": "^3.3.11"
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
   }
 }
