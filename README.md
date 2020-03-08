@@ -8,8 +8,6 @@ Ported by raz0red
 JS7800 is an enhanced JavaScript port of the ProSystem Atari 7800 emulator developed by Greg Stanton. 
 Portions of the Pokey code were adapted from the MAME implementation.
 
-[https://gstanton.github.io/ProSystem1_3/]
-
 Test deployment (when commits are made to master):
 
 https://raz0red.github.io/js7800/
