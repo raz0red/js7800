@@ -30,10 +30,10 @@ The following section contains the "default" control mappings for JS7800.
 
 ### General:
   
-    F3 : Select (Atari 7800 Console)
-    F4 : Pause (Atari 7800 Console)
-    F5 : Left difficulty switch (Atari 7800 Console)
-    F6 : Right difficulty switch (Atari 7800 Console)
+    F3 : Select                   (Atari 7800 Console)
+    F4 : Pause                    (Atari 7800 Console)
+    F5 : Left difficulty switch   (Atari 7800 Console)
+    F6 : Right difficulty switch  (Atari 7800 Console)
 
     F9 : Switch to "Full Screen" display
                     
