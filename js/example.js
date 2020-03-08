@@ -27,7 +27,7 @@ var Example = (function () {
     xhr.send();
   }
 
-  var RomList = function (selectId) {
+  var RomList = function(selectId) {
     var select = document.getElementById(selectId);
     if (!select) {
       throw "Unable to find select element with id: " + selectId;
@@ -98,8 +98,7 @@ var Example = (function () {
         addChildren(select, romList);
       }
 
-      var ReadList = function (url, root, current) {
-        loadCount++;
+      var ReadList = function (url, root, current) {        
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
         xhr.onload = function () {
@@ -129,6 +128,7 @@ var Example = (function () {
                 for (var i = 0; i < folders.length; i++) {
                   outFolders[i] = folders[i];
                   outFolders[i].path = getPath(urlPrefix, folders[i].path);
+                  loadCount++;
                   new ReadList(outFolders[i].path, root, outFolders[i]);
                 }
               }
@@ -151,6 +151,7 @@ var Example = (function () {
         };
         xhr.send();
       }
+      loadCount++;
       new ReadList(romShareUrl, root, root);
     }
   }
