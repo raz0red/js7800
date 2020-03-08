@@ -32,7 +32,7 @@ var Example = (function () {
     if (!select) {
       throw "Unable to find select element with id: " + selectId;
     }
-    select.onchange = function () { loadRom(select.value); }
+    select.onchange = function() { loadRom(select.value); this.blur(); }
 
     this.loadList = function (romShareUrl) {
       var loadCount = 0;
