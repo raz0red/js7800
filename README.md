@@ -43,32 +43,35 @@ The following section contains the "default" control mappings for JS7800.
 
      Controller 1:
      
-         D-pad        : Move
-         Left analog  : Move
-         B            : Left button
-         A            : Right button
-         Right analog : Move/controller 2 (directional fire for Robotron and TiME Salvo)
+         D-pad         : Move
+         Left analog   : Move
+         B             : Left button
+         A             : Right button
+         Right analog  : Move/controller 2 (directional fire for Robotron and TiME Salvo)
        
      Controller 2:
      
-         D-pad        : Move
-         Left analog  : Move
-         B            : Left button
-         A            : Right button
+         D-pad         : Move
+         Left analog   : Move
+         B             : Left button
+         A             : Right button
     
 ##### Keyboard:
     
      Controller 1:
      
-         Arrow keys   : Move
-         Z            : Left button
-         X            : Right button
+         Arrow keys    : Move
+         Z             : Left button
+         X             : Right button
        
      Controller 2:
      
-         I, J, K, L   : Move
-         N            : Left button
-         M            : Right button
+         I, J, K, L    : Move
+         N             : Left button
+         M             : Right button
 
 ### Lightgun:
+
+         Mouse         : Move crosshairs
+         Left button   : Fire gun
     
