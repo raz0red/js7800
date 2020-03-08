@@ -24,3 +24,51 @@ Packaging the emulator as a JavaScript module allows the component to be easily 
 
 The method for loading cartridges will vary based on the application that is embedding the JS7800 module. However, it should always be possible to load a local ROM file by **"Dragging and Dropping"** it on top of the JS7800 component. 
 
+## Controls
+
+The following section contains the "default" control mappings for JS7800.
+
+### General:
+  
+    F3 : Select Button (Atari 7800 Console)
+    F4 : Pause Button (Atari 7800 Console)
+    F5 : Left Difficulty Switch (Atari 7800 Console)
+    F6 : Right Difficulty Switch (Atari 7800 Console)
+
+    F9 : Switch to "Full Screen" display
+                    
+### Joystick:
+    
+##### Gamepad:
+
+     Controller 1:
+     
+         D-pad        : Move
+         Left analog  : Move
+         B            : Left button
+         A            : Right button
+         Right analog : Move/controller 2 (directional fire for Robotron and TiME Salvo)
+       
+     Controller 2:
+     
+         D-pad        : Move
+         Left analog  : Move
+         B            : Left button
+         A            : Right button
+    
+##### Keyboard:
+    
+     Controller 1:
+     
+         Arrow keys   : Move
+         Z            : Left button
+         X            : Right button
+       
+     Controller 2:
+     
+         I, J, K, L   : Move
+         N            : Left button
+         M            : Right button
+
+### Lightgun:
+    
