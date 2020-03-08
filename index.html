@@ -3,30 +3,25 @@
 
 <head>
   <title>JS7800: Atari 7800 Emulator</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">  
   <link rel="stylesheet" type="text/css" href="css/example.css">
   <script src="js/js7800.min.js"></script>
+  <script src="js/example.js"></script>
 </head>
 
 <body>
   <div class="header">
     <span class="header__label">JS7800 by raz0red</span><a href="https://github.com/raz0red/js7800"><img class="header__logo"
-        src="images/github-logo.svg" alt="GitHub: js7800 by raz0red"></a>
+        src="images/github-logo.svg" alt="GitHub: JS7800 by raz0red" title="GitHub: JS7800 by raz0red"></a>
   </div>
   <div id="content">
     <div id="js7800__target"></div>
     <div class="cartselect__outer">
       <div class="cartselect">
-        <select>
-          <option selected disabled>Select Atari 7800 Cartridge...</option>
-          <optgroup label="Category 1">
-            <option value="cart1">Cartridge 1</option>
-            <option value="cart2">Cartridge 2</option>
-          </optgroup>
-          <optgroup label="Category 2">
-            <option value="cart3">Cartridge 3</option>
-            <option value="cart4">Cartridge 4</option>
-          </optgroup>
-        </select>
+        <select id="cartselect__select"></select>
       </div>
     </div>
   </div>
@@ -34,6 +29,10 @@
   <script>
     var emu = js7800.Main;
     emu.init('js7800__target');
+
+    Example.set7800(js7800);
+    var RomList = new Example.RomList('cartselect__select');
+    RomList.loadList('roms/rs-hb.json');
   </script>
 </body>
 
