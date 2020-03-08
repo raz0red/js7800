@@ -1,6 +1,7 @@
 {
-    "name": "",
-    "short_name": "",
+    "name": "JS7800",
+    "short_name": "JS7800",
+    "description": "Atari 7800 Emulator",
     "icons": [
         {
             "src": "android-chrome-192x192.png",
