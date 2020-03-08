@@ -1,3 +1,5 @@
+"use strict";
+
 var Example = (function () {
 
   var js7800 = null;
@@ -20,7 +22,6 @@ var Example = (function () {
           js7800.Main.startEmulation(cart);
         }
       } catch (e) {
-        error = true;
         alert(url + " (" + e + ")");
       }
     }
