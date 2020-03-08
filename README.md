@@ -72,6 +72,6 @@ The following section contains the "default" control mappings for JS7800.
 
 ### Lightgun:
 
-         Mouse         : Move crosshairs
-         Left button   : Fire gun
+         Mouse              : Move crosshairs
+         Left mouse button  : Fire gun
     
