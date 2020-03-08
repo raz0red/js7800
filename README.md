@@ -22,7 +22,7 @@ Packaging the emulator as a JavaScript module allows the component to be easily 
 
 ## Loading Cartridges (ROMs)
 
-The method for loading cartridges will vary based on the application that is embedding the JS7800 module. However, it should always be possible to load a local ROM file by **"Dragging and Dropping"** it on top of the JS7800 component. 
+The method for loading cartridges will vary based on the application that is embedding the JS7800 module. However, it should always be possible to load a local ROM by **"Dragging and Dropping"** the file on top of the JS7800 component. 
 
 ## Controls
 
