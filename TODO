@@ -6,3 +6,4 @@
 - Gamepads on iOS appears to have different control mappings (need to also test Android)
 - Start to fill out the command bar component (bottom bar). These will include full screen, sound on/off, etc.
 - Evaluate browser specific dependencies (key input, drag, etc.). Should these be external?
+- Fix WebPack warnings
