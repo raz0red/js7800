@@ -38,11 +38,11 @@ The following section contains the "default" controller mappings for JS7800. It 
 
     F9 : Switch to "Full Screen" display
                     
-### Joystick:
+### Joysticks:
 
 The following input methods are available for games that require joysticks.
     
-##### Gamepad:
+##### Gamepads:
 
 JS7800 supports the use of up to two gamepads for joystick-based games. Gamepad testing has been extremely limited (Chrome and Edge on Windows with Switch, Xbox 360, PS3, and PS4 controllers).
 
