@@ -16,9 +16,9 @@ https://raz0red.github.io/js7800/
 
 ## JavaScript Module
 
-This particular repository contains the JS7800 JavaScript Module. A JavaScript Module is a self-contained reusable component that can be utilized as part of a larger application. The JS7800 module is distributed as a single JavaScript file that contains of all the required JavaScript code, CSS, and images required for the emulator to execute. 
+This particular repository contains the JS7800 JavaScript Module. A JavaScript Module is a self-contained reusable component that can be utilized as part of a larger application. The JS7800 module is distributed as a single JavaScript file that contains all of the required JavaScript code, CSS, and images for the emulator to execute. 
 
-Packaging the emulator as a JavaScript module allows the component to be easily embedded for different devices and form factors (web, mobile, tablet, etc.). Currently, a separate repository is being developed that will embed the module and provide many additional features such as settings dialogs, persistence between sessions, and the ability to save and restore states. This README will be updated to reflect the various other related repositories once they become available.
+Packaging the emulator as a JavaScript module allows the component to be easily embedded for different devices and form factors (web, mobile, tablet, etc.). A separate repository is currently being developed that will embed the module and provide many additional features such as settings dialogs, persistence between sessions, and the ability to save and restore states. This README will be updated to reflect the various other related repositories once they become available.
 
 ## Loading Cartridges (ROMs)
 
@@ -44,22 +44,22 @@ The following input methods are available for games that require joysticks.
     
 ##### Gamepad:
 
-JS7800 supports the use of up to two gamepads for joystick-based games. Gamepad testing  has been extremely limited (Chrome and Edge on Windows with Switch, Xbox 360, PS3, and PS4 controllers).
+JS7800 supports the use of up to two gamepads for joystick-based games. Gamepad testing has been extremely limited (Chrome and Edge on Windows with Switch, Xbox 360, PS3, and PS4 controllers).
 
      Controller 1:
      
-         D-pad         : Move
-         Left analog   : Move
-         B             : Left button
-         A             : Right button
-         Right analog  : Move/controller 2 (directional fire for Robotron and TiME Salvo)
+         D-pad              : Move
+         Left analog        : Move
+         B (or equivalent)  : Left button
+         A (or equivalent)  : Right button
+         Right analog       : Move/controller 2 (directional fire for Robotron and TiME Salvo)
        
      Controller 2:
      
-         D-pad         : Move
-         Left analog   : Move
-         B             : Left button
-         A             : Right button
+         D-pad              : Move
+         Left analog        : Move
+         B (or equivalent)  : Left button
+         A (or equivalent)  : Right button
     
 ##### Keyboard:
 
@@ -83,4 +83,3 @@ For games that support the use of a light gun (Alien Brigade, Crossbow, etc.), J
 
      Mouse              : Move crosshairs
      Left mouse button  : Fire gun
-   
