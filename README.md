@@ -26,7 +26,7 @@ The method for loading cartridges will vary based on the application that is emb
 
 ## Controls
 
-The following section contains the "default" control mappings for JS7800.
+The following section contains the "default" controller mappings for JS7800. It is important to note that the default mappings may be modified by a particular application that is embedding the JS7800 module (globally or via user-defined values). 
 
 ### General:
   
@@ -44,7 +44,7 @@ The following input methods are available for games that require joysticks.
     
 ##### Gamepad:
 
-JS7800 supports the use of up to two gamepads for joystick-based games. Gamepad support testing so far has been extermely limited (Chrome and Edge on Windows with Switch, Xbox 360, PS3, and PS4 controllers).
+JS7800 supports the use of up to two gamepads for joystick-based games. Gamepad testing  has been extremely limited (Chrome and Edge on Windows with Switch, Xbox 360, PS3, and PS4 controllers).
 
      Controller 1:
      
@@ -63,7 +63,7 @@ JS7800 supports the use of up to two gamepads for joystick-based games. Gamepad 
     
 ##### Keyboard:
 
-JS7800 supports keyboard input for joystick-based games.
+JS7800 also supports keyboard input for joystick-based games.
     
      Controller 1:
      
@@ -83,4 +83,4 @@ For games that support the use of a light gun (Alien Brigade, Crossbow, etc.), J
 
      Mouse              : Move crosshairs
      Left mouse button  : Fire gun
-    
+   
