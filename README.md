@@ -40,7 +40,7 @@ The following section contains the "default" control mappings for JS7800.
                     
 ### Joystick:
 
-The following input methods are available for games that require a joystick.
+The following input methods are available for games that require joysticks.
     
 ##### Gamepad:
 
