@@ -39,8 +39,12 @@ The following section contains the "default" control mappings for JS7800.
     F9 : Switch to "Full Screen" display
                     
 ### Joystick:
+
+The following input methods are available for games that require a joystick.
     
 ##### Gamepad:
+
+JS7800 supports the use of up to two gamepads for joystick-based games. Gamepad support testing so far has been extermely limited (Chrome and Edge on Windows with Switch, Xbox 360, PS3, and PS4 controllers).
 
      Controller 1:
      
@@ -58,6 +62,8 @@ The following section contains the "default" control mappings for JS7800.
          A             : Right button
     
 ##### Keyboard:
+
+JS7800 supports keyboard input for joystick-based games.
     
      Controller 1:
      
@@ -72,6 +78,8 @@ The following section contains the "default" control mappings for JS7800.
          M             : Right button
 
 ### Lightgun:
+
+For games that support the use of a light gun (Alien Brigade, Crossbow, etc.), JS7800 provides the ability to use a mouse for input.
 
      Mouse              : Move crosshairs
      Left mouse button  : Fire gun
