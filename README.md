@@ -81,5 +81,5 @@ JS7800 also supports keyboard input for joystick-based games.
 
 For games that support the use of a light gun (Alien Brigade, Crossbow, etc.), JS7800 provides the ability to use a mouse for input.
 
-     Mouse              : Move crosshairs
+     Mouse              : Move crosshair
      Left mouse button  : Fire gun
