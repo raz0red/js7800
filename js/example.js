@@ -28,12 +28,12 @@ var Example = (function () {
     xhr.send();
   }
 
-  var RomList = function(selectId) {
+  var RomList = function (selectId) {
     var select = document.getElementById(selectId);
     if (!select) {
       throw "Unable to find select element with id: " + selectId;
     }
-    select.onchange = function() { loadRom(select.value); this.blur(); }
+    select.onchange = function () { loadRom(select.value); this.blur(); }
 
     this.loadList = function (romShareUrl) {
       var loadCount = 0;
@@ -99,7 +99,7 @@ var Example = (function () {
         addChildren(select, romList);
       }
 
-      var ReadList = function (url, root, current) {        
+      var ReadList = function(url, root, current) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
         xhr.onload = function () {
@@ -157,9 +157,15 @@ var Example = (function () {
     }
   }
 
+  function getRequestParameter(name) {
+    if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))
+      return decodeURIComponent(name[1]);
+  }
+
   return {
     set7800: function (in7800) { js7800 = in7800 },
-    RomList: RomList,
-    loadRom: loadRom
+    loadRom: loadRom,
+    getRequestParameter: getRequestParameter,
+    RomList: RomList
   }
 })();
