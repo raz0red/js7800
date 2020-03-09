@@ -30,9 +30,14 @@
     var emu = js7800.Main;
     emu.init('js7800__target');
 
+    var romshare = Example.getRequestParameter("rs");
+    if (!romshare) {
+      romshare = 'roms/rs-hb.json';
+    }
+
     Example.set7800(js7800);
     var RomList = new Example.RomList('cartselect__select');
-    RomList.loadList('roms/rs-hb.json');
+    RomList.loadList(romshare);
   </script>
 </body>
 
