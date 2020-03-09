@@ -38,6 +38,11 @@
     Example.set7800(js7800);
     var RomList = new Example.RomList('cartselect__select');
     RomList.loadList(romshare);
+
+    var rom = Example.getRequestParameter("rom");
+    if (rom) {
+      Example.loadRom(rom);
+    }
   </script>
 </body>
 
