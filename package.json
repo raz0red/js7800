@@ -4,17 +4,17 @@
   "description": "An enhanced JavaScript port of the ProSystem Atari 7800 emulator",
   "homepage": "https://github.com/raz0red/js7800",
   "author": "raz0red",
+  "license": " GPL-2.0",
   "main": "src/index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/raz0red/js7800.git"
   },
   "scripts": {
-    "build": "npm run dbConvert && webpack",
-    "prepublish": "npm run build",
-    "webpackWatch": "webpack --watch",
+    "build": "npm run dbConvert && webpack --mode=production",
+    "webpackWatch": "webpack --watch --mode=production",
     "webpackWatchDebug": "webpack -d --watch",
-    "devServer": "webpack-dev-server",
+    "devServer": "webpack-dev-server --mode=production",
     "devServerDebug": "webpack-dev-server -d",
     "dbConvert": "node db/convert.js db/ProSystem.dat > src/js/prosystem/ProSystemDat.js"
   },
