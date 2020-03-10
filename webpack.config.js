@@ -7,7 +7,7 @@ module.exports = {
     /*"js7800": "./src/js/index.js",*/
     "js7800.min": "./src/js/index.js"
   },
-  devtool: "source-map",
+  /*devtool: "source-map",*/
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
