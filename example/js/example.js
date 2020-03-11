@@ -1,12 +1,33 @@
 "use strict";
 
 var Example = (function () {
+  
+  var js7800 = null;  
+  var isGitHub = (
+    window.location.hostname.toLowerCase() == 'raz0red.github.io');
 
-  var js7800 = null;
+  var errorHandler = function(error) {
+    console.error(error);
+    alert(error);
+  }
+
+  function addUrlPrefix(url) {    
+    var urlLower = url.toLowerCase();    
+    var prefix = "";
+    if (isGitHub) {
+      var x = atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==");
+      if (urlLower.startsWith("http://")) {
+        prefix = "http" + x;
+      } else if (urlLower.startsWith("https://")) {
+        prefix = "https" + x; 
+      } 
+    }
+    return prefix + url;
+  }
 
   function loadRom(url) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url);
+    xhr.open('GET', addUrlPrefix(url));
     xhr.responseType = 'arraybuffer';
     xhr.onload = function () {
       try {
@@ -22,7 +43,7 @@ var Example = (function () {
           js7800.Main.startEmulation(cart);
         }
       } catch (e) {
-        alert(url + " (" + e + ")");
+        errorHandler(url + " (" + e + ")");
       }
     }
     xhr.send();
@@ -33,7 +54,9 @@ var Example = (function () {
     if (!select) {
       throw "Unable to find select element with id: " + selectId;
     }
-    select.onchange = function () { loadRom(select.value); this.blur(); }
+    select.onchange = function () { 
+      loadRom(select.value); this.blur(); 
+    }
 
     this.loadList = function (romShareUrl) {
       var loadCount = 0;
@@ -99,9 +122,9 @@ var Example = (function () {
         addChildren(select, romList);
       }
 
-      var ReadList = function(url, root, current) {
+      function ReadList(url, root, current) {
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', url);
+        xhr.open('GET', addUrlPrefix(url));
         xhr.onload = function () {
           try {
             if (xhr.status >= 300 || xhr.stats < 200) {
@@ -142,9 +165,8 @@ var Example = (function () {
 
           loadCount--;
           if (loadCount == 0) {
-            if (error) {
-              console.error(errorMessage);
-              alert(errorMessage);
+            if (error) {              
+              errorHandler(errorMessage);
             } else {
               populate(root);
             }
@@ -162,10 +184,55 @@ var Example = (function () {
       return decodeURIComponent(name[1]);
   }
 
+  function fileDropHandler(ev) {
+    ev.preventDefault();
+    var file = null;
+    if (ev.dataTransfer.items) {
+      for (var i = 0; i < ev.dataTransfer.items.length; i++) {
+        if (ev.dataTransfer.items[i].kind === 'file') {
+          file = ev.dataTransfer.items[i].getAsFile();
+          break;
+        }
+      }
+    } else {
+      for (var i = 0; i < ev.dataTransfer.files.length; i++) {
+        file = ev.dataTransfer.files[i];
+        break;
+      }
+    }
+
+    if (file) {
+      var reader = new FileReader();
+      reader.readAsBinaryString(file);
+      reader.onloadend = function () {
+        var cart = new Array();
+        for (var i = 0; i < reader.result.length; i++) {
+          cart[i] = reader.result.charCodeAt(i);
+        }
+        js7800.Main.startEmulation(cart);
+      }
+    }
+  }
+  
+  function init(in7800) {
+    js7800 = in7800;
+
+    var ignore = function (event) {
+      event.preventDefault();
+    }
+
+    var body = document.body;
+    body.addEventListener("drop", fileDropHandler);
+    body.addEventListener("dragdrop", fileDropHandler);
+    body.addEventListener("dragenter", ignore);
+    body.addEventListener("dragover", ignore);
+  }
+
   return {
-    set7800: function (in7800) { js7800 = in7800 },
+    init: init,
     loadRom: loadRom,
     getRequestParameter: getRequestParameter,
+    SetErrorHandler: function(handler) { errorHandler = handler },
     RomList: RomList
   }
 })();

@@ -9,7 +9,6 @@ import * as Memory from "./prosystem/Memory.js"
 import * as Cartridge from "./prosystem/Cartridge.js"
 import * as Database from "./prosystem/Database.js"
 import * as Riot from "./prosystem/Riot.js"
-import * as WebDrop from "./web/drop.js"
 
 import 'fullscreen-api-polyfill'
 
@@ -192,11 +191,6 @@ function addElements(id) {
   controlsDiv = document.createElement("div");
   controlsDiv.id = controlsDiv.className = "js7800__controls";
   fullscreenContainer.appendChild(controlsDiv);
-
-  // drop container
-  var dropDiv = document.createElement("div");
-  dropDiv.id = dropDiv.className = "js7800__drop-div";
-  mainContainer.appendChild(dropDiv);
 }
 
 function init(id) {
@@ -213,7 +207,6 @@ function init(id) {
     // Web
     WebAudio.init();
     WebVideo.init(canvas, controlsDiv);
-    WebDrop.init();
     WebKb.init();
     WebInput.init(keyboardData);
 

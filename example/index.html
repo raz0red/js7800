@@ -18,6 +18,7 @@
         src="images/github-logo.svg" alt="GitHub: JS7800 by raz0red" title="GitHub: JS7800 by raz0red"></a>
   </div>
   <div id="content">
+    <div class="drop__div"></div>
     <div id="js7800__target"></div>
     <div class="cartselect__outer">
       <div class="cartselect">
@@ -35,7 +36,7 @@
       romshare = 'roms/rs-hb.json';
     }
 
-    Example.set7800(js7800);
+    Example.init(js7800);
     var RomList = new Example.RomList('cartselect__select');
     RomList.loadList(romshare);
 
