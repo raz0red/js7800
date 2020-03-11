@@ -189,9 +189,15 @@ var Example = (function () {
     var file = null;
     if (ev.dataTransfer.items) {
       for (var i = 0; i < ev.dataTransfer.items.length; i++) {
-        if (ev.dataTransfer.items[i].kind === 'file') {
-          file = ev.dataTransfer.items[i].getAsFile();
+        var item = ev.dataTransfer.items[i];
+        if (item.kind === 'file') {
+          file = item.getAsFile();
           break;
+        } else if (item.kind === 'string' && item.type.match('^text/uri-list')) {
+          item.getAsString(function(url) {
+            loadRom(url);
+            return;
+          });
         }
       }
     } else {
