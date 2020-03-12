@@ -33,11 +33,11 @@
     emu.init('js7800__target');
     Example.init(js7800, 'cartselect__select');
 
-    var romshare = Example.getRequestParameter("romshare");
-    if (!romshare) {
-      romshare = 'roms/romlist-homebrew.json';
+    var romlist = Example.getRequestParameter("romlist");
+    if (!romlist) {
+      romlist = 'roms/romlist-homebrew.json';
     }
-    Example.loadListFromUrl(romshare);
+    Example.loadListFromUrl(romlist);
 
     var rom = Example.getRequestParameter("rom");
     if (rom) {
