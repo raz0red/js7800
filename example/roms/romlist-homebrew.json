@@ -2,19 +2,19 @@
     "folders": [
         {
             "name": "Homebrew (Released)",
-            "path": "rs-hb-released.json"
+            "path": "romlist-homebrew-released.json"
         },
         {
             "name": "Homebrew (In Development)",
-            "path": "rs-hb-indev.json"
+            "path": "romlist-homebrew-indev.json"
         },
         {
             "name": "Homebrew (Demos)",
-            "path": "rs-hb-demos.json"
+            "path": "romlist-homebrew-demos.json"
         },
         {
             "name": "Utilities",
-            "path": "rs-hb-utils.json"
+            "path": "romlist-homebrew-utils.json"
         }
     ],
     "files": []
