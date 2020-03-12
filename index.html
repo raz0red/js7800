@@ -9,6 +9,7 @@
   <link rel="manifest" href="site.webmanifest">  
   <link rel="stylesheet" type="text/css" href="css/example.css">
   <script src="js/js7800.min.js"></script>
+  <script src="js/zip.min.js"></script>
   <script src="js/example.js"></script>
 </head>
 
@@ -30,19 +31,17 @@
   <script>
     var emu = js7800.Main;
     emu.init('js7800__target');
+    Example.init(js7800, 'cartselect__select');
 
-    var romshare = Example.getRequestParameter("rs");
+    var romshare = Example.getRequestParameter("romshare");
     if (!romshare) {
-      romshare = 'roms/rs-hb.json';
+      romshare = 'roms/romlist-homebrew.json';
     }
-
-    Example.init(js7800);
-    var RomList = new Example.RomList('cartselect__select');
-    RomList.loadList(romshare);
+    Example.loadListFromUrl(romshare);
 
     var rom = Example.getRequestParameter("rom");
     if (rom) {
-      Example.loadRom(rom);
+      Example.loadRomFromUrl(rom);
     }
   </script>
 </body>

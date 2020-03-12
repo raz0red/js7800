@@ -1,46 +1,91 @@
 "use strict";
 
 var Example = (function () {
-  
-  var js7800 = null;  
+
+  // Disable use of web workers for zip files
+  zip.useWebWorkers = false;
+
+  var js7800 = null;
+  var romList = null;
+
   var isGitHub = (
     window.location.hostname.toLowerCase() == 'raz0red.github.io');
 
-  var errorHandler = function(error) {
+  var errorHandler = function (error) {
     console.error(error);
     alert(error);
   }
 
-  function addUrlPrefix(url) {    
-    var urlLower = url.toLowerCase();    
+  function unzip(file, success, failure) {
+    var error = null;
+    failure = failure || errorHandler;
+
+    function entryProcessor(entries) {
+      if (entries.length == 1) {
+        var entry = entries[0];
+        var writer = new zip.BlobWriter();
+        entry.getData(writer, success);
+      } else {
+        failure("Invalid zip file entry count: " + entries.length);
+      }
+    }
+
+    function blobReader(zipReader) {
+      zipReader.getEntries(
+        entryProcessor,
+        failure
+      );
+    }
+
+    zip.createReader(
+      new zip.BlobReader(file),
+      blobReader,
+      function () { success(file); } // Assume is not a zip file
+    );
+  }
+
+  function addUrlPrefix(url) {
+    var urlLower = url.toLowerCase();
     var prefix = "";
     if (isGitHub) {
       var x = atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==");
       if (urlLower.startsWith("http://")) {
         prefix = "http" + x;
       } else if (urlLower.startsWith("https://")) {
-        prefix = "https" + x; 
-      } 
+        prefix = "https" + x;
+      }
     }
     return prefix + url;
   }
 
-  function loadRom(url) {
+  function startEmulation(blob) {
+    unzip(blob,
+      function (file) {
+        console.log(file);
+        var reader = new FileReader();
+        reader.readAsBinaryString(file);
+        reader.onloadend = function () {
+          var cart = new Array();
+          for (var i = 0; i < reader.result.length; i++) {
+            cart[i] = reader.result.charCodeAt(i);
+          }
+          js7800.Main.startEmulation(cart);
+        }
+      },
+      errorHandler
+    );
+  }
+
+  function loadRomFromUrl(url) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', addUrlPrefix(url));
-    xhr.responseType = 'arraybuffer';
+    xhr.responseType = 'blob';
     xhr.onload = function () {
       try {
         if (xhr.status >= 300 || xhr.stats < 200) {
           throw xhr.status + ": " + xhr.statusText;
         } else {
-          var uInt8Array = new Uint8Array(xhr.response);
-          var len = uInt8Array.length;
-          var cart = new Array(len);
-          for (var i = 0; i < len; i++) {
-            cart[i] = uInt8Array[i];
-          }
-          js7800.Main.startEmulation(cart);
+          startEmulation(xhr.response);
         }
       } catch (e) {
         errorHandler(url + " (" + e + ")");
@@ -54,75 +99,123 @@ var Example = (function () {
     if (!select) {
       throw "Unable to find select element with id: " + selectId;
     }
-    select.onchange = function () { 
-      loadRom(select.value); this.blur(); 
+    select.onchange = function () {
+      loadRomFromUrl(select.value); this.blur();
     }
 
-    this.loadList = function (romShareUrl) {
-      var loadCount = 0;
-      var error = false;
-      var errorMessage = "";
-      var root = {};
+    function clearSelect() {
+      var len, groups, par;
+      groups = select.getElementsByTagName('optgroup');
+      len = groups.length;
+      for (var i = len; i; i--) {
+        select.removeChild(groups[i - 1]);
+      }
+      len = select.options.length;
+      for (var i = len; i; i--) {
+        par = select.options[i - 1].parentNode;
+        par.removeChild(select.options[i - 1]);
+      }
+    }
 
+    function populateSelect(romList) {
+      var depth = 0;
+
+      function addChildren(parentEl, parent) {
+        depth++;
+        try {
+          var files = parent.files;
+          for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var opt = document.createElement('option');
+            opt.appendChild(document.createTextNode(file.name));
+            opt.value = file.path;
+            parentEl.appendChild(opt);
+          }
+
+          if (depth < 2) {
+            var folders = parent.folders;
+            for (var i = 0; i < folders.length; i++) {
+              var folder = folders[i];
+              var group = document.createElement("optgroup");
+              group.setAttribute("label", folder.name);
+              parentEl.appendChild(group);
+              addChildren(group, folder);
+            }
+          }
+        } finally {
+          depth--;
+        }
+      }
+
+      clearSelect();
+      var opt = document.createElement('option');
+      opt.appendChild(document.createTextNode("Select Atari 7800 Cartridge..."));
+      opt.disabled = true;
+      opt.selected = true;
+      select.appendChild(opt);
+
+      addChildren(select, romList);
+    }
+
+    function ReadList(ctx, current) {
       function getPath(prefix, path) {
         return path.indexOf('//') != -1 ? path : prefix + "/" + path;
       }
 
-      function clear() {
-        var len, groups, par;
-        groups = select.getElementsByTagName('optgroup');
-        len = groups.length;
-        for (var i = len; i; i--) {
-          select.removeChild(groups[i - 1]);
+      function walkResults(ctx, result, url, current) {
+        var urlPrefix = result.pathPrefix;
+        if (!urlPrefix) {
+          var slash = url ? url.lastIndexOf('/') : -1;
+          urlPrefix = slash == -1 ? '' : url.substring(0, slash);
         }
-        len = select.options.length;
-        for (var i = len; i; i--) {
-          par = select.options[i - 1].parentNode;
-          par.removeChild(select.options[i - 1]);
-        }
-      }
 
-      function populate(romList) {
-        var depth = 0;
-
-        function addChildren(parentEl, parent) {
-          depth++;
-          try {
-            var files = parent.files;
-            for (var i = 0; i < files.length; i++) {
-              var file = files[i];
-              var opt = document.createElement('option');
-              opt.appendChild(document.createTextNode(file.name));
-              opt.value = file.path;
-              parentEl.appendChild(opt);
-            }
-
-            if (depth < 2) {
-              var folders = parent.folders;
-              for (var i = 0; i < folders.length; i++) {
-                var folder = folders[i];
-                var group = document.createElement("optgroup");
-                group.setAttribute("label", folder.name);
-                parentEl.appendChild(group);
-                addChildren(group, folder);
-              }
-            }
-          } finally {
-            depth--;
+        // Walk files
+        var outFiles = [];
+        var files = result.files;
+        if (files) {
+          for (var i = 0; i < files.length; i++) {
+            outFiles[i] = files[i];
+            outFiles[i].path = getPath(urlPrefix, files[i].path);
           }
         }
+        current.files = outFiles;
 
-        clear();
-        var opt = document.createElement('option');
-        opt.appendChild(document.createTextNode("Select Atari 7800 Cartridge..."));
-        opt.disabled = true;
-        opt.selected = true;
-        select.appendChild(opt);
-
-        addChildren(select, romList);
+        // Walk folders
+        var outFolders = [];
+        var folders = result.folders;
+        if (folders) {
+          for (var i = 0; i < folders.length; i++) {
+            outFolders[i] = folders[i];
+            if (folders[i].children) {
+              new ReadList(ctx, outFolders[i]).fromList(folders[i].children, urlPrefix + "/");
+            } else {
+              outFolders[i].path = getPath(urlPrefix, folders[i].path);
+              new ReadList(ctx, outFolders[i]).fromUrl(outFolders[i].path);
+            }
+          }
+        }
+        current.folders = outFolders;
       }
 
-      function ReadList(url, root, current) {
+      function postRead() {
+        ctx.loadCount--;
+        if (ctx.loadCount == 0) {
+          if (ctx.error) {
+            errorHandler(ctx.errorMessage);
+          } else {
+            populateSelect(ctx.root);
+          }
+        }
+      }
+
+      this.fromList = function (result, baseUrl) {
+        ctx.loadCount++;
+        walkResults(ctx, result, baseUrl, current);
+        postRead();
+      }
+
+      this.fromUrl = function (url) {
+        ctx.loadCount++;
         var xhr = new XMLHttpRequest();
         xhr.open('GET', addUrlPrefix(url));
         xhr.onload = function () {
@@ -131,51 +224,44 @@ var Example = (function () {
               throw xhr.status + ": " + xhr.statusText;
             } else {
               var result = JSON.parse(xhr.responseText);
-              var slash = url.lastIndexOf('/');
-              var urlPrefix = slash == -1 ? '' : url.substring(0, slash);
-
-              // Walk files
-              var outFiles = [];
-              var files = result.files;
-              if (files) {
-                for (var i = 0; i < files.length; i++) {
-                  outFiles[i] = files[i];
-                  outFiles[i].path = getPath(urlPrefix, files[i].path);
-                }
-              }
-              current.files = outFiles;
-
-              // Walk folders
-              var outFolders = [];
-              var folders = result.folders;
-              if (folders) {
-                for (var i = 0; i < folders.length; i++) {
-                  outFolders[i] = folders[i];
-                  outFolders[i].path = getPath(urlPrefix, folders[i].path);
-                  loadCount++;
-                  new ReadList(outFolders[i].path, root, outFolders[i]);
-                }
-              }
-              current.folders = outFolders;
+              walkResults(ctx, result, url, current);
             }
           } catch (e) {
-            error = true;
-            errorMessage = url + " (" + e + ")";
+            ctx.error = true;
+            ctx.errorMessage = url + " (" + e + ")";
           }
-
-          loadCount--;
-          if (loadCount == 0) {
-            if (error) {              
-              errorHandler(errorMessage);
-            } else {
-              populate(root);
-            }
-          }
+          postRead();
         };
         xhr.send();
       }
-      loadCount++;
-      new ReadList(romShareUrl, root, root);
+    }
+
+    function loadList(source, isUrl) {
+      var ctx = {
+        loadCount: 0,
+        error: false,
+        errorMessage: "",
+        root: {}
+      };
+
+      if (isUrl) {
+        new ReadList(ctx, ctx.root).fromUrl(source);
+      } else {
+        try {
+          var result = JSON.parse(source);
+          new ReadList(ctx, ctx.root).fromList(result, null);
+        } catch (e) {
+          errorHandler(e);
+        }
+      }
+    }
+
+    this.loadListFromJson = function (json) {
+      loadList(json, false);
+    }
+
+    this.loadListFromUrl = function (romShareUrl) {
+      loadList(romShareUrl, true);
     }
   }
 
@@ -187,41 +273,42 @@ var Example = (function () {
   function fileDropHandler(ev) {
     ev.preventDefault();
     var file = null;
+
     if (ev.dataTransfer.items) {
       for (var i = 0; i < ev.dataTransfer.items.length; i++) {
         var item = ev.dataTransfer.items[i];
         if (item.kind === 'file') {
           file = item.getAsFile();
+          if (file.name.toLowerCase().endsWith(".json")) {
+            var reader = new FileReader();
+            reader.onload = function (event) {
+              romList.loadListFromJson(event.target.result);
+            };
+            reader.readAsText(file);
+            file = null; // not a rom
+          }
           break;
         } else if (item.kind === 'string' && item.type.match('^text/uri-list')) {
-          item.getAsString(function(url) {
-            loadRom(url);
-            return;
+          item.getAsString(function (url) {
+            var urlLower = url.toLowerCase();
+            if (urlLower.endsWith(".json") || (urlLower.indexOf(".json?") != -1)) {
+              romList.loadListFromUrl(url);
+            } else {
+              loadRomFromUrl(url);
+            }
           });
         }
-      }
-    } else {
-      for (var i = 0; i < ev.dataTransfer.files.length; i++) {
-        file = ev.dataTransfer.files[i];
-        break;
       }
     }
 
     if (file) {
-      var reader = new FileReader();
-      reader.readAsBinaryString(file);
-      reader.onloadend = function () {
-        var cart = new Array();
-        for (var i = 0; i < reader.result.length; i++) {
-          cart[i] = reader.result.charCodeAt(i);
-        }
-        js7800.Main.startEmulation(cart);
-      }
+      startEmulation(file);
     }
   }
-  
-  function init(in7800) {
+
+  function init(in7800, selectId) {
     js7800 = in7800;
+    romList = new RomList(selectId);
 
     var ignore = function (event) {
       event.preventDefault();
@@ -236,9 +323,9 @@ var Example = (function () {
 
   return {
     init: init,
-    loadRom: loadRom,
+    loadRomFromUrl: loadRomFromUrl,
+    loadListFromUrl: function (url) { romList.loadListFromUrl(url); },
     getRequestParameter: getRequestParameter,
-    SetErrorHandler: function(handler) { errorHandler = handler },
-    RomList: RomList
+    SetErrorHandler: function (handler) { errorHandler = handler },
   }
 })();
