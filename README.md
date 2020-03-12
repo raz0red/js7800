@@ -10,9 +10,9 @@ Portions of the Pokey code were adapted from the MAME implementation.
 
 An example usage of the JS7800 module can be found at the following location:
 
-https://raz0red.github.io/js7800/
+http://js7800.org
 
-[![JS7800](https://github.com/raz0red/js7800/raw/master/screenshots/screenshot.png)](https://raz0red.github.io/js7800/)
+[![JS7800](https://github.com/raz0red/js7800/raw/master/screenshots/screenshot.png)](http://js7800.org)
 
 ## JavaScript Module
 
