@@ -46,8 +46,7 @@ var Example = (function () {
 
   function addUrlPrefix(url) {
     return isGitHub ?
-      "https" + atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==") :
-      url;
+      "https" + atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==") + url : url;
   }
 
   function startEmulation(blob) {
