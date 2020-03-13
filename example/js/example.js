@@ -1,5 +1,14 @@
 "use strict";
 
+if (!String.prototype.endsWith) {
+	String.prototype.endsWith = function(search, this_len) {
+		if (this_len === undefined || this_len > this.length) {
+			this_len = this.length;
+		}
+		return this.substring(this_len - search.length, this_len) === search;
+	};
+}
+
 var Example = (function () {
 
   // Disable use of web workers for zip files
@@ -21,12 +30,25 @@ var Example = (function () {
     failure = failure || errorHandler;
 
     function entryProcessor(entries) {
+      var romEntry = null;
       if (entries.length == 1) {
+        romEntry = entries[0];
+      } else if (entries.length > 0) {
+        for (var i = 0; i < entries.length; i++) {
+          var entry = entries[i];
+          var filename = entry.filename.toLowerCase();
+          if (filename.endsWith(".a78") ||
+            (filename.endsWith(".bin") && !romEntry)) {
+            romEntry = entry;
+          }
+        }
+      }
+      if (romEntry) {
         var entry = entries[0];
         var writer = new zip.BlobWriter();
         entry.getData(writer, success);
       } else {
-        failure("Invalid zip file entry count: " + entries.length);
+        failure("Unable to find valid ROM in zip file");
       }
     }
 
