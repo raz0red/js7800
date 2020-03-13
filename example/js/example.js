@@ -45,17 +45,9 @@ var Example = (function () {
   }
 
   function addUrlPrefix(url) {
-    var urlLower = url.toLowerCase();
-    var prefix = "";
-    if (isGitHub) {
-      var x = atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==");
-      if (urlLower.startsWith("http://")) {
-        prefix = "http" + x;
-      } else if (urlLower.startsWith("https://")) {
-        prefix = "https" + x;
-      }
-    }
-    return prefix + url;
+    return isGitHub ?
+      "https" + atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==") :
+      url;
   }
 
   function startEmulation(blob) {
