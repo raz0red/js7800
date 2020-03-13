@@ -124,7 +124,7 @@ function startSnow() {
         imageData[i - 3] = v;
         imageData[i - 2] = v;
         imageData[i - 1] = v;
-        imageData[i] = 0x30;
+        imageData[i] = 0x25;
       }
       ctx.putImageData(image, 0, 0);
     }
