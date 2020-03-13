@@ -45,8 +45,14 @@ var Example = (function () {
   }
 
   function addUrlPrefix(url) {
-    return isGitHub ?
-      "https" + atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==") + url : url;
+    var urlLower = url.toLowerCase(); 
+    var prefix = "";
+    if (isGitHub) {
+      if (urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
+        prefix = "https" + atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==");
+      }
+    }
+    return prefix + url;
   }
 
   function startEmulation(blob) {
