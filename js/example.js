@@ -80,13 +80,14 @@ var Example = (function () {
   function startEmulation(blob) {
     unzip(blob,
       function (file) {
-        console.log(file);
         var reader = new FileReader();
         reader.readAsBinaryString(file);
         reader.onloadend = function () {
-          var cart = new Array();
-          for (var i = 0; i < reader.result.length; i++) {
-            cart[i] = reader.result.charCodeAt(i);
+          var result = reader.result;
+          var len = result.length;
+          var cart = new Array(len);
+          for (var i = 0; i < len; i++) {
+            cart[i] = result.charCodeAt(i);
           }
           js7800.Main.startEmulation(cart);
         }
