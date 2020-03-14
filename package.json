@@ -14,8 +14,8 @@
     "build": "npm run dbConvert && webpack --mode=production",
     "webpackWatch": "webpack --watch --mode=production",
     "webpackWatchDebug": "webpack -d --watch",
-    "devServer": "webpack-dev-server --mode=production",
-    "devServerDebug": "webpack-dev-server -d",
+    "devServer": "webpack-dev-server --mode=production --host 0.0.0.0",
+    "devServerDebug": "webpack-dev-server -d --host 0.0.0.0",
     "dbConvert": "node db/convert.js db/ProSystem.dat > src/js/prosystem/ProSystemDat.js"
   },
   "dependencies": {
