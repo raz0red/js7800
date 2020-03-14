@@ -22,8 +22,7 @@ var flipImage = WebVideo.flipImage;
 var canvas = null;
 var controlsDiv = null;
 var logoDiv = null;
-
-var atariRefreshCallbackId = null;
+var starting = false;
 
 /** The keyboard data */
 var keyboardData = new Array(19);
@@ -69,6 +68,7 @@ function startEmu(cart) {
 
   init();
   ProSystem.Reset();
+  starting = false;
 
   var start = Date.now();
   var fc = 0;
@@ -125,10 +125,13 @@ function startEmu(cart) {
 }
 
 function startEmulation(cart) {
-  if (atariRefreshCallbackId) {
-    clearTimeout(atariRefreshCallbackId);
-    atariRefreshCallbackId = null;
+  if (starting) {
+    return;
   }
+
+  // Mark that emulation is starting
+  starting = true;
+
   if (ProSystem.IsActive()) {
     ProSystem.Close();
   }
