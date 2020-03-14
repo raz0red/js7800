@@ -1,12 +1,12 @@
 "use strict";
 
 if (!String.prototype.endsWith) {
-	String.prototype.endsWith = function(search, this_len) {
-		if (this_len === undefined || this_len > this.length) {
-			this_len = this.length;
-		}
-		return this.substring(this_len - search.length, this_len) === search;
-	};
+  String.prototype.endsWith = function (search, this_len) {
+    if (this_len === undefined || this_len > this.length) {
+      this_len = this.length;
+    }
+    return this.substring(this_len - search.length, this_len) === search;
+  };
 }
 
 var Example = (function () {
@@ -67,7 +67,7 @@ var Example = (function () {
   }
 
   function addUrlPrefix(url) {
-    var urlLower = url.toLowerCase(); 
+    var urlLower = url.toLowerCase();
     var prefix = "";
     if (isGitHub) {
       if (urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
@@ -307,7 +307,8 @@ var Example = (function () {
             file = null; // not a rom
           }
           break;
-        } else if (item.kind === 'string' && item.type.match('^text/uri-list')) {
+        } else if (item.kind === 'string' &&
+          (item.type.match('^text/uri-list') || item.type.match('^text/plain'))) {
           item.getAsString(function (url) {
             var urlLower = url.toLowerCase();
             if (urlLower.endsWith(".json") || (urlLower.indexOf(".json?") != -1)) {
