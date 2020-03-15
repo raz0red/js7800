@@ -21,6 +21,7 @@ var lightGunScanline = 0;
 var lightGunCycle = 0;
 var mouseTracking = false;
 var leftButtonDown = false;
+var leftLatchCount = 0;
 
 // The number of cycles per scanline that the 7800 checks for a hit
 var LG_CYCLES_PER_SCANLINE = 318;
@@ -76,13 +77,16 @@ function onMouseMove(event) {
 }
 
 function onMouseDown(event) {
+  onMouseMove(event);
   if (event.which == 1) {
     leftButtonDown = true;
+    leftLatchCount = 5;
   }
   event.preventDefault();
 }
 
 function onMouseUp(event) {
+  onMouseMove(event);
   if (event.which == 1) {
     leftButtonDown = false;
   }
@@ -90,7 +94,9 @@ function onMouseUp(event) {
 }
 
 function isLeftButtonDown() { 
-  return leftButtonDown; 
+  var down = (leftButtonDown || leftLatchCount > 0);
+  if (leftLatchCount > 0)  leftLatchCount--; 
+  return down; 
 }
 
 function getLightGunScanline() { 
@@ -104,6 +110,7 @@ function getLightGunCycle() {
 function onCartridgeLoaded() {
   enableMouseTracking(false);
   leftButtonDown = false;
+  leftLatchCount = 0;
   lightGunScanline = 0;
   lightGunCycle = 0;
 }
