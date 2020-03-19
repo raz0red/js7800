@@ -21,14 +21,15 @@ function updateInput() {
     }
   } else {
     Pad.poll();
-    updateJoystick(0, keyboardData);
-    updateJoystick(1, keyboardData);
+    var pad = Pad.getMapping(0);
+    updateJoystick(0, keyboardData, pad);
+    updateJoystick(1, keyboardData, pad);
   }
 
   // | 12       | Console      | Reset
-  keyboardData[12] = Kb.isReset() || Pad.isReset(0);
+  keyboardData[12] = Kb.isReset() || pad.isReset();
   // | 13       | Console      | Select
-  keyboardData[13] = Kb.isSelect() || Pad.isSelect(0);
+  keyboardData[13] = Kb.isSelect() || pad.isSelect();
   // | 14       | Console      | Pause
   keyboardData[14] = Kb.isPause();
   // | 15       | Console      | Left Difficulty
@@ -37,39 +38,40 @@ function updateInput() {
   keyboardData[16] = Kb.isRightDiffSet();
 }
 
-function updateJoystick(joyIndex, keyboardData) {
+function updateJoystick(joyIndex, keyboardData, pad0) {
   var offset = (joyIndex == 0 ? 0 : 6);
   var swap = Cartridge.IsSwapButtons();
   var dualanalog = Cartridge.IsDualAnalog();
+  var pad = joyIndex ? Pad.getMapping(joyIndex) : pad0;
 
   // | 00 06     | Joystick 1 2 | Right
   keyboardData[0 + offset] =
     (joyIndex ? p2KeyMap.isRight() : p1KeyMap.isRight()) ||
-    Pad.isRight(joyIndex, 0) ||
-    (dualanalog && joyIndex && Pad.isAnalogRight(0, 1)); // Dual analog
+    pad.isRight(0) ||
+    (dualanalog && joyIndex && pad0.isAnalogRight(1)); // Dual analog
   // | 01 07     | Joystick 1 2 | Left
   keyboardData[1 + offset] =
     (joyIndex ? p2KeyMap.isLeft() : p1KeyMap.isLeft()) ||
-    Pad.isLeft(joyIndex, 0) ||
-    (dualanalog && joyIndex && Pad.isAnalogLeft(0, 1)); // Dual analog
+    pad.isLeft(0) ||
+    (dualanalog && joyIndex && pad0.isAnalogLeft(1)); // Dual analog
   // | 02 08     | Joystick 1 2 | Down
   keyboardData[2 + offset] =
     (joyIndex ? p2KeyMap.isDown() : p1KeyMap.isDown()) ||
-    Pad.isDown(joyIndex, 0) ||
-    (dualanalog && joyIndex && Pad.isAnalogDown(0, 1)); // Dual analog
+    pad.isDown(0) ||
+    (dualanalog && joyIndex && pad0.isAnalogDown(1)); // Dual analog
   // | 03 09     | Joystick 1 2 | Up
   keyboardData[3 + offset] =
     (joyIndex ? p2KeyMap.isUp() : p1KeyMap.isUp()) ||
-    Pad.isUp(joyIndex, 0) ||
-    (dualanalog && joyIndex && Pad.isAnalogUp(0, 1)); // Dual analog
+    pad.isUp(0) ||
+    (dualanalog && joyIndex && pad0.isAnalogUp(1)); // Dual analog
   // | 04 10     | Joystick 1 2 | Button 1
   keyboardData[(swap ? 5 : 4) + offset] =
     (joyIndex ? p2KeyMap.isButton1() : p1KeyMap.isButton1()) ||
-    Pad.isButton1(joyIndex);
+    pad.isButton1();
   // | 05 11     | Joystick 1 2 | Button 2
   keyboardData[(swap ? 4 : 5) + offset] =
     (joyIndex ? p2KeyMap.isButton2() : p1KeyMap.isButton2()) ||
-    Pad.isButton2(joyIndex);
+    pad.isButton2();
 }
 
 function reset() {

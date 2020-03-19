@@ -1,130 +1,199 @@
-var B1 = 0;
-var B2 = 1;
-var BACK = 8;
-var START = 9;
-var UP = 12;
-var DOWN = 13;
-var LEFT = 14;
-var RIGHT = 15;
+import * as WebUtil from "./util.js"
 
-var gamepads = [];
-
-function isAnalogDir(index, axesIndex, gt, value) {
-  if (gamepads.length > index) {
-    var pad = gamepads[index];
-    if (pad && pad.axes) {
-      var axes = pad.axes;
-      if(axes.length > axesIndex) {
-        return gt ? axes[axesIndex] > value : axes[axesIndex] < value;
+function StandardMapping(props) {
+  WebUtil.addProps(this, {
+    isAnalogDir: function (pad, axesIndex, pos) {
+      if (pad && pad.axes) {
+        var axes = pad.axes;
+        if (axes.length > axesIndex) {
+          return pos ? axes[axesIndex] > 0.5 : axes[axesIndex] < -0.5;
+        }
       }
-    }
+      return false;
+    },
+    isPressed: function (pad, buttonIndex) {
+      if (pad && pad.buttons) {
+        var buttons = pad.buttons;
+        if (buttons.length > buttonIndex) {
+          var button = buttons[buttonIndex];
+          return button.pressed || button.value == 1.0;
+        }
+      }
+      return false;
+    },
+    isAnalogLeft: function (pad, stickIndex) {
+      return this.isAnalogDir(pad, stickIndex << 1, false);
+    },
+    isAnalogRight: function (pad, stickIndex) {
+      return this.isAnalogDir(pad, stickIndex << 1, true);
+    },
+    isAnalogUp: function (pad, stickIndex) {
+      return this.isAnalogDir(pad, (stickIndex << 1) + 1, false);
+    },
+    isAnalogDown: function (pad, stickIndex) {
+      return this.isAnalogDir(pad, (stickIndex << 1) + 1, true);
+    },
+    isDigitalLeft: function (pad) { return this.isPressed(pad, 14); },
+    isDigitalRight: function (pad) { return this.isPressed(pad, 15); },
+    isDigitalUp: function (pad) { return this.isPressed(pad, 12); },
+    isDigitalDown: function (pad) { return this.isPressed(pad, 13); },
+    isButton1: function (pad) { return this.isPressed(pad, 0); },
+    isButton2: function (pad) { return this.isPressed(pad, 1); },
+    isReset: function (pad) { return this.isPressed(pad, 9); },
+    isSelect: function (pad) { return this.isPressed(pad, 8); }
+  });
+
+  if (props) {
+    WebUtil.addProps(this, props);
+  }
+};
+
+var stdMapping = new StandardMapping();
+var iosMapping = new StandardMapping({
+  isAnalogLeft: function (pad, stickIndex) { 
+    return this.isAnalogDir(pad, stickIndex ? 2 : 0, false); 
+  },
+  isAnalogRight: function (pad, stickIndex) {
+    return this.isAnalogDir(pad, stickIndex ? 2 : 0, true);
+  },
+  isAnalogUp: function (pad, stickIndex) {
+    return this.isAnalogDir(pad, stickIndex ? 3 : 1, true);
+  },
+  isAnalogDown: function (pad, stickIndex) {
+    return this.isAnalogDir(pad, stickIndex ? 3 : 1, false);
+  },
+  isDigitalLeft: function (pad) { return this.isAnalogDir(pad, 4, false); },
+  isDigitalRight: function (pad) { return this.isAnalogDir(pad, 4, true); },
+  isDigitalUp: function (pad) { return this.isAnalogDir(pad, 5, true); },
+  isDigitalDown: function (pad) { return this.isAnalogDir(pad, 5, false); },
+  isReset: function (pad) { return this.isPressed(pad, 5); },
+  isSelect: function (pad) {  return this.isPressed(pad, 4); }  
+});
+
+function PadMapping(padIn, mappingIn) {
+  var pad = padIn;
+  var mapping = mappingIn;
+
+  function isLeft(stickIndex) {
+    if (!pad) return false;
+    return mapping.isDigitalLeft(pad) || 
+      ((stickIndex !== undefined) &&
+        mapping.isAnalogLeft(pad, stickIndex));
   }
 
-  return false;
-}
-
-function isPressed(index, buttonIndex) {
-  if (gamepads.length > index) {
-    var pad = gamepads[index];
-    if (pad && pad.buttons) {
-      var buttons = pad.buttons;
-      if (buttons.length > buttonIndex) {
-        var button = buttons[buttonIndex];
-        return button.pressed || button.value == 1.0;
-      }
-    }
+  function isRight(stickIndex) {
+    if (!pad) return false;
+    return mapping.isDigitalRight(pad) || 
+      ((stickIndex !== undefined) &&
+        mapping.isAnalogRight(pad, stickIndex));
   }
-  return false;
-}
+
+  function isUp(stickIndex) {
+    if (!pad) return false;
+    return mapping.isDigitalUp(pad) || 
+      ((stickIndex !== undefined) &&
+        mapping.isAnalogUp(pad, stickIndex));
+  }
+
+  function isDown(stickIndex) {    
+    if (!pad) return false;
+    return mapping.isDigitalDown(pad) || 
+      ((stickIndex !== undefined) &&
+        mapping.isAnalogDown(pad, stickIndex));
+  }
+
+  function isAnalogLeft(stickIndex) {
+    if (!pad || (stickIndex === undefined)) return false;
+    return mapping.isAnalogLeft(pad, stickIndex);
+  }
+    
+  function isAnalogRight(stickIndex) {
+    if (!pad || (stickIndex === undefined)) return false;
+    return mapping.isAnalogRight(pad, stickIndex);
+  }
+
+  function isAnalogUp(stickIndex) {
+    if (!pad || (stickIndex === undefined)) return false;
+    return mapping.isAnalogUp(pad, stickIndex);
+  }
+
+  function isAnalogDown(stickIndex) {
+    if (!pad || (stickIndex === undefined)) return false;
+    return mapping.isAnalogDown(pad, stickIndex);
+  }  
+
+  function isButton1() {
+    if (!pad) return false;
+    return mapping.isButton1(pad);
+  }
+
+  function isButton2() {
+    if (!pad) return false;
+    return mapping.isButton2(pad);
+  } 
+
+  function isReset() {
+    if (!pad) return false;
+    return mapping.isReset(pad);
+  }
+
+  function isSelect() {
+    if (!pad) return false;
+    return mapping.isSelect(pad);
+  }
+
+  return {
+    setPad: function(padIn) { pad = padIn; },
+    setMapping: function(mappingIn) { mapping = mappingIn; },
+    isLeft: isLeft,
+    isRight: isRight,
+    isUp: isUp,
+    isDown: isDown,
+    isAnalogLeft: isAnalogLeft,
+    isAnalogRight: isAnalogRight,
+    isAnalogUp: isAnalogUp,
+    isAnalogDown: isAnalogDown,
+    isButton1: isButton1,
+    isButton2: isButton2,
+    isReset: isReset,
+    isSelect: isSelect
+  }
+};
+
+var pads = [
+  new PadMapping(null, stdMapping),
+  new PadMapping(null, stdMapping)
+];
 
 function poll() {
-  gamepads = navigator.getGamepads ? navigator.getGamepads() :
+  var gamepads = navigator.getGamepads ? navigator.getGamepads() :
     (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
+
+  var padIdx = 0;
+  for (var idx = 0; padIdx < 2 && idx < gamepads.length; idx++) {
+    var pad = gamepads[idx];
+    if (pad) {
+      pads[padIdx].setPad(pad);
+      pads[padIdx].setMapping(stdMapping);
+
+      var standard = (pad.mapping && (pad.mapping == "standard"));
+      if (!standard && WebUtil.isIosDevice) {
+        pads[padIdx].setMapping(iosMapping);
+      } 
+      
+      padIdx++;
+    }
+  }
+  for (; padIdx < 2; padIdx++) {
+    pads[padIdx].setPad(null);
+  }
 }
 
-function isDigitalLeft(index) { 
-  return isPressed(index, LEFT);
+function getMapping(index) {
+  return pads[index];  
 }
-
-function isDigitalRight(index) { 
-  return isPressed(index, RIGHT);
-}
-
-function isDigitalUp(index) { 
-  return isPressed(index, UP);
-}
-
-function isDigitalDown(index) { 
-  return isPressed(index, DOWN);
-}
-
-function isButton1(index) { 
-  return isPressed(index, B1);
-}
-
-function isButton2(index) { 
-  return isPressed(index, B2);
-}
-
-function isReset(index) { 
-  return isPressed(index, START);
-}
-
-function isSelect(index) { 
-  return isPressed(index, BACK);
-}
-
-function isAnalogLeft(index, stickIndex) { 
-  return (stickIndex !== undefined) && 
-    isAnalogDir(index, stickIndex << 1, false, -.5);
- }
-function isAnalogRight(index, stickIndex) { 
-  return (stickIndex !== undefined) && 
-    isAnalogDir(index, stickIndex << 1, true, .5); 
-}
-
-function isAnalogUp(index, stickIndex) { 
-  return (stickIndex !== undefined) && 
-    isAnalogDir(index, (stickIndex << 1) + 1, false, -.5); 
-}
-
-function isAnalogDown(index, stickIndex) { 
-  return (stickIndex !== undefined) && 
-    isAnalogDir(index, (stickIndex << 1) + 1, true, .5); 
-}
-
-function isLeft(index, stickIndex) {
-  return isDigitalLeft(index) || isAnalogLeft(index, stickIndex);
-}
-
-function isRight(index, stickIndex) {
-  return isDigitalRight(index) || isAnalogRight(index, stickIndex);
-}
-
-function isUp(index, stickIndex) {
-  return isDigitalUp(index) || isAnalogUp(index, stickIndex);
-}
-
-function isDown(index, stickIndex) {
-  return isDigitalDown(index) || isAnalogDown(index, stickIndex);
-}  
 
 export {
   poll,
-  isDigitalLeft,
-  isDigitalRight,
-  isDigitalUp,
-  isDigitalDown,
-  isButton1,
-  isButton2,
-  isReset,
-  isSelect,
-  isAnalogLeft,
-  isAnalogRight,
-  isAnalogUp,
-  isAnalogDown,
-  isLeft,
-  isRight,
-  isUp,
-  isDown  
+  getMapping
 };
