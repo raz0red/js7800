@@ -9,7 +9,7 @@ if (!String.prototype.endsWith) {
   };
 }
 
-var Example = (function () {
+var js7800Site = (function () {
 
   // Disable use of web workers for zip files
   zip.useWebWorkers = false;

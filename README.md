@@ -8,7 +8,7 @@ Ported by raz0red
 JS7800 is an enhanced JavaScript port of the ProSystem Atari 7800 emulator developed by Greg Stanton packaged as a JavaScript module.
 Portions of the Pokey code were adapted from the MAME implementation.
 
-An example usage of the JS7800 module can be found at the following location:
+A complete site using the JS7800 module can be found at the following location:
 
 http://js7800.org
 
@@ -22,7 +22,7 @@ Packaging the emulator as a JavaScript module allows the component to be easily 
 
 ## Loading Cartridges (ROMs)
 
-The method for loading cartridges will vary based on the application that is embedding the JS7800 module. However, it should always be possible to load a local ROM by **"Dragging and Dropping"** the file on top of the JS7800 component. 
+The method for loading cartridges will vary based on the application that is embedding the JS7800 module.
 
 ## Controls
 

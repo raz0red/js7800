@@ -42,7 +42,7 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: path.join(__dirname, 'example'),
+    contentBase: path.join(__dirname, 'site'),
     publicPath: '/js/',
     compress: true,
     port: 8000
@@ -52,13 +52,13 @@ module.exports = {
       apply: compiler => {
         compiler.hooks.afterEmit.tap('AfterEmitPlugin', () => {
           let src = path.resolve(__dirname, 'dist/js7800.min.js');
-          let dst = path.resolve(__dirname, 'example/js/js7800.min.js');
+          let dst = path.resolve(__dirname, 'site/js/js7800.min.js');
           fs.copyFile(src, dst,
             err => {
               if (!err) {
-                console.log("Copied to example: " + src);
+                console.log("Copied to site: " + src);
               } else {                
-                throw "Failed copy to example: " + src
+                throw "Failed copy to site: " + src
               }
             });
         });

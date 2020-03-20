@@ -7,10 +7,10 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
   <link rel="manifest" href="site.webmanifest">  
-  <link rel="stylesheet" type="text/css" href="css/example.css">
+  <link rel="stylesheet" type="text/css" href="css/site.css">
   <script src="js/js7800.min.js"></script>
   <script src="js/zip.min.js"></script>
-  <script src="js/example.js"></script>
+  <script src="js/site.js"></script>
 </head>
 
 <body>
@@ -31,17 +31,17 @@
   <script>
     var emu = js7800.Main;
     emu.init('js7800__target');
-    Example.init(js7800, 'cartselect__select');
+    js7800Site.init(js7800, 'cartselect__select');
 
-    var romlist = Example.getRequestParameter("romlist");
+    var romlist = js7800Site.getRequestParameter("romlist");
     if (!romlist) {
       romlist = 'roms/romlist-homebrew.json';
     }
-    Example.loadListFromUrl(romlist);
+    js7800Site.loadListFromUrl(romlist);
 
-    var rom = Example.getRequestParameter("rom");
+    var rom = js7800Site.getRequestParameter("rom");
     if (rom) {
-      Example.loadRomFromUrl(rom);
+      js7800Site.loadRomFromUrl(rom);
     }
   </script>
 </body>
