@@ -12,6 +12,7 @@ var keyboardData = null;
 var lightGunFirstFire = true;
 
 function updateInput() {
+  var pad = null;
   if (isLightGunEnabled()) {
     if (lightGunFirstFire) {
       lightGunFirstFire = false;
@@ -21,15 +22,15 @@ function updateInput() {
     }
   } else {
     Pad.poll();
-    var pad = Pad.getMapping(0);
+    pad = Pad.getMapping(0);  
     updateJoystick(0, keyboardData, pad);
     updateJoystick(1, keyboardData, pad);
   }
 
   // | 12       | Console      | Reset
-  keyboardData[12] = Kb.isReset() || pad.isReset();
+  keyboardData[12] = Kb.isReset() || (pad && pad.isReset());
   // | 13       | Console      | Select
-  keyboardData[13] = Kb.isSelect() || pad.isSelect();
+  keyboardData[13] = Kb.isSelect() || (pad && pad.isSelect());
   // | 14       | Console      | Pause
   keyboardData[14] = Kb.isPause();
   // | 15       | Console      | Left Difficulty
