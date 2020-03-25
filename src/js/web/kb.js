@@ -109,10 +109,10 @@ var f11Code = Keys.KEY_F11.code;
 
 function keyEvent(event, down) {
   var code = event.keyCode;
-  var handled = false;
+  var handled = (p1KeyMap.handleKeyCode(code, down) ||
+    p2KeyMap.handleKeyCode(code, down));
 
-  if (!p1KeyMap.handleKeyCode(code, down) &&
-    !p2KeyMap.handleKeyCode(code, down)) {
+  if (!handled) {
     switch (code) {
       case f2Code:
         resetHeld = down;
@@ -169,24 +169,24 @@ function init() {
     };
 }
 
-function isSelect() { 
-  return selectHeld 
+function isSelect() {
+  return selectHeld
 }
 
-function isReset() { 
-  return resetHeld 
+function isReset() {
+  return resetHeld
 }
 
-function isPause() { 
-  return pauseHeld 
+function isPause() {
+  return pauseHeld
 }
 
-function isLeftDiffSet() { 
-  return leftDiffSet 
+function isLeftDiffSet() {
+  return leftDiffSet
 }
 
-function isRightDiffSet() { 
-  return rightDiffSet 
+function isRightDiffSet() {
+  return rightDiffSet
 }
 
 function onCartridgeLoaded() {
