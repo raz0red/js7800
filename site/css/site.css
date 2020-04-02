@@ -123,7 +123,7 @@ body {
   position: fixed;
   z-index: 2;
   left: 50%;
-  top: 100px;
+  top: 110px;
   font-size: 1.25em;
   opacity: .98;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4), 0 6px 20px 0 rgba(0, 0, 0, 0.39);
@@ -176,48 +176,48 @@ body {
 
 @-webkit-keyframes message--fadein {
   from {
-    top: 60px;
+    top: 70px;
     opacity: 0;
   }
 
   to {
-    top: 100px;
+    top: 110px;
     opacity: .98;
   }
 }
 
 @keyframes message--fadein {
   from {
-    top: 60px;
+    top: 70px;
     opacity: 0;
   }
 
   to {
-    top: 100px;
+    top: 110px;
     opacity: .98;
   }
 }
 
 @-webkit-keyframes message--fadeout {
   from {
-    top: 100px;
+    top: 110px;
     opacity: .98;
   }
 
   to {
-    top: 60px;
+    top: 70px;
     opacity: 0;
   }
 }
 
 @keyframes message--fadeout {
   from {
-    top: 100px;
+    top: 110px;
     opacity: .98;
   }
 
   to {
-    top: 60px;
+    top: 70px;
     opacity: 0;
   }
 }
