@@ -29,20 +29,7 @@
   </div>
 
   <script>
-    var emu = js7800.Main;
-    emu.init('js7800__target');
-    js7800Site.init(js7800, 'cartselect__select');
-
-    var romlist = js7800Site.getRequestParameter("romlist");
-    if (!romlist) {
-      romlist = 'roms/romlist-homebrew.json';
-    }
-    js7800Site.loadListFromUrl(romlist);
-
-    var rom = js7800Site.getRequestParameter("rom");
-    if (rom) {
-      js7800Site.loadRomFromUrl(rom);
-    }
+    js7800Site.init(js7800);
   </script>
 </body>
 

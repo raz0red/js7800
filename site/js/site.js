@@ -327,9 +327,22 @@ var js7800Site = (function () {
     }
   }
 
-  function init(in7800, selectId) {
+  function init(in7800) {
     js7800 = in7800;
-    romList = new RomList(selectId);
+    romList = new RomList('cartselect__select');
+
+    js7800.Main.init('js7800__target');    
+
+    var rlist = getRequestParameter("romlist");
+    if (!rlist) {
+      rlist = 'roms/romlist-homebrew.json';
+    }
+    romList.loadListFromUrl(rlist);
+
+    var rom = getRequestParameter("rom");
+    if (rom) {
+      loadRomFromUrl(rom);
+    }  
 
     var ignore = function (event) {
       event.preventDefault();

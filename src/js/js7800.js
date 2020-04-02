@@ -9,6 +9,7 @@ import * as Memory from "./prosystem/Memory.js"
 import * as Cartridge from "./prosystem/Cartridge.js"
 import * as Database from "./prosystem/Database.js"
 import * as Riot from "./prosystem/Riot.js"
+import * as WebControlsBar from "./web/cbar.js"
 
 import 'fullscreen-api-polyfill'
 
@@ -212,6 +213,7 @@ function init(id) {
     WebVideo.init(canvas, controlsDiv);
     WebKb.init();
     WebInput.init(keyboardData);
+    WebControlsBar.init();
 
     WebVideo.startScreenSnow();
     //jQuery("#logo").fadeIn("slow");
