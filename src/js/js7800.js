@@ -20,6 +20,7 @@ var executeFrame = ProSystem.ExecuteFrame;
 var soundStore = Sound.Store;
 var updateInput = WebInput.updateInput;
 var flipImage = WebVideo.flipImage;
+
 var canvas = null;
 var controlsDiv = null;
 var logoDiv = null;
@@ -31,7 +32,6 @@ var keyboardData = new Array(19);
 var initialized = false;
 
 function startEmu(cart) {
-
   Cartridge.Load(cart, cart.length);
   var digest = Cartridge.GetDigest();
   Database.Load(digest);
