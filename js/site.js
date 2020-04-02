@@ -122,7 +122,10 @@ var js7800Site = (function () {
       var wait = elapsed > minWait ? 0 : minWait - elapsed;
       setTimeout(hideMessage, wait);
     }
-    xhr.onerror = function() {showErrorMessage('An error occurred during the load attempt.')};
+    xhr.onerror = function() {
+      errorHandler(
+        'An error occurred during the load attempt.<br>(see console log for details)'
+    )};
     xhr.send();
   }
 
