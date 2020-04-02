@@ -23,8 +23,13 @@ var js7800Site = (function () {
   var isGitHub = (
     window.location.hostname.toLowerCase() == 'raz0red.github.io');
 
-  var errorHandler = function (error) {
-    console.error(error);
+  var errorHandler = function (error, logToConsole) {
+    if (logToConsole == undefined) {
+      logToConsole = true;
+    }
+    if (logToConsole) {
+      console.error(error);
+    }
     showErrorMessage(error);
   }
 
@@ -108,7 +113,7 @@ var js7800Site = (function () {
     xhr.open('GET', addUrlPrefix(url));
     xhr.responseType = 'blob';
     xhr.onload = function () {
-      try {      
+      try {
         if (xhr.status >= 300 || xhr.stats < 200) {
           throw xhr.status + ": " + xhr.statusText;
         } else {
@@ -118,14 +123,16 @@ var js7800Site = (function () {
         errorHandler(url + " (" + e + ")");
       }
 
-      var elapsed = Date.now() - start;      
+      var elapsed = Date.now() - start;
       var wait = elapsed > minWait ? 0 : minWait - elapsed;
       setTimeout(hideMessage, wait);
     }
-    xhr.onerror = function() {
+    xhr.onerror = function () {
       errorHandler(
-        'An error occurred during the load attempt.<br>(see console log for details)'
-    )};
+        'An error occurred during the load attempt.<br>(see console log for details)',
+        false
+      )
+    };
     xhr.send();
   }
 
@@ -345,42 +352,42 @@ var js7800Site = (function () {
   function showMessage(message) {
     hideErrorMessage();
     snackbarEl.innerHTML = message;
-    snackbarEl.classList.add('show');    
-    snackbarEl.classList.remove('hide');    
+    snackbarEl.classList.add('show');
+    snackbarEl.classList.remove('hide');
   }
 
   function hideMessage() {
-    snackbarEl.classList.add('hide');    
-    snackbarEl.classList.remove('show');    
+    snackbarEl.classList.add('hide');
+    snackbarEl.classList.remove('show');
   }
 
   function showErrorMessage(message) {
     hideMessage();
-    errorTextEl.innerHTML = message;    
-    errorMessageEl.classList.add('show');    
-    errorMessageEl.classList.remove('hide');    
+    errorTextEl.innerHTML = message;
+    errorMessageEl.classList.add('show');
+    errorMessageEl.classList.remove('hide');
   }
 
   function hideErrorMessage() {
-    errorMessageEl.classList.add('hide');    
-    errorMessageEl.classList.remove('show');    
+    errorMessageEl.classList.add('hide');
+    errorMessageEl.classList.remove('show');
   }
 
-  function addElements() {    
-    var parent = document.getElementById('js7800__fullscreen-container');       
+  function addElements() {
+    var parent = document.getElementById('js7800__fullscreen-container');
 
     // Snackbar (Loading messages, etc.)
-    snackbarEl = document.createElement('div');    
-    snackbarEl.id = 'snackbar';  
+    snackbarEl = document.createElement('div');
+    snackbarEl.id = 'snackbar';
     snackbarEl.classList.add('message');
-    parent.appendChild(snackbarEl);    
+    parent.appendChild(snackbarEl);
 
     // Error message
-    errorMessageEl = document.createElement('div');    
-    errorMessageEl.id = 'errormsg';  
-    errorMessageEl.classList.add('message');    
+    errorMessageEl = document.createElement('div');
+    errorMessageEl.id = 'errormsg';
+    errorMessageEl.classList.add('message');
     errorMessageEl.onclick = hideErrorMessage;
-    parent.appendChild(errorMessageEl);    
+    parent.appendChild(errorMessageEl);
     var closeButtonEl = document.createElement('span');
     closeButtonEl.classList.add('closebtn');
     closeButtonEl.onclick = hideErrorMessage;
@@ -388,12 +395,12 @@ var js7800Site = (function () {
     closeButtonEl.innerHTML = '&times;';
     errorTextEl = document.createElement('span');
     errorMessageEl.appendChild(errorTextEl);
-  }  
+  }
 
-  function init(in7800) {   
+  function init(in7800) {
     js7800 = in7800;
     romList = new RomList('cartselect__select');
-    js7800.Main.init('js7800__target');    
+    js7800.Main.init('js7800__target');
 
     addElements();
 
@@ -406,7 +413,7 @@ var js7800Site = (function () {
     var rom = getRequestParameter("rom");
     if (rom) {
       loadRomFromUrl(rom);
-    }  
+    }
 
     var ignore = function (event) {
       event.preventDefault();
