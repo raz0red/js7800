@@ -41,7 +41,60 @@
   -moz-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   position: absolute;
-  display: none;
+  visibility: hidden;
+}
+
+.js7800__logo--show {
+  visibility: visible;
+  -webkit-animation: js7800__logo--fadein 2s;
+  animation: js7800__logo--fadein 2s;
+}
+
+.js7800__logo--hide {
+  visibility: hidden;
+  -webkit-animation: js7800__logo--fadeout 1s;
+  animation: js7800__logo--fadeout 1s;
+  transition: visibility 1s;
+}
+
+@-webkit-keyframes js7800__logo--fadein {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes js7800__logo--fadein {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes js7800__logo--fadeout {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes js7800__logo--fadeout {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
 }
 
 .js7800__controls {

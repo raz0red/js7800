@@ -137,8 +137,8 @@ function startEmulation(cart) {
     ProSystem.Close();
   }
 
-  //jQuery("#logo").fadeOut("slow");
-  logoDiv.style.display = "none";
+  logoDiv.classList.add('js7800__logo--hide');
+  logoDiv.classList.remove('js7800__logo--show');
 
   setTimeout(function () {
     WebVideo.stopScreenSnow();
@@ -216,8 +216,7 @@ function init(id) {
     WebControlsBar.init();
 
     WebVideo.startScreenSnow();
-    //jQuery("#logo").fadeIn("slow");
-    logoDiv.style.display = "block";
+    logoDiv.classList.add('js7800__logo--show');
   }
 }
 
