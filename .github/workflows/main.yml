@@ -31,13 +31,13 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: dist
-        path: dist    
+        path: dist
 
     - name: Upload site
       uses: actions/upload-artifact@v1
       with:
         name: site
-        path: site
+        path: site/deploy
 
     - name: Deploy to GitHub pages
       uses: JamesIves/github-pages-deploy-action@releases/v3
@@ -46,4 +46,4 @@ jobs:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         BASE_BRANCH: master
         BRANCH: gh-pages
-        FOLDER: site        
+        FOLDER: site/deploy

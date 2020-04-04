@@ -4,13 +4,13 @@ const fs = require('fs');
 
 module.exports = {
   entry: {
-    "js7800.min": "./src/js/index.js"
+    "site.min": "./site/src/js/site.js"
   },
   devtool: "source-map",
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
-    library: 'js7800',
+    library: 'site',
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
@@ -41,7 +41,7 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: path.join(__dirname, 'site/deploy'),
+    contentBase: path.join(__dirname, 'deploy'),
     publicPath: '/js/',
     compress: true,
     port: 8000
@@ -50,8 +50,8 @@ module.exports = {
     {
       apply: compiler => {
         compiler.hooks.afterEmit.tap('AfterEmitPlugin', () => {
-          let src = path.resolve(__dirname, 'dist/js7800.min.js');
-          let dst = path.resolve(__dirname, 'site/deploy/js/js7800.min.js');
+          let src = path.resolve(__dirname, 'dist/site.min.js');
+          let dst = path.resolve(__dirname, 'deploy/js/site.min.js');
           fs.copyFile(src, dst,
             err => {
               if (!err) {

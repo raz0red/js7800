@@ -86,7 +86,6 @@ body {
   text-align: center;
   display: block;
   box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.4), 0 0 20px 0 rgba(0, 0, 0, 0.39);
-
 }
 
 .header__label {
@@ -134,7 +133,7 @@ body {
   background-color: #222;
   min-width: 250px;
   max-width: 250px;
-  margin-left: -125px;    
+  margin-left: -125px;
 }
 
 #errormsg {
@@ -142,7 +141,7 @@ body {
   cursor: pointer;
   min-width: 350px;
   max-width: 350px;
-  margin-left: -175px;    
+  margin-left: -175px;
 }
 
 #errormsg .closebtn {
