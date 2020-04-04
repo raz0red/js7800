@@ -16,7 +16,7 @@
     "buildModule": 
       "webpack --mode=production",
     "buildSite": 
-      "webpack --mode=production --config site/site.webpack.config.js",
+      "webpack --mode=production --config site/webpack.config.js",
     "webpackWatch": 
       "webpack --watch --mode=production",
     "webpackWatchDebug": 
@@ -26,9 +26,9 @@
     "devServerDebug": 
       "webpack-dev-server -d --host 0.0.0.0",
     "devServerSite": 
-      "webpack-dev-server --config site/site.webpack.config.js --mode=production --host 0.0.0.0",
+      "webpack-dev-server --config site/webpack.config.js --mode=production --host 0.0.0.0",
     "devServerDebugSite": 
-      "webpack-dev-server --config site/site.webpack.config.js -d --host 0.0.0.0",
+      "webpack-dev-server --config site/webpack.config.js -d --host 0.0.0.0",
     "dbConvert": 
       "node db/convert.js db/ProSystem.dat > src/js/prosystem/ProSystemDat.js"
   },
