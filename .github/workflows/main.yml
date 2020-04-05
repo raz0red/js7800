@@ -47,3 +47,4 @@ jobs:
         BASE_BRANCH: master
         BRANCH: gh-pages
         FOLDER: site/deploy
+        CLEAN: true
