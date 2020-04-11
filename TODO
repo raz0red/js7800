@@ -7,3 +7,6 @@
 - Add options to support lower performance devices (frame skipping, disable vsync, disable sound)
 - Remove button swap on Bentley Bear's Crystal Quest
 - Move switches out of KB (should be input?)
+- Fix zip load issues (AtariAge game... maybe dungeon stalker?, search for .a78 first)
+- Fix top of command bar (not curved, need to fix 10px spacer above command bar)
+- Mouse pointer no longer visible after loading lightgun game, and then loading non-lightgun game
