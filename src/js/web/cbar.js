@@ -129,12 +129,20 @@ addProps(ImageButton.prototype, {
     return "js7800__controls-img-button";
   },
   doCreateElement: function () {
+    var self = this;
     var anchor = document.createElement("a");
     this.anchor = anchor;
-    anchor.setAttribute("draggable", "false");
-    anchor.setAttribute("href", "javascript:void(0)");
-    var self = this;
-    anchor.onclick = function (event) { self.onClick(event) };
+    anchor.setAttribute("draggable", "false");    
+    anchor.setAttribute("role", "button");
+    anchor.setAttribute("tabindex", "0");
+    anchor.onkeydown = function(e) { 
+      var code = e.which;
+      if ((code === 13) || (code === 32)) {
+        self.onClick(e);
+      }
+    };    
+    anchor.onmousedown = function (event) { event.preventDefault(); }
+    anchor.onclick = function (event) { self.onClick(event); };
     var img = document.createElement("img");
     this.img = img;
     img.setAttribute("draggable", "false");
