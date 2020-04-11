@@ -1,21 +1,22 @@
 import * as ProSystem from "../prosystem/ProSystem.js"
 import * as Region from "../prosystem/Region.js"
-import * as WebVideo from "./video.js"
+import * as Video from "./video.js"
 import * as Cartridge from "../prosystem/Cartridge.js"
 import * as Maria from "../prosystem/Maria.js"
+import * as Events from "../events.js"
 
 var CYCLES_PER_SCANLINE = ProSystem.CYCLES_PER_SCANLINE;
 var HBLANK_CYCLES = ProSystem.HBLANK_CYCLES;
 var visibleArea = Maria.visibleArea;
 var displayArea = Maria.displayArea;
 var REGION_NTSC = Region.REGION_NTSC;
-var PAL_ATARI_BLIT_TOP_Y = WebVideo.PAL_ATARI_BLIT_TOP_Y;
-var NTSC_ATARI_BLIT_TOP_Y = WebVideo.NTSC_ATARI_BLIT_TOP_Y;
-var NTSC_ATARI_HEIGHT = WebVideo.NTSC_ATARI_HEIGHT;
-var PAL_ATARI_HEIGHT = WebVideo.PAL_ATARI_HEIGHT;
+var PAL_ATARI_BLIT_TOP_Y = Video.PAL_ATARI_BLIT_TOP_Y;
+var NTSC_ATARI_BLIT_TOP_Y = Video.NTSC_ATARI_BLIT_TOP_Y;
+var NTSC_ATARI_HEIGHT = Video.NTSC_ATARI_HEIGHT;
+var PAL_ATARI_HEIGHT = Video.PAL_ATARI_HEIGHT;
 var canvas = null;
-var ATARI_WIDTH = WebVideo.ATARI_WIDTH;
-var ATARI_CANVAS_HEIGHT = WebVideo.ATARI_CANVAS_HEIGHT;
+var ATARI_WIDTH = Video.ATARI_WIDTH;
+var ATARI_CANVAS_HEIGHT = Video.ATARI_CANVAS_HEIGHT;
 
 var lightGunScanline = 0;
 var lightGunCycle = 0;
@@ -33,7 +34,7 @@ function enableMouseTracking(enabled) {
     return;
   }
   mouseTracking = enabled;
-  canvas = WebVideo.getCanvas();
+  canvas = Video.getCanvas();
   if (canvas) {
     if (mouseTracking) {
       canvas.addEventListener('mousemove', onMouseMove);
@@ -115,10 +116,13 @@ function onCartridgeLoaded() {
   lightGunCycle = 0;
 }
 
+var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
+cartLoadedListener.onEvent = function () { onCartridgeLoaded(); }
+Events.addListener(cartLoadedListener);
+
 export {
   enableMouseTracking,
   isLeftButtonDown,
   getLightGunScanline,
-  getLightGunCycle,
-  onCartridgeLoaded
+  getLightGunCycle
 };

@@ -2,11 +2,14 @@ import * as Mouse from "./mouse.js"
 import * as Kb from "./kb.js"
 import * as Cartridge from "../prosystem/Cartridge.js"
 import * as Pad from "./pad.js"
+import * as Events from "../events.js"
 
 var isLightGunEnabled = Cartridge.IsLightGunEnabled;
 var isLeftButtonDown = Mouse.isLeftButtonDown;
 var p1KeyMap = Kb.p1KeyMap;
 var p2KeyMap = Kb.p2KeyMap;
+var resetSet = false;
+var selectSet = false;
 
 var keyboardData = null;
 var lightGunFirstFire = true;
@@ -22,15 +25,15 @@ function updateInput() {
     }
   } else {
     Pad.poll();
-    pad = Pad.getMapping(0);  
+    pad = Pad.getMapping(0);
     updateJoystick(0, keyboardData, pad);
     updateJoystick(1, keyboardData, pad);
   }
 
   // | 12       | Console      | Reset
-  keyboardData[12] = Kb.isReset() || (pad && pad.isReset());
+  keyboardData[12] = resetSet || Kb.isReset() || (pad && pad.isReset());
   // | 13       | Console      | Select
-  keyboardData[13] = Kb.isSelect() || (pad && pad.isSelect());
+  keyboardData[13] = selectSet || Kb.isSelect() || (pad && pad.isSelect());
   // | 14       | Console      | Pause
   keyboardData[14] = Kb.isPause();
   // | 15       | Console      | Left Difficulty
@@ -85,14 +88,31 @@ function reset() {
 
   // Reset light gun
   lightGunFirstFire = true;
+
+  // Reset buttons
+  resetSet = false;
+  selectSet = false;
 }
 
 function init(kbData) {
   keyboardData = kbData;
 }
 
+var initListener = new Events.Listener("init");
+initListener.onEvent = function (event) { init(event.keyboardData); }
+Events.addListener(initListener);
+
+function setReset(val) {
+  resetSet = val;
+}
+
+function setSelect(val) {
+  selectSet = val;
+}
+
 export {
   reset as resetKeyboardData,
   updateInput,
-  init
+  setReset,
+  setSelect
 };

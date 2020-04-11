@@ -1,15 +1,16 @@
-import * as WebMouse from "./web/mouse.js"
-import * as WebInput from "./web/input.js"
+import * as Mouse from "./web/mouse.js"
+import * as Input from "./web/input.js"
 import * as ProSystem from "./prosystem/ProSystem.js"
-import * as WebVideo from "./web/video.js"
+import * as Video from "./web/video.js"
 import * as Sound from "./prosystem/Sound.js"
-import * as WebAudio from "./web/audio.js"
-import * as WebKb from "./web/kb.js"
+import * as Audio from "./web/audio.js"
+import * as Kb from "./web/kb.js"
 import * as Memory from "./prosystem/Memory.js"
 import * as Cartridge from "./prosystem/Cartridge.js"
 import * as Database from "./prosystem/Database.js"
 import * as Riot from "./prosystem/Riot.js"
-import * as WebControlsBar from "./web/cbar.js"
+import * as ControlsBar from "./web/cbar.js"
+import * as Events from "./events.js"
 
 import 'fullscreen-api-polyfill'
 
@@ -18,23 +19,46 @@ import logoImageSrc from '../images/Atari_7800_Logo.png'
 
 var executeFrame = ProSystem.ExecuteFrame;
 var soundStore = Sound.Store;
-var updateInput = WebInput.updateInput;
-var flipImage = WebVideo.flipImage;
+var updateInput = Input.updateInput;
+var flipImage = Video.flipImage;
 
 var canvas = null;
 var controlsDiv = null;
 var logoDiv = null;
 var starting = false;
+var currentCart = null;
+
+var messageHandler = function(message) {
+  alert(message);
+}
+
+var errorHandler = function(message) {
+  alert(message);
+}
 
 /** The keyboard data */
 var keyboardData = new Array(19);
 
 var initialized = false;
 
-function startEmu(cart) {
+function startEmu(cart, isRestart) {
+  currentCart = cart;
+
+  var leftSwitch = 0;
+  var rightSwitch = 0;
+  if (isRestart) {
+    leftSwitch = Kb.isLeftDiffSet();
+    rightSwitch = Kb.isRightDiffSet();
+  }
+
   Cartridge.Load(cart, cart.length);
   var digest = Cartridge.GetDigest();
-  Database.Load(digest);
+  Database.Load(digest);  
+
+  if (isRestart) {
+    Cartridge.SetLeftSwitch(leftSwitch);
+    Cartridge.SetRightSwitch(rightSwitch);
+  }
 
   console.log("Final values:");
   console.log("  Title: %s", Cartridge.GetTitle());
@@ -56,16 +80,11 @@ function startEmu(cart) {
   console.log("  Crosshair X: %d", Cartridge.GetCrossX());
   console.log("  Crosshair Y: %d", Cartridge.GetCrossY());
 
-  // ProSystem
-  Memory.OnCartridgeLoaded();
-  ProSystem.OnCartridgeLoaded();
-  Sound.OnCartridgeLoaded();
-  // Web
-  WebVideo.onCartidgeLoaded();
-  WebKb.onCartridgeLoaded();
-  WebMouse.onCartridgeLoaded();
+  // Fire on cartridge loaded event
+  Events.fireEvent("onCartridgeLoaded");
+
   // Reset keyboard data
-  WebInput.resetKeyboardData();    
+  Input.resetKeyboardData();  
 
   init();
   ProSystem.Reset();
@@ -81,43 +100,47 @@ function startEmu(cart) {
   var isPaused = ProSystem.IsPaused;
 
   // Enable mouse tracking if lightgun game
-  WebMouse.enableMouseTracking(Cartridge.IsLightGunEnabled());
+  Mouse.enableMouseTracking(Cartridge.IsLightGunEnabled());
 
   var f = function () {
-    if (isActive() && !isPaused()) {
+    if (isActive()) {
 
-      updateInput();
-      executeFrame(keyboardData);
-      flipImage();
-      soundStore();
+      if (!isPaused()) {
+        updateInput();
+        executeFrame(keyboardData);
+        flipImage();
+        soundStore();
 
-      nextTimestamp += frameTicks;
-      var now = Date.now();
-      if ((nextTimestamp + adjustTolerance) < now) {
-        nextTimestamp = now;
-        console.log("adjusted next timestamp.");
-      }
-      var wait = (nextTimestamp - now);
-      if (wait > 0) {
-        setTimeout(function () { requestAnimationFrame(f); }, wait);
+        nextTimestamp += frameTicks;
+        var now = Date.now();
+        if ((nextTimestamp + adjustTolerance) < now) {
+          nextTimestamp = now;
+          console.log("adjusted next timestamp.");
+        }
+        var wait = (nextTimestamp - now);
+        if (wait > 0) {
+          setTimeout(function () { requestAnimationFrame(f); }, wait);
+        } else {
+          requestAnimationFrame(f);
+        }
+
+        fc++;
+        if ((fc % debugFrequency) == 0) {
+          var elapsed = Date.now() - start;
+          console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
+            (1000.0 / (elapsed / fc)).toFixed(2),
+            (Riot.GetTimerCount() % 1000),
+            ProSystem.GetDebugWsync() ? 1 : 0,
+            ProSystem.GetDebugWsyncCount(),
+            ProSystem.GetDebugCycleStealing() ? 1 : 0,
+            ProSystem.GetDebugMariaCycles(),
+            ProSystem.GetDebug6502Cycles(),
+            ProSystem.GetDebugSavedCycles());
+          start = Date.now();
+          fc = 0;
+        }
       } else {
-        requestAnimationFrame(f);
-      }
-
-      fc++;
-      if ((fc % debugFrequency) == 0) {
-        var elapsed = Date.now() - start;
-        console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
-          (1000.0 / (elapsed / fc)).toFixed(2),
-          (Riot.GetTimerCount() % 1000),
-          ProSystem.GetDebugWsync() ? 1 : 0,
-          ProSystem.GetDebugWsyncCount(),
-          ProSystem.GetDebugCycleStealing() ? 1 : 0,
-          ProSystem.GetDebugMariaCycles(),
-          ProSystem.GetDebug6502Cycles(),
-          ProSystem.GetDebugSavedCycles());
-        start = Date.now();
-        fc = 0;
+        setTimeout(function () { requestAnimationFrame(f); }, 100);
       }
     }
   };
@@ -125,7 +148,13 @@ function startEmu(cart) {
   setTimeout(function () { requestAnimationFrame(f) }, frameTicks);
 }
 
-function startEmulation(cart) {
+function restart() {
+  if (currentCart) {
+    startEmulation(currentCart, true);
+  }
+}
+
+function startEmulation(cart, isRestart) {
   if (starting) {
     return;
   }
@@ -137,12 +166,19 @@ function startEmulation(cart) {
     ProSystem.Close();
   }
 
-  logoDiv.classList.add('js7800__logo--hide');
-  logoDiv.classList.remove('js7800__logo--show');
+  if (!logoDiv.classList.contains('js7800__logo--hide')) {
+    logoDiv.classList.add('js7800__logo--hide');
+    logoDiv.classList.remove('js7800__logo--show');
+
+    // Should not be necessary, but makes sure is not displayed
+    setTimeout(function() {
+      logoDiv.style.display = 'none';
+    }, 1000);
+  }
 
   setTimeout(function () {
-    WebVideo.stopScreenSnow();
-    startEmu(cart);
+    Video.stopScreenSnow();
+    startEmu(cart, isRestart);
   }, 200);
 }
 
@@ -155,7 +191,7 @@ function addElements(id) {
   // border-container
   var mainContainer = document.createElement("div");
   mainContainer.className = mainContainer.id = "js7800";
-  mainContainer.style.width = WebVideo.DEFAULT_WIDTH + "px";
+  mainContainer.style.width = Video.DEFAULT_WIDTH + "px";
   container.appendChild(mainContainer);
 
   // fullscreen-container
@@ -176,8 +212,8 @@ function addElements(id) {
   // canvas
   canvas = document.createElement("canvas");
   canvas.id = canvas.className = "js7800__screen";
-  canvas.width = WebVideo.ATARI_WIDTH;
-  canvas.height = WebVideo.ATARI_CANVAS_HEIGHT;
+  canvas.width = Video.ATARI_WIDTH;
+  canvas.height = Video.ATARI_CANVAS_HEIGHT;
   noSelectWrapper.appendChild(canvas);  
 
   // logo
@@ -204,20 +240,44 @@ function init(id) {
     // Add the HTML elements
     addElements(id);
 
-    // ProSystem
-    Sound.init();
-    Riot.init();
-    Cartridge.init();
-    // Web
-    WebAudio.init();
-    WebVideo.init(canvas, controlsDiv);
-    WebKb.init();
-    WebInput.init(keyboardData);
-    WebControlsBar.init();
+    // Fire init event
+    Events.fireEvent("init", {
+      "canvas": canvas,
+      "controlsDiv": controlsDiv,
+      "keyboardData": keyboardData
+    });
 
-    WebVideo.startScreenSnow();
+    Video.startScreenSnow();
     logoDiv.classList.add('js7800__logo--show');
+
+    var restartListener = new Events.Listener("restart");
+    restartListener.onEvent = function() {
+      restart();
+    }
+    Events.addListener(restartListener);
   }
 }
 
-export { init, startEmulation };
+function setMessageHandler(handler) {
+  messageHandler = handler;
+}
+
+function setErrorHandler(handler) {
+  errorHandler = handler;
+}
+
+var showMessageListener = new Events.Listener("showMessage");
+showMessageListener.onEvent = function(message) { messageHandler(message); }
+Events.addListener(showMessageListener);
+
+var showErrorListener = new Events.Listener("showError");
+showErrorListener.onEvent = function(message) { errorHandler(message); }
+Events.addListener(showErrorListener);
+
+export { 
+  init, 
+  startEmulation, 
+  restart,
+  setMessageHandler,
+  setErrorHandler
+};

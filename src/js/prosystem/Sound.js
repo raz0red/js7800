@@ -28,6 +28,7 @@ import * as Pokey from "./Pokey.js"
 import * as Xm from "./ExpansionModule.js"
 import * as Cartridge from "./Cartridge.js"
 import * as Tia from "./Tia.js"
+import * as Events from "../events.js"
 
 var pokey_buffer = Pokey.buffer;
 var pokey_Clear = Pokey.Clear;
@@ -166,7 +167,7 @@ function sound_Store() {
 
   var prosystem_frame = prosystem_GetFrame();
 
-  if (sound_muted) sound_SetMuted(false);
+  //if (sound_muted) sound_SetMuted(false);
   //memset(sample, 0, MAX_BUFFER_SIZE);
 
   // TODO JS: This seems unnecessary
@@ -227,7 +228,9 @@ function sound_Store() {
   pokey_Clear(); // WII
 
   //wii_storeSound(sample, length);
-  store_sound_callback(sample, length);
+  if (!sound_muted) {
+    store_sound_callback(sample, length);
+  }
 
   //#ifdef TRACE_SOUND
   // if (scount++ == 60) {
@@ -289,6 +292,7 @@ function sound_GetSampleRate() {
 // ----------------------------------------------------------------------------
 //bool sound_SetMuted(bool muted) {
 function sound_SetMuted(muted) {
+  /*
   if (sound_muted != muted) {
     if (!muted) {
       if (!sound_Play()) {
@@ -302,6 +306,8 @@ function sound_SetMuted(muted) {
     }
     sound_muted = muted;
   }
+  */
+  sound_muted = muted;
   return true;
 }
 
@@ -339,12 +345,19 @@ function init() {
   prosystem_GetFrame = ProSystem.GetFrame;
 }
 
+var initListener = new Events.Listener("init");
+initListener.onEvent = function() { init(); }
+Events.addListener(initListener);
+
+var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
+cartLoadedListener.onEvent = function () { OnCartridgeLoaded(); }
+Events.addListener(cartLoadedListener);
+
 export {
   sound_Store as Store,
+  sound_SetMuted as SetMuted,
   SetFrequency,
   SetScanlines,
   SetSampleRate,
-  SetStoreSoundCallback,
-  OnCartridgeLoaded,
-  init
+  SetStoreSoundCallback
 };

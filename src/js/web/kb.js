@@ -1,8 +1,9 @@
 import * as Video from "./video.js"
 import * as Cartridge from "../prosystem/Cartridge.js"
-import * as WebKeys from "./keys.js"
+import * as KeysModule from "./keys.js"
+import * as Events from "../events.js"
 
-var Keys = WebKeys.Keys;
+var Keys = KeysModule.Keys;
 
 var KeyboardMapping = function (leftKey, rightKey, upKey, downKey, b1Key, b2Key) {
   var leftKey = leftKey;
@@ -107,6 +108,16 @@ var f6Code = Keys.KEY_F6.code;
 var f9Code = Keys.KEY_F9.code;
 var f11Code = Keys.KEY_F11.code;
 
+function setLeftDiffSet(val) {
+  leftDiffSet = val;
+  Events.fireEvent("onLeftDiffChanged", val);
+}
+
+function setRightDiffSet(val) {
+  rightDiffSet = val;
+  Events.fireEvent("onRightDiffChanged", val);
+}
+
 function keyEvent(event, down) {
   var code = event.keyCode;
   var handled = (p1KeyMap.handleKeyCode(code, down) ||
@@ -128,13 +139,13 @@ function keyEvent(event, down) {
         break;
       case f5Code:
         if (!down) {
-          leftDiffSet ^= 1;
+          setLeftDiffSet(leftDiffSet ^= 1);
         }
         handled = true;
         break;
       case f6Code:
         if (!down) {
-          rightDiffSet ^= 1;
+          setRightDiffSet(rightDiffSet ^= 1);
         }
         handled = true;
         break;
@@ -169,6 +180,10 @@ function init() {
     };
 }
 
+var initListener = new Events.Listener("init");
+initListener.onEvent = function () { init(); }
+Events.addListener(initListener);
+
 function isSelect() {
   return selectHeld
 }
@@ -194,26 +209,30 @@ function onCartridgeLoaded() {
   cartridgeRightSwitch = Cartridge.GetRightSwitch();
 }
 
+var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
+cartLoadedListener.onEvent = function () { onCartridgeLoaded(); }
+Events.addListener(cartLoadedListener);
+
 function reset() {
   // Reset key maps
   p1KeyMap.reset();
   p2KeyMap.reset();
 
   // Left difficulty switch defaults to off
-  leftDiffSet = cartridgeLeftSwitch;
+  setLeftDiffSet(cartridgeLeftSwitch);
 
   // Right difficulty switch defaults to on
-  rightDiffSet = cartridgeRightSwitch;
+  setRightDiffSet(cartridgeRightSwitch);
 }
 
 export {
-  init,
   isSelect,
   isReset,
   isPause,
   isLeftDiffSet,
-  isRightDiffSet,
-  onCartridgeLoaded,
+  isRightDiffSet,  
+  setLeftDiffSet,
+  setRightDiffSet,
   reset,
   p1KeyMap,
   p2KeyMap

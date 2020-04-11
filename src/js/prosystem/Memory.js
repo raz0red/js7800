@@ -29,6 +29,7 @@ import * as Cartridge from "./Cartridge.js"
 import * as Riot from "./Riot.js"
 import * as Tia from "./Tia.js"
 import * as Bios from "./Bios.js"
+import * as Events from "../events.js"
 
 var pokey_SetRegister = Pokey.SetRegister;
 var pokey_GetRegister = Pokey.GetRegister;
@@ -306,6 +307,10 @@ function OnCartridgeLoaded() {
   cartridge_flags = Cartridge.GetFlags();
 }
 
+var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
+cartLoadedListener.onEvent = function () { OnCartridgeLoaded(); }
+Events.addListener(cartLoadedListener);
+
 export {
   memory_ClearROM as ClearROM,
   memory_WriteROM as WriteROM,
@@ -313,7 +318,6 @@ export {
   memory_Read as Read,
   memory_Reset as Reset,
   memory_ram as ram,
-  memory_rom as rom,
-  OnCartridgeLoaded
+  memory_rom as rom
 };
 

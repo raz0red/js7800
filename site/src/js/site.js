@@ -398,8 +398,11 @@ function addElements() {
 
 function init(in7800) {
   js7800 = in7800;
+  var main = js7800.Main;
+  main.setMessageHandler(showMessage);
+  main.setErrorHandler(errorHandler);
   romList = new RomList('cartselect__select');
-  js7800.Main.init('js7800__target');
+  main.init('js7800__target');
 
   addElements();
 

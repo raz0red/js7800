@@ -1,7 +1,7 @@
-import * as WebUtil from "./util.js"
+import * as Util from "../util.js"
 
 function StandardMapping(props) {
-  WebUtil.addProps(this, {
+  Util.addProps(this, {
     isAnalogDir: function (pad, axesIndex, pos) {
       if (pad && pad.axes) {
         var axes = pad.axes;
@@ -44,7 +44,7 @@ function StandardMapping(props) {
   });
 
   if (props) {
-    WebUtil.addProps(this, props);
+    Util.addProps(this, props);
   }
 };
 
@@ -177,7 +177,7 @@ function poll() {
       pads[padIdx].setMapping(stdMapping);
 
       var standard = (pad.mapping && (pad.mapping == "standard"));
-      if (!standard && WebUtil.isIosDevice) {
+      if (!standard && Util.isIosDevice) {
         pads[padIdx].setMapping(iosMapping);
       } 
       

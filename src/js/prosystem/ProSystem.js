@@ -35,6 +35,7 @@ import * as Riot from "./Riot.js"
 import * as Sally from "./Sally.js"
 import * as Tia from "./Tia.js"
 import * as Bios from "./Bios.js"
+import * as Events from "../events.js"
 
 var Tia_Process = Tia.Process;
 var pokey_Frame = Pokey.Frame;
@@ -417,14 +418,19 @@ function OnCartridgeLoaded() {
   cartridge_hblank = Cartridge.GetHblank();
 }
 
+var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
+cartLoadedListener.onEvent = function () { OnCartridgeLoaded(); }
+Events.addListener(cartLoadedListener);
+
 export {
   prosystem_Reset as Reset,
   prosystem_Close as Close,
   prosystem_ExecuteFrame as ExecuteFrame,
+  prosystem_Pause as Pause,
   CYCLES_PER_SCANLINE,
   HBLANK_CYCLES,
   IsActive,
-  IsPaused,
+  IsPaused,  
   GetFrequency,
   SetFrequency,
   GetFrame,
@@ -438,8 +444,7 @@ export {
   GetDebug6502Cycles,
   GetDebugWsync,
   GetDebugCycleStealing,
-  GetMariaScanline,
-  OnCartridgeLoaded
+  GetMariaScanline
 };
 
 // byte * loc_buffer = 0;

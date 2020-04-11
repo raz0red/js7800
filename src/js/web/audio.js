@@ -1,4 +1,5 @@
 import * as Sound from "../prosystem/Sound.js"
+import * as Events from "../events.js"
 
 var SOUNDBUFSIZE = 8192 << 1;
 var DEFAULT_SAMPLE_RATE = 48000;  
@@ -61,7 +62,9 @@ function init() {
   }
 }
 
-export {
-  init
-};
+var initListener = new Events.Listener("init");
+initListener.onEvent = function() { init(); }
+Events.addListener(initListener);
+
+export {};
 

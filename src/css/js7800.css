@@ -6,6 +6,8 @@
   -ms-user-select: none;        /* Internet Explorer/Edge */
   user-select: none;            /* Non-prefixed version, currently
                                    supported by Chrome, Opera and Firefox */
+  padding:0px;
+  margin:0px;
 }
 
 .js7800 {
@@ -31,7 +33,7 @@
   /*image-rendering: -webkit-optimize-contrast;*/ /* Safari                        */
   /*image-rendering: -o-crisp-edges;*/            /* OS X & Windows Opera (12.02+) */
   image-rendering: pixelated;                 /* Awesome future-browsers       */
-  /*-ms-interpolation-mode: nearest-neighbor;*/   /* IE    */
+  /*-ms-interpolation-mode: nearest-neighbor;*/   /* IE    */  
 }
 
 .js7800__logo {
@@ -42,71 +44,151 @@
   transform: translate(-50%, -50%);
   position: absolute;
   visibility: hidden;
+  opacity: 0;
 }
 
 .js7800__logo--show {
   visibility: visible;
-  -webkit-animation: js7800__logo--fadein 2s;
-  animation: js7800__logo--fadein 2s;
+  opacity: 1;
+  transition: visibility 0s linear 0s, opacity 1s;
 }
 
 .js7800__logo--hide {
   visibility: hidden;
-  -webkit-animation: js7800__logo--fadeout 1s;
-  animation: js7800__logo--fadeout 1s;
-  transition: visibility 1s;
-}
-
-@-webkit-keyframes js7800__logo--fadein {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes js7800__logo--fadein {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@-webkit-keyframes js7800__logo--fadeout {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes js7800__logo--fadeout {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
+  opacity: 0;
+  transition: visibility 1s linear 1s, opacity 1s;  
 }
 
 .js7800__controls {
   border-top: 10px solid black;
   background-color: #151515;
-  height: 30px;
   margin-left: auto;
   margin-right: auto;
+  border-radius: .4em;
 }
 
 #js7800__fullscreen-container:-webkit-full-screen {
   position:fixed;
   width: 100%;
   background-color: black;
+}
+
+.js7800__controls-switch {
+  position: relative;
+  display: inline-block;
+  width: 29px;
+  height: 18px;
+  margin: 0 5px 0 5px;
+}
+
+.js7800__controls-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.js7800__controls-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #666;
+  -webkit-transition: .4s;
+  transition: .4s;
+  opacity: 0.6;
+  border-radius: .2em;
+}
+
+.js7800__controls-switch-slider:hover {
+  opacity: 1
+}
+
+.js7800__controls-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 11px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #DDD;
+  border-radius: .2em;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked+.js7800__controls-switch-slider:before {
+  -webkit-transform: translateX(12x);
+  -ms-transform: translateX(12px);
+  transform: translateX(12px);
+}
+
+.js7800__controls-button {
+  background-color: #ce2f37;
+  border: none;
+  color: white;
+  text-align: center;
+  font-size: 10px;
+  margin: 0 5px 0 5px;
+  opacity: .6;
+  transition: .3s;
+  display: inline-block;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 3px 2px 3px 2px;
+  min-width: 48px;
+  border-radius: .2em;
+}
+
+.js7800__controls-button:hover {
+  opacity: 1
+}
+
+.js7800__controls-img-button {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  opacity: .6;
+  margin: 0 4px 0 4px;
+  border: 0px solid white;
+  vertical-align: middle;
+}
+
+.js7800__controls-img-button:hover {
+  opacity: .9
+}
+
+.js7800__controls-container {
+  display: flex;
+  margin: 0 2px 0 2px;
+  padding: 4px 0 4px 0;
+  flex-wrap: nowrap;
+  user-select: none;
+  /* max-width: 800px; */
+}
+
+.js7800__controls-group {
+  border: 0px solid white;
+  flex: 1 0 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.js7800__controls-group-start {
+  border: 0px solid white;
+  flex: 1 0 1px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.js7800__controls-group-end {
+  border: 0px solid white;
+  flex: 1 0 1px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }

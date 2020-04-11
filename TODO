@@ -5,3 +5,5 @@
 - Start to fill out the command bar component (bottom bar). These will include full screen, sound on/off, etc.
 - Evaluate browser specific dependencies (key input, drag, etc.). Should these be external?
 - Add options to support lower performance devices (frame skipping, disable vsync, disable sound)
+- Remove button swap on Bentley Bear's Crystal Quest
+- Move switches out of KB (should be input?)

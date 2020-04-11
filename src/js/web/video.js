@@ -1,6 +1,7 @@
 import * as Region from "../prosystem/Region.js"
 import * as Cartridge from "../prosystem/Cartridge.js"
 import * as Maria from "../prosystem/Maria.js"
+import * as Events from "../events.js"
 
 var ATARI_WIDTH = 320;
 var ATARI_BLIT_HEIGHT = 300;
@@ -96,6 +97,10 @@ function init(canvasIn, controlsDivIn) {
   resizeCanvas();
 }
 
+var initListener = new Events.Listener("init");
+initListener.onEvent = function (event) { init(event.canvas, event.controlsDiv); }
+Events.addListener(initListener);
+
 function clearCanvas() {
   // set alpha to opaque 
   for (var i = 3; i < imageData.length; i += 4) {
@@ -150,6 +155,7 @@ function resizeCanvas() {
       canvas.style.width = DEFAULT_WIDTH + "px";
       canvas.style.height = DEFAULT_HEIGHT + "px";
     }
+    Events.fireEvent("fullscreen", fullScreen ? true : false);
   }
 }
 
@@ -167,19 +173,30 @@ function stopScreenSnow() {
 
 function fullScreen() {
   var fsContainer = document.getElementById("js7800__fullscreen-container");
-  if (!document.fullscreenElement) {
+  if (!isFullscreen()) {
     fsContainer.requestFullscreen();
     setTimeout(resizeCanvas, 200);
   }  
 }
 
-function onCartidgeLoaded() {
+function isFullscreen() {
+  return document.fullscreenElement;
+}
+
+function exitFullScreen() {
+  document.exitFullscreen();
+}
+
+function onCartridgeLoaded() {
   cartridgeRegion = Cartridge.GetRegion();
   initPalette8();
 }
 
+var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
+cartLoadedListener.onEvent = function () { onCartridgeLoaded(); }
+Events.addListener(cartLoadedListener);
+
 export {
-  init,
   flipImage,
   startSnow as startScreenSnow,
   ATARI_WIDTH,
@@ -193,5 +210,6 @@ export {
   getCanvas,
   stopScreenSnow,
   fullScreen,
-  onCartidgeLoaded
+  exitFullScreen,
+  isFullscreen
 };

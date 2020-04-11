@@ -25,6 +25,7 @@
 
 import * as Memory from "./Memory.js"
 import { md5 } from "../3rdparty/md5.js"
+import * as Events from "../events.js"
 
 var memory_WriteROM = null;
 var memory_ClearROM = null;
@@ -761,6 +762,10 @@ function init() {
   memory_ClearROM = Memory.ClearROM;
 }
 
+var initListener = new Events.Listener("init");
+initListener.onEvent = function() { init(); }
+Events.addListener(initListener);
+
 export {
   GetRegion,
   IsPokeyEnabled,
@@ -797,7 +802,6 @@ export {
   SetLeftSwitch,
   SetRightSwitch,
   SetSwapButtons,
-  init,
   cartridge_Load as Load,
   cartridge_IsLoaded as IsLoaded,
   cartridge_Write as Write,
