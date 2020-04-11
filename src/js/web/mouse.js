@@ -45,7 +45,7 @@ function enableMouseTracking(enabled) {
       canvas.removeEventListener('mousemove', onMouseMove);
       canvas.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('mouseup', onMouseUp);
-      canvas.style.cursor = 'none';
+      canvas.style.cursor = 'auto';
     }
   }
 }
