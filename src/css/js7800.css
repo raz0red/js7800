@@ -1,3 +1,5 @@
+/* All sizing currently done in pixels */
+
 .js7800_noselect {
   -webkit-touch-callout: none;  /* iOS Safari */
   -webkit-user-select: none;    /* Safari */
@@ -6,8 +8,8 @@
   -ms-user-select: none;        /* Internet Explorer/Edge */
   user-select: none;            /* Non-prefixed version, currently
                                    supported by Chrome, Opera and Firefox */
-  padding:0px;
-  margin:0px;
+  padding:0;
+  margin:0;
 }
 
 .js7800 {
@@ -64,7 +66,8 @@
   background-color: #151515;
   margin-left: auto;
   margin-right: auto;
-  border-radius: .4em;
+  font-size: 12px;
+  border-radius: 5px;
 }
 
 #js7800__fullscreen-container:-webkit-full-screen {
@@ -98,7 +101,7 @@
   -webkit-transition: .4s;
   transition: .4s;
   opacity: 0.6;
-  border-radius: .2em;
+  border-radius: 3px;
 }
 
 .js7800__controls-switch-slider:hover {
@@ -113,7 +116,7 @@
   left: 3px;
   bottom: 3px;
   background-color: #DDD;
-  border-radius: .2em;
+  border-radius: 3px;
   -webkit-transition: .4s;
   transition: .4s;
 }
@@ -138,7 +141,7 @@ input:checked+.js7800__controls-switch-slider:before {
   cursor: pointer;
   padding: 3px 2px 3px 2px;
   min-width: 48px;
-  border-radius: .2em;
+  border-radius: 3px;
 }
 
 .js7800__controls-button:hover {
