@@ -95,13 +95,16 @@ function startEmu(cart, isRestart) {
   var fc = 0;
   var frequency = ProSystem.GetFrequency();
   var debugFrequency = frequency * 10;
-  var frameTicks = (1000.0 / frequency) | 0;
+  var frameTicks = (1000.0 / frequency) /*| 0*/;
   var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
   var isActive = ProSystem.IsActive;
   var isPaused = ProSystem.IsPaused;
 
   // Enable mouse tracking if lightgun game
   Mouse.enableMouseTracking(Cartridge.IsLightGunEnabled());
+
+  console.log("Frame ticks: " + frameTicks);
+  console.log("Frequency: " + frequency);
 
   var f = function () {
     if (isActive()) {
