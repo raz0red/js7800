@@ -140,7 +140,12 @@ function startEmu(cart, isRestart) {
           fc = 0;
         }
       } else {
-        setTimeout(function () { requestAnimationFrame(f); }, 100);
+        setTimeout(function () { 
+          fc = 0; 
+          start = Date.now(); 
+          nextTimestamp = start;
+          requestAnimationFrame(f); 
+        }, 100);
       }
     }
   };
