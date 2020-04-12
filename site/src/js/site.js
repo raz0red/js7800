@@ -135,16 +135,25 @@ function loadRomFromUrl(url) {
   xhr.send();
 }
 
-var RomList = function (selectId) {
-  var select = document.getElementById(selectId);
-  if (!select) {
-    throw "Unable to find select element with id: " + selectId;
-  }
-  select.onchange = function () {
-    loadRomFromUrl(select.value); this.blur();
+var RomList = function (selects) {
+  for (var idx = 0; idx < selects.length; idx++) {
+    (function () {
+      var iidx = idx;
+      var select = selects[iidx];
+      select.onchange = function () {
+        var value = select.value;
+        loadRomFromUrl(value);
+        this.blur();
+        for (var i = 0; i < selects.length; i++) {
+          if (selects[i] != select) {
+            selects[i].value = value;
+          }
+        }
+      }
+    })();
   }
 
-  function clearSelect() {
+  function clearSelect(select) {
     var len, groups, par;
     groups = select.getElementsByTagName('optgroup');
     len = groups.length;
@@ -158,7 +167,7 @@ var RomList = function (selectId) {
     }
   }
 
-  function populateSelect(romList) {
+  function populateSelect(select, romList) {
     var depth = 0;
 
     function addChildren(parentEl, parent) {
@@ -188,7 +197,7 @@ var RomList = function (selectId) {
       }
     }
 
-    clearSelect();
+    clearSelect(select);
     var opt = document.createElement('option');
     opt.appendChild(document.createTextNode("Select Atari 7800 Cartridge..."));
     opt.disabled = true;
@@ -244,7 +253,10 @@ var RomList = function (selectId) {
         if (ctx.error) {
           errorHandler(ctx.errorMessage);
         } else {
-          populateSelect(ctx.root);
+          for (var idx = 0; idx < selects.length; idx++) {
+            var select = selects[idx];
+            populateSelect(select, ctx.root);
+          }
         }
       }
     }
@@ -399,34 +411,71 @@ function addElements() {
 function init(in7800) {
   js7800 = in7800;
   var main = js7800.Main;
+  var cbar = js7800.ControlsBar;
+  var util = js7800.Util;
+  var events = js7800.Events;
+
   main.setMessageHandler(showMessage);
   main.setErrorHandler(errorHandler);
-  romList = new RomList('cartselect__select');
+
+  // Cartridge select
+  var selectId = 'cartselect__select';
+  var select = document.getElementById(selectId);
+  if (!select) {
+    throw "Unable to find select element with id: " + selectId;
+  }
+
+  // Full screen cartridge select
+  var fsSelect = document.createElement("select");
+  var fsSelectComp = new cbar.Component();
+  util.addProps(fsSelectComp, {
+    getClass: function () { return "fsselect"; },
+    doCreateElement: function () { return fsSelect; }
+  });
+  cbar.getGroup(1).addChildAtIndex(2, fsSelectComp);
+  var fullscreenListener = new events.Listener("fullscreen");
+  fullscreenListener.onEvent = function (isFullscreen) {
+    fsSelect.style.display = isFullscreen ? "block" : "none";
+  }
+  events.addListener(fullscreenListener);
+
+  // Rom list component
+  romList = new RomList([select, fsSelect]);
+
+  // Initialize js7800
   main.init('js7800__target');
 
+  // Add display elements
   addElements();
 
+  //
+  // Handle request parameters
+  //
+
+  // rom list
   var rlist = getRequestParameter("romlist");
   if (!rlist) {
     rlist = 'roms/romlist-homebrew.json';
   }
   romList.loadListFromUrl(rlist);
 
+  // rom
   var rom = getRequestParameter("rom");
   if (rom) {
     loadRomFromUrl(rom);
   }
 
+  // log fps
   var logFps = getRequestParameter("fps");
   if (logFps) {
     logFps = logFps.toLowerCase();
-    main.setLogFps(logFps === "1" || logFps == "true");    
+    main.setLogFps(logFps === "1" || logFps == "true");
   }
 
+  // Register drop handlers
   var ignore = function (event) {
     event.preventDefault();
   }
-
   var body = document.body;
   body.addEventListener("drop", fileDropHandler);
   body.addEventListener("dragdrop", fileDropHandler);

@@ -16,9 +16,6 @@ import restartImgSrc from '../../images/restart.svg'
 import infoImgSrc from '../../images/information-outline.svg'
 
 var addProps = Utils.addProps;
-var pauseButton = null;
-var leftDiffSwitch = null;
-var rightDiffSwitch = null;
 
 if (!Object.create) {
   Object.create = function (o) {
@@ -41,6 +38,7 @@ Component.prototype = {
     }
     return this.el;
   },
+  getClass: function() { return null; },
   doCreateElement: function () { return null; }
 };
 
@@ -63,6 +61,9 @@ addProps(ControlGroup.prototype, {
   },
   addChild: function (component) {
     this.children.push(component);
+  },
+  addChildAtIndex: function (idx, component) {
+    this.children.splice(idx, 0, component);
   }
 });
 
@@ -212,45 +213,45 @@ addProps(ToggleSwitch.prototype, {
   onClick: function (event) { }
 });
 
+var groupStart = new ControlGroupStart();
+var pauseButton = new ToggleImageButton("Pause", pauseImgSrc, "Resume", playImgSrc);
+pauseButton.onClick = function () { ProSystem.Pause(this.getValue()); }
+groupStart.addChild(pauseButton);
+var soundButton = new ToggleImageButton("Sound Off", volImgSrc, "Sound On", volOffImgSrc);
+soundButton.onClick = function () { Sound.SetMuted(this.getValue()); }
+groupStart.addChild(soundButton);
+var restartButton = new ImageButton("Restart", restartImgSrc);
+restartButton.onClick = function () { Events.fireEvent("restart") }
+groupStart.addChild(restartButton);
+
+var group = new ControlGroup();
+var selectButton = new Button("SELECT", "Select");
+selectButton.onDown = function () { Input.setSelect(true); }
+selectButton.onUp = function () { Input.setSelect(false); }
+group.addChild(selectButton);
+var resetButton = new Button("RESET", "Reset");
+resetButton.onDown = function () { Input.setReset(true); }
+resetButton.onUp = function () { Input.setReset(false); }
+group.addChild(resetButton);
+var leftDiffSwitch = new ToggleSwitch("Left difficulty switch");
+leftDiffSwitch.onClick = function () { Kb.setLeftDiffSet(!this.getValue()) }
+group.addChild(leftDiffSwitch);
+var rightDiffSwitch = new ToggleSwitch("Right difficulty switch")
+rightDiffSwitch.onClick = function () { Kb.setRightDiffSet(!this.getValue()) }
+group.addChild(rightDiffSwitch);
+
+var groupEnd = new ControlGroupEnd();
+var helpButton = new ImageButton("Help", infoImgSrc);
+helpButton.onClick = function () { Events.fireEvent("showError", "Not implemented."); }
+groupEnd.addChild(helpButton);
+var settingsButton = new ImageButton("Settings", cogsImgSrc);
+settingsButton.onClick = function () { Events.fireEvent("showError", "Not implemented."); }
+groupEnd.addChild(settingsButton);
+var fsButton = new ToggleImageButton("Fullscreen", fsImgSrc, "Exit Fullscreen", fsExitImgSrc);
+fsButton.onClick = function () { Video.isFullscreen() ? Video.exitFullScreen() : Video.fullScreen();  }
+groupEnd.addChild(fsButton);
+
 function init() {
-  var groupStart = new ControlGroupStart();
-  pauseButton = new ToggleImageButton("Pause", pauseImgSrc, "Resume", playImgSrc);
-  pauseButton.onClick = function () { ProSystem.Pause(this.getValue()); }
-  groupStart.addChild(pauseButton);
-  var soundButton = new ToggleImageButton("Sound Off", volImgSrc, "Sound On", volOffImgSrc);
-  soundButton.onClick = function () { Sound.SetMuted(this.getValue()); }
-  groupStart.addChild(soundButton);
-  var restartButton = new ImageButton("Restart", restartImgSrc);
-  restartButton.onClick = function () { Events.fireEvent("restart") }
-  groupStart.addChild(restartButton);
-
-  var group = new ControlGroup();
-  var selectButton = new Button("SELECT", "Select");
-  selectButton.onDown = function () { Input.setSelect(true); }
-  selectButton.onUp = function () { Input.setSelect(false); }
-  group.addChild(selectButton);
-  var resetButton = new Button("RESET", "Reset");
-  resetButton.onDown = function () { Input.setReset(true); }
-  resetButton.onUp = function () { Input.setReset(false); }
-  group.addChild(resetButton);
-  leftDiffSwitch = new ToggleSwitch("Left difficulty switch");
-  leftDiffSwitch.onClick = function () { Kb.setLeftDiffSet(!this.getValue()) }
-  group.addChild(leftDiffSwitch);
-  rightDiffSwitch = new ToggleSwitch("Right difficulty switch")
-  rightDiffSwitch.onClick = function () { Kb.setRightDiffSet(!this.getValue()) }
-  group.addChild(rightDiffSwitch);
-
-  var groupEnd = new ControlGroupEnd();
-  var helpButton = new ImageButton("Help", infoImgSrc);
-  helpButton.onClick = function () { Events.fireEvent("showError", "Not implemented."); }
-  groupEnd.addChild(helpButton);
-  var settingsButton = new ImageButton("Settings", cogsImgSrc);
-  settingsButton.onClick = function () { Events.fireEvent("showError", "Not implemented."); }
-  groupEnd.addChild(settingsButton);
-  var fsButton = new ToggleImageButton("Fullscreen", fsImgSrc, "Exit Fullscreen", fsExitImgSrc);
-  fsButton.onClick = function () { Video.isFullscreen() ? Video.exitFullScreen() : Video.fullScreen();  }
-  groupEnd.addChild(fsButton);
-
   var controls = document.getElementById("js7800__controls");
   var controlsContainer = document.createElement("div");
   controlsContainer.className = "js7800__controls-container";
@@ -264,6 +265,15 @@ function init() {
     fsButton.setValue(isFullscreen);
   }
   Events.addListener(fullscreenListener);
+}
+
+function getGroup(idx) {
+  switch(idx) {
+    case 0: return groupStart;
+    case 1: return group;
+    case 2: return groupEnd;
+    default: throw "Unknown group: " + idx;
+  }
 }
 
 function isPauseButtonDown() {
@@ -291,5 +301,7 @@ rightDiffChangedListener.onEvent = function (val) { rightDiffSwitch.setValue(!va
 Events.addListener(rightDiffChangedListener);
 
 export {
-  isPauseButtonDown  
+  isPauseButtonDown,
+  getGroup,
+  Component
 };
