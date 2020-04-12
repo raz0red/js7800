@@ -417,6 +417,12 @@ function init(in7800) {
     loadRomFromUrl(rom);
   }
 
+  var logFps = getRequestParameter("fps");
+  if (logFps) {
+    logFps = logFps.toLowerCase();
+    main.setLogFps(logFps === "1" || logFps == "true");    
+  }
+
   var ignore = function (event) {
     event.preventDefault();
   }

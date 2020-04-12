@@ -27,6 +27,7 @@ var controlsDiv = null;
 var logoDiv = null;
 var starting = false;
 var currentCart = null;
+var logFps = false;
 
 var messageHandler = function (message) {
   alert(message);
@@ -134,15 +135,17 @@ function startEmu(cart, isRestart) {
         fc++;
         if ((fc % debugFrequency) == 0) {
           var elapsed = Date.now() - start;
-          console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
-            (1000.0 / (elapsed / fc)).toFixed(2),
-            (Riot.GetTimerCount() % 1000),
-            ProSystem.GetDebugWsync() ? 1 : 0,
-            ProSystem.GetDebugWsyncCount(),
-            ProSystem.GetDebugCycleStealing() ? 1 : 0,
-            ProSystem.GetDebugMariaCycles(),
-            ProSystem.GetDebug6502Cycles(),
-            ProSystem.GetDebugSavedCycles());
+          if (logFps) {
+            console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
+              (1000.0 / (elapsed / fc)).toFixed(2),
+              (Riot.GetTimerCount() % 1000),
+              ProSystem.GetDebugWsync() ? 1 : 0,
+              ProSystem.GetDebugWsyncCount(),
+              ProSystem.GetDebugCycleStealing() ? 1 : 0,
+              ProSystem.GetDebugMariaCycles(),
+              ProSystem.GetDebug6502Cycles(),
+              ProSystem.GetDebugSavedCycles());
+          }
           start = Date.now();
           fc = 0;
         }
@@ -276,6 +279,10 @@ function setErrorHandler(handler) {
   errorHandler = handler;
 }
 
+function setLogFps(val) {
+  logFps = val;
+}
+
 var showMessageListener = new Events.Listener("showMessage");
 showMessageListener.onEvent = function (message) { messageHandler(message); }
 Events.addListener(showMessageListener);
@@ -316,5 +323,6 @@ export {
   startEmulation,
   restart,
   setMessageHandler,
-  setErrorHandler
+  setErrorHandler,
+  setLogFps
 };
