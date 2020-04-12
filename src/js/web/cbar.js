@@ -266,6 +266,10 @@ function init() {
   Events.addListener(fullscreenListener);
 }
 
+function isPauseButtonDown() {
+  return pauseButton && pauseButton.getValue();
+}
+
 function onCartridgeLoaded() {
   pauseButton.setValue(false);  
 }
@@ -286,4 +290,6 @@ var rightDiffChangedListener = new Events.Listener("onRightDiffChanged");
 rightDiffChangedListener.onEvent = function (val) { rightDiffSwitch.setValue(!val); }
 Events.addListener(rightDiffChangedListener);
 
-export {};
+export {
+  isPauseButtonDown  
+};

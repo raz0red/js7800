@@ -28,11 +28,11 @@ var logoDiv = null;
 var starting = false;
 var currentCart = null;
 
-var messageHandler = function(message) {
+var messageHandler = function (message) {
   alert(message);
 }
 
-var errorHandler = function(message) {
+var errorHandler = function (message) {
   alert(message);
 }
 
@@ -40,6 +40,7 @@ var errorHandler = function(message) {
 var keyboardData = new Array(19);
 
 var initialized = false;
+var forceAdjustTimestamp = false;
 
 function startEmu(cart, isRestart) {
   currentCart = cart;
@@ -53,7 +54,7 @@ function startEmu(cart, isRestart) {
 
   Cartridge.Load(cart, cart.length);
   var digest = Cartridge.GetDigest();
-  Database.Load(digest);  
+  Database.Load(digest);
 
   if (isRestart) {
     Cartridge.SetLeftSwitch(leftSwitch);
@@ -84,7 +85,7 @@ function startEmu(cart, isRestart) {
   Events.fireEvent("onCartridgeLoaded");
 
   // Reset keyboard data
-  Input.resetKeyboardData();  
+  Input.resetKeyboardData();
 
   init();
   ProSystem.Reset();
@@ -113,7 +114,8 @@ function startEmu(cart, isRestart) {
 
         nextTimestamp += frameTicks;
         var now = Date.now();
-        if ((nextTimestamp + adjustTolerance) < now) {
+        if (((nextTimestamp + adjustTolerance) < now) || forceAdjustTimestamp) {
+          forceAdjustTimestamp = false;
           nextTimestamp = now;
           fc = 0;
           start = now;
@@ -142,11 +144,9 @@ function startEmu(cart, isRestart) {
           fc = 0;
         }
       } else {
-        setTimeout(function () { 
-          fc = 0; 
-          start = Date.now(); 
-          nextTimestamp = start;
-          requestAnimationFrame(f); 
+        setTimeout(function () {
+          forceAdjustTimestamp = true;
+          requestAnimationFrame(f);
         }, 100);
       }
     }
@@ -178,7 +178,7 @@ function startEmulation(cart, isRestart) {
     logoDiv.classList.remove('js7800__logo--show');
 
     // Should not be necessary, but makes sure is not displayed
-    setTimeout(function() {
+    setTimeout(function () {
       logoDiv.style.display = 'none';
     }, 1000);
   }
@@ -221,7 +221,7 @@ function addElements(id) {
   canvas.id = canvas.className = "js7800__screen";
   canvas.width = Video.ATARI_WIDTH;
   canvas.height = Video.ATARI_CANVAS_HEIGHT;
-  noSelectWrapper.appendChild(canvas);  
+  noSelectWrapper.appendChild(canvas);
 
   // logo
   logoDiv = document.createElement("div");
@@ -258,7 +258,7 @@ function init(id) {
     logoDiv.classList.add('js7800__logo--show');
 
     var restartListener = new Events.Listener("restart");
-    restartListener.onEvent = function() {
+    restartListener.onEvent = function () {
       restart();
     }
     Events.addListener(restartListener);
@@ -274,16 +274,43 @@ function setErrorHandler(handler) {
 }
 
 var showMessageListener = new Events.Listener("showMessage");
-showMessageListener.onEvent = function(message) { messageHandler(message); }
+showMessageListener.onEvent = function (message) { messageHandler(message); }
 Events.addListener(showMessageListener);
 
 var showErrorListener = new Events.Listener("showError");
-showErrorListener.onEvent = function(message) { errorHandler(message); }
+showErrorListener.onEvent = function (message) { errorHandler(message); }
 Events.addListener(showErrorListener);
 
-export { 
-  init, 
-  startEmulation, 
+var hidden, visibilityChange;
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+  hidden = "hidden";
+  visibilityChange = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+  hidden = "msHidden";
+  visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+  hidden = "webkitHidden";
+  visibilityChange = "webkitvisibilitychange";
+}
+
+function handleVisibilityChange() {
+  if (document[hidden]) {
+    console.log("page is no longer visible.");
+    ProSystem.Pause(true);
+    forceAdjustTimestamp = true;
+  } else {
+    console.log("page visible.");
+    if (!ControlsBar.isPauseButtonDown()) {
+      ProSystem.Pause(false);
+    }
+  }
+}
+
+document.addEventListener(visibilityChange, handleVisibilityChange, false);
+
+export {
+  init,
+  startEmulation,
   restart,
   setMessageHandler,
   setErrorHandler
