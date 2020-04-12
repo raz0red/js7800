@@ -95,7 +95,7 @@ function startEmu(cart, isRestart) {
   var frequency = ProSystem.GetFrequency();
   var debugFrequency = frequency * 10;
   var frameTicks = (1000.0 / frequency) | 0;
-  var adjustTolerance = (frameTicks * 1000);
+  var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
   var isActive = ProSystem.IsActive;
   var isPaused = ProSystem.IsPaused;
 
@@ -115,6 +115,8 @@ function startEmu(cart, isRestart) {
         var now = Date.now();
         if ((nextTimestamp + adjustTolerance) < now) {
           nextTimestamp = now;
+          fc = 0;
+          start = now;
           console.log("adjusted next timestamp.");
         }
         var wait = (nextTimestamp - now);
