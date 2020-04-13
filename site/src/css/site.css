@@ -47,8 +47,8 @@ body {
   position: relative;
   display: flex;
   width: 25em;
-  height: 3em;
-  line-height: 3em;
+  height: 2.5em;
+  line-height: 2.5em;
   margin: 0 auto;
   background: black;
   overflow: hidden;
@@ -227,9 +227,9 @@ body {
 /* Command bar components (uses px) */
 
 .fsselect {
-  /* opacity: .8; */
+  opacity: .8;
   font-size: 11px;
-  color: #eee;
+  color: #fff;
   position: relative;
   display: flex;
   width: 190px;
@@ -243,9 +243,9 @@ body {
   display: none;
 }
 
-/* .fsselect:hover {
+.fsselect:hover {
   opacity: 1;
-} */
+}
 
 /* Arrow */
 .fsselect::after {
@@ -272,7 +272,7 @@ body {
   background: black;
   background-image: none;
   padding: 0 10px;
-  color: #BBBBBB;
+  color: #CCC;
   cursor: pointer;
   font-size: 11px;
   flex: 1;
