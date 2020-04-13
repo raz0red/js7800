@@ -161,6 +161,7 @@ function resizeCanvas() {
 
 window.addEventListener("resize", function () {
   resizeCanvas();
+  setTimeout(resizeCanvas, 1000);
 });
 
 function getCanvas() { 
@@ -175,7 +176,8 @@ function fullScreen() {
   var fsContainer = document.getElementById("js7800__fullscreen-container");
   if (!isFullscreen()) {
     fsContainer.requestFullscreen();
-    setTimeout(resizeCanvas, 200);
+    resizeCanvas();
+    setTimeout(resizeCanvas, 1000);
   }  
 }
 

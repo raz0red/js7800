@@ -437,7 +437,7 @@ function init(in7800) {
   cbar.getGroup(1).addChildAtIndex(2, fsSelectComp);
   var fullscreenListener = new events.Listener("fullscreen");
   fullscreenListener.onEvent = function (isFullscreen) {
-    fsSelect.style.display = isFullscreen ? "block" : "none";
+    fsSelect.style.display = isFullscreen ? "flex" : "none";
   }
   events.addListener(fullscreenListener);
 

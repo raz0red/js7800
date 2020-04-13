@@ -48,7 +48,7 @@ body {
   display: flex;
   width: 25em;
   height: 3em;
-  line-height: 3;
+  line-height: 3em;
   margin: 0 auto;
   background: black;
   overflow: hidden;
@@ -227,13 +227,14 @@ body {
 /* Command bar components (uses px) */
 
 .fsselect {
+  /* opacity: .8; */
   font-size: 11px;
-  color: #EEE;
-  opacity: 1;  
+  color: #eee;
   position: relative;
   display: flex;
   width: 190px;
-  /* line-height: 20px; */
+  height: 20px;
+  line-height: 20px;
   background: black;
   overflow: hidden;
   border-radius: 3px;
@@ -242,16 +243,19 @@ body {
   display: none;
 }
 
+/* .fsselect:hover {
+  opacity: 1;
+} */
+
 /* Arrow */
 .fsselect::after {
   content: '\25BC';
   position: absolute;
   top: 0;
   right: 0;
-  padding: 4px 5px;
+  padding: 0 3px;
   font-size:11px;
   color: #ce2f37;
-  background: #2C2C2C;
   cursor: pointer;
   pointer-events: none;
 }
@@ -267,10 +271,11 @@ body {
   border: 0 !important;
   background: black;
   background-image: none;
-  padding: 3px 10px;
+  padding: 0 10px;
   color: #BBBBBB;
   cursor: pointer;
   font-size: 11px;
+  flex: 1;
 }
 
 /* Remove IE arrow */
