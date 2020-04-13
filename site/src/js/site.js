@@ -426,7 +426,9 @@ function init(in7800) {
   }
 
   // Full screen cartridge select
-  var fsSelect = document.createElement("select");
+  var fsSelect = document.createElement("div");
+  var fsSelectSel = document.createElement("select");
+  fsSelect.appendChild(fsSelectSel);
   var fsSelectComp = new cbar.Component();
   util.addProps(fsSelectComp, {
     getClass: function () { return "fsselect"; },
@@ -440,7 +442,7 @@ function init(in7800) {
   events.addListener(fullscreenListener);
 
   // Rom list component
-  romList = new RomList([select, fsSelect]);
+  romList = new RomList([select, fsSelectSel]);
 
   // Initialize js7800
   main.init('js7800__target');
