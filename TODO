@@ -9,3 +9,6 @@
 - Fix top of command bar (not curved, need to fix 10px spacer above command bar)
 - Fix select/reset buttons on mobile (does not stay down while pressed, 
   same issue w/ lightgun, need to use touch events)
+- Local file selection button is not tabbable (it seems there is now a way to make this 
+  work, and does not require javascript, need to investigate)
+- Opacity for local and remote buttons (on hover)

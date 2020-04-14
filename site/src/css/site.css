@@ -38,22 +38,60 @@ body {
   text-align: center;
 }
 
-/* Custom Select */
-.cartselect__outer {
-  margin: 1.67em;
+.controls {
+  display: flex; 
+  justify-content: center; 
+  margin-top: 1.8em;
 }
 
+.controls-button {
+  width: 3em; 
+  height: 3em; 
+  margin: 0 .8em; 
+  background:#282828;
+  border-radius: .75em;
+  box-shadow: 0 .34em .67em 0 rgba(0, 0, 0, 0.4), 0 .5em 1.67em 0 rgba(0, 0, 0, 0.39);
+}
+
+.controls-button__img {
+  width:2em; 
+  height:2em; 
+  padding: .5em .5em; 
+  margin: 0; 
+  cursor:pointer;
+  opacity: .6;
+}
+
+.controls-button__img:hover {
+  opacity: .9;    
+}
+
+.controls-button__upload {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.controls-button__upload>input[type="file"] {
+  display: none;
+}
+
+/* Custom Select */
 .cartselect {
+  opacity: .8;
   position: relative;
   display: flex;
   width: 25em;
-  height: 2.5em;
-  line-height: 2.5em;
-  margin: 0 auto;
+  height: 3em;
+  line-height: 3em;
   background: black;
   overflow: hidden;
   border-radius: .75em;
   box-shadow: 0 .34em .67em 0 rgba(0, 0, 0, 0.4), 0 .5em 1.67em 0 rgba(0, 0, 0, 0.39);
+  margin: 0 .8em;
+}
+
+.cartselect:hover {
+  opacity: 1;
 }
 
 /* Arrow */
@@ -64,7 +102,7 @@ body {
   right: 0;
   padding: 0 1em;
   color: #ce2f37;
-  background: #202020;
+  background: #282828;
   cursor: pointer;
   pointer-events: none;
 }
