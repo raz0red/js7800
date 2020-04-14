@@ -44,16 +44,17 @@ function unzip(file, success, failure) {
       for (var i = 0; i < entries.length; i++) {
         var entry = entries[i];
         var filename = entry.filename.toLowerCase();
-        if (filename.endsWith(".a78") ||
-          (filename.endsWith(".bin") && !romEntry)) {
+        if (filename.endsWith(".a78")) {
+          romEntry = entry;
+          break;
+        } else if (filename.endsWith(".bin")) {
           romEntry = entry;
         }
       }
     }
     if (romEntry) {
-      var entry = entries[0];
       var writer = new zip.BlobWriter();
-      entry.getData(writer, success);
+      romEntry.getData(writer, success);
     } else {
       failure("Unable to find valid ROM in zip file");
     }
