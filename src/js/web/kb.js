@@ -180,9 +180,7 @@ function init() {
     };
 }
 
-var initListener = new Events.Listener("init");
-initListener.onEvent = function () { init(); }
-Events.addListener(initListener);
+Events.addListener(new Events.Listener("init", init));
 
 function isSelect() {
   return selectHeld
@@ -209,9 +207,8 @@ function onCartridgeLoaded() {
   cartridgeRightSwitch = Cartridge.GetRightSwitch();
 }
 
-var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
-cartLoadedListener.onEvent = function () { onCartridgeLoaded(); }
-Events.addListener(cartLoadedListener);
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", onCartridgeLoaded));
 
 function reset() {
   // Reset key maps

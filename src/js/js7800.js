@@ -263,11 +263,8 @@ function init(id) {
     Video.startScreenSnow();
     logoDiv.classList.add('js7800__logo--show');
 
-    var restartListener = new Events.Listener("restart");
-    restartListener.onEvent = function () {
-      restart();
-    }
-    Events.addListener(restartListener);
+    // Restart event listener
+    Events.addListener(new Events.Listener("restart", restart));
   }
 }
 
@@ -283,13 +280,13 @@ function setLogFps(val) {
   logFps = val;
 }
 
-var showMessageListener = new Events.Listener("showMessage");
-showMessageListener.onEvent = function (message) { messageHandler(message); }
-Events.addListener(showMessageListener);
+// Show message event listener
+Events.addListener(new Events.Listener("showMessage",
+  function (message) { messageHandler(message); }));
 
-var showErrorListener = new Events.Listener("showError");
-showErrorListener.onEvent = function (message) { errorHandler(message); }
-Events.addListener(showErrorListener);
+// Show error event listener
+Events.addListener(new Events.Listener("showError",
+  function (message) { errorHandler(message); }));
 
 var hidden, visibilityChange;
 if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 

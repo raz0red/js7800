@@ -97,9 +97,8 @@ function init(canvasIn, controlsDivIn) {
   resizeCanvas();
 }
 
-var initListener = new Events.Listener("init");
-initListener.onEvent = function (event) { init(event.canvas, event.controlsDiv); }
-Events.addListener(initListener);
+Events.addListener(new Events.Listener("init",
+  function (event) { init(event.canvas, event.controlsDiv); }));
 
 function clearCanvas() {
   // set alpha to opaque 
@@ -194,9 +193,8 @@ function onCartridgeLoaded() {
   initPalette8();
 }
 
-var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
-cartLoadedListener.onEvent = function () { onCartridgeLoaded(); }
-Events.addListener(cartLoadedListener);
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", onCartridgeLoaded));
 
 export {
   flipImage,

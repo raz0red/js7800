@@ -418,9 +418,8 @@ function OnCartridgeLoaded() {
   cartridge_hblank = Cartridge.GetHblank();
 }
 
-var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
-cartLoadedListener.onEvent = function () { OnCartridgeLoaded(); }
-Events.addListener(cartLoadedListener);
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", OnCartridgeLoaded));
 
 export {
   prosystem_Reset as Reset,

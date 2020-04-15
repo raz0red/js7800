@@ -116,9 +116,8 @@ function onCartridgeLoaded() {
   lightGunCycle = 0;
 }
 
-var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
-cartLoadedListener.onEvent = function () { onCartridgeLoaded(); }
-Events.addListener(cartLoadedListener);
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", onCartridgeLoaded));
 
 export {
   enableMouseTracking,

@@ -340,9 +340,7 @@ function init() {
   memory_Write = Memory.Write;
 }
 
-var initListener = new Events.Listener("init");
-initListener.onEvent = function() { init(); }
-Events.addListener(initListener);
+Events.addListener(new Events.Listener("init", init));
 
 export {
   riot_UpdateTimer as UpdateTimer,

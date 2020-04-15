@@ -762,9 +762,7 @@ function init() {
   memory_ClearROM = Memory.ClearROM;
 }
 
-var initListener = new Events.Listener("init");
-initListener.onEvent = function() { init(); }
-Events.addListener(initListener);
+Events.addListener(new Events.Listener("init", init));
 
 export {
   GetRegion,

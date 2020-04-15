@@ -17,14 +17,6 @@ import infoImgSrc from '../../images/information-outline.svg'
 
 var addProps = Utils.addProps;
 
-if (!Object.create) {
-  Object.create = function (o) {
-    function F() { }
-    F.prototype = o;
-    return new F();
-  }
-}
-
 /* Component */
 function Component() {
   this.el = null;
@@ -260,11 +252,8 @@ function init() {
   controlsContainer.appendChild(group.createElement());
   controlsContainer.appendChild(groupEnd.createElement());
 
-  var fullscreenListener = new Events.Listener("fullscreen");
-  fullscreenListener.onEvent = function(isFullscreen) {
-    fsButton.setValue(isFullscreen);
-  }
-  Events.addListener(fullscreenListener);
+  Events.addListener(new Events.Listener("fullscreen",
+    function(isFullscreen) { fsButton.setValue(isFullscreen); }));
 }
 
 function getGroup(idx) {
@@ -284,21 +273,16 @@ function onCartridgeLoaded() {
   pauseButton.setValue(false);  
 }
 
-var initListener = new Events.Listener("init");
-initListener.onEvent = function () { init(); }
-Events.addListener(initListener);
-
-var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
-cartLoadedListener.onEvent = function () { onCartridgeLoaded(); }
-Events.addListener(cartLoadedListener);
-
-var leftDiffChangedListener = new Events.Listener("onLeftDiffChanged");
-leftDiffChangedListener.onEvent = function (val) { leftDiffSwitch.setValue(!val); }
-Events.addListener(leftDiffChangedListener);
-
-var rightDiffChangedListener = new Events.Listener("onRightDiffChanged");
-rightDiffChangedListener.onEvent = function (val) { rightDiffSwitch.setValue(!val); }
-Events.addListener(rightDiffChangedListener);
+Events.addListener(
+  new Events.Listener("init", init));
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", onCartridgeLoaded));
+Events.addListener(
+  new Events.Listener("onLeftDiffChanged", 
+  function (val) { leftDiffSwitch.setValue(!val); }));
+Events.addListener(
+  new Events.Listener("onRightDiffChanged",
+  function (val) { rightDiffSwitch.setValue(!val); }));
 
 export {
   isPauseButtonDown,

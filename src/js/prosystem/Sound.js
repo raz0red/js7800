@@ -345,13 +345,10 @@ function init() {
   prosystem_GetFrame = ProSystem.GetFrame;
 }
 
-var initListener = new Events.Listener("init");
-initListener.onEvent = function() { init(); }
-Events.addListener(initListener);
-
-var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
-cartLoadedListener.onEvent = function () { OnCartridgeLoaded(); }
-Events.addListener(cartLoadedListener);
+Events.addListener(
+  new Events.Listener("init", init));
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", OnCartridgeLoaded));
 
 export {
   sound_Store as Store,

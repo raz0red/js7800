@@ -307,9 +307,8 @@ function OnCartridgeLoaded() {
   cartridge_flags = Cartridge.GetFlags();
 }
 
-var cartLoadedListener = new Events.Listener("onCartridgeLoaded");
-cartLoadedListener.onEvent = function () { OnCartridgeLoaded(); }
-Events.addListener(cartLoadedListener);
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", OnCartridgeLoaded));
 
 export {
   memory_ClearROM as ClearROM,

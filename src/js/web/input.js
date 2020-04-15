@@ -98,9 +98,8 @@ function init(kbData) {
   keyboardData = kbData;
 }
 
-var initListener = new Events.Listener("init");
-initListener.onEvent = function (event) { init(event.keyboardData); }
-Events.addListener(initListener);
+Events.addListener(new Events.Listener("init",
+  function (event) { init(event.keyboardData); }));
 
 function setReset(val) {
   resetSet = val;
