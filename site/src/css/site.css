@@ -51,6 +51,11 @@ body {
   background:#282828;
   border-radius: .75em;
   box-shadow: 0 .34em .67em 0 rgba(0, 0, 0, 0.4), 0 .5em 1.67em 0 rgba(0, 0, 0, 0.39);
+  opacity: .8;
+}
+
+.controls-button:hover {
+  opacity: 1;
 }
 
 .controls-button__img {
@@ -59,7 +64,7 @@ body {
   padding: .5em .5em; 
   margin: 0; 
   cursor:pointer;
-  opacity: .6;
+  opacity: .7;
 }
 
 .controls-button__img:hover {
