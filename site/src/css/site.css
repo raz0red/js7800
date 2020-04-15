@@ -6,6 +6,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 75%;
   margin: 5em 0 0 0;
+  -webkit-user-select: none;
+  -moz-user-select: -moz-none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .header {
@@ -39,16 +43,16 @@ body {
 }
 
 .controls {
-  display: flex; 
-  justify-content: center; 
+  display: flex;
+  justify-content: center;
   margin-top: 1.8em;
 }
 
 .controls-button {
-  width: 3em; 
-  height: 3em; 
-  margin: 0 .8em; 
-  background:#282828;
+  width: 3em;
+  height: 3em;
+  margin: 0 .8em;
+  background: #282828;
   border-radius: .75em;
   box-shadow: 0 .34em .67em 0 rgba(0, 0, 0, 0.4), 0 .5em 1.67em 0 rgba(0, 0, 0, 0.39);
   opacity: .8;
@@ -59,16 +63,16 @@ body {
 }
 
 .controls-button__img {
-  width:2em; 
-  height:2em; 
-  padding: .5em .5em; 
-  margin: 0; 
-  cursor:pointer;
+  width: 2em;
+  height: 2em;
+  padding: .5em .5em;
+  margin: 0;
+  cursor: pointer;
   opacity: .7;
 }
 
 .controls-button__img:hover {
-  opacity: .9;    
+  opacity: .9;
 }
 
 .controls-button__upload {
@@ -297,7 +301,7 @@ body {
   top: 0;
   right: 0;
   padding: 0 3px;
-  font-size:11px;
+  font-size: 11px;
   color: #ce2f37;
   cursor: pointer;
   pointer-events: none;
@@ -328,12 +332,12 @@ body {
 
 .fsselect select optgroup {
   font-weight: bold;
-  font-size:12px;
+  font-size: 12px;
   color: #777777;
 }
 
 .fsselect select option {
   font-weight: normal;
-  font-size:12px;
+  font-size: 12px;
   color: #BBBBBB;
 }

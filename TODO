@@ -11,3 +11,6 @@
   same issue w/ lightgun, need to use touch events)
 - Local file selection button is not tabbable (it seems there is now a way to make this 
   work, and does not require javascript, need to investigate)
+- Ignore text/html (drag local links into github based js7800)
+- Fix bug where you can select the file chooser and cloud download, and drag the file chooser 
+  (may be fixed)
