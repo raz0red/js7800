@@ -1,8 +1,8 @@
 import * as Events from "./events.js"
 
-var errorHandler = null;
 var loadFromUrl = null;
 var romList = null;
+var startEmulation = null;
 
 function fileDropHandler(ev) {
   ev.preventDefault();
@@ -34,8 +34,8 @@ function fileDropHandler(ev) {
 
 Events.addListener(new Events.Listener("init", function (event) {
   loadFromUrl = event.loadFromUrl;
-  errorHandler = event.errorHandler;
   romList = event.romList;
+  startEmulation = event.startEmulation;
 
   // Register drop handlers
   var body = document.body;

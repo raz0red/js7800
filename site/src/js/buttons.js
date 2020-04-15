@@ -58,6 +58,9 @@ function init(event) {
   var fileInput = document.createElement("input");
   label.className = "controls-button__upload";
   label.appendChild(fileInput);
+  var resetValueFunc = function() { fileInput.value = null; }
+  label.onclick = resetValueFunc;
+  fileInput.onclick = resetValueFunc;
   fileInput.setAttribute("type", "file");
   fileInput.setAttribute("accept", ".a78, .bin, .zip, .json");
   fileInput.addEventListener("change", function () {
