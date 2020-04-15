@@ -1,1 +1,1 @@
-export * from './common/common-events.js'
+export * from './common/events-common.js'

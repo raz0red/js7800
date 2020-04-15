@@ -1,1 +1,1 @@
-export * from '../../../src/js/common/common-events.js'
+export * from '../../../src/js/common/events-common.js'
