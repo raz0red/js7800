@@ -138,6 +138,7 @@ function init(in7800) {
 
   // Fire init event
   Events.fireEvent("init", {
+    js7800: js7800,
     romList: romList,
     loadFromUrl: loadFromUrl,
     startEmulation: startEmulation,

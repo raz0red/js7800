@@ -1,11 +1,13 @@
 import * as UiCommon from "../../../src/js/common/ui-common.js"
 import * as Utils from "./util.js"
+import * as Events from "./events.js"
 
 var cbar = null;
 var Component = UiCommon.Component;
 var Button = UiCommon.Button;
 
 var addProps = Utils.addProps;
+var js7800 = null;
 
 //
 // Dialog Button
@@ -27,7 +29,7 @@ addProps(DialogButton.prototype, {
 
 function Dialog(title) {
   Component.call(this);
-
+  
   this.title = title;
 
   this.modalEl = null;
@@ -39,6 +41,9 @@ function Dialog(title) {
 
   this.ok = null;
   this.cancel = null;
+
+  this.pauseButton = null;
+  this.paused = false;
 
   var that = this;
   this.windowResizeFunc = function (e) {
@@ -109,6 +114,14 @@ addProps(Dialog.prototype, {
   },
   addBodyContent: function (bodyEl) { },
   show: function () {
+    var pauseButton = js7800.ControlsBar.pauseButton;
+    this.pauseButton = pauseButton;
+    this.paused = pauseButton.getValue();
+    if (!this.paused) {
+      pauseButton.setValue(true);
+      pauseButton.onClick();      
+    }
+
     window.addEventListener("resize", this.windowResizeFunc);
     this.modalEl.style.display = "block";
     this.windowResizeFunc();
@@ -116,6 +129,11 @@ addProps(Dialog.prototype, {
   hide: function () {
     window.removeEventListener("resize", this.windowResizeFunc);
     this.modalEl.style.display = "none";
+
+    if (!this.paused) {
+      this.pauseButton.setValue(false);
+      this.pauseButton.onClick();
+    }
   }
 });
 
@@ -220,6 +238,12 @@ addProps(Tab.prototype, {
     return rootEl;
   }
 });
+
+Events.addListener(new Events.Listener("init",
+  function (event) {
+    js7800 = event.js7800;
+  }
+));
 
 export {
   Dialog,

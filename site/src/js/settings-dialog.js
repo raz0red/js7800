@@ -7,10 +7,6 @@ var Tab = DialogModule.Tab;
 
 var addProps = Util.addProps;
 
-//
-// Settings Dialog
-//
-
 var settingsTabSet = new TabSet();
 settingsTabSet.addTab(new Tab("Display"));
 settingsTabSet.addTab(new Tab("Keyboard"));

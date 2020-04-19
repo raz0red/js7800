@@ -37,18 +37,31 @@ function init(event) {
   var romList = event.romList;
   var loadFromUrl = event.loadFromUrl;
   var startEmulation = event.startEmulation;
+  var js7800 = event.js7800;
 
   // Remote file button
   createImageButton("select-remote-file", cloudDownloadImgSrc,
     "Select Remote File", true,
     function () {
-      var url = prompt("Enter the URL of a remote ROM file or ROM list");
-      if (url) {
-        var trimmed = url.trim();
-        if (trimmed.length > 0) {
-          loadFromUrl(trimmed);
-        }
+      var pauseButton = js7800.ControlsBar.pauseButton
+      var paused = pauseButton.getValue();
+      if (!paused) {
+        pauseButton.setValue(true);
+        pauseButton.onClick();      
       }
+      setTimeout(function() {      
+        var url = prompt("Enter the URL of a remote ROM file or ROM list");
+        if (url) {
+          var trimmed = url.trim();
+          if (trimmed.length > 0) {
+            loadFromUrl(trimmed);
+          }
+        }
+        if (!paused) {
+          pauseButton.setValue(false);
+          pauseButton.onClick();
+        }
+      }, 200);
     });
 
   // Local file button

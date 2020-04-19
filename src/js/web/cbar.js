@@ -248,5 +248,7 @@ export {
   getGroup,
   Component,
   Button,
-  settingsButton
+  settingsButton,
+  pauseButton,
+  soundButton
 }
