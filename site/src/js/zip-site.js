@@ -1,4 +1,4 @@
-import { zip } from "./zip.js"
+import { zip } from "./3rdparty/zip.js"
 import * as Events from "./events.js"
 
 var errorHandler = null;
