@@ -40,9 +40,12 @@ function init(event) {
   var js7800 = event.js7800;
 
   // Remote file button
+  var remoteOpened = false;
   createImageButton("select-remote-file", cloudDownloadImgSrc,
     "Select Remote File", true,
     function () {
+      if (remoteOpened) return;
+      remoteOpened = true;
       var pauseButton = js7800.ControlsBar.pauseButton
       var paused = pauseButton.getValue();
       if (!paused) {
@@ -61,6 +64,7 @@ function init(event) {
           pauseButton.setValue(false);
           pauseButton.onClick();
         }
+        remoteOpened = false;
       }, 200);
     });
 
