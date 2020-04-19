@@ -111,6 +111,30 @@ function createFullscreenSelect() {
   return fsSelectSel;
 }
 
+function handleRequestParameters() {
+    var main = js7800.Main;
+    
+    // ROM list
+    var rlist = getRequestParameter("romlist");
+    if (!rlist) {
+      rlist = 'roms/romlist-homebrew.json';
+    }
+    romList.loadListFromUrl(rlist);
+  
+    // ROM
+    var rom = getRequestParameter("rom");
+    if (rom) {
+      loadFromUrl(rom);
+    }
+  
+    // Log FPS
+    var logFps = getRequestParameter("fps");
+    if (logFps) {
+      logFps = logFps.toLowerCase();
+      main.setLogFps(logFps === "1" || logFps == "true");
+    }  
+}
+
 function init(in7800) {
   js7800 = in7800;
   var main = js7800.Main;
@@ -145,29 +169,8 @@ function init(in7800) {
     errorHandler: errorHandler
   });
 
-  //
   // Handle request parameters
-  //
-
-  // ROM list
-  var rlist = getRequestParameter("romlist");
-  if (!rlist) {
-    rlist = 'roms/romlist-homebrew.json';
-  }
-  romList.loadListFromUrl(rlist);
-
-  // ROM
-  var rom = getRequestParameter("rom");
-  if (rom) {
-    loadFromUrl(rom);
-  }
-
-  // Log FPS
-  var logFps = getRequestParameter("fps");
-  if (logFps) {
-    logFps = logFps.toLowerCase();
-    main.setLogFps(logFps === "1" || logFps == "true");
-  }
+  handleRequestParameters();
 }
 
 export { init }
