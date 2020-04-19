@@ -212,4 +212,4 @@ export {
   fullScreen,
   exitFullScreen,
   isFullscreen
-};
+}

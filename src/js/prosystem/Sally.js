@@ -2312,4 +2312,4 @@ export {
   sally_ExecuteInstruction as ExecuteInstruction,
   sally_ExecuteNMI as ExecuteNMI,
   half_cycle
-};
+}

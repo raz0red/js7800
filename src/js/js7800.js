@@ -255,9 +255,9 @@ function init(id) {
 
     // Fire init event
     Events.fireEvent("init", {
-      "canvas": canvas,
-      "controlsDiv": controlsDiv,
-      "keyboardData": keyboardData
+      canvas: canvas,
+      controlsDiv: controlsDiv,
+      keyboardData: keyboardData
     });
 
     Video.startScreenSnow();
@@ -322,4 +322,4 @@ export {
   setMessageHandler,
   setErrorHandler,
   setLogFps
-};
+}

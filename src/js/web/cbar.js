@@ -5,6 +5,7 @@ import * as Events from "../events.js"
 import * as ProSystem from "../prosystem/ProSystem.js"
 import * as Sound from "../prosystem/Sound.js"
 import * as Kb from "./kb.js"
+import * as UiCommon from "../common/ui-common.js"
 import cogsImgSrc from '../../images/cogs.svg'
 import fsImgSrc from '../../images/fullscreen.svg'
 import fsExitImgSrc from '../../images/fullscreen-exit.svg'
@@ -16,23 +17,8 @@ import restartImgSrc from '../../images/restart.svg'
 import infoImgSrc from '../../images/information-outline.svg'
 
 var addProps = Utils.addProps;
-
-/* Component */
-function Component() {
-  this.el = null;
-}
-Component.prototype = {
-  createElement: function () {
-    this.el = this.doCreateElement();
-    var clazz = this.getClass();
-    if (clazz) {
-      this.el.className = clazz;
-    }
-    return this.el;
-  },
-  getClass: function() { return null; },
-  doCreateElement: function () { return null; }
-};
+var Component = UiCommon.Component;
+var Button = UiCommon.Button;
 
 /* Control Group */
 function ControlGroup() {
@@ -79,33 +65,6 @@ addProps(ControlGroupEnd.prototype, {
   getClass: function () {
     return "js7800__controls-group-end";
   }
-});
-
-/* Button */
-function Button(text, title) {
-  Component.call(this);
-  this.title = title;
-  this.text = text;
-}
-Button.prototype = Object.create(Component.prototype);
-addProps(Button.prototype, {
-  getClass: function () {
-    return "js7800__controls-button";
-  },
-  doCreateElement: function () {
-    var btn = document.createElement("button");
-    var self = this;
-    btn.onclick = function (event) { self.onClick(event) };
-    btn.onmousedown = function (event) { self.onDown(event) };
-    btn.onmouseup = function (event) { self.onUp(event) };
-    var text = document.createTextNode(this.text);
-    btn.appendChild(text);
-    btn.setAttribute("title", this.title);
-    return btn;
-  },
-  onClick: function (event) { },
-  onDown: function (event) { },
-  onUp: function (event) { }
 });
 
 /* Image Button */
@@ -287,5 +246,7 @@ Events.addListener(
 export {
   isPauseButtonDown,
   getGroup,
-  Component
-};
+  Component,
+  Button,
+  settingsButton
+}

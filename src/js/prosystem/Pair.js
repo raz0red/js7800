@@ -99,4 +99,4 @@ var Pair = function () {
   }
 }
 
-export { Pair };
+export { Pair }

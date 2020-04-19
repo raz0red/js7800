@@ -805,7 +805,7 @@ export {
   cartridge_Write as Write,
   cartridge_Store as Store,
   cartridge_Release as Release
-};
+}
 
 // // The memory location of the high score cartridge SRAM
 // #define HS_SRAM_START 0x1000

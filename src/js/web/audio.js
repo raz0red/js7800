@@ -64,5 +64,5 @@ function init() {
 
 Events.addListener(new Events.Listener("init", init));
 
-export {};
+export { }
 

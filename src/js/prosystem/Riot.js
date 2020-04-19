@@ -351,5 +351,5 @@ export {
   riot_SetTimer as SetTimer,
   IsTimingEnabled,
   GetTimerCount
-};
+}
 

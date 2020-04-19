@@ -211,4 +211,4 @@ Events.addListener(new Events.Listener("init", function (event) {
   errorHandler = event.errorHandler;
 }));
 
-export { RomList };
+export { RomList }

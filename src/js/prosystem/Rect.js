@@ -53,4 +53,4 @@ function Rect(left, top, right, bottom) {
   this.Update(left, top, right, bottom);
 };
 
-export { Rect };
+export { Rect }

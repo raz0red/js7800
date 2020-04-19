@@ -318,5 +318,5 @@ export {
   memory_Reset as Reset,
   memory_ram as ram,
   memory_rom as rom
-};
+}
 

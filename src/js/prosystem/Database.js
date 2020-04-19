@@ -118,6 +118,6 @@ function database_Load(digest) {
 
 export {
   database_Load as Load
-};
+}
 
 

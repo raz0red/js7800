@@ -124,4 +124,4 @@ export {
   xm_Reset as Reset,
   IsPokeyEnabled,
   IsMemEnabled
-};
+}

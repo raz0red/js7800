@@ -241,4 +241,4 @@ export {
   REGION_PALETTE_NTSC,
   REGION_PALETTE_PAL,
   region_Reset as Reset
-};
+}

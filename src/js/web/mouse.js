@@ -124,4 +124,4 @@ export {
   isLeftButtonDown,
   getLightGunScanline,
   getLightGunCycle
-};
+}

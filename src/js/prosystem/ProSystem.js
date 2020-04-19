@@ -444,7 +444,7 @@ export {
   GetDebugWsync,
   GetDebugCycleStealing,
   GetMariaScanline
-};
+}
 
 // byte * loc_buffer = 0;
 

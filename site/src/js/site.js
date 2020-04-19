@@ -5,6 +5,7 @@ import * as Util from "./util.js"
 import * as Events from "./events.js"
 import * as Buttons from "./buttons.js"
 import * as Drop from "./drop.js"
+import { SettingsDialog } from "./settings-dialog.js"
 
 import css from '../css/site.css'
 
@@ -83,7 +84,7 @@ function loadFromUrl(url) {
 
 function createFullscreenSelect() {
   var cbar = js7800.ControlsBar;
-  var util = js7800.Util;
+  
   // The js7800 module events vs. the site events
   var js7800Events = js7800.Events;
 
@@ -94,7 +95,7 @@ function createFullscreenSelect() {
 
   // Create the component in the command bar
   var fsSelectComp = new cbar.Component();
-  util.addProps(fsSelectComp, {
+  Util.addProps(fsSelectComp, {
     getClass: function () { return "fsselect"; },
     doCreateElement: function () { return fsSelect; }
   });
@@ -113,6 +114,7 @@ function createFullscreenSelect() {
 function init(in7800) {
   js7800 = in7800;
   var main = js7800.Main;
+  var cbar = js7800.ControlsBar;
 
   // Must be done prior to initializing js7800
   var fsSelect = createFullscreenSelect();
@@ -122,16 +124,24 @@ function init(in7800) {
   main.setErrorHandler(errorHandler);
   main.init('js7800__target');
 
+  // js7800 parent element
+  var parent = document.getElementById('js7800__fullscreen-container');
+
+  // Create the settings dialog  
+  var settingsDialog = new SettingsDialog();  
+  parent.appendChild(settingsDialog.createElement());
+  cbar.settingsButton.onClick = function () { settingsDialog.show(); }
+
   // Rom list component
   romList = new RomList(
     [document.getElementById('cartselect__select'), fsSelect]);
 
   // Fire init event
   Events.fireEvent("init", {
-    "romList": romList,
-    "loadFromUrl": loadFromUrl,
-    "startEmulation": startEmulation,
-    "errorHandler": errorHandler
+    romList: romList,
+    loadFromUrl: loadFromUrl,
+    startEmulation: startEmulation,
+    errorHandler: errorHandler
   });
 
   //
@@ -159,4 +169,4 @@ function init(in7800) {
   }
 }
 
-export { init };
+export { init }

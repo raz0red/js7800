@@ -357,4 +357,4 @@ export {
   SetScanlines,
   SetSampleRate,
   SetStoreSoundCallback
-};
+}

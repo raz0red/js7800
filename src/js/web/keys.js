@@ -30,4 +30,4 @@ var Keys = {
 
 export {
   Keys
-};
+}

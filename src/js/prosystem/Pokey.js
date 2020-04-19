@@ -688,4 +688,4 @@ export {
   pokey_Scanline as Scanline,  
   pokey_buffer as buffer,
   SetCyclesPerScanline
-};
+}

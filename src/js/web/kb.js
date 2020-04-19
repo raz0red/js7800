@@ -233,4 +233,4 @@ export {
   reset,
   p1KeyMap,
   p2KeyMap
-};
+}

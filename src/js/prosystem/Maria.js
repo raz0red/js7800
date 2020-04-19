@@ -494,4 +494,4 @@ export {
   maria_displayArea as displayArea,
   maria_visibleArea as visibleArea,
   SetSurface
-};
+}

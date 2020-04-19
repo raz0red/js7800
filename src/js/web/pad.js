@@ -196,4 +196,4 @@ function getMapping(index) {
 export {
   poll,
   getMapping
-};
+}

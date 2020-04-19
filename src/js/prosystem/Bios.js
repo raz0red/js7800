@@ -123,4 +123,4 @@ function IsEnabled() {
 export {
   bios_Store as Store,
   IsEnabled
-};
+}

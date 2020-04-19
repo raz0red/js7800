@@ -70,5 +70,5 @@ lineReader.on('close', function () {
   }
   console.log(
     "}\n\n" +
-    "export { DATABASE };");
+    "export { DATABASE }");
 });

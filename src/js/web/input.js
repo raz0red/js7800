@@ -114,4 +114,4 @@ export {
   updateInput,
   setReset,
   setSelect
-};
+}
