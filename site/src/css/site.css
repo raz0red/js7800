@@ -556,6 +556,11 @@ b.callout {
   text-align: center;
 }
 
+.controller-keyboard {
+  border: 1px solid red;
+  padding: 0 0 5px 5px;
+}
+
 .controller__title {
   text-align: center; 
   padding-bottom: 10px;

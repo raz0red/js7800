@@ -103,9 +103,11 @@ function KbController(title) {
   this.targets = [this.up, this.left, this.right, this.down, this.b1, this.b2];
   this.map = null;
 }
-
 KbController.prototype = Object.create(Controller.prototype);
 addProps(KbController.prototype, {  
+  getClass: function () {
+    return Controller.prototype.getClass.call(this) + " controller-keyboard";
+  },
   onShow: function (keys, map) {
     this.map = map;
     this.keys = keys;
