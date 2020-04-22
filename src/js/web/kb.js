@@ -24,6 +24,18 @@ var KeyboardMapping = function (leftKey, rightKey, upKey, downKey, b1Key, b2Key)
   var upLast = false;
 
   return {
+    getLeft() { return leftKey; },
+    setLeft(c) { leftKey = c; },
+    getRight() { return rightKey; },
+    setRight(c) { rightKey = c; },
+    getUp() { return upKey; },
+    setUp(c) { upKey = c; },
+    getDown() { return downKey; },
+    setDown(c) { downKey = c; },
+    getButton1() { return b1Key; },
+    setButton1(c) { b1Key = c; },
+    getButton2() { return b2Key; },
+    setButton2(c) { b2Key = c; },
     isLeft: function () {
       return (leftHeld && !(rightHeld && !leftLast));
     },
@@ -73,20 +85,22 @@ var KeyboardMapping = function (leftKey, rightKey, upKey, downKey, b1Key, b2Key)
 }
 
 var p1KeyMap = new KeyboardMapping(
-  Keys.KEY_LEFT.code,
-  Keys.KEY_RIGHT.code,
-  Keys.KEY_UP.code,
-  Keys.KEY_DOWN.code,
-  Keys.KEY_Z.code,
-  Keys.KEY_X.code);
+  37, // Left arrow
+  39, // Right arrow
+  38, // Up arrow
+  40, // Down arrow
+  90, // Z key
+  88  // X key
+);
 
 var p2KeyMap = new KeyboardMapping(
-  Keys.KEY_J.code,
-  Keys.KEY_L.code,
-  Keys.KEY_I.code,
-  Keys.KEY_K.code,
-  Keys.KEY_N.code,
-  Keys.KEY_M.code);
+  74, // J key
+  76, // L key
+  73, // I key
+  75, // K key
+  78, // N key
+  77  // M key
+);
 
 var resetHeld = false;
 var selectHeld = false;
@@ -99,14 +113,14 @@ var rightDiffSet = false;
 var cartridgeLeftSwitch = 1;
 var cartridgeRightSwitch = 0;
 
-var f1Code = Keys.KEY_F1.code;
-var f2Code = Keys.KEY_F2.code;
-var f3Code = Keys.KEY_F3.code;
-var f4Code = Keys.KEY_F4.code;
-var f5Code = Keys.KEY_F5.code;
-var f6Code = Keys.KEY_F6.code;
-var f9Code = Keys.KEY_F9.code;
-var f11Code = Keys.KEY_F11.code;
+var f1Code = 112; // F1
+var f2Code = 113; // F2
+var f3Code = 114; // F3
+var f4Code = 115; // F4
+var f5Code = 116; // F5
+var f6Code = 117; // F6
+var f9Code = 120; // F9
+var f11Code = 122; // F11
 
 function setLeftDiffSet(val) {
   leftDiffSet = val;

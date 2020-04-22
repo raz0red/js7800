@@ -2,7 +2,6 @@ import * as UiCommon from "../../../src/js/common/ui-common.js"
 import * as Utils from "./util.js"
 import * as Events from "./events.js"
 
-var cbar = null;
 var Component = UiCommon.Component;
 var Button = UiCommon.Button;
 
@@ -53,6 +52,9 @@ function Dialog(title) {
 }
 Dialog.prototype = Object.create(Component.prototype);
 addProps(Dialog.prototype, {
+  onShow: function () {},
+  onHide: function () {},
+  onOk: function() {},
   getClass: function () { return "modal"; },
   doCreateElement: function () {
     // Modal
@@ -81,7 +83,7 @@ addProps(Dialog.prototype, {
     // Add body content
     this.addBodyContent(bodyEl);
     var clear = document.createElement("div");
-    clear.style = "clear:both";
+    clear.style.clear = "both";
     contentEl.appendChild(clear);
 
     // Footer
@@ -93,7 +95,7 @@ addProps(Dialog.prototype, {
     // Add footer content
     this.addFooterContent(footerEl);
     clear = document.createElement("div");
-    clear.style = "clear:both";
+    clear.style.clear = "both";
     footerEl.appendChild(clear);
 
     return modalEl;
@@ -106,7 +108,10 @@ addProps(Dialog.prototype, {
     var cancel = new DialogButton("Cancel", "Cancel");
     this.cancel = cancel;
 
-    ok.onClick = function () { dialog.hide(); }
+    ok.onClick = function () { 
+      dialog.onOk();
+      dialog.hide(); 
+    }
     cancel.onClick = function () { dialog.hide(); }
 
     footerEl.appendChild(cancel.createElement());
@@ -122,6 +127,9 @@ addProps(Dialog.prototype, {
       pauseButton.onClick();      
     }
 
+    // Call on show callback
+    this.onShow();
+
     window.addEventListener("resize", this.windowResizeFunc);
     this.modalEl.style.display = "block";
     this.windowResizeFunc();
@@ -129,6 +137,9 @@ addProps(Dialog.prototype, {
   hide: function () {
     window.removeEventListener("resize", this.windowResizeFunc);
     this.modalEl.style.display = "none";
+
+    // Call on hide callback
+    this.onHide();
 
     if (!this.paused) {
       this.pauseButton.setValue(false);
@@ -191,7 +202,7 @@ addProps(TabSet.prototype, {
     }
 
     var clear = document.createElement("div");
-    clear.style = "clear:both";
+    clear.style.clear = "both";
     rootEl.appendChild(clear);
 
     // Select the default tab
@@ -221,6 +232,9 @@ function Tab(title) {
 }
 Tab.prototype = Object.create(Component.prototype);
 addProps(Tab.prototype, {
+  onShow: function() {},
+  onHide: function() {},
+  onOk: function() {},
   getClass: function () { return "tabcontent"; },
   getButtonElement: function () { return this.buttonEl },
   createButtonElement: function () {
@@ -239,6 +253,44 @@ addProps(Tab.prototype, {
   }
 });
 
+//
+// Tabbed Dialog
+//
+
+function TabbedDialog(title) {
+  Dialog.call(this, title);
+  this.tabset = this.getTabSet();
+}
+TabbedDialog.prototype = Object.create(Dialog.prototype);
+addProps(TabbedDialog.prototype, {
+  getTabSet: function () {},
+  onShow: function () {
+    Dialog.prototype.onShow.call(this);
+    var tabs = this.tabset.tabs;
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].onShow();
+    }
+  },
+  onHide: function () {
+    Dialog.prototype.onHide.call(this);
+    var tabs = this.tabset.tabs;
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].onHide();
+    }
+  },
+  onOk: function() {
+    Dialog.prototype.onOk.call(this);
+    var tabs = this.tabset.tabs;
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].onOk();
+    }
+  },
+  addBodyContent: function (bodyEl) {
+    Dialog.prototype.addBodyContent.call(this);
+    bodyEl.appendChild(this.tabset.createElement());
+  },
+});
+
 Events.addListener(new Events.Listener("init",
   function (event) {
     js7800 = event.js7800;
@@ -248,6 +300,7 @@ Events.addListener(new Events.Listener("init",
 export {
   Dialog,
   DialogButton,
+  TabbedDialog,
   TabSet,
   Tab
 }

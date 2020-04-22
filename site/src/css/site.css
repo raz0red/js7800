@@ -187,16 +187,17 @@ body {
 }
 
 #errormsg {
-  background-color: #550000;
+  background-color: #992329;
   cursor: pointer;
   min-width: 23.34em;
   max-width: 23.34em;
   margin-left: -11.67em;
+  color: #ddd;
 }
 
 #errormsg .closebtn {
   margin-left: .68em;
-  color: #BBB;
+  color: #ddd;
   font-weight: bold;
   float: right;
   font-size: 1.48em;
@@ -361,7 +362,6 @@ body {
   position: relative;
   background-color: #1A1A1A;
   margin: auto;
-  padding: 0;
   border-left: 1em solid #202020;
   border-right: 1em solid #202020;
   width: 65em;
@@ -371,7 +371,6 @@ body {
   animation-name: animatetop;
   animation-duration: 0.4s;
   border-radius: .67em;
-  overflow: hidden;
 }
 
 @-webkit-keyframes animatetop {
@@ -421,14 +420,14 @@ body {
 .tabset {
   display: flex;
   align-items: stretch;
+  width: 100%;
 }
 
 .tab {
-  float: left;
   padding: .667em;
   background-color: #171717;
-  width: 11.67em;
-  min-width: 11.67em;
+  width: 10.5em;
+  min-width: 10.5em;
   min-height: 36.67em;
   flex-grow: 0;
 }
@@ -464,7 +463,6 @@ body {
 }
 
 .tabcontent {
-  float: left;
   padding: 0 .857em;
   border-left: none;
   display: none;
@@ -516,21 +514,84 @@ p.center {
 }
 
 .about-atari {
-  width: 17.142em;
-  height: 12.857em;
-  margin: 1.43em auto;
+  width: 240px;
+  height: 180px;
+  margin: 20px auto;
   background: black;
-  box-shadow: 0 .286em .571em 0 rgba(0, 0, 0, 0.2), 0 .429em 1.429em 0 rgba(0, 0, 0, 0.19);
-  border-radius: .857em;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 12px;
   text-align: center;
   display: inline-block;
 }
 
 H3 {
   font-weight: bold;
-  font-size: 16px;
+  font-size: 1.143em;
 }
 
 H3.center {
   text-align: center;
+}
+
+b.callout {
+  font-weight: bold;
+  color: #ddd;
+}
+
+.controls-container {
+  display: flex;
+  overflow: hidden;
+  justify-content: center;
+  margin-top:40px;
+  min-width: 600px;
+}
+
+.controller {
+  width: 291px; 
+  min-width: 291px;
+  color: #bbb; 
+  overflow: hidden;
+  flex-grow: 1;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.controller__title {
+  text-align: center; 
+  padding-bottom: 10px;
+  font-weight: bold;
+}
+
+.controller__inner {
+  display: inline-block;
+  position: relative;
+  width: 291px;
+  min-width: 291px;
+  height: 151px;   
+  min-height: 151px;         
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.controller__keytarget {
+  text-align: center;
+  color: #ccc;
+  background-color: #992329;
+  position: absolute;
+  width: 40px;
+  height: 20px;      
+  line-height: 20px;      
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  border-radius: 4px;
+  overflow: hidden;
+  font-size: 11px;
+}
+
+.controller__keytarget:hover {
+  background-color: #ce2f37;
+  color: white;
+}
+
+.controller__keytarget:focus {
+  color: #292929;
+  background-color :#ccc;
 }

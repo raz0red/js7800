@@ -14,3 +14,4 @@
 - Ignore text/html (drag local links into github based js7800)
 - Fix bug where you can select the file chooser and cloud download, and drag the file chooser 
   (may be fixed)
+- Remove certain images from pack (controller.png, etc.)

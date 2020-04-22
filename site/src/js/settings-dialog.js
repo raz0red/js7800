@@ -1,16 +1,189 @@
 import * as Util from "./util.js"
 import * as DialogModule from "./dialog.js"
+import { Component } from "../../../src/js/common/ui-common.js";
+import * as Events from "./events.js"
 
-var Dialog = DialogModule.Dialog;
+var TabbedDialog = DialogModule.TabbedDialog;
 var TabSet = DialogModule.TabSet;
 var Tab = DialogModule.Tab;
-
 var addProps = Util.addProps;
+var js7800 = null;
+
+//
+// Key target
+//
+
+function KeyTarget(controller, left, top) {
+  Component.call(this);
+  this.controller = controller;
+  this.keys = null;
+  this.left = left;
+  this.top = top;
+  this.value = 0;
+  var that = this;
+  this.keydownf = function(e) { 
+    that.setValue(e.keyCode);    
+    e.preventDefault();
+    e.stopPropagation();  
+  }
+}
+KeyTarget.prototype = Object.create(Component.prototype);
+addProps(KeyTarget.prototype, {
+  getClass: function () {
+    return "controller__keytarget";
+  },
+  doCreateElement: function () {
+    var target = document.createElement("div");
+    this.target = target;
+    target.setAttribute("tabindex", "0");
+    target.style.left = "" + this.left + "px";
+    target.style.top = "" + this.top + "px";
+    return target;
+  },
+  onShow: function (keys, value) {
+    this.keys = keys;
+    this.setValue(value);
+    this.el.addEventListener("keydown", this.keydownf);
+  },
+  onHide: function () {
+    this.el.removeEventListener("keydown", this.keydownf);
+  },
+  setValue: function (value) {
+    var label = this.keys[value];
+    if (label) {
+      this.target.innerHTML = label;
+      this.value = value;
+    }
+  },
+  getValue: function() { return this.value; }
+});
+
+//
+// Controller
+//
+
+function Controller(title) {
+  Component.call(this);
+  this.title = title;
+  this.inner = null;
+}
+Controller.prototype = Object.create(Component.prototype);
+addProps(Controller.prototype, {
+  getClass: function () {
+    return "controller";
+  },
+  doCreateElement: function () {
+    var rootEl = document.createElement("div");
+    var title = document.createElement("div");
+    rootEl.appendChild(title);
+    title.className = "controller__title";
+    title.appendChild(document.createTextNode(this.title));
+    var inner = document.createElement("div");
+    this.inner = inner;
+    inner.className = "controller__inner";
+    // TODO: See if this can be done in CSS, but ignored by webpack
+    inner.style['background-image'] = "url('../images/controller.png')";
+    rootEl.appendChild(inner);
+    return rootEl;
+  }
+});
+
+//
+// Keyboard controller
+//
+
+function KbController(title) {
+  Controller.call(this, title);
+  this.up = new KeyTarget(this, 38, -5);
+  this.left = new KeyTarget(this, -7, 33);
+  this.right = new KeyTarget(this, 82, 33);
+  this.down = new KeyTarget(this, 38, 70);
+  this.b1 = new KeyTarget(this, 138, 133);
+  this.b2 = new KeyTarget(this, 204, 133);
+  this.targets = [this.up, this.left, this.right, this.down, this.b1, this.b2];
+  this.map = null;
+}
+
+KbController.prototype = Object.create(Controller.prototype);
+addProps(KbController.prototype, {  
+  onShow: function (keys, map) {
+    this.map = map;
+    this.keys = keys;
+    this.left.onShow(keys, map.getLeft());
+    this.right.onShow(keys, map.getRight());
+    this.up.onShow(keys, map.getUp());
+    this.down.onShow(keys, map.getDown());
+    this.b1.onShow(keys, map.getButton1());
+    this.b2.onShow(keys, map.getButton2());
+  },
+  onOk: function() {
+    var map = this.map;
+    map.setUp(this.up.getValue());
+    map.setLeft(this.left.getValue());
+    map.setRight(this.right.getValue());
+    map.setDown(this.down.getValue());
+    map.setButton1(this.b1.getValue());    
+    map.setButton2(this.b2.getValue());    
+  },
+  onHide: function () {
+    for (var i = 0; i < this.targets.length; i++) {
+      this.targets[i].onHide();
+    }
+  },
+  doCreateElement: function () {
+    var rootEl = Controller.prototype.doCreateElement.call(this);
+    for (var i = 0; i < this.targets.length; i++) {
+      this.inner.appendChild(this.targets[i].createElement());
+    }
+    return rootEl;
+  }
+});
+
+//
+// Settings dialog tabs
+//
 
 var settingsTabSet = new TabSet();
 settingsTabSet.addTab(new Tab("Display"));
-settingsTabSet.addTab(new Tab("Keyboard"));
 settingsTabSet.addTab(new Tab("Gamepads"));
+
+// Keyboard tab
+var keyboardTab = new Tab("Keyboard");
+addProps(keyboardTab, {
+  controller1: new KbController("Controller 1"),
+  controller2: new KbController("Controller 2"),
+  onShow: function () {
+    var kb = js7800.Keyboard;
+    var p1map = kb.p1KeyMap;
+    var p2map = kb.p2KeyMap;
+    var keys = js7800.Keys.Keys;
+    this.controller1.onShow(keys, p1map);
+    this.controller2.onShow(keys, p2map);
+  },
+  onOk: function() {
+    this.controller1.onOk();
+    this.controller2.onOk();    
+  },
+  onHide: function() {
+    this.controller1.onHide();
+    this.controller2.onHide();
+  },
+  createTabContent: function (rootEl) {
+    var desc = document.createElement("div");
+    desc.innerHTML =
+      '<h3 class="center">Keyboard Mappings</h3>\n' +
+      '<p class="center">Click on the <b class="callout">box</b> near a control to select it for mapping.</p>\n' +
+      '<p class="center">Once selected, press the <b class="callout">key</b> you would like to map to the control.</p>';
+    rootEl.appendChild(desc);
+
+    var controlsDiv = document.createElement("div");
+    rootEl.appendChild(controlsDiv);
+    controlsDiv.className = "controls-container";
+    controlsDiv.appendChild(this.controller1.createElement());
+    controlsDiv.appendChild(this.controller2.createElement());
+  }
+});
+settingsTabSet.addTab(keyboardTab);
 
 // About tab
 var aboutTab = new Tab("About");
@@ -37,14 +210,22 @@ aboutTab.createTabContent = function (rootEl) {
 };
 settingsTabSet.addTab(aboutTab, true);
 
+//
+// Settings dialog
+//
+
 function SettingsDialog() {
-  Dialog.call(this, "Settings");
+  TabbedDialog.call(this, "Settings");
 }
-SettingsDialog.prototype = Object.create(Dialog.prototype);
-addProps(Dialog.prototype, {
-  addBodyContent: function (bodyEl) {
-    bodyEl.appendChild(settingsTabSet.createElement());
-  },
+SettingsDialog.prototype = Object.create(TabbedDialog.prototype);
+addProps(SettingsDialog.prototype, {
+  getTabSet: function () { return settingsTabSet; }
 });
+
+Events.addListener(new Events.Listener("init",
+  function (event) {
+    js7800 = event.js7800;
+  }
+));
 
 export { SettingsDialog }
