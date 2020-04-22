@@ -82,7 +82,7 @@ addProps(Controller.prototype, {
     this.inner = inner;
     inner.className = "controller__inner";
     // TODO: See if this can be done in CSS, but ignored by webpack
-    inner.style['background-image'] = "url('../images/controller.png')";
+    inner.style['background-image'] = "url('images/controller.png')";
     rootEl.appendChild(inner);
     return rootEl;
   }
