@@ -260,7 +260,7 @@ addProps(keyboardTab, {
     var desc = document.createElement("div");
     desc.innerHTML =
       '<h3 class="center">Keyboard Mappings</h3>\n' +
-      '<p class="center">Click on the <b class="callout">box</b> near a control to select it for mapping.</p>\n' +
+      '<p class="center">Click on the <b class="callout">red box</b> near a control to select it for mapping.</p>\n' +
       '<p class="center">Once selected, press the <b class="callout">key</b> you would like to map to the control.</p>';
     rootEl.appendChild(desc);
 
