@@ -133,6 +133,15 @@ addProps(KbController.prototype, {
       this.targets[i].onHide();
     }
   },
+  onDefaults: function() {
+    var map = this.map;
+    this.up.setValue(map.getDefaultUp());
+    this.left.setValue(map.getDefaultLeft());
+    this.right.setValue(map.getDefaultRight());
+    this.down.setValue(map.getDefaultDown());
+    this.b1.setValue(map.getDefaultButton1());
+    this.b2.setValue(map.getDefaultButton2());
+  },
   doCreateElement: function () {
     var rootEl = Controller.prototype.doCreateElement.call(this);
     for (var i = 0; i < this.targets.length; i++) {
@@ -157,6 +166,9 @@ addProps(ConsoleButton.prototype, {
   },
   getValue: function () {
     return this.target.getValue();
+  },
+  setValue: function(value) {
+    this.target.setValue(value);
   },
   onShow: function (keys, value) {
     this.target.onShow(keys, value);
@@ -205,6 +217,12 @@ addProps(ConsoleControls.prototype, {
     for (var i = 0; i < this.buttons.length; i++) {
       this.buttons[i].onHide();
     }
+  },
+  onDefaults: function() {
+    var kb = this.kb;
+    this.resetButton.setValue(kb.defResetKey);
+    this.selectButton.setValue(kb.defSelectKey);
+    this.pauseButton.setValue(kb.defPauseKey);
   },
   doCreateElement: function () {
     var rootEl = document.createElement("div");
@@ -255,6 +273,11 @@ addProps(keyboardTab, {
     this.controller1.onHide();
     this.controller2.onHide();
     this.console.onHide();
+  },
+  onDefaults: function() {
+    this.controller1.onDefaults();
+    this.controller2.onDefaults();
+    this.console.onDefaults();
   },
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
@@ -318,3 +341,4 @@ Events.addListener(new Events.Listener("init",
 ));
 
 export { SettingsDialog }
+

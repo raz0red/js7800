@@ -40,6 +40,7 @@ function Dialog(title) {
 
   this.ok = null;
   this.cancel = null;
+  this.defaults = null;
 
   this.pauseButton = null;
   this.paused = false;
@@ -55,6 +56,7 @@ addProps(Dialog.prototype, {
   onShow: function () {},
   onHide: function () {},
   onOk: function() {},
+  onDefaults: function() {},
   getClass: function () { return "modal"; },
   doCreateElement: function () {
     // Modal
@@ -107,15 +109,28 @@ addProps(Dialog.prototype, {
     this.ok = ok;
     var cancel = new DialogButton("Cancel", "Cancel");
     this.cancel = cancel;
+    var defaults = new DialogButton("Defaults", "Defaults");
+    this.defaults = defaults;
 
     ok.onClick = function () { 
       dialog.onOk();
       dialog.hide(); 
     }
-    cancel.onClick = function () { dialog.hide(); }
 
-    footerEl.appendChild(cancel.createElement());
+    cancel.onClick = function () { 
+      dialog.hide(); 
+    }
+
+    defaults.onClick = function () {
+      dialog.onDefaults();
+    }
+    
+    var defDiv = document.createElement("div");
+    defDiv.style['flex-grow'] = 1;    
+    defDiv.appendChild(defaults.createElement());
+    footerEl.appendChild(defDiv);
     footerEl.appendChild(ok.createElement());
+    footerEl.appendChild(cancel.createElement());      
   },
   addBodyContent: function (bodyEl) { },
   show: function () {
@@ -235,6 +250,7 @@ addProps(Tab.prototype, {
   onShow: function() {},
   onHide: function() {},
   onOk: function() {},
+  onDefaults: function() {},
   getClass: function () { return "tabcontent"; },
   getButtonElement: function () { return this.buttonEl },
   createButtonElement: function () {
@@ -283,6 +299,13 @@ addProps(TabbedDialog.prototype, {
     var tabs = this.tabset.tabs;
     for (var i = 0; i < tabs.length; i++) {
         tabs[i].onOk();
+    }
+  },
+  onDefaults: function() {
+    Dialog.prototype.onDefaults.call(this);
+    var tabs = this.tabset.tabs;
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].onDefaults();
     }
   },
   addBodyContent: function (bodyEl) {

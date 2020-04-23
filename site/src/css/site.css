@@ -415,6 +415,8 @@ body {
   padding: .834em .4167em;
   background-color: #202020;
   color: white;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .tabset {
@@ -488,9 +490,8 @@ body {
   text-decoration: none;
   cursor: pointer;
   padding: .25em .167em;
-  min-width: 4em;
+  min-width: 4.5em;
   border-radius: .25em;
-  float: right;
   box-shadow: 0 .334em .667em 0 rgba(0, 0, 0, 0.2), 0 .5em 1.667em 0 rgba(0, 0, 0, 0.19);
 }
 

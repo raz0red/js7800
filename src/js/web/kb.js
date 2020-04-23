@@ -1,17 +1,20 @@
 import * as Video from "./video.js"
 import * as Cartridge from "../prosystem/Cartridge.js"
-import * as KeysModule from "./keys.js"
 import * as Events from "../events.js"
-
-var Keys = KeysModule.Keys;
 
 var KeyboardMapping = function (leftKey, rightKey, upKey, downKey, b1Key, b2Key) {
   var leftKey = leftKey;
+  var defLeftKey = leftKey;
   var rightKey = rightKey;
+  var defRightKey = rightKey;
   var upKey = upKey;
+  var defUpKey = upKey;
   var downKey = downKey;
+  var defDownKey = downKey;
   var b1Key = b1Key;
+  var defB1Key = b1Key;
   var b2Key = b2Key;
+  var defB2Key = b2Key;
 
   var leftHeld = false;
   var rightHeld = false;
@@ -24,18 +27,24 @@ var KeyboardMapping = function (leftKey, rightKey, upKey, downKey, b1Key, b2Key)
   var upLast = false;
 
   return {
-    getLeft() { return leftKey; },
-    setLeft(c) { leftKey = c; },
-    getRight() { return rightKey; },
-    setRight(c) { rightKey = c; },
-    getUp() { return upKey; },
-    setUp(c) { upKey = c; },
-    getDown() { return downKey; },
-    setDown(c) { downKey = c; },
-    getButton1() { return b1Key; },
-    setButton1(c) { b1Key = c; },
-    getButton2() { return b2Key; },
-    setButton2(c) { b2Key = c; },
+    getDefaultLeft: function() { return defLeftKey; },
+    getLeft: function() { return leftKey; },
+    setLeft: function(c) { leftKey = c; },    
+    getDefaultRight: function() { return defRightKey; },
+    getRight: function() { return rightKey; },
+    setRight: function(c) { rightKey = c; },
+    getDefaultUp: function() { return defUpKey; },
+    getUp: function() { return upKey; },
+    setUp: function(c) { upKey = c; },
+    getDefaultDown: function() { return defDownKey; },
+    getDown: function() { return downKey; },
+    setDown: function(c) { downKey = c; },
+    getDefaultButton1: function() { return defB1Key; },
+    getButton1: function() { return b1Key; },
+    setButton1: function(c) { b1Key = c; },
+    getDefaultButton2: function() { return defB2Key; },
+    getButton2: function() { return b2Key; },
+    setButton2: function(c) { b2Key = c; },
     isLeft: function () {
       return (leftHeld && !(rightHeld && !leftLast));
     },
@@ -123,8 +132,11 @@ var f9Code = 120; // F9
 var f11Code = 122; // F11
 
 var selectKey = f3Code;
+var defSelectKey = selectKey;
 var resetKey = f2Code;
+var defResetKey = resetKey;
 var pauseKey = f4Code;
+var defPauseKey = pauseKey;
 
 function setLeftDiffSet(val) {
   leftDiffSet = val;
@@ -281,5 +293,8 @@ export {
   setSelectKey,
   getSelectKey,
   setResetKey,
-  getResetKey
+  getResetKey,
+  defResetKey,
+  defPauseKey,
+  defSelectKey
 }
