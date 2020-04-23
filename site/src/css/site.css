@@ -542,7 +542,7 @@ b.callout {
   display: flex;
   overflow: hidden;
   justify-content: center;
-  margin-top:40px;
+  margin-top: 40px;
   min-width: 600px;
 }
 
@@ -598,4 +598,30 @@ b.callout {
 .controller__keytarget:focus {
   color: #292929;
   background-color :#ccc;
+}
+
+.console {
+  padding-top:25px;
+}
+
+.console__inner {
+  padding-top: 2px;
+  display: flex;
+  justify-content: center;
+}
+
+.console__button {
+  border: 2px solid #464448;
+  display: inline-block;
+  position: relative;
+  background-color: #333;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  width: 70px;
+  height: 24px;
+  line-height: 24px; 
+  border-radius: 5px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  margin: 0 8px;
 }

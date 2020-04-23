@@ -13,18 +13,17 @@ var js7800 = null;
 // Key target
 //
 
-function KeyTarget(controller, left, top) {
+function KeyTarget(left, top) {
   Component.call(this);
-  this.controller = controller;
   this.keys = null;
   this.left = left;
   this.top = top;
   this.value = 0;
   var that = this;
-  this.keydownf = function(e) { 
-    that.setValue(e.keyCode);    
+  this.keydownf = function (e) {
+    that.setValue(e.keyCode);
     e.preventDefault();
-    e.stopPropagation();  
+    e.stopPropagation();
   }
 }
 KeyTarget.prototype = Object.create(Component.prototype);
@@ -43,9 +42,11 @@ addProps(KeyTarget.prototype, {
   onShow: function (keys, value) {
     this.keys = keys;
     this.setValue(value);
+    //console.log('add listener: ' + this.keys[this.value]);
     this.el.addEventListener("keydown", this.keydownf);
   },
   onHide: function () {
+    //console.log('remove listener: ' + this.keys[this.value]);
     this.el.removeEventListener("keydown", this.keydownf);
   },
   setValue: function (value) {
@@ -55,7 +56,7 @@ addProps(KeyTarget.prototype, {
       this.value = value;
     }
   },
-  getValue: function() { return this.value; }
+  getValue: function () { return this.value; }
 });
 
 //
@@ -94,17 +95,17 @@ addProps(Controller.prototype, {
 
 function KbController(title) {
   Controller.call(this, title);
-  this.up = new KeyTarget(this, 38, -5);
-  this.left = new KeyTarget(this, -7, 33);
-  this.right = new KeyTarget(this, 82, 33);
-  this.down = new KeyTarget(this, 38, 70);
-  this.b1 = new KeyTarget(this, 138, 133);
-  this.b2 = new KeyTarget(this, 204, 133);
+  this.up = new KeyTarget(38, -5);
+  this.left = new KeyTarget(-7, 33);
+  this.right = new KeyTarget(82, 33);
+  this.down = new KeyTarget(38, 70);
+  this.b1 = new KeyTarget(138, 133);
+  this.b2 = new KeyTarget(204, 133);
   this.targets = [this.up, this.left, this.right, this.down, this.b1, this.b2];
   this.map = null;
 }
 KbController.prototype = Object.create(Controller.prototype);
-addProps(KbController.prototype, {  
+addProps(KbController.prototype, {
   getClass: function () {
     return Controller.prototype.getClass.call(this) + " controller-keyboard";
   },
@@ -118,14 +119,14 @@ addProps(KbController.prototype, {
     this.b1.onShow(keys, map.getButton1());
     this.b2.onShow(keys, map.getButton2());
   },
-  onOk: function() {
+  onOk: function () {
     var map = this.map;
     map.setUp(this.up.getValue());
     map.setLeft(this.left.getValue());
     map.setRight(this.right.getValue());
     map.setDown(this.down.getValue());
-    map.setButton1(this.b1.getValue());    
-    map.setButton2(this.b2.getValue());    
+    map.setButton1(this.b1.getValue());
+    map.setButton2(this.b2.getValue());
   },
   onHide: function () {
     for (var i = 0; i < this.targets.length; i++) {
@@ -142,6 +143,87 @@ addProps(KbController.prototype, {
 });
 
 //
+// Console control
+//
+function ConsoleButton(title) {
+  this.title = title;
+  this.target = new KeyTarget(15, 34);
+  Component.call(this);
+}
+ConsoleButton.prototype = Object.create(Component.prototype);
+addProps(ConsoleButton.prototype, {
+  getClass: function () {
+    return "console__button";
+  },
+  getValue: function () {
+    return this.target.getValue();
+  },
+  onShow: function (keys, value) {
+    this.target.onShow(keys, value);
+  },
+  onHide: function () {
+    this.target.onHide();
+  },
+  doCreateElement: function () {
+    var rootEl = document.createElement("div");
+    rootEl.appendChild(document.createTextNode(this.title));
+    rootEl.appendChild(this.target.createElement());
+    return rootEl;
+  }
+});
+
+//
+// Console controls
+//
+function ConsoleControls() {
+  Component.call(this);
+  this.pauseButton = new ConsoleButton("PAUSE");
+  this.selectButton = new ConsoleButton("SELECT");
+  this.resetButton = new ConsoleButton("RESET");
+  this.buttons = [this.pauseButton, this.selectButton, this.resetButton];
+  this.kb = null;
+}
+ConsoleControls.prototype = Object.create(Component.prototype);
+addProps(ConsoleControls.prototype, {
+  getClass: function () {
+    return "console";
+  },
+  onShow: function (keys) {
+    var kb = js7800.Keyboard;
+    this.kb = kb;
+    this.resetButton.onShow(keys, kb.getResetKey());
+    this.selectButton.onShow(keys, kb.getSelectKey());
+    this.pauseButton.onShow(keys, kb.getPauseKey());
+  },
+  onOk: function () {
+    var kb = this.kb;
+    kb.setResetKey(this.resetButton.getValue());
+    kb.setSelectKey(this.selectButton.getValue());
+    kb.setPauseKey(this.pauseButton.getValue());
+  },
+  onHide: function () {
+    for (var i = 0; i < this.buttons.length; i++) {
+      this.buttons[i].onHide();
+    }
+  },
+  doCreateElement: function () {
+    var rootEl = document.createElement("div");
+    var title = document.createElement("div");
+    rootEl.appendChild(title);
+    title.className = "controller__title";
+    title.appendChild(document.createTextNode("Console Buttons"));
+    var inner = document.createElement("div");
+    rootEl.appendChild(inner);
+    inner.className = "console__inner";
+    inner.appendChild(this.resetButton.createElement());
+    inner.appendChild(this.selectButton.createElement());
+    inner.appendChild(this.pauseButton.createElement());
+    return rootEl;
+  }
+});
+
+
+//
 // Settings dialog tabs
 //
 
@@ -154,6 +236,7 @@ var keyboardTab = new Tab("Keyboard");
 addProps(keyboardTab, {
   controller1: new KbController("Controller 1"),
   controller2: new KbController("Controller 2"),
+  console: new ConsoleControls(),
   onShow: function () {
     var kb = js7800.Keyboard;
     var p1map = kb.p1KeyMap;
@@ -161,14 +244,17 @@ addProps(keyboardTab, {
     var keys = js7800.Keys.Keys;
     this.controller1.onShow(keys, p1map);
     this.controller2.onShow(keys, p2map);
+    this.console.onShow(keys);
   },
-  onOk: function() {
+  onOk: function () {
     this.controller1.onOk();
-    this.controller2.onOk();    
+    this.controller2.onOk();
+    this.console.onOk();
   },
-  onHide: function() {
+  onHide: function () {
     this.controller1.onHide();
     this.controller2.onHide();
+    this.console.onHide();
   },
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
@@ -183,6 +269,7 @@ addProps(keyboardTab, {
     controlsDiv.className = "controls-container";
     controlsDiv.appendChild(this.controller1.createElement());
     controlsDiv.appendChild(this.controller2.createElement());
+    rootEl.appendChild(this.console.createElement());
   }
 });
 settingsTabSet.addTab(keyboardTab);

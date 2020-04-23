@@ -122,6 +122,10 @@ var f6Code = 117; // F6
 var f9Code = 120; // F9
 var f11Code = 122; // F11
 
+var selectKey = f3Code;
+var resetKey = f2Code;
+var pauseKey = f4Code;
+
 function setLeftDiffSet(val) {
   leftDiffSet = val;
   Events.fireEvent("onLeftDiffChanged", val);
@@ -139,15 +143,15 @@ function keyEvent(event, down) {
 
   if (!handled) {
     switch (code) {
-      case f2Code:
+      case resetKey:
         resetHeld = down;
         handled = true;
         break;
-      case f3Code:
+      case selectKey:
         selectHeld = down;
         handled = true;
         break;
-      case f4Code:
+      case pauseKey:
         pauseHeld = down;
         handled = true;
         break;
@@ -236,6 +240,31 @@ function reset() {
   setRightDiffSet(cartridgeRightSwitch);
 }
 
+function setPauseKey(key) {
+  pauseKey = key;
+}
+
+function getPauseKey() {
+  return pauseKey;
+}
+
+function setSelectKey(key) {
+  selectKey = key;
+}
+
+function getSelectKey() {
+  return selectKey;
+}
+
+function setResetKey(key) {
+  resetKey = key;
+}
+
+function getResetKey() {
+  return resetKey;
+}
+
+
 export {
   isSelect,
   isReset,
@@ -246,5 +275,11 @@ export {
   setRightDiffSet,
   reset,
   p1KeyMap,
-  p2KeyMap
+  p2KeyMap,
+  setPauseKey,
+  getPauseKey,
+  setSelectKey,
+  getSelectKey,
+  setResetKey,
+  getResetKey
 }
