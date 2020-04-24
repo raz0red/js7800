@@ -35,7 +35,7 @@ function updateInput() {
   // | 13       | Console      | Select
   keyboardData[13] = selectSet || Kb.isSelect() || (pad && pad.isSelect());
   // | 14       | Console      | Pause
-  keyboardData[14] = Kb.isPause();
+  keyboardData[14] = Kb.isPause() || (pad && pad.isPause());
   // | 15       | Console      | Left Difficulty
   keyboardData[15] = Kb.isLeftDiffSet();
   // | 16       | Console      | Right Difficulty
