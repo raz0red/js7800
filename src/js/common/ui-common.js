@@ -39,7 +39,9 @@ addProps(Button.prototype, {
     btn.onmouseup = function (event) { self.onUp(event) };
     var text = document.createTextNode(this.text);
     btn.appendChild(text);
-    btn.setAttribute("title", this.title);
+    if (this.title) {
+      btn.setAttribute("title", this.title);
+    }
     return btn;
   },
   onClick: function (event) { },

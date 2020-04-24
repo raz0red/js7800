@@ -105,11 +105,11 @@ addProps(Dialog.prototype, {
   addFooterContent: function (footerEl) {
     var dialog = this;
 
-    var ok = new DialogButton("OK", "OK");
+    var ok = new DialogButton("OK");
     this.ok = ok;
-    var cancel = new DialogButton("Cancel", "Cancel");
+    var cancel = new DialogButton("Cancel");
     this.cancel = cancel;
-    var defaults = new DialogButton("Defaults", "Defaults");
+    var defaults = new DialogButton("Defaults", "Reset to Defaults");
     this.defaults = defaults;
 
     ok.onClick = function () { 
