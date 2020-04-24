@@ -613,10 +613,8 @@ b.callout {
 }
 
 .console__button {
-  border: 2px solid #464448;
   display: inline-block;
   position: relative;
-  background-color: #333;
   text-align: center;
   font-size: 12px;
   font-weight: bold;
@@ -626,6 +624,17 @@ b.callout {
   border-radius: 5px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   margin: 0 8px;
+}
+
+.console__button--up {
+  border: 2px solid #464448;
+  background-color: #333;
+}
+
+.console__button--down {
+  border: 2px solid #464448;
+  background-color: #b0abb6;  
+  color: #111;
 }
 
 .gamepad-focus {

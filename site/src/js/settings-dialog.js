@@ -146,7 +146,7 @@ addProps(GamepadController.prototype, {
   },
   updatePadId: function (pad) {
     var value = null;
-    if (pad && pad.id && pad.id.trim().length > 0) {      
+    if (pad && pad.id && pad.id.trim().length > 0) {
       value = pad.id.trim();
       var pidx = value.indexOf("(");
       if (pidx != -1) {
@@ -154,12 +154,12 @@ addProps(GamepadController.prototype, {
       }
     } else {
       value = "None (connect and press button)";
-    }    
+    }
     if (this.padId.innerHTML != value) {
       this.padId.innerHTML = value;
     }
   },
-  updatePadMapping: function(pad) {
+  updatePadMapping: function (pad) {
     var value = null;
     if (pad && pad.mapping && pad.mapping.trim().length > 0) {
       var mapStr = pad.mapping.trim();
@@ -179,7 +179,7 @@ addProps(GamepadController.prototype, {
     this.down.setVisible(mapping.isDown(0));
     this.b1.setVisible(mapping.isButton1());
     this.b2.setVisible(mapping.isButton2());
-    
+
     var pad = js7800.Pads.getMapping(this.index).getPad();
     this.updatePadId(pad);
     this.updatePadMapping(pad);
@@ -292,7 +292,7 @@ function ConsoleButton(title) {
 ConsoleButton.prototype = Object.create(Component.prototype);
 addProps(ConsoleButton.prototype, {
   getClass: function () {
-    return "console__button";
+    return "console__button console__button--up";
   },
   doCreateElement: function () {
     var rootEl = document.createElement("div");
@@ -328,19 +328,20 @@ addProps(ConsoleButtonKeyboard.prototype, {
 
 function ConsoleButtonGamepad(title) {
   ConsoleButton.call(this, title);
-  this.focus = new GamepadFocus(30, 20);
+  //this.focus = new GamepadFocus(30, 20);
 }
 ConsoleButtonGamepad.prototype = Object.create(ConsoleButton.prototype);
 addProps(ConsoleButtonGamepad.prototype, {
   onShow: function () {
-    this.focus.setVisible(false);
+    this.setFocusVisible(false);
   },
-  setFocusVisible: function (visible) {
-    this.focus.setVisible(visible);
+  setFocusVisible: function (visible) {        
+    this.el.className = "console__button console__button--" +
+      (visible ? "down" : "up");
   },
   doCreateElement: function () {
     var rootEl = ConsoleButton.prototype.doCreateElement.call(this);
-    rootEl.appendChild(this.focus.createElement());
+    //rootEl.appendChild(this.focus.createElement());
     return rootEl;
   }
 });
@@ -563,7 +564,6 @@ aboutTab.createTabContent = function (rootEl) {
     '  Portions of the Pokey code were adapted from the MAME implementation.\n' +
     '</p>';
 };
-
 
 var settingsTabSet = new TabSet();
 settingsTabSet.addTab(new Tab("Display"));
