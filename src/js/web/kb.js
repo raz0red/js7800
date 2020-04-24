@@ -131,9 +131,9 @@ var f6Code = 117; // F6
 var f9Code = 120; // F9
 var f11Code = 122; // F11
 
-var selectKey = f3Code;
+var selectKey = f2Code;
 var defSelectKey = selectKey;
-var resetKey = f2Code;
+var resetKey = f3Code;
 var defResetKey = resetKey;
 var pauseKey = f4Code;
 var defPauseKey = pauseKey;

@@ -4,6 +4,7 @@ import * as Util from "./util.js"
 import * as Events from "./events.js"
 import * as Keyboard from "./web/kb.js"
 import * as Keys from "./web/keys.js"
+import * as Pads from "./web/pad.js"
 
 export { 
     js7800 as Main,
@@ -11,5 +12,6 @@ export {
     Util,
     Events,
     Keyboard,
-    Keys
+    Keys,
+    Pads
 }

@@ -430,7 +430,7 @@ body {
   background-color: #171717;
   width: 10.5em;
   min-width: 10.5em;
-  min-height: 38.67em;
+  min-height: 35.67em;
   flex-grow: 0;
 }
 
@@ -472,9 +472,9 @@ body {
   flex-grow: 1;
   font-size: 1.167em;
   /* 14px */
-  min-height: 31.43em;
-  max-height: 31.43em;
-  height: 31.43em;
+  min-height: 35.67em;
+  max-height: 35.67em;
+  height: 35.67em;
   overflow: auto;
 }
 
@@ -543,8 +543,8 @@ b.callout {
   display: flex;
   overflow: hidden;
   justify-content: center;
-  margin-top: 40px;
   min-width: 600px;
+  margin-top: 40px;
 }
 
 .controller {
@@ -574,6 +574,7 @@ b.callout {
   min-width: 291px;
   height: 151px;   
   min-height: 151px;         
+  background-image: url('../images/controller.png');
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
@@ -626,3 +627,43 @@ b.callout {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   margin: 0 8px;
 }
+
+.gamepad-focus {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: none;
+  background-color: #ccc;
+  box-shadow: 0 0 2px #ccc;
+}
+
+.gamepad-grid {
+  background-color: #222; 
+  width: 270px;
+  grid-column-gap: 5px;
+  grid-row-gap:5px;
+  display: inline-grid;  
+  grid-template-columns: auto 1fr;  
+  padding: 10px;
+  border-radius: 5px;
+  margin: 0 0 25px 1px;
+  font-size: 12px;
+}
+
+.gamepad-cell-name {  
+  text-align: center;
+  overflow: hidden;
+  text-align: left;  
+  font-weight:bold;
+  color: #777;
+  white-space: nowrap;
+}
+
+.gamepad-cell-value {  
+  text-align: center;
+  overflow: hidden;
+  text-align: left;  
+  white-space: nowrap;
+}
+

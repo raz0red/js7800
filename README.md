@@ -30,8 +30,8 @@ The following section contains the "default" controller mappings for JS7800. It 
 
 ### General:
   
-    F2 : Reset                    (Atari 7800 Console)
-    F3 : Select                   (Atari 7800 Console)
+    F2 : Select                   (Atari 7800 Console)
+    F3 : Reset                    (Atari 7800 Console)
     F4 : Pause                    (Atari 7800 Console)
     F5 : Left difficulty switch   (Atari 7800 Console)
     F6 : Right difficulty switch  (Atari 7800 Console)

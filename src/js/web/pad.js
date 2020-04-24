@@ -40,7 +40,8 @@ function StandardMapping(props) {
     isButton1: function (pad) { return this.isPressed(pad, 0); },
     isButton2: function (pad) { return this.isPressed(pad, 1); },
     isReset: function (pad) { return this.isPressed(pad, 9); },
-    isSelect: function (pad) { return this.isPressed(pad, 8); }
+    isSelect: function (pad) { return this.isPressed(pad, 8); },
+    isPause: function (pad) { return this.isPressed(pad, 4) || this.isPressed(pad, 5); }
   });
 
   if (props) {
@@ -67,7 +68,8 @@ var iosMapping = new StandardMapping({
   isDigitalUp: function (pad) { return this.isAnalogDir(pad, 5, true); },
   isDigitalDown: function (pad) { return this.isAnalogDir(pad, 5, false); },
   isReset: function (pad) { return this.isPressed(pad, 5); },
-  isSelect: function (pad) {  return this.isPressed(pad, 4); }  
+  isSelect: function (pad) {  return this.isPressed(pad, 4); },
+  isPause: function (pad) { return false; }  
 });
 
 function PadMapping(padIn, mappingIn) {
@@ -142,8 +144,14 @@ function PadMapping(padIn, mappingIn) {
     return mapping.isSelect(pad);
   }
 
+  function isPause() {
+    if (!pad) return false;
+    return mapping.isPause(pad);
+  }
+
   return {
     setPad: function(padIn) { pad = padIn; },
+    getPad: function() { return pad; },
     setMapping: function(mappingIn) { mapping = mappingIn; },
     isLeft: isLeft,
     isRight: isRight,
@@ -156,7 +164,8 @@ function PadMapping(padIn, mappingIn) {
     isButton1: isButton1,
     isButton2: isButton2,
     isReset: isReset,
-    isSelect: isSelect
+    isSelect: isSelect,
+    isPause: isPause
   }
 };
 
