@@ -2,6 +2,7 @@ import * as Util from "./util.js"
 import * as DialogModule from "./dialog.js"
 import { Component } from "../../../src/js/common/ui-common.js";
 import * as Events from "./events.js"
+import * as Storage from "./storage.js"
 
 var TabbedDialog = DialogModule.TabbedDialog;
 var TabSet = DialogModule.TabSet;
@@ -580,7 +581,11 @@ function SettingsDialog() {
 }
 SettingsDialog.prototype = Object.create(TabbedDialog.prototype);
 addProps(SettingsDialog.prototype, {
-  getTabSet: function () { return settingsTabSet; }
+  getTabSet: function () { return settingsTabSet; },
+  onOk: function() {
+    TabbedDialog.prototype.onOk.call(this);
+    Storage.savePrefs();
+  }
 });
 
 Events.addListener(new Events.Listener("init",

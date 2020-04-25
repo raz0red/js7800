@@ -5,6 +5,7 @@ import * as Util from "./util.js"
 import * as Events from "./events.js"
 import * as Buttons from "./buttons.js"
 import * as Drop from "./drop.js"
+import * as Storage from "./storage.js"
 import { SettingsDialog } from "./settings-dialog.js"
 
 import css from '../css/site.css'
@@ -168,6 +169,17 @@ function init(in7800) {
     startEmulation: startEmulation,
     errorHandler: errorHandler
   });
+
+  // Show message event listener
+  Events.addListener(new Events.Listener("showMessage",
+    function (message) { showMessage(message); }));
+
+  // Show error event listener
+  Events.addListener(new Events.Listener("showError",
+    function (message) { errorHandler(message); }));
+
+  // Load preferences
+  Storage.loadPrefs();
 
   // Handle request parameters
   handleRequestParameters();
