@@ -192,7 +192,7 @@ rightDiffSwitch.onClick = function () { Kb.setRightDiffSet(!this.getValue()) }
 group.addChild(rightDiffSwitch);
 
 var groupEnd = new ControlGroupEnd();
-var helpButton = new ImageButton("Help", infoImgSrc);
+var helpButton = new ImageButton("Help / Info", infoImgSrc);
 helpButton.onClick = function () { Events.fireEvent("showError", "Not implemented."); }
 groupEnd.addChild(helpButton);
 var settingsButton = new ImageButton("Settings", cogsImgSrc);
