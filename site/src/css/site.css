@@ -475,7 +475,28 @@ body {
   min-height: 35.67em;
   max-height: 35.67em;
   height: 35.67em;
-  overflow: auto;
+  overflow: auto;  
+}
+
+.tabcontent__title {
+  font-weight: bold;
+  font-size: 1.143em;
+  text-align: center;
+  line-height: 1em;
+  margin: 1em 0 1em 0;
+  line-height: 1.125;
+}
+
+.tabcontent a, 
+.tabcontent a:visited
+.tabcontent a:active {
+  font-weight: bold;
+  text-decoration: none;
+  color: #BBB;  
+}
+
+.tabcontent a:hover {
+  color: #DDD;  
 }
 
 .dialog-button {
@@ -523,15 +544,6 @@ p.center {
   border-radius: 12px;
   text-align: center;
   display: inline-block;
-}
-
-H3 {
-  font-weight: bold;
-  font-size: 1.143em;
-}
-
-H3.center {
-  text-align: center;
 }
 
 b.callout {
@@ -661,7 +673,6 @@ b.callout {
 }
 
 .gamepad-cell-name {  
-  text-align: center;
   overflow: hidden;
   text-align: left;  
   font-weight:bold;
@@ -676,3 +687,35 @@ b.callout {
   white-space: nowrap;
 }
 
+.dialog-grid {
+  margin: 2em 1em 1em 1em;
+  grid-column-gap: 1em;
+  grid-row-gap: 1.5em;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  padding: 1em;
+  line-height: 1em;
+  background-color: #222; 
+  border-radius: .4em;
+}
+
+.dialog-cell-name {
+  overflow: hidden;
+  text-align: left;
+  font-weight: bold;
+  color: #7C7C7C;
+  white-space: nowrap;
+}
+
+.dialog-cell-value {
+  text-align: center;
+  overflow: hidden;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.about P {
+  text-align: center;
+  line-height: 1.5em;
+  padding: 0 3em 0 3em;
+}

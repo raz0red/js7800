@@ -454,6 +454,27 @@ addProps(ConsoleControlsGamepad.prototype, {
 // Settings dialog tabs
 //
 
+var displayTab = new Tab("Display");
+addProps(displayTab, {
+  createTabContent: function (rootEl) {
+    var desc = document.createElement("div");
+    desc.innerHTML =
+      '<div class="tabcontent__title">Display Settings</div>\n' +
+      '<p class="center">The following settings are used to control the screen display.\n' +
+      '<div class="dialog-grid">\n' +
+      '  <div class="dialog-cell-name">Screen size:</div>\n' +
+      '  <div class="dialog-cell-value">1x</div>\n' +
+      '  <div class="dialog-cell-name">Aspect ratio:</div>\n' +
+      '  <div class="dialog-cell-value">6:7 (Atari 7800 Aspect Ratio)</div>\n' +
+      '  <div class="dialog-cell-name">Bilinear filter:</div>\n' +
+      '  <div class="dialog-cell-value">Disabled</div>\n' +
+      '</div>';
+    rootEl.appendChild(desc);
+  }
+});
+
+// Display tab
+
 // Gamepads tab
 var gamepadsTab = new Tab("Gamepads");
 addProps(gamepadsTab, {
@@ -481,7 +502,7 @@ addProps(gamepadsTab, {
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
     desc.innerHTML =
-      '<h3 class="center">Gamepad Compatibility</h3>\n' +
+      '<div class="tabcontent__title">Gamepad Compatibility</div>\n' +
       '<p class="center">This page provides the ability to <b class="callout">test compatibility</b> with connected gamepads.</p>\n' +
       '<p class="center">Connect gamepads and test if they are mapped correctly (by pressing buttons, D-pad, etc.).' +
       // '<br><span style="color:#777; font-size:.93em;">(custom mappings are not currently supported)</span></p>';
@@ -530,7 +551,7 @@ addProps(keyboardTab, {
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
     desc.innerHTML =
-      '<h3 class="center">Keyboard Mappings</h3>\n' +
+      '<div class="tabcontent__title">Keyboard Mappings</div>\n' +
       '<p class="center">Click on the <b class="callout">red box</b> near a control to select it for mapping.</p>\n' +
       '<p class="center">Once selected, press the <b class="callout">key</b> you would like to map to the control.</p>';
     rootEl.appendChild(desc);
@@ -544,7 +565,7 @@ addProps(keyboardTab, {
 });
 
 var settingsTabSet = new TabSet();
-settingsTabSet.addTab(new Tab("Display"));
+settingsTabSet.addTab(displayTab);
 settingsTabSet.addTab(keyboardTab);
 settingsTabSet.addTab(gamepadsTab);
 settingsTabSet.addTab(new AboutTab(), true);
