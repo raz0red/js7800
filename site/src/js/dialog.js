@@ -26,9 +26,10 @@ addProps(DialogButton.prototype, {
 // Dialog
 //
 
-function Dialog(title) {
+function Dialog(title, isReadOnly) {
   Component.call(this);
   
+  this.isReadOnly = isReadOnly ? true : false;
   this.title = title;
 
   this.modalEl = null;
@@ -105,32 +106,41 @@ addProps(Dialog.prototype, {
   addFooterContent: function (footerEl) {
     var dialog = this;
 
-    var ok = new DialogButton("OK");
-    this.ok = ok;
-    var cancel = new DialogButton("Cancel");
-    this.cancel = cancel;
-    var defaults = new DialogButton("Defaults", "Reset to Defaults");
-    this.defaults = defaults;
-
-    ok.onClick = function () { 
-      dialog.onOk();
-      dialog.hide(); 
-    }
-
-    cancel.onClick = function () { 
-      dialog.hide(); 
-    }
-
-    defaults.onClick = function () {
-      dialog.onDefaults();
-    }
-    
     var defDiv = document.createElement("div");
     defDiv.style['flex-grow'] = 1;    
-    defDiv.appendChild(defaults.createElement());
-    footerEl.appendChild(defDiv);
-    footerEl.appendChild(ok.createElement());
-    footerEl.appendChild(cancel.createElement());      
+
+    if (this.isReadOnly) {
+      var cancel = new DialogButton("Close");
+      this.cancel = cancel;
+
+      footerEl.appendChild(defDiv);
+      footerEl.appendChild(cancel.createElement());        
+    } else {
+      var ok = new DialogButton("OK");
+      this.ok = ok;
+      var cancel = new DialogButton("Cancel");
+      this.cancel = cancel;
+      var defaults = new DialogButton("Defaults", "Reset to Defaults");
+      this.defaults = defaults;
+
+      ok.onClick = function () {
+        dialog.onOk();
+        dialog.hide();
+      }
+
+      defaults.onClick = function () {
+        dialog.onDefaults();
+      }
+
+      defDiv.appendChild(defaults.createElement());
+      footerEl.appendChild(defDiv);
+      footerEl.appendChild(ok.createElement());
+      footerEl.appendChild(cancel.createElement());        
+    }
+
+    cancel.onClick = function () {
+      dialog.hide();
+    }
   },
   addBodyContent: function (bodyEl) { },
   show: function () {
@@ -273,8 +283,8 @@ addProps(Tab.prototype, {
 // Tabbed Dialog
 //
 
-function TabbedDialog(title) {
-  Dialog.call(this, title);
+function TabbedDialog(title, isReadOnly) {
+  Dialog.call(this, title, isReadOnly);
   this.tabset = this.getTabSet();
 }
 TabbedDialog.prototype = Object.create(Dialog.prototype);

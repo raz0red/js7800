@@ -7,6 +7,7 @@ import * as Buttons from "./buttons.js"
 import * as Drop from "./drop.js"
 import * as Storage from "./storage.js"
 import { SettingsDialog } from "./settings-dialog.js"
+import { HelpDialog } from "./help-dialog.js"
 
 import css from '../css/site.css'
 
@@ -156,6 +157,11 @@ function init(in7800) {
   var settingsDialog = new SettingsDialog();  
   parent.appendChild(settingsDialog.createElement());
   cbar.settingsButton.onClick = function () { settingsDialog.show(); }
+
+  // Create the help dialog  
+  var helpDialog = new HelpDialog();  
+  parent.appendChild(helpDialog.createElement());
+  cbar.helpButton.onClick = function () { helpDialog.show(); }
 
   // Rom list component
   romList = new RomList(

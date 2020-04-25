@@ -249,6 +249,7 @@ export {
   Component,
   Button,
   settingsButton,
+  helpButton,
   pauseButton,
   soundButton
 }

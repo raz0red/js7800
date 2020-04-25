@@ -16,14 +16,14 @@ function storeKeyboardMappings(name, map) {
     down: map.getDown(),
     b1: map.getButton1(),
     b2: map.getButton2()
-  };  
+  };
 }
 
 function loadKeyboardMappings(name, map) {
   var mapIn = prefs[name];
   if (mapIn != undefined) {
     for (var k in mapIn) {
-      var v =  mapIn[k];
+      var v = mapIn[k];
       switch (k) {
         case "left": map.setLeft(v);
         case "right": map.setRight(v);
@@ -31,7 +31,7 @@ function loadKeyboardMappings(name, map) {
         case "down": map.setDown(v);
         case "b1": map.setButton1(v);
         case "b2": map.setButton2(v);
-      }      
+      }
     }
   }
 }
@@ -41,19 +41,19 @@ function storeConsoleMappings() {
     pause: kb.getPauseKey(),
     select: kb.getSelectKey(),
     reset: kb.getResetKey()
-  };  
+  };
 }
 
 function loadConsoleMappings() {
   var mapIn = prefs[CONSOLE_MAP_NAME];
   if (mapIn != undefined) {
     for (var k in mapIn) {
-      var v =  mapIn[k];
+      var v = mapIn[k];
       switch (k) {
         case "pause": kb.setPauseKey(v);
         case "select": kb.setSelectKey(v);
         case "reset": kb.setResetKey(v);
-      }      
+      }
     }
   }
 }
@@ -64,10 +64,10 @@ function loadPrefs() {
     if (prefsStr) {
       prefs = JSON.parse(localStorage.getItem("prefs"));
       loadKeyboardMappings(P1_MAP_NAME, kb.p1KeyMap);
-      loadKeyboardMappings(P2_MAP_NAME, kb.p2KeyMap);  
+      loadKeyboardMappings(P2_MAP_NAME, kb.p2KeyMap);
       loadConsoleMappings();
     }
-  } catch(e) {
+  } catch (e) {
     Events.fireEvent("showError", "An error occurred loading preferences: " + e);
     prefs = {};
   }
@@ -78,16 +78,16 @@ function savePrefs() {
     storeKeyboardMappings(P1_MAP_NAME, kb.p1KeyMap);
     storeKeyboardMappings(P2_MAP_NAME, kb.p2KeyMap);
     storeConsoleMappings();
-    localStorage.setItem("prefs", JSON.stringify(prefs));  
-  } catch(e) {
+    localStorage.setItem("prefs", JSON.stringify(prefs));
+  } catch (e) {
     Events.fireEvent("showError", "An error occurred saving preferences: " + e);
     prefs = {};
   }
 }
 
 Events.addListener(new Events.Listener("init",
-  function (event) { 
-    js7800 = event.js7800; 
+  function (event) {
+    js7800 = event.js7800;
     kb = js7800.Keyboard;
   }));
 
@@ -95,4 +95,3 @@ export {
   loadPrefs,
   savePrefs
 }
- 
