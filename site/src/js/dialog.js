@@ -190,11 +190,15 @@ addProps(TabSet.prototype, {
       var ii = i;
       (function () {
         var tab = that.tabs[ii];
-        var buttonEl = tab.getButtonElement();
+        var buttonEl = tab.getButtonElement();      
+        if ((buttonEl.className.indexOf(" active") != -1)) {
+          tab.onTabHide();
+        }
         buttonEl.className = buttonEl.className.replace(" active", "");
         tab.getElement().style.display = "none";
       })();
     }
+    tab.onTabShow();
     tab.getButtonElement().className += " active";
     tab.getElement().style.display = "block";
   },
@@ -257,6 +261,8 @@ function Tab(title) {
 }
 Tab.prototype = Object.create(Component.prototype);
 addProps(Tab.prototype, {
+  onTabShow: function() {},
+  onTabHide: function() {},
   onShow: function() {},
   onHide: function() {},
   onOk: function() {},

@@ -12,6 +12,7 @@ function AboutTab() {
   this.videoEl = null;
   this.iframe = null;
   this.timerId = null;
+  this.played = false;
 
   var that = this;
   this.fClick = function(e) { 
@@ -26,29 +27,41 @@ addProps(AboutTab.prototype, {
     this.iframe.setAttribute('src', '');  
     this.logoEl.style.display = 'inline-block';
     this.videoEl.style.display = 'none';
+    this.top.style.opacity = "0";
     if (this.timerId != null) {
       clearTimeout(this.timerId);
       this.timerId = null;
     }
   },
   showVideo: function () {
-    this.iframe.setAttribute('src', 'https://player.vimeo.com/video/411891457?autoplay=1&api=1&background=1&mute=0');    
-    this.logoEl.style.display = 'none';
-    this.videoEl.style.display = 'inline-block';
+    this.played = true;
+    this.iframe.setAttribute('src', 'https://player.vimeo.com/video/411891457?autoplay=1&api=1&background=true&mute=0');    
     this.top.style['cursor'] = 'auto';
     this.top.removeEventListener("click", this.fClick);       
+    this.top.style.opacity = ".4";
     var that = this;    
-    this.timerId = setTimeout(function () { that.hideVideo(); }, 53 * 1000 /* 51 secs */ );
+    this.timerId = setTimeout(function () {       
+      that.top.style.opacity = "0";
+      that.logoEl.style.display = 'none';
+      that.videoEl.style.display = 'inline-block';  
+      that.timerId = setTimeout(function () { that.hideVideo(); }, 50 * 1000 );
+    }, 5 * 1000);    
   },
   onShow: function () {
     this.hideVideo();    
+    this.played = false;
     this.top.style['cursor'] = 'pointer';
     this.top.addEventListener("click", this.fClick);        
   },
-  onHide: function () {
+  onHide: function () {    
     this.top.removeEventListener("click", this.fClick);    
     this.hideVideo();
   },
+  onTabHide: function() {
+    if (this.played) {
+      this.onHide();    
+    }
+  },  
   createTabContent: function (rootEl) {
     var title = document.createElement('div');
     title.className = 'tabcontent__title';

@@ -567,6 +567,9 @@ p.center {
   z-index: 100;
   top: 0;
   left: 0;
+  opacity: 0;
+  background-color: #555;
+  border-radius: 12px;
 }
 
 b.callout {
