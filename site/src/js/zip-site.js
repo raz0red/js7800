@@ -11,16 +11,22 @@ function unzip(file, success, failure) {
 
   function entryProcessor(entries) {
     var romEntry = null;
+    var a78 = false;
     if (entries.length == 1) {
       romEntry = entries[0];
     } else if (entries.length > 0) {
       for (var i = 0; i < entries.length; i++) {
         var entry = entries[i];
         var filename = entry.filename.toLowerCase();
-        if (filename.endsWith(".a78")) {
+        if (filename.endsWith("p.a78")) {
+          // Hack to work around PAL homebrew
+          // TODO: Use header instead of file name
+          romEntry = entry;
+          a78 = true;
+        } else if (filename.endsWith(".a78")) {
           romEntry = entry;
           break;
-        } else if (filename.endsWith(".bin")) {
+        } else if (filename.endsWith(".bin") && !a78) {
           romEntry = entry;
         }
       }

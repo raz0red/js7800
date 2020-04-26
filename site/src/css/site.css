@@ -562,6 +562,8 @@ p.center {
 
 .about-atari__top {
   position: absolute;
+  /* width: 206px; */
+  /* height: 146px; */
   width: 240px;
   height: 180px;
   z-index: 100;
@@ -569,6 +571,7 @@ p.center {
   left: 0;
   opacity: 0;
   background-color: #555;
+  /* border: 17px solid black; */
   border-radius: 12px;
 }
 
