@@ -8,6 +8,7 @@ import * as Drop from "./drop.js"
 import * as Storage from "./storage.js"
 import { SettingsDialog } from "./settings-dialog.js"
 import { HelpDialog } from "./help-dialog.js"
+import highScoreRom64 from "../roms/Highscore.rom"
 
 import css from '../css/site.css'
 
@@ -18,6 +19,7 @@ var getRequestParameter = Util.getRequestParameter;
 
 var js7800 = null;
 var romList = null;
+var highScoreRom = null;
 
 var errorHandler = function (error, logToConsole) {
   if (logToConsole == undefined) {
@@ -141,6 +143,10 @@ function init(in7800) {
   js7800 = in7800;
   var main = js7800.Main;
   var cbar = js7800.ControlsBar;
+
+  // Get high score ROM
+  highScoreRom = atob(highScoreRom64.split(',')[1]);
+  console.log("High score rom: " + js7800.md5(highScoreRom));
 
   // Must be done prior to initializing js7800
   var fsSelect = createFullscreenSelect();

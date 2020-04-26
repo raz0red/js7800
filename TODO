@@ -17,3 +17,5 @@
 - Remove certain images from pack (controller.png, etc.)
 - Fix drag of logo image
 - Create new video with pause at beginning, add other content to it, splice multiple commercials
+- Reset ROM select lists when an external rom is loaded (drag, or load, etc.)
+- Add documentation to intro screen (settings and info buttons w/ direct links)

@@ -21,6 +21,14 @@ module.exports = {
         use: ['style-loader', 'css-loader'],
       },
       {
+        test: /\.(rom)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+          },
+        ],
+      },
+      {
         test: /\.(png|jp(e*)g|svg|gif)$/,
         use: [{
           loader: 'url-loader',
@@ -45,7 +53,7 @@ module.exports = {
     publicPath: '/js/',
     compress: true,
     port: 8000
-  },  
+  },
   plugins: [
     {
       apply: compiler => {
@@ -56,7 +64,7 @@ module.exports = {
             err => {
               if (!err) {
                 console.log("Copied to site: " + src);
-              } else {                
+              } else {
                 throw "Failed copy to site: " + src
               }
             });
