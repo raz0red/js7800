@@ -28,6 +28,7 @@ addProps(AboutTab.prototype, {
     this.logoEl.style.display = 'inline-block';
     this.videoEl.style.display = 'none';
     this.top.style.opacity = "0";
+    this.top.style.display = 'inline-block';
     if (this.timerId != null) {
       clearTimeout(this.timerId);
       this.timerId = null;
@@ -37,14 +38,13 @@ addProps(AboutTab.prototype, {
     this.played = true;
     this.iframe.setAttribute('src', 'https://player.vimeo.com/video/411891457?autoplay=1&api=1&background=true&mute=0');    
     this.top.style['cursor'] = 'auto';
-    this.top.removeEventListener("click", this.fClick);       
     this.top.style.opacity = ".4";
+    this.top.removeEventListener("click", this.fClick);       
     var that = this;    
     this.timerId = setTimeout(function () {       
-      that.top.style.opacity = "0";
+      that.top.style.display = 'none';
       that.logoEl.style.display = 'none';
-      that.videoEl.style.display = 'inline-block';  
-      that.timerId = setTimeout(function () { that.hideVideo(); }, 50 * 1000 );
+      that.videoEl.style.display = 'inline-block';        
     }, 5 * 1000);    
   },
   onShow: function () {
