@@ -15,3 +15,5 @@
 - Fix bug where you can select the file chooser and cloud download, and drag the file chooser 
   (may be fixed)
 - Remove certain images from pack (controller.png, etc.)
+- Fix drag of logo image
+- Point to my own hosted video (versus the 7800 commercial)

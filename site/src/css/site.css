@@ -12,6 +12,14 @@ body {
   user-select: none;
 }
 
+img {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
 .header {
   top: 0;
   position: fixed;
@@ -544,6 +552,21 @@ p.center {
   border-radius: 12px;
   text-align: center;
   display: inline-block;
+  position: relative;
+}
+
+.about-atari__video {
+  padding: 15px;
+  display: none;
+}
+
+.about-atari__top {
+  position: absolute;
+  width: 240px;
+  height: 180px;
+  z-index: 100;
+  top: 0;
+  left: 0;
 }
 
 b.callout {
