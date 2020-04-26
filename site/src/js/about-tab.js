@@ -19,6 +19,7 @@ function AboutTab() {
     e.preventDefault();
   }
 }
+
 AboutTab.prototype = Object.create(Tab.prototype);
 addProps(AboutTab.prototype, {
   hideVideo: function() {
@@ -31,7 +32,7 @@ addProps(AboutTab.prototype, {
     }
   },
   showVideo: function () {
-    this.iframe.setAttribute('src', '//www.youtube.com/embed/Oxfsb1wvWb8?rel=0&modestbranding=1&autohide=1&mute=1&showinfo=0&controls=0&autoplay=1');    
+    this.iframe.setAttribute('src', 'https://player.vimeo.com/video/411891457?autoplay=1&api=1&background=1&mute=0');    
     this.logoEl.style.display = 'none';
     this.videoEl.style.display = 'inline-block';
     this.top.style['cursor'] = 'auto';
