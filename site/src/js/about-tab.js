@@ -12,7 +12,7 @@ function AboutTab() {
   this.videoEl = null;
   this.iframe = null;
   this.timerId = null;
-  
+
   var that = this;
   this.fClick = function(e) { 
     that.showVideo();
@@ -31,7 +31,7 @@ addProps(AboutTab.prototype, {
     }
   },
   showVideo: function () {
-    this.iframe.setAttribute('src', '//www.youtube.com/embed/Oxfsb1wvWb8?&showinfo=0&controls=0&autoplay=1');    
+    this.iframe.setAttribute('src', '//www.youtube.com/embed/Oxfsb1wvWb8?rel=0&modestbranding=1&autohide=1&mute=1&showinfo=0&controls=0&autoplay=1');    
     this.logoEl.style.display = 'none';
     this.videoEl.style.display = 'inline-block';
     this.top.style['cursor'] = 'auto';
@@ -93,6 +93,7 @@ addProps(AboutTab.prototype, {
     iframe.setAttribute('width', '100%');
     iframe.setAttribute('height', '100%');      
     iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allow', 'autoplay');
     this.videoEl.appendChild(iframe);    
 
     var footer = document.createElement('div');
