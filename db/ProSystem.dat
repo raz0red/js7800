@@ -1260,6 +1260,7 @@ controller2=1
 region=0
 flags=0
 dualanalog=true
+hsc=true
 [dbb493bdc4e98436dbbfd4f2e4413397]
 title=Dig Dog (No Harp) (PAL)
 type=0

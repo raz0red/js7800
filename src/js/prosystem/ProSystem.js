@@ -122,7 +122,7 @@ function prosystem_Reset() {
       Cartridge.Store();
     }
     // Load the high score cartridge
-    //cartridge_LoadHighScoreCart();
+    Events.fireEvent("onHighScoreCartLoaded", Cartridge.LoadHighScoreCart());
     prosystem_cycles = Sally.ExecuteRES();
     prosystem_active = true;
   }

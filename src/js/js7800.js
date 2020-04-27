@@ -11,11 +11,19 @@ import * as Database from "./prosystem/Database.js"
 import * as Riot from "./prosystem/Riot.js"
 import * as ControlsBar from "./web/cbar.js"
 import * as Events from "./events.js"
+import * as Region from "./prosystem/region.js"
 
 import 'fullscreen-api-polyfill'
 
 import css from '../css/js7800.css'
 import logoImageSrc from '../images/Atari_7800_Logo.png'
+
+function HighScoreCallback() {}
+HighScoreCallback.prototype = {
+  getRom: function () { return null; },
+  write: function (address, data) { },
+  loadSram: function () { return null; }
+};
 
 var executeFrame = ProSystem.ExecuteFrame;
 var soundStore = Sound.Store;
@@ -27,6 +35,7 @@ var controlsDiv = null;
 var logoDiv = null;
 var starting = false;
 var currentCart = null;
+var highScoreCallback = new HighScoreCallback();
 var logFps = false;
 
 var messageHandler = function (message) {
@@ -81,6 +90,7 @@ function startEmu(cart, isRestart) {
   console.log("  Hblank: %d", Cartridge.GetHblank());
   console.log("  Crosshair X: %d", Cartridge.GetCrossX());
   console.log("  Crosshair Y: %d", Cartridge.GetCrossY());
+  console.log("  High score cart enabled: %s", Cartridge.IsHighScoreCartEnabled() ? "true" : "false");
 
   // Fire on cartridge loaded event
   Events.fireEvent("onCartridgeLoaded");
@@ -257,7 +267,8 @@ function init(id) {
     Events.fireEvent("init", {
       canvas: canvas,
       controlsDiv: controlsDiv,
-      keyboardData: keyboardData
+      keyboardData: keyboardData,
+      Region: Region
     });
 
     Video.startScreenSnow();
@@ -313,6 +324,13 @@ function handleVisibilityChange() {
   }
 }
 
+function setHighScoreCallback(cb) {
+  highScoreCallback = cb;
+
+  // Fire hs callback changed event
+  Events.fireEvent("highScoreCallbackChanged", highScoreCallback);
+}
+
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 export {
@@ -320,6 +338,8 @@ export {
   startEmulation,
   restart,
   setMessageHandler,
-  setErrorHandler,
-  setLogFps
+  setErrorHandler,  
+  setLogFps,
+  setHighScoreCallback,
+  HighScoreCallback
 }

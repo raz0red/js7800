@@ -81,8 +81,26 @@ function savePrefs() {
     localStorage.setItem("prefs", JSON.stringify(prefs));
   } catch (e) {
     Events.fireEvent("showError", "An error occurred saving preferences: " + e);
-    prefs = {};
   }
+}
+
+function writeValue(name, value) {
+  try {
+    localStorage.setItem(name, value);
+  } catch (e) {
+    Events.fireEvent("showError", 
+      "An error occurred attempting to save '" + name + "': " + e);
+  }
+}
+
+function readValue(name) {
+  try {
+    return localStorage.getItem(name);
+  } catch (e) {
+    Events.fireEvent("showError", 
+    "An error occurred attempting to save '" + name + "': " + e);
+  }
+  return null;
 }
 
 Events.addListener(new Events.Listener("init",
@@ -93,5 +111,7 @@ Events.addListener(new Events.Listener("init",
 
 export {
   loadPrefs,
-  savePrefs
+  savePrefs,
+  writeValue,
+  readValue
 }

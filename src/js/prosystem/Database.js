@@ -111,6 +111,10 @@ function database_Load(digest) {
       if (swapbuttons !== undefined) {
         Cartridge.SetSwapButtons(swapbuttons == 't');
       }
+      var highscorecart = entry['hs'];
+      if (highscorecart !== undefined ) {
+        Cartridge.SetHighScoreCartEnabled(highscorecart == 't');
+      }
     }      
     return cart_in_db;
   }

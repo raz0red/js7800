@@ -42,6 +42,9 @@ var xm_IsMemEnabled = Xm.IsMemEnabled;
 var xm_Read = Xm.Read;
 var xm_Write = Xm.Write;
 
+var highScoreCartEnabled = false;
+var highScoreCallback = null;
+
 var INPTCTRL = 1;
 var INPT0 = 8;
 var INPT1 = 9;
@@ -177,9 +180,12 @@ function memory_Write(address, data) {
 
   if (!memory_rom[address]) {
 
-    // Debug, track writes to high score SRAM
-    if (address >= 0x1000 && address <= 0x17FF) {
+    // Track writes to high score SRAM
+    if (highScoreCartEnabled && ((address >= 0x1000) && (address <= 0x17FF))) {
       hs_sram_write_count++;
+      if (highScoreCallback) {
+        highScoreCallback.write(address, data);
+      }
     }
 
     switch (address) {
@@ -309,6 +315,20 @@ function OnCartridgeLoaded() {
 
 Events.addListener(
   new Events.Listener("onCartridgeLoaded", OnCartridgeLoaded));
+
+Events.addListener(
+  new Events.Listener("onHighScoreCartLoaded", 
+  function(loaded) {  
+    highScoreCartEnabled = loaded;
+  }
+));
+
+Events.addListener(
+  new Events.Listener("highScoreCallbackChanged",
+  function (hsCallback) { 
+    highScoreCallback = hsCallback;
+  }
+));
 
 export {
   memory_ClearROM as ClearROM,

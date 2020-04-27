@@ -29,8 +29,18 @@ import * as Events from "../events.js"
 
 var memory_WriteROM = null;
 var memory_ClearROM = null;
+var memory_Write = null;
+
+// #define HS_SRAM_START 0x1000
+var HS_SRAM_START = 0x1000;
+// // The size of the high score cartridge SRAM
+// #define HS_SRAM_SIZE 2048
+var HS_SRAM_SIZE = 2048;
+
+var highScoreCallback = null;
 
 var HBLANK_DEFAULT = 34;
+var REGION_NTSC = null; 
 var CARTRIDGE_TYPE_NORMAL = 0;
 var CARTRIDGE_TYPE_SUPERCART = 1;
 var CARTRIDGE_TYPE_SUPERCART_LARGE = 2;
@@ -94,9 +104,10 @@ var cartridge_hsc_enabled = false;
 // SRAM should be persisted when the cartridge is unloaded)
 //bool high_score_set = false;
 //  var high_score_set = false;
+
 // Whether the high score cart has been loaded
 //static bool high_score_cart_loaded = false;
-//  var high_score_cart_loaded = false;
+var high_score_cart_loaded = false;
 
 //static byte* cartridge_buffer = NULL;
 var cartridge_buffer = null; // Will be an Array()
@@ -578,7 +589,7 @@ function cartridge_IsLoaded() {
 // ----------------------------------------------------------------------------
 //void cartridge_Release() {
 function cartridge_Release() {
-//    high_score_cart_loaded = false;
+  high_score_cart_loaded = false;
 
   //if (cartridge_buffer != NULL) {
   if (cartridge_buffer != null) {
@@ -615,6 +626,45 @@ function cartridge_Release() {
     cartridge_swap_buttons = false;
     cartridge_hsc_enabled = false;
   }
+}
+
+function cartridge_LoadHighScoreCart() {
+
+  if (!cartridge_hsc_enabled || (cartridge_region != REGION_NTSC)) {
+    // Only load the cart if it is enabled and the region is NTSC
+    return false;
+  }
+
+  var high_score_buffer = highScoreCallback.getRom();
+  if (high_score_buffer != null) {
+    console.log("Found high score cartridge.");
+    var digest = md5(high_score_buffer);
+    if (digest == "c8a73288ab97226c52602204ab894286") {
+
+      //cartridge_LoadHighScoreSram();
+      var sram = highScoreCallback.loadSram();
+      if (sram) {
+        for (var i = 0; i < sram.length && i < HS_SRAM_SIZE; i++) {
+          memory_Write(HS_SRAM_START + i, sram[i]);
+        }
+      }
+
+      for (var i = 0; i < high_score_buffer.length; i++)
+      {
+        memory_Write(0x3000 + i, high_score_buffer.charCodeAt(i));
+      }
+      high_score_cart_loaded = true;
+    }
+    else {
+      console.log("High score cartridge hash is invalid.");
+    }
+    return high_score_cart_loaded;
+  }
+  else {
+    console.log("Unable to locate high score cartridge.");
+  }
+
+  return false;
 }
 
 function GetRegion() { 
@@ -757,12 +807,27 @@ function SetSwapButtons(val) {
   cartridge_swap_buttons = val;
 }
 
-function init() {
-  memory_WriteROM = Memory.WriteROM;
-  memory_ClearROM = Memory.ClearROM;
+function SetHighScoreCartEnabled(val) {
+  cartridge_hsc_enabled = val;
 }
 
-Events.addListener(new Events.Listener("init", init));
+function IsHighScoreCartEnabled() {
+  return cartridge_hsc_enabled;
+}
+
+function init(e) {
+  REGION_NTSC = e.Region.REGION_NTSC;
+
+  memory_WriteROM = Memory.WriteROM;
+  memory_ClearROM = Memory.ClearROM;
+  memory_Write = Memory.Write;
+}
+
+Events.addListener(new Events.Listener("init",
+  function (event) { init(event); }));
+
+Events.addListener(new Events.Listener("highScoreCallbackChanged",
+  function (hsCallback) { highScoreCallback = hsCallback }));
 
 export {
   GetRegion,
@@ -800,11 +865,14 @@ export {
   SetLeftSwitch,
   SetRightSwitch,
   SetSwapButtons,
+  SetHighScoreCartEnabled,
+  IsHighScoreCartEnabled,
   cartridge_Load as Load,
   cartridge_IsLoaded as IsLoaded,
   cartridge_Write as Write,
   cartridge_Store as Store,
-  cartridge_Release as Release
+  cartridge_Release as Release,
+  cartridge_LoadHighScoreCart as LoadHighScoreCart
 }
 
 // // The memory location of the high score cartridge SRAM

@@ -5,6 +5,7 @@ import * as Events from "./events.js"
 import * as Keyboard from "./web/kb.js"
 import * as Keys from "./web/keys.js"
 import * as Pads from "./web/pad.js"
+import * as Memory from "./prosystem/Memory.js"
 import { md5 } from "./3rdparty/md5.js"
 
 export { 
@@ -15,5 +16,6 @@ export {
     Keyboard,
     Keys,
     Pads,
+    Memory,
     md5
 }

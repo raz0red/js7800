@@ -47,6 +47,8 @@ lineReader.on('line', function (line) {
           key = 'f';
         else if (key == 'swapbuttons')
           key = 'sb';                    
+          else if (key == 'hsc')
+          key = 'hs';                    
         var value = values[1].replace("'", "\\'");
         value = value.replace('"', '\\"');
         if (value == 'true')
