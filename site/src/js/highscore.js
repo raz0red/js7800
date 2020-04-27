@@ -11,8 +11,10 @@ var SRAM_SCORE_START = 0x113D;
 var WRITE_DELAY = 5000; // 5 seconds
 var STORAGE_KEY = "highScoreSRAM";
 
-var highScoreRom = null;
 var js7800 = null;
+var debug = false;
+
+var highScoreRom = null;
 var hsCallback = null;
 var sram = new Array(SRAM_SIZE);
 var pending = 0;
@@ -22,7 +24,8 @@ function generateDefaultSram() {
   for (var i = 0; i < sram.length; i++) {
     sram[i] = 0;
   }
-  var h = "AABog6pVnAIJEhsSBBUEDRsECAYHExsODhwLDgIACx8AAAAAAAAAABc";
+  var h = "AABog6pVnAILDgIACx0LBAADBBEBDgARAx8AAAAAAAAAAAAAAAAAABE";
+  //var h = "AABog6pVnAIJEhsSBBUEDRsECAYHExsODhwLDgIACx8AAAAAAAAAABc";
   for (var i = 0; i < 183; i++) h += "A";
   h += "B";
   for (var i = 0; i < 45; i++) h += '/f39';
@@ -55,7 +58,9 @@ function onSramWrite(address, data) {
 
   if (address >= SRAM_SCORE_START) {
     pending++;
-    console.log("HSC pending write: 0x" + address.toString(16) + " = 0x" + data.toString(16));  
+    if (debug) {
+      console.log("HSC pending write: 0x" + address.toString(16) + " = 0x" + data.toString(16));  
+    }
     if (timeoutId == null) {
       timeoutId = setTimeout( function() {
           timeoutId = null;
@@ -94,6 +99,9 @@ function init(event) {
   js7800 = event.js7800;
   var Main = js7800.Main;
 
+  // Set the debug flag 
+  debug = event.debug;
+
   // Generate the default SRAM
   generateDefaultSram();
 
@@ -113,15 +121,17 @@ function init(event) {
     loadSram: function () { return loadSram(); }
   });
   Main.setHighScoreCallback(hsCallback);
+
+  // Add ability to dump state if in debug mode
+  if (debug) {
+    document.addEventListener('keydown',
+      function (e) {
+        if (e.keyCode == 119 /* F8 */) {
+          console.log(sramToBase64());
+        }
+      });
+  }
 }
 
 Events.addListener(
   new Events.Listener( "init", function (event) {init(event) }));
-
-// document.addEventListener('keydown', 
-//   function(e) {
-//     if (e.keyCode == 119 /* F8 */) {
-//       console.log(sramToBase64());
-//     }
-//   }
-// );

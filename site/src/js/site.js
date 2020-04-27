@@ -16,6 +16,7 @@ var showMessage = Message.showMessage;
 var hideMessage = Message.hideMessage;
 var showErrorMessage = Message.showErrorMessage;
 var getRequestParameter = Util.getRequestParameter;
+var debug = false;
 
 var js7800 = null;
 var romList = null;
@@ -128,14 +129,17 @@ function handleRequestParameters() {
     var rom = getRequestParameter("rom");
     if (rom) {
       loadFromUrl(rom);
-    }
-  
-    // Log FPS
-    var logFps = getRequestParameter("fps");
-    if (logFps) {
-      logFps = logFps.toLowerCase();
-      main.setLogFps(logFps === "1" || logFps == "true");
     }  
+}
+
+function checkDebugParam() {
+  // Log FPS
+  var debugParam = getRequestParameter("debug");
+  if (debugParam) {
+    debugParam = debugParam.toLowerCase();
+   return (debugParam === "1" || debugParam == "true");
+  }    
+  return false;
 }
 
 function init(in7800) {
@@ -168,13 +172,18 @@ function init(in7800) {
   romList = new RomList(
     [document.getElementById('cartselect__select'), fsSelect]);
 
+  // Check whether debug has been set
+  debug = checkDebugParam();
+  main.setLogFps(debug);
+
   // Fire init event
   Events.fireEvent("init", {
     js7800: js7800,
     romList: romList,
     loadFromUrl: loadFromUrl,
     startEmulation: startEmulation,
-    errorHandler: errorHandler
+    errorHandler: errorHandler,
+    debug: debug
   });
 
   // Show message event listener
