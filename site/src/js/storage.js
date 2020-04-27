@@ -8,6 +8,20 @@ var CONSOLE_MAP_NAME = "consoleMap";
 var js7800 = null;
 var kb = null;
 
+var localStorageEnabled = false;
+
+function checkLocalStorageAvailable(){
+  var test = 'test';
+  try {
+      localStorage.setItem(test, test);
+      localStorage.removeItem(test);
+      localStorageEnabled = true;
+      console.log("Local storage is available.");
+  } catch(e) {
+    console.log("Local storage is not available.");
+  }
+}
+
 function storeKeyboardMappings(name, map) {
   prefs[name] = {
     left: map.getLeft(),
@@ -59,6 +73,11 @@ function loadConsoleMappings() {
 }
 
 function loadPrefs() {
+  if (!localStorageEnabled) {
+    console.log("Unable to load preferences, local storage disabled.");
+    return;
+  }
+
   try {
     var prefsStr = localStorage.getItem("prefs");
     if (prefsStr) {
@@ -74,6 +93,11 @@ function loadPrefs() {
 }
 
 function savePrefs() {
+  if (!localStorageEnabled) {
+    console.log("Unable to save preferences, local storage disabled.");
+    return;
+  }
+
   try {
     storeKeyboardMappings(P1_MAP_NAME, kb.p1KeyMap);
     storeKeyboardMappings(P2_MAP_NAME, kb.p2KeyMap);
@@ -85,6 +109,11 @@ function savePrefs() {
 }
 
 function writeValue(name, value) {
+  if (!localStorageEnabled) {
+    console.log("Unable to write '" + name + "', local storage disabled.");
+    return;
+  }
+
   try {
     localStorage.setItem(name, value);
   } catch (e) {
@@ -94,11 +123,16 @@ function writeValue(name, value) {
 }
 
 function readValue(name) {
+  if (!localStorageEnabled) {
+    console.log("Unable to read '" + name + "', local storage disabled.");
+    return;
+  }
+
   try {
     return localStorage.getItem(name);
   } catch (e) {
     Events.fireEvent("showError", 
-    "An error occurred attempting to save '" + name + "': " + e);
+      "An error occurred attempting to load '" + name + "': " + e);
   }
   return null;
 }
@@ -107,6 +141,7 @@ Events.addListener(new Events.Listener("init",
   function (event) {
     js7800 = event.js7800;
     kb = js7800.Keyboard;
+    checkLocalStorageAvailable();    
   }));
 
 export {
