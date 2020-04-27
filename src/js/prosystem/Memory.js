@@ -78,7 +78,7 @@ var memory_ram = new Array(MEMORY_SIZE);
 var memory_rom = new Array(MEMORY_SIZE);
 
 //int hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
-var hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
+//var hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
 
 /** Shadow of Cartridge */
 var cartridge_pokey = false;
@@ -101,7 +101,7 @@ function memory_Reset() {
   }
 
   // Debug, reset write count to High Score SRAM
-  hs_sram_write_count = 0;
+  //hs_sram_write_count = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -182,7 +182,7 @@ function memory_Write(address, data) {
 
     // Track writes to high score SRAM
     if (highScoreCartEnabled && ((address >= 0x1000) && (address <= 0x17FF))) {
-      hs_sram_write_count++;
+      //hs_sram_write_count++;
       if (highScoreCallback) {
         highScoreCallback.write(address, data);
       }

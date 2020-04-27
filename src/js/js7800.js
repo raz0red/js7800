@@ -11,7 +11,7 @@ import * as Database from "./prosystem/Database.js"
 import * as Riot from "./prosystem/Riot.js"
 import * as ControlsBar from "./web/cbar.js"
 import * as Events from "./events.js"
-import * as Region from "./prosystem/region.js"
+import * as Region from "./prosystem/Region.js"
 
 import 'fullscreen-api-polyfill'
 
