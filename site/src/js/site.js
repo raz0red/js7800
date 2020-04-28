@@ -183,8 +183,12 @@ function init(in7800) {
     loadFromUrl: loadFromUrl,
     startEmulation: startEmulation,
     errorHandler: errorHandler,
-    debug: debug
+    debug: debug,
+    HighScore: HighScore
   });
+
+  // Fire post init event
+  Events.fireEvent("postInit", null);
 
   // Show message event listener
   Events.addListener(new Events.Listener("showMessage",

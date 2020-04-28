@@ -2,12 +2,15 @@ import * as Events from "./events.js"
 import * as Util from "./util.js"
 import * as Storage from "./storage.js"
 import highScoreRom64 from "../roms/Highscore.rom"
+import * as HsDecode from "./hs-encode-decode.js"
 
 var addProps = Util.addProps;
 
 var SRAM_SIZE = 2048;
 var SRAM_OFFSET = 0x1000;
 var SRAM_SCORE_OFFSET = 0x113D;
+var LOCAL_ID_FUNC = 0x7;
+var ID_FUNC_CANARY = 0xFF;
 
 var WRITE_DELAY = 2000; // 2 seconds
 var STORAGE_KEY = "highScoreSRAM";
@@ -17,21 +20,23 @@ var debug = false;
 
 var highScoreRom = null;
 var hsCallback = null;
+
 var pending = 0;
 var timeoutId = null;
 
 var sram = new Array(SRAM_SIZE);
 
-function generateDefaultSram() {
-  for (var i = 0; i < sram.length; i++) {
-    sram[i] = 0;
+function generateDefaultSram(s) {
+  for (var i = 0; i < s.length; i++) {
+    s[i] = 0;
   }
   var h = "AABog6pVnAILDgIACx0LBAADBBEBDgARAx8AAAAAAAAAAAAAAAAAABE";
   for (var i = 0; i < 183; i++) h += "A";
   h += "B";
   for (var i = 0; i < 45; i++) h += '/f39';
   h += "/f38";
-  base64toSram(h);
+
+  base64toSram(h, s);
 }
 
 function sramToBase64(s) {
@@ -42,11 +47,12 @@ function sramToBase64(s) {
   return btoa(out);
 }
 
-function base64toSram(h) {
+function base64toSram(h, s) {
   var b = atob(h);
   for (var i = 0; i < b.length; i++) {
-    sram[i] = b.charCodeAt(i);
+    s[i] = b.charCodeAt(i);
   }
+  s[LOCAL_ID_FUNC] = ID_FUNC_CANARY;
 }
 
 function onCartLoaded() {
@@ -86,7 +92,7 @@ function loadSram() {
   var h = Storage.readValue(STORAGE_KEY);
   if (h) {
     console.log("Found High Score SRAM in local storage.");
-    base64toSram(h);
+    base64toSram(h, sram);
   } else {
     console.log("Not able to find High Score SRAM in local storage.");
   }
@@ -117,8 +123,8 @@ function init(event) {
   debug = event.debug;
 
   // Generate the default SRAM
-  generateDefaultSram();
-
+  generateDefaultSram(sram);
+  
   // Get high score ROM
   highScoreRom = atob(highScoreRom64.split(',')[1]);
   console.log("High score rom: " + js7800.md5(highScoreRom));
@@ -140,7 +146,10 @@ function init(event) {
   if (debug) {
     document.addEventListener('keydown', function (e) {
       if (e.keyCode == 119 /* F8 */) {
+        console.log("ID Func changed: " + (sram[LOCAL_ID_FUNC] != ID_FUNC_CANARY));
         console.log(sramToBase64(sram));
+        // TODO: Remove 
+        HsDecode.dumpDetails(sram);
       }
     });
   }
@@ -148,3 +157,18 @@ function init(event) {
 
 Events.addListener(
   new Events.Listener("init", function (event) { init(event) }));
+
+Events.addListener(
+  new Events.Listener("postInit", function () { 
+      // TODO: Remove
+      HsDecode.generateTestSram(sram);
+  }
+));
+  
+
+export {
+  SRAM_SIZE,
+  generateDefaultSram,
+  sramToBase64,
+  base64toSram
+}
