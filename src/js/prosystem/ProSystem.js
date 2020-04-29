@@ -100,7 +100,7 @@ Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
 // Reset
 // ----------------------------------------------------------------------------
 //void prosystem_Reset() {
-function prosystem_Reset() {
+function prosystem_Reset(postResetCallback) {
   if (Cartridge.IsLoaded()) {
     maria_scanline = 1;
     prosystem_paused = false;
@@ -121,10 +121,16 @@ function prosystem_Reset() {
     else {
       Cartridge.Store();
     }
-    // Load the high score cartridge
-    Events.fireEvent("onHighScoreCartLoaded", Cartridge.LoadHighScoreCart());
-    prosystem_cycles = Sally.ExecuteRES();
-    prosystem_active = true;
+
+    var postHsLoad = function(isSuccess) {
+      Events.fireEvent("onHighScoreCartLoaded", isSuccess);
+      prosystem_cycles = Sally.ExecuteRES();
+      prosystem_active = true;  
+      // Invoke post reset callback
+      postResetCallback();
+    }
+    // Load high score cart w/ callback
+    Cartridge.LoadHighScoreCart(postHsLoad);
   }
 }
 

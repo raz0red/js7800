@@ -9,33 +9,34 @@ var addProps = Util.addProps;
 var SRAM_SIZE = 2048;
 var SRAM_OFFSET = 0x1000;
 var SRAM_SCORE_OFFSET = 0x113D;
-var LOCAL_ID_FUNC = 0x7;
-var ID_FUNC_CANARY = 0xFF;
 
 var WRITE_DELAY = 2000; // 2 seconds
 var STORAGE_KEY = "highScoreSRAM";
 
 var js7800 = null;
+var Main = null;
 var debug = false;
 
 var highScoreRom = null;
+var hsNullCallback = null;
 var hsCallback = null;
 
 var pending = 0;
 var timeoutId = null;
+
+//var isGlobal = true;
 
 var sram = new Array(SRAM_SIZE);
 
 function generateDefaultSram(s) {
   for (var i = 0; i < s.length; i++) {
     s[i] = 0;
-  }
+  }  
   var h = "AABog6pVnAILDgIACx0LBAADBBEBDgARAx8AAAAAAAAAAAAAAAAAABE";
   for (var i = 0; i < 183; i++) h += "A";
   h += "B";
   for (var i = 0; i < 45; i++) h += '/f39';
   h += "/f38";
-
   base64toSram(h, s);
 }
 
@@ -52,11 +53,16 @@ function base64toSram(h, s) {
   for (var i = 0; i < b.length; i++) {
     s[i] = b.charCodeAt(i);
   }
-  s[LOCAL_ID_FUNC] = ID_FUNC_CANARY;
 }
 
 function onCartLoaded() {
+  // Save any pending writes
   saveSram();
+
+  // Set the high score callback appropriately
+  Main.setHighScoreCallback(
+    Storage.isLocalStorageEnabled() ? 
+      hsCallback : hsNullCallback);
 }
 
 function onSramWrite(address, data) {
@@ -87,16 +93,38 @@ function onSramWrite(address, data) {
   }
 }
 
-function loadSram() {
+function loadSramLocal(success, failure) {
   console.log("Reading High Score SRAM from local storage.");
-  var h = Storage.readValue(STORAGE_KEY);
-  if (h) {
-    console.log("Found High Score SRAM in local storage.");
-    base64toSram(h, sram);
-  } else {
-    console.log("Not able to find High Score SRAM in local storage.");
-  }
-  return sram;
+  try {
+    var h = Storage.readValue(STORAGE_KEY, true);
+    if (h) {
+      console.log("Found High Score SRAM in local storage.");
+      base64toSram(h, sram);
+    } else {
+      console.log("Not able to find High Score SRAM in local storage.");
+    }
+    success(sram);  
+  } catch (e) {
+    failure(e);
+  }  
+}
+
+function loadSram(postLoadCallback) {
+  var fSuccess = function (sram) {
+    postLoadCallback(sram);
+  };
+  var fFailure = function(message) {
+    console.log(message);
+    Events.fireEvent("showError", message);       
+    postLoadCallback(null);        
+  };
+  
+  loadSramLocal(fSuccess, fFailure);
+}
+
+function saveSramLocal() {
+  console.log("Writing High Score SRAM to local storage.");
+  Storage.writeValue(STORAGE_KEY, sramToBase64(sram), true);
 }
 
 function saveSram() {
@@ -106,10 +134,15 @@ function saveSram() {
   }
 
   if (pending) {
-    console.log("HSC Scores have changed, saving.");
-    console.log("Writing High Score SRAM to local storage.");
-    Storage.writeValue(STORAGE_KEY, sramToBase64(sram));
     pending = 0;
+    console.log("HSC Scores have changed, saving.");    
+
+    try {
+      saveSramLocal();
+    } catch (e) {
+      console.log(e);
+      Events.fireEvent("showError", e);   
+    }      
   } else {
     console.log("HSC Scores have not changed, ignoring.");
   }
@@ -117,7 +150,7 @@ function saveSram() {
 
 function init(event) {
   js7800 = event.js7800;
-  var Main = js7800.Main;
+  Main = js7800.Main;
 
   // Set the debug flag 
   debug = event.debug;
@@ -134,19 +167,18 @@ function init(event) {
     new js7800.Events.Listener("onCartridgeLoaded", onCartLoaded));
 
   // Create and set high score callback
+  hsNullCallback = new Main.HighScoreCallback();
   hsCallback = new Main.HighScoreCallback();
   addProps(hsCallback, {
     getRom: function () { return highScoreRom; },
     write: function (address, data) { onSramWrite(address, data); },
-    loadSram: function () { return loadSram(); }
-  });
-  Main.setHighScoreCallback(hsCallback);
+    loadSram: function (postLoadCallback) { loadSram(postLoadCallback); }
+  });  
 
   // Add ability to dump state if in debug mode
   if (debug) {
     document.addEventListener('keydown', function (e) {
       if (e.keyCode == 119 /* F8 */) {
-        console.log("ID Func changed: " + (sram[LOCAL_ID_FUNC] != ID_FUNC_CANARY));
         console.log(sramToBase64(sram));
         // TODO: Remove 
         HsDecode.dumpDetails(sram);
@@ -163,8 +195,7 @@ Events.addListener(
       // TODO: Remove
       HsDecode.generateTestSram(sram);
   }
-));
-  
+));  
 
 export {
   SRAM_SIZE,

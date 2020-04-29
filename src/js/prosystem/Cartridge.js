@@ -628,43 +628,52 @@ function cartridge_Release() {
   }
 }
 
-function cartridge_LoadHighScoreCart() {
-
+function cartridge_LoadHighScoreCart(callback) {
   if (!cartridge_hsc_enabled || (cartridge_region != REGION_NTSC)) {
     // Only load the cart if it is enabled and the region is NTSC
-    return false;
+    console.log(cartridge_hsc_enabled ? 
+      "Not loading high score cartridge, PAL region." :
+      "High score cartridge is disabled (via db and cart header)."
+    );
+    callback(false);
+    return;
   }
 
+  // Load high score cartridge
   var high_score_buffer = highScoreCallback.getRom();
-  if (high_score_buffer != null) {
-    console.log("Found high score cartridge.");
-    var digest = md5(high_score_buffer);
-    if (digest == "c8a73288ab97226c52602204ab894286") {
-
-      //cartridge_LoadHighScoreSram();
-      var sram = highScoreCallback.loadSram();
-      if (sram) {
-        for (var i = 0; i < sram.length && i < HS_SRAM_SIZE; i++) {
-          memory_Write(HS_SRAM_START + i, sram[i]);
-        }
-      }
-
-      for (var i = 0; i < high_score_buffer.length; i++)
-      {
-        memory_Write(0x3000 + i, high_score_buffer.charCodeAt(i));
-      }
-      high_score_cart_loaded = true;
-    }
-    else {
-      console.log("High score cartridge hash is invalid.");
-    }
-    return high_score_cart_loaded;
-  }
-  else {
+  if (high_score_buffer == null) {
     console.log("Unable to locate high score cartridge.");
+    callback(false);
+    return;
+  }
+  console.log("Found high score cartridge.");
+
+  // Validate high score cartridge hash
+  var digest = md5(high_score_buffer);
+  if (digest != "c8a73288ab97226c52602204ab894286") {
+    console.log("High score cartridge hash is invalid.");
+    callback(false);
+    return;
   }
 
-  return false;
+  // Post SRAM load callback
+  var postLoadCallback = function(sram) {
+    if (sram) {
+      for (var i = 0; i < sram.length && i < HS_SRAM_SIZE; i++) {
+        memory_Write(HS_SRAM_START + i, sram[i]);
+      }
+      for (var i = 0; i < high_score_buffer.length; i++) {
+        memory_Write(0x3000 + i, high_score_buffer.charCodeAt(i));
+      }      
+      high_score_cart_loaded = true;  
+    }
+    console.log("High score cart loaded: " + high_score_cart_loaded);
+
+    // Invoke callback
+    callback(high_score_cart_loaded);
+  }
+  // Load SRAM with callback
+  highScoreCallback.loadSram(postLoadCallback);
 }
 
 function GetRegion() { 

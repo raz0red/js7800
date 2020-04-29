@@ -22,7 +22,7 @@ function HighScoreCallback() {}
 HighScoreCallback.prototype = {
   getRom: function () { return null; },
   write: function (address, data) { },
-  loadSram: function () { return null; }
+  loadSram: function (postLoadCallback) { postLoadCallback(null); }
 };
 
 var executeFrame = ProSystem.ExecuteFrame;
@@ -99,76 +99,81 @@ function startEmu(cart, isRestart) {
   Input.resetKeyboardData();
 
   init();
-  ProSystem.Reset();
-  starting = false;
 
-  var start = Date.now();
-  var fc = 0;
-  var frequency = ProSystem.GetFrequency();
-  var debugFrequency = frequency * 10;
-  var frameTicks = (1000.0 / frequency) /*| 0*/;
-  var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
-  var isActive = ProSystem.IsActive;
-  var isPaused = ProSystem.IsPaused;
+  // Callback after reset
+  var postResetCallback = function() {
+    starting = false;
 
-  // Enable mouse tracking if lightgun game
-  Mouse.enableMouseTracking(Cartridge.IsLightGunEnabled());
+    var start = Date.now();
+    var fc = 0;
+    var frequency = ProSystem.GetFrequency();
+    var debugFrequency = frequency * 10;
+    var frameTicks = (1000.0 / frequency) /*| 0*/;
+    var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
+    var isActive = ProSystem.IsActive;
+    var isPaused = ProSystem.IsPaused;
 
-  console.log("Frame ticks: " + frameTicks);
-  console.log("Frequency: " + frequency);
+    // Enable mouse tracking if lightgun game
+    Mouse.enableMouseTracking(Cartridge.IsLightGunEnabled());
 
-  var f = function () {
-    if (isActive()) {
+    console.log("Frame ticks: " + frameTicks);
+    console.log("Frequency: " + frequency);
 
-      if (!isPaused()) {
-        updateInput();
-        executeFrame(keyboardData);
-        flipImage();
-        soundStore();
+    var f = function () {
+      if (isActive()) {
 
-        nextTimestamp += frameTicks;
-        var now = Date.now();
-        if (((nextTimestamp + adjustTolerance) < now) || forceAdjustTimestamp) {
-          forceAdjustTimestamp = false;
-          nextTimestamp = now;
-          fc = 0;
-          start = now;
-          console.log("adjusted next timestamp.");
-        }
-        var wait = (nextTimestamp - now);
-        if (wait > 0) {
-          setTimeout(function () { requestAnimationFrame(f); }, wait);
-        } else {
-          requestAnimationFrame(f);
-        }
+        if (!isPaused()) {
+          updateInput();
+          executeFrame(keyboardData);
+          flipImage();
+          soundStore();
 
-        fc++;
-        if ((fc % debugFrequency) == 0) {
-          var elapsed = Date.now() - start;
-          if (logFps) {
-            console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
-              (1000.0 / (elapsed / fc)).toFixed(2),
-              (Riot.GetTimerCount() % 1000),
-              ProSystem.GetDebugWsync() ? 1 : 0,
-              ProSystem.GetDebugWsyncCount(),
-              ProSystem.GetDebugCycleStealing() ? 1 : 0,
-              ProSystem.GetDebugMariaCycles(),
-              ProSystem.GetDebug6502Cycles(),
-              ProSystem.GetDebugSavedCycles());
+          nextTimestamp += frameTicks;
+          var now = Date.now();
+          if (((nextTimestamp + adjustTolerance) < now) || forceAdjustTimestamp) {
+            forceAdjustTimestamp = false;
+            nextTimestamp = now;
+            fc = 0;
+            start = now;
+            console.log("adjusted next timestamp.");
           }
-          start = Date.now();
-          fc = 0;
+          var wait = (nextTimestamp - now);
+          if (wait > 0) {
+            setTimeout(function () { requestAnimationFrame(f); }, wait);
+          } else {
+            requestAnimationFrame(f);
+          }
+
+          fc++;
+          if ((fc % debugFrequency) == 0) {
+            var elapsed = Date.now() - start;
+            if (logFps) {
+              console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
+                (1000.0 / (elapsed / fc)).toFixed(2),
+                (Riot.GetTimerCount() % 1000),
+                ProSystem.GetDebugWsync() ? 1 : 0,
+                ProSystem.GetDebugWsyncCount(),
+                ProSystem.GetDebugCycleStealing() ? 1 : 0,
+                ProSystem.GetDebugMariaCycles(),
+                ProSystem.GetDebug6502Cycles(),
+                ProSystem.GetDebugSavedCycles());
+            }
+            start = Date.now();
+            fc = 0;
+          }
+        } else {
+          setTimeout(function () {
+            forceAdjustTimestamp = true;
+            requestAnimationFrame(f);
+          }, 100);
         }
-      } else {
-        setTimeout(function () {
-          forceAdjustTimestamp = true;
-          requestAnimationFrame(f);
-        }, 100);
       }
-    }
+    };
+    var nextTimestamp = Date.now() + frameTicks;
+    setTimeout(function () { requestAnimationFrame(f) }, frameTicks);
   };
-  var nextTimestamp = Date.now() + frameTicks;
-  setTimeout(function () { requestAnimationFrame(f) }, frameTicks);
+  // Reset w/ callback
+  ProSystem.Reset(postResetCallback);
 }
 
 function restart() {

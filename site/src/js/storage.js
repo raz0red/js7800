@@ -108,33 +108,57 @@ function savePrefs() {
   }
 }
 
-function writeValue(name, value) {
+function writeValue(name, value, throwError) {
   if (!localStorageEnabled) {
-    console.log("Unable to write '" + name + "', local storage disabled.");
-    return;
+    var message = "Unable to write '" + name + "', local storage disabled.";
+    if (throwError) {
+      throw message;
+    } else {
+      console.log(message);
+      return false;
+    }
   }
 
   try {
     localStorage.setItem(name, value);
   } catch (e) {
-    Events.fireEvent("showError", 
-      "An error occurred attempting to save '" + name + "': " + e);
+    var message = "An error occurred attempting to save '" + name + "': " + e;
+    if (throwError) {
+      throw message;
+    } else {
+      Events.fireEvent("showError", message);
+      return false;
+    }
   }
+  return true;
 }
 
-function readValue(name) {
+function readValue(name, throwError) {
   if (!localStorageEnabled) {
-    console.log("Unable to read '" + name + "', local storage disabled.");
-    return;
+    var message = "Unable to read '" + name + "', local storage disabled.";
+    if (throwError) {
+      throw message;
+    } else {
+      console.log(message);
+      return;
+    }
   }
 
   try {
     return localStorage.getItem(name);
   } catch (e) {
-    Events.fireEvent("showError", 
-      "An error occurred attempting to load '" + name + "': " + e);
+    var message = "An error occurred attempting to load '" + name + "': " + e;
+    if (throwError) {
+      throw message;
+    } else {
+      Events.fireEvent("showError", message);
+    }
   }
   return null;
+}
+
+function isLocalStorageEnabled() {
+  return localStorageEnabled;
 }
 
 Events.addListener(new Events.Listener("init",
@@ -148,5 +172,6 @@ export {
   loadPrefs,
   savePrefs,
   writeValue,
-  readValue
+  readValue,
+  isLocalStorageEnabled
 }
