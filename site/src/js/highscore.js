@@ -227,6 +227,11 @@ function init(event) {
   // Set the debug flag 
   debug = event.debug;
 
+  // Set global high score 
+  if (event.globalHighScores && (event.globalHighScores == "true")) {
+    isGlobal = true;
+  }
+
   // Generate the default SRAM
   generateDefaultSram(sram);
   

@@ -184,7 +184,8 @@ function init(in7800) {
     startEmulation: startEmulation,
     errorHandler: errorHandler,
     debug: debug,
-    HighScore: HighScore
+    HighScore: HighScore,
+    globalHighScores: getRequestParameter("ghs")
   });
 
   // Show error event listener
