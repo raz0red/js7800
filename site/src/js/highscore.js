@@ -23,6 +23,7 @@ var hsCallback = null;
 
 var pending = 0;
 var timeoutId = null;
+var sessionId = null;
 
 //var isGlobal = true;
 
@@ -58,6 +59,9 @@ function base64toSram(h, s) {
 function onCartLoaded() {
   // Save any pending writes
   saveSram();
+
+  // Generate a new GUID
+  sessionId = Util.generateUuid();
 
   // Set the high score callback appropriately
   Main.setHighScoreCallback(
