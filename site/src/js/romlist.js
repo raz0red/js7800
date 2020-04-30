@@ -140,7 +140,7 @@ function RomList(selects) {
     this.fromUrl = function (url) {
       ctx.loadCount++;
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', Util.addUrlPrefix(url));
+      xhr.open('GET', Util.addRomUrlPrefix(url));
       xhr.onload = function () {
         try {
           if (xhr.status >= 300 || xhr.stats < 200) {
@@ -155,6 +155,9 @@ function RomList(selects) {
         }
         postRead();
       };
+      xhr.onerror = function() {
+        console.log('Error attempting to read rom list.');
+      }
       xhr.send();
     }
   }

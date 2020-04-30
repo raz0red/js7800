@@ -2146,6 +2146,7 @@ controller2=1
 region=0
 flags=0
 xm=true
+hsc=true
 [32f1a1b5a7e3b4493c3b7b637aeea7d8]
 title=Scrapyard Dog Graphics-Life Hack
 type=4

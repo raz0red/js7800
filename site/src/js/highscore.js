@@ -2,7 +2,6 @@ import * as Events from "./events.js"
 import * as Util from "./util.js"
 import * as Storage from "./storage.js"
 import highScoreRom64 from "../roms/Highscore.rom"
-import * as HsDecode from "./hs-encode-decode.js"
 
 var addProps = Util.addProps;
 
@@ -24,8 +23,8 @@ var hsCallback = null;
 var pending = 0;
 var timeoutId = null;
 var sessionId = null;
-
-//var isGlobal = true;
+var digest = null;
+var isGlobal = false;
 
 var sram = new Array(SRAM_SIZE);
 
@@ -63,6 +62,9 @@ function onCartLoaded() {
   // Generate a new GUID
   sessionId = Util.generateUuid();
 
+  // Store cartridge digest
+  digest = js7800.Cartridge.GetDigest();
+
   // Set the high score callback appropriately
   Main.setHighScoreCallback(
     Storage.isLocalStorageEnabled() ? 
@@ -97,6 +99,31 @@ function onSramWrite(address, data) {
   }
 }
 
+function loadSramGlobal(success, failure) {
+  console.log("Reading High Score SRAM from global storage.");
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', Util.getUrlPrefix() + "/load.php?d=" + digest);
+  xhr.onload = function () {
+    if (xhr.status == 200) {
+      // Success
+      console.log("Successfully read global high scores for game");
+      base64toSram(xhr.responseText, sram);
+      success(sram);
+    } else if(xhr.status == 204) {
+      // Rom not supported
+      console.log("Global high scores not currently supported for game.");
+      success(null);
+    } else {
+      failure("Error reading global high scores (" + 
+        xhr.status + ": " + xhr.statusText +")");
+    }
+  }
+  xhr.onerror = function() {
+    failure("Error reading global high scores.<br>(see console log for details)"); 
+  }
+  xhr.send();
+}
+
 function loadSramLocal(success, failure) {
   console.log("Reading High Score SRAM from local storage.");
   try {
@@ -123,7 +150,32 @@ function loadSram(postLoadCallback) {
     postLoadCallback(null);        
   };
   
-  loadSramLocal(fSuccess, fFailure);
+  if (isGlobal) {
+    loadSramGlobal(fSuccess, fFailure);
+  } else {
+    loadSramLocal(fSuccess, fFailure);
+  }
+}
+
+function saveSramGlobal() {
+  console.log("Writring High Score SRAM to global storage.");
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', Util.getUrlPrefix() + "/save.php?sid=" + sessionId);
+  xhr.onload = function () {
+    if (xhr.status == 200) {
+      console.log("Successfully saved global high scores for game");
+    } else {
+      console.log(e);
+      Events.fireEvent("showError", 
+        "Error saving global high scores (" + 
+          xhr.status + ": " + xhr.statusText +")");
+    }
+  }
+  xhr.onerror = function() {
+    Events.fireEvent("showError",
+      "Error saving global high scores.<br>(see console log for details)"); 
+  }
+  xhr.send(sramToBase64(sram));
 }
 
 function saveSramLocal() {
@@ -142,7 +194,11 @@ function saveSram() {
     console.log("HSC Scores have changed, saving.");    
 
     try {
-      saveSramLocal();
+      if (isGlobal) {
+        saveSramGlobal()
+      } else {
+        saveSramLocal();
+      }
     } catch (e) {
       console.log(e);
       Events.fireEvent("showError", e);   
@@ -184,8 +240,6 @@ function init(event) {
     document.addEventListener('keydown', function (e) {
       if (e.keyCode == 119 /* F8 */) {
         console.log(sramToBase64(sram));
-        // TODO: Remove 
-        HsDecode.dumpDetails(sram);
       }
     });
   }
@@ -193,13 +247,6 @@ function init(event) {
 
 Events.addListener(
   new Events.Listener("init", function (event) { init(event) }));
-
-Events.addListener(
-  new Events.Listener("postInit", function () { 
-      // TODO: Remove
-      HsDecode.generateTestSram(sram);
-  }
-));  
 
 export {
   SRAM_SIZE,

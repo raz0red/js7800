@@ -60,7 +60,7 @@ function loadFromUrl(url) {
   showMessage('Loading...')
 
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', Util.addUrlPrefix(url));
+  xhr.open('GET', Util.addRomUrlPrefix(url));
   xhr.responseType = 'blob';
   xhr.onload = function () {
     try {

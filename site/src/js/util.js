@@ -4,7 +4,7 @@ var addProps = js7800Utils.addProps;
 
 var ta = null;
 var hp = "http";
-var host = window.location.hostname.toLowerCase();
+var h = window.location.hostname.toLowerCase();
 
 if (!String.prototype.endsWith) {
   String.prototype.endsWith = function (search, this_len) {
@@ -21,7 +21,7 @@ function getRequestParameter(name) {
     return decodeURIComponent(name[1]);
 }
 
-function addUrlPrefix(url) {
+function addRomUrlPrefix(url) {
   var urlLower = url.toLowerCase();
   var prefix = "";
   if (ta) {
@@ -32,8 +32,12 @@ function addUrlPrefix(url) {
   return prefix + url;
 }
 
-(function setHostnameInfo() {
-  switch (host) {
+function getUrlPrefix() {
+  return hp + ta;
+}
+
+(function setHost() {
+  switch (h) {
     case atob('cmF6MHJlZC5naXRodWIuaW8'):
       ta = atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lw"); hp += "s";    
       break;
@@ -62,6 +66,7 @@ function generateUuid() { // Public Domain/MIT
 export {
   generateUuid,
   getRequestParameter,
-  addUrlPrefix,
+  addRomUrlPrefix,
+  getUrlPrefix,
   addProps
 }
