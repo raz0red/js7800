@@ -32,7 +32,7 @@ function fileDropHandler(ev) {
   }
 }
 
-Events.addListener(new Events.Listener("init", function (event) {
+Events.addListener(new Events.Listener("siteInit", function (event) {
   loadFromUrl = event.loadFromUrl;
   romList = event.romList;
   startEmulation = event.startEmulation;

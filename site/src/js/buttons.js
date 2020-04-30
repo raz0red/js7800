@@ -92,7 +92,7 @@ function init(event) {
   }, false);
 }
 
-Events.addListener(new Events.Listener("init",
+Events.addListener(new Events.Listener("siteInit",
   function (event) { init(event) }));
 
 export { }

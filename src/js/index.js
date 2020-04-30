@@ -6,10 +6,12 @@ import * as Keyboard from "./web/kb.js"
 import * as Keys from "./web/keys.js"
 import * as Pads from "./web/pad.js"
 import * as Memory from "./prosystem/Memory.js"
+import * as Cartridge from "./prosystem/Cartridge.js"
 import { md5 } from "./3rdparty/md5.js"
 
 export { 
     js7800 as Main,
+    Cartridge,
     ControlsBar,
     Util,
     Events,

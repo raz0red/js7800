@@ -586,7 +586,7 @@ addProps(SettingsDialog.prototype, {
   }
 });
 
-Events.addListener(new Events.Listener("init",
+Events.addListener(new Events.Listener("siteInit",
   function (event) {
     js7800 = event.js7800;
   }

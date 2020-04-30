@@ -89,9 +89,6 @@ function loadFromUrl(url) {
 function createFullscreenSelect() {
   var cbar = js7800.ControlsBar;
   
-  // The js7800 module events vs. the site events
-  var js7800Events = js7800.Events;
-
   // Create full screen cartridge select
   var fsSelect = document.createElement("div");
   var fsSelectSel = document.createElement("select");
@@ -106,8 +103,8 @@ function createFullscreenSelect() {
   cbar.getGroup(1).addChildAtIndex(2, fsSelectComp);
 
   // Listen for full screen change vents
-  js7800Events.addListener(
-    new js7800Events.Listener("fullscreen",
+  Events.addListener(
+    new Events.Listener("fullscreen",
       function (isFullscreen) {
         fsSelect.style.display = isFullscreen ? "flex" : "none";
       }));
@@ -146,6 +143,7 @@ function init(in7800) {
   js7800 = in7800;
   var main = js7800.Main;
   var cbar = js7800.ControlsBar;
+  Events.setParentEvents(js7800.Events);
 
   // Must be done prior to initializing js7800
   var fsSelect = createFullscreenSelect();
@@ -177,7 +175,7 @@ function init(in7800) {
   main.setLogFps(debug);
 
   // Fire init event
-  Events.fireEvent("init", {
+  Events.fireEvent("siteInit", {
     js7800: js7800,
     romList: romList,
     loadFromUrl: loadFromUrl,
@@ -186,9 +184,6 @@ function init(in7800) {
     debug: debug,
     HighScore: HighScore
   });
-
-  // Fire post init event
-  Events.fireEvent("postInit", null);
 
   // Show message event listener
   Events.addListener(new Events.Listener("showMessage",

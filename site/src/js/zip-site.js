@@ -53,7 +53,7 @@ function unzip(file, success, failure) {
   );
 }
 
-Events.addListener(new Events.Listener("init", function (event) {
+Events.addListener(new Events.Listener("siteInit", function (event) {
   errorHandler = event.errorHandler;
 }));
 

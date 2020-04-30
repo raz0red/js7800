@@ -53,7 +53,7 @@ function hideErrorMessage() {
   errorMessageEl.classList.remove('show');
 }
 
-Events.addListener(new Events.Listener("init", init));
+Events.addListener(new Events.Listener("siteInit", init));
 
 export {
   showMessage,

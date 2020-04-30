@@ -223,8 +223,7 @@ function init(event) {
   console.log("High score rom: " + js7800.md5(highScoreRom));
 
   // Register listener for onCartridgeLoaded
-  js7800.Events.addListener(
-    new js7800.Events.Listener("onCartridgeLoaded", onCartLoaded));
+  Events.addListener(new Events.Listener("onCartridgeLoaded", onCartLoaded));
 
   // Create and set high score callback
   hsNullCallback = new Main.HighScoreCallback();
@@ -246,7 +245,7 @@ function init(event) {
 }
 
 Events.addListener(
-  new Events.Listener("init", function (event) { init(event) }));
+  new Events.Listener("siteInit", function (event) { init(event) }));
 
 export {
   SRAM_SIZE,
