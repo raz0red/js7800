@@ -3,6 +3,8 @@ import * as Events from "./events.js"
 var snackbarEl = null;
 var errorMessageEl = null;
 var errorTextEl = null;
+var messageId = 0;
+var messageStart = Date.now();
 
 function init() {
   // The fullscreen container
@@ -29,20 +31,37 @@ function init() {
   errorMessageEl.appendChild(errorTextEl);
 }
 
-function showMessage(message) {
+function showMessage(message) {  
   hideErrorMessage();
   snackbarEl.innerHTML = message;
+  snackbarEl.onclick = function() { hideMessage(-1); }
   snackbarEl.classList.add('show');
   snackbarEl.classList.remove('hide');
+
+  messageStart = Date.now();
+  return ++messageId;
 }
 
-function hideMessage() {
-  snackbarEl.classList.add('hide');
-  snackbarEl.classList.remove('show');
+function hideMessage(mid, timeoutIn) {
+  var force = (mid == -1);
+  if ((mid == messageId) || force) {  
+    var timeout = 0;
+    if (!force && timeoutIn) {
+      var now = Date.now();
+      var elapsed = now - messageStart;
+      if (elapsed < timeoutIn) {
+        timeout = timeoutIn - elapsed;
+      }
+    }
+    setTimeout(function() {
+      snackbarEl.classList.add('hide');
+      snackbarEl.classList.remove('show');
+    }, timeout);
+  }
 }
 
 function showErrorMessage(message) {
-  hideMessage();
+  hideMessage(-1);
   errorTextEl.innerHTML = message;
   errorMessageEl.classList.add('show');
   errorMessageEl.classList.remove('hide');

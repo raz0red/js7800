@@ -38,10 +38,6 @@ var currentCart = null;
 var highScoreCallback = new HighScoreCallback();
 var logFps = false;
 
-var messageHandler = function (message) {
-  alert(message);
-}
-
 var errorHandler = function (message) {
   alert(message);
 }
@@ -102,6 +98,8 @@ function startEmu(cart, isRestart) {
 
   // Callback after reset
   var postResetCallback = function() {
+    Events.fireEvent("onEmulationStarted", null);
+
     starting = false;
 
     var start = Date.now();
@@ -182,6 +180,7 @@ function restart() {
   }
 }
 
+var hideTitleCb = null;
 function startEmulation(cart, isRestart) {
   if (starting) {
     return;
@@ -194,18 +193,25 @@ function startEmulation(cart, isRestart) {
     ProSystem.Close();
   }
 
-  if (!logoDiv.classList.contains('js7800__logo--hide')) {
-    logoDiv.classList.add('js7800__logo--hide');
-    logoDiv.classList.remove('js7800__logo--show');
-
-    // Should not be necessary, but makes sure is not displayed
-    setTimeout(function () {
-      logoDiv.style.display = 'none';
-    }, 1000);
+  if (!hideTitleCb) {
+    hideTitleCb = new Events.Listener("onEmulationStarted", 
+      function() {    
+        Video.stopScreenSnow();
+        if (!logoDiv.classList.contains('js7800__logo--hide')) {
+          logoDiv.classList.add('js7800__logo--hide');
+          logoDiv.classList.remove('js7800__logo--show');
+      
+          // Should not be necessary, but makes sure is not displayed
+          setTimeout(function () {
+            logoDiv.style.display = 'none';
+          }, 1000);
+        }
+      }
+    );    
+    Events.addListener(hideTitleCb);
   }
 
   setTimeout(function () {
-    Video.stopScreenSnow();
     startEmu(cart, isRestart);
   }, 200);
 }
@@ -284,10 +290,6 @@ function init(id) {
   }
 }
 
-function setMessageHandler(handler) {
-  messageHandler = handler;
-}
-
 function setErrorHandler(handler) {
   errorHandler = handler;
 }
@@ -295,14 +297,6 @@ function setErrorHandler(handler) {
 function setLogFps(val) {
   logFps = val;
 }
-
-// Show message event listener
-Events.addListener(new Events.Listener("showMessage",
-  function (message) { messageHandler(message); }));
-
-// Show error event listener
-Events.addListener(new Events.Listener("showError",
-  function (message) { errorHandler(message); }));
 
 var hidden, visibilityChange;
 if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
@@ -342,7 +336,6 @@ export {
   init,
   startEmulation,
   restart,
-  setMessageHandler,
   setErrorHandler,  
   setLogFps,
   setHighScoreCallback,

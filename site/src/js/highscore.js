@@ -1,6 +1,7 @@
 import * as Events from "./events.js"
 import * as Util from "./util.js"
 import * as Storage from "./storage.js"
+import * as Message from "./message.js"
 import highScoreRom64 from "../roms/Highscore.rom"
 
 var addProps = Util.addProps;
@@ -101,25 +102,36 @@ function onSramWrite(address, data) {
 
 function loadSramGlobal(success, failure) {
   console.log("Reading High Score SRAM from global storage.");
+
+  // Show message
+  var startTime = Date.now();
+  var mid = Message.showMessage("Loading global leaderboard...");
+  
   var xhr = new XMLHttpRequest();
   xhr.open('GET', Util.getUrlPrefix() + "/load.php?d=" + digest);
   xhr.onload = function () {
     if (xhr.status == 200) {
       // Success
-      console.log("Successfully read global high scores for game");
+      console.log("Successfully read global leaderboard for game");
       base64toSram(xhr.responseText, sram);
       success(sram);
+
+      // Hide message
+      Message.hideMessage(mid, 1000);
     } else if(xhr.status == 204) {
       // Rom not supported
-      console.log("Global high scores not currently supported for game.");
+      var msg = "Global loaderboard not currently supported for this game.";
+      mid = Message.showMessage(msg);
+      console.log(msg);
       success(null);
+      Message.hideMessage(mid, 1500);
     } else {
-      failure("Error reading global high scores (" + 
+      failure("Error reading global leaderboard (" + 
         xhr.status + ": " + xhr.statusText +")");
     }
   }
   xhr.onerror = function() {
-    failure("Error reading global high scores.<br>(see console log for details)"); 
+    failure("Error reading global leaderboard.<br>(see console log for details)"); 
   }
   xhr.send();
 }

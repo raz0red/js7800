@@ -50,14 +50,21 @@ function startEmulation(blob) {
   );
 }
 
+var loadingMessageId = null;
+var onEmulationStartedCb = null;
+
 function loadFromUrl(url) {
-  var start = Date.now()
-  var minWait = 750;
   var urlLower = url.toLowerCase();
   var forceList = (
     urlLower.endsWith(".json") || (urlLower.indexOf(".json?") != -1));
 
-  showMessage('Loading...')
+  loadingMessageId = showMessage('Loading...')
+
+  if (!onEmulationStartedCb) {
+    onEmulationStartedCb = new Events.Listener("onEmulationStarted",
+      function() { hideMessage(loadingMessageId, 750); });
+    Events.addListener(onEmulationStartedCb);
+  }
 
   var xhr = new XMLHttpRequest();
   xhr.open('GET', Util.addRomUrlPrefix(url));
@@ -72,10 +79,6 @@ function loadFromUrl(url) {
     } catch (e) {
       errorHandler(url + " (" + e + ")");
     }
-
-    var elapsed = Date.now() - start;
-    var wait = elapsed > minWait ? 0 : minWait - elapsed;
-    setTimeout(hideMessage, wait);
   }
   xhr.onerror = function () {
     errorHandler(
@@ -149,7 +152,6 @@ function init(in7800) {
   var fsSelect = createFullscreenSelect();
 
   // Configure and init js7800 module
-  main.setMessageHandler(showMessage);
   main.setErrorHandler(errorHandler);
   main.init('js7800__target');
 
@@ -184,10 +186,6 @@ function init(in7800) {
     debug: debug,
     HighScore: HighScore
   });
-
-  // Show message event listener
-  Events.addListener(new Events.Listener("showMessage",
-    function (message) { showMessage(message); }));
 
   // Show error event listener
   Events.addListener(new Events.Listener("showError",
