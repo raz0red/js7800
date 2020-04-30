@@ -2,7 +2,9 @@ import * as js7800Utils from '../../../src/js/common/util-common'
 
 var addProps = js7800Utils.addProps;
 
-var isGitHub = (window.location.hostname.toLowerCase() == 'raz0red.github.io');
+var ta = null;
+var hp = "http";
+var host = window.location.hostname.toLowerCase();
 
 if (!String.prototype.endsWith) {
   String.prototype.endsWith = function (search, this_len) {
@@ -22,13 +24,24 @@ function getRequestParameter(name) {
 function addUrlPrefix(url) {
   var urlLower = url.toLowerCase();
   var prefix = "";
-  if (isGitHub) {
+  if (ta) {
     if (urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
-      prefix = "https" + atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lz95PQ==");
+      prefix = hp + ta + "?y=";
     }
   }
   return prefix + url;
 }
+
+(function setHostnameInfo() {
+  switch (host) {
+    case atob('cmF6MHJlZC5naXRodWIuaW8'):
+      ta = atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lw"); hp += "s";    
+      break;
+    case atob('bG9jYWxob3N0'):
+      ta = atob("Oi8vbG9jYWxob3N0");
+      break;
+  }
+})();
 
 function generateUuid() { // Public Domain/MIT
   var d = new Date().getTime();//Timestamp
