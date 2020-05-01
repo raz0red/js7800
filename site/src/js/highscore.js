@@ -113,7 +113,12 @@ function loadSramGlobal(success, failure) {
     if (xhr.status == 200) {
       // Success
       console.log("Successfully read global leaderboard for game");
-      base64toSram(xhr.responseText, sram);
+      try {
+        base64toSram(xhr.responseText, sram);
+      } catch (e) {
+        failure("Error converting SRAM: " + e);
+        return;
+      }      
       success(sram);
 
       // Hide message
@@ -142,7 +147,12 @@ function loadSramLocal(success, failure) {
     var h = Storage.readValue(STORAGE_KEY, true);
     if (h) {
       console.log("Found High Score SRAM in local storage.");
-      base64toSram(h, sram);
+      try {
+        base64toSram(h, sram);
+      } catch (e) {
+        failure("Error converting SRAM: " + e);
+        return;
+      }
     } else {
       console.log("Not able to find High Score SRAM in local storage.");
     }

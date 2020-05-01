@@ -1372,6 +1372,7 @@ controller1=1
 controller2=1
 region=0
 flags=0
+hsc=true
 [6010a398070dfacb4c0173d75d73c50a]
 title=Beef Drop (New Levels Hack)
 type=0
@@ -1388,6 +1389,7 @@ controller1=1
 controller2=1
 region=0
 flags=0
+hsc=true
 [af1c8f89f0aef0d9e2e15901d6e0539a]
 title=Centipede PMI PAL
 type=0
@@ -1867,8 +1869,19 @@ controller2=1
 region=0
 flags=0
 rightswitch=1
-[5013b69cb05b21a1194ce48517df7bfc]
+[368c3bfa91cf2bb8413967eb0c392c6c]
 title=Pac-Man Collection
+type=0
+pokey=true
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=false
+xm=false
+hsc=true
+[5013b69cb05b21a1194ce48517df7bfc]
+title=Pac-Man Collection (Updated)
 type=0
 pokey=true
 controller1=1
@@ -2180,6 +2193,7 @@ controller2=1
 region=0
 flags=0
 pokey450=true
+hsc=false
 [95c8a795e30640c9ec82609872c80517]
 title=Shark Attack (Hack)
 type=0
@@ -2521,7 +2535,7 @@ region=0
 flags=0
 pokey450=false
 xm=false
-hsc=false
+hsc=true
 [7cdfbe37634e7dcd4dc67db7edbcd3ba]
 title=Baby Pac-Man
 type=0
