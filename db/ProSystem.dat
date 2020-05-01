@@ -2513,7 +2513,7 @@ region=0
 flags=0
 pokey450=false
 xm=false
-hsc=false
+hsc=true
 [e547492ebd342e57c28bb235546da299]
 title=3D Demo
 type=0
