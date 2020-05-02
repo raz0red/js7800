@@ -54,8 +54,10 @@ function hideMessage(mid, timeoutIn) {
       }
     }
     setTimeout(function() {
-      snackbarEl.classList.add('hide');
-      snackbarEl.classList.remove('show');
+      if (force || (mid == messageId)) {
+        snackbarEl.classList.add('hide');
+        snackbarEl.classList.remove('show');
+      }
     }, timeout);
   }
 }
