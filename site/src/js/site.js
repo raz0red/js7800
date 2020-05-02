@@ -51,7 +51,8 @@ function startEmulation(blob) {
 }
 
 var loadingMessageId = null;
-var onEmulationStartedCb = null;
+var loadMessageTimeout = 750;
+var onEmulationStartedCb = null; 
 
 function loadFromUrl(url) {
   var urlLower = url.toLowerCase();
@@ -62,7 +63,7 @@ function loadFromUrl(url) {
 
   if (!onEmulationStartedCb) {
     onEmulationStartedCb = new Events.Listener("onEmulationStarted",
-      function() { hideMessage(loadingMessageId, 750); });
+      function() { hideMessage(loadingMessageId, loadMessageTimeout); });
     Events.addListener(onEmulationStartedCb);
   }
 
@@ -73,7 +74,9 @@ function loadFromUrl(url) {
     try {
       if (xhr.status >= 300 || xhr.stats < 200) {
         throw xhr.status + ": " + xhr.statusText;
-      } else if (!romList.loadListFromFile(xhr.response) && !forceList) {
+      } else if (romList.loadListFromFile(xhr.response) || forceList) {
+        hideMessage(loadingMessageId, loadMessageTimeout);
+      } else {
         startEmulation(xhr.response);
       }
     } catch (e) {
