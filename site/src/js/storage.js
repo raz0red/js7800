@@ -4,9 +4,13 @@ var prefs = {}
 var P1_MAP_NAME = "p1map";
 var P2_MAP_NAME = "p2map";
 var CONSOLE_MAP_NAME = "consoleMap";
+var DISPLAY_FILTER = "displayFilter";
+var DISPLAY_RATIO = "displayRatio";
+var DISPLAY_SIZE = "displaySize";
 
 var js7800 = null;
 var kb = null;
+var video = null;
 
 var localStorageEnabled = false;
 
@@ -85,6 +89,12 @@ function loadPrefs() {
       loadKeyboardMappings(P1_MAP_NAME, kb.p1KeyMap);
       loadKeyboardMappings(P2_MAP_NAME, kb.p2KeyMap);
       loadConsoleMappings();
+      var filter = prefs[DISPLAY_FILTER];
+      if (filter !== undefined ) video.setFilterEnabled(filter);
+      var ratio = prefs[DISPLAY_RATIO];
+      if (ratio !== undefined ) video.setScreenRatio(ratio);
+      var size = prefs[DISPLAY_SIZE];
+      if (size !== undefined ) video.setScreenSize(size);
     }
   } catch (e) {
     Events.fireEvent("showError", "An error occurred loading preferences: " + e);
@@ -102,6 +112,9 @@ function savePrefs() {
     storeKeyboardMappings(P1_MAP_NAME, kb.p1KeyMap);
     storeKeyboardMappings(P2_MAP_NAME, kb.p2KeyMap);
     storeConsoleMappings();
+    prefs[DISPLAY_FILTER] = video.isFilterEnabled();
+    prefs[DISPLAY_SIZE] = video.getScreenSize();
+    prefs[DISPLAY_RATIO] = video.getScreenRatio();
     localStorage.setItem("prefs", JSON.stringify(prefs));
   } catch (e) {
     Events.fireEvent("showError", "An error occurred saving preferences: " + e);
@@ -165,6 +178,7 @@ Events.addListener(new Events.Listener("siteInit",
   function (event) {
     js7800 = event.js7800;
     kb = js7800.Keyboard;
+    video = js7800.Video;
     checkLocalStorageAvailable();    
   }));
 

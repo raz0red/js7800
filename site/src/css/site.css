@@ -726,21 +726,147 @@ b.callout {
   line-height: 1em;
   background-color: #222; 
   border-radius: .4em;
+  /* justify-items: center; */
+  align-items: center;  
 }
 
-.dialog-cell-name {
+.dialog-cell-label {
   overflow: hidden;
   text-align: left;
   font-weight: bold;
   color: #7C7C7C;
   white-space: nowrap;
+  /* border: 1px solid red;  */
 }
 
-.dialog-cell-value {
+.dialog-cell-content {
   text-align: center;
   overflow: hidden;
   text-align: left;
   white-space: nowrap;
+  /* border: 1px solid red;  */
+}
+
+.dialog-switch { /* 14px */
+  position: relative;
+  display: inline-block;
+  width: 2.429em; /*34px;*/
+  height: 1.4286em; /*20px;*/
+}
+
+.dialog-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.dialog-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #666;
+  -webkit-transition: .4s;
+  transition: .4s;
+  opacity: 0.6;
+  border-radius: 2.4286em; /* 34px;*/
+}
+
+.dialog-switch-slider:hover {
+  opacity: 1
+}
+
+.dialog-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: .857em; /*12px;*/
+  width: .857em; /*12px;*/
+  left: .2857em; /*4px;*/
+  bottom: .2857em; /*4px;*/
+  background-color: #DDD;
+  border-radius: 50%;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .dialog-switch-slider {
+  background-color: #ce2f37;
+}
+
+input:checked+.dialog-switch-slider:before {
+  -webkit-transform: translateX(1em /*14px*/);
+  -ms-transform: translateX(1em /*14px*/);
+  transform: translateX(1em /*14px*/);  
+}
+
+.dialog-select { /* 14px */
+  opacity: .8;
+  font-size: 1em; 
+  color: #fff;
+  position: relative;
+  display: flex;
+  width: 14em; /*160px;*/
+  height: 1.8em; /*20px;*/
+  line-height: 1.8em; /*20px;*/
+  background: black;
+  overflow: hidden;
+  border-radius: .4em; /*4px;*/
+  border: 1px solid #666;
+}
+
+.dialog-select:hover {
+  opacity: 1;
+}
+
+/* Arrow */
+.dialog-select::after {
+  content: '\25BC';
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 0 .3em; /*3px*/
+  font-size: 1em;
+  color: #ce2f37;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+/* Reset Select */
+.dialog-select select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  appearance: none;
+  outline: 0;
+  box-shadow: none;
+  border: 0 !important;
+  background: black;
+  background-image: none;
+  padding: 0 .714em;
+  color: #CCC;
+  cursor: pointer;
+  /* font-size: 11px; */
+  font-size: .9em;
+  flex: 1;
+}
+
+/* Remove IE arrow */
+.dialog-select select::-ms-expand {
+  display: none;
+}
+
+.dialog-select select optgroup {
+  font-weight: bold;
+  font-size: 1em;
+  color: #777777;
+}
+
+.dialog-select select option {
+  font-weight: normal;
+  font-size: 1em;
+  color: #BBBBBB;
 }
 
 .about P {

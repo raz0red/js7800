@@ -23,12 +23,4 @@
   Using init eliminates issues with circular dependencies (values were copied previously before init existed)
 - Better exception handling (for example, loading global hs, and content is bad, site is down on save and load)
 - Check all XHR calls and handle exceptions appropriately
-- Fix "Loading..." message. disappears before loading global scores
-- Fix snack bar in general. If subsequent messages come in, don't hide, etc. maybe pass token to control
-  hiding. If token doesn't match latest, ignore
-- Snack bar should allow for specifying timeout
-- Add message when global high scores are not supported for a game
-- Instead of relying on callback, etc. for messages, use the event system
-  Fire events prior to starting load, after load has completed, etc. 
-- Add support for games that have multiple codes per game (HSC)
-- Add support for 7800 basic score encoding/decoding
+- Show rom list loaded successful message (when loading was displayed)

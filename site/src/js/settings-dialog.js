@@ -8,6 +8,11 @@ import { AboutTab } from "./about-tab.js"
 var TabbedDialog = DialogModule.TabbedDialog;
 var TabSet = DialogModule.TabSet;
 var Tab = DialogModule.Tab;
+var Grid = DialogModule.Grid;
+var LabelCell = DialogModule.LabelCell;
+var ToggleSwitch = DialogModule.DialogToggleSwitch;
+var Select = DialogModule.DialogSelect;
+var ContentCell = DialogModule.ContentCell;
 var addProps = Util.addProps;
 var js7800 = null;
 
@@ -37,8 +42,8 @@ addProps(KeyTarget.prototype, {
     var target = document.createElement("div");
     this.target = target;
     target.setAttribute("tabindex", "0");
-    target.style.left = "" + this.left + "px";
-    target.style.top = "" + this.top + "px";
+    target.style.left = this.left + "px";
+    target.style.top = this.top + "px";
     return target;
   },
   onShow: function (keys, value) {
@@ -118,8 +123,8 @@ addProps(GamepadFocus.prototype, {
   },
   doCreateElement: function () {
     var focus = document.createElement("div");
-    focus.style.left = "" + this.left + "px";
-    focus.style.top = "" + this.top + "px";
+    focus.style.left = this.left + "px";
+    focus.style.top = this.top + "px";
     return focus;
   }
 });
@@ -456,20 +461,50 @@ addProps(ConsoleControlsGamepad.prototype, {
 
 var displayTab = new Tab("Display");
 addProps(displayTab, {
+  filterSwitch: null,
+  sizeSelect: null,
+  arSelect: null,
+  onShow: function () {    
+    var vid = js7800.Video;
+    this.vid = vid;
+    this.filterSwitch.setValue(vid.isFilterEnabled());
+    this.sizeSelect.setValue(vid.getScreenSize());
+    this.arSelect.setValue(vid.getScreenRatio());
+  },
+  onOk: function () {    
+    this.vid.setFilterEnabled(this.filterSwitch.getValue());
+    this.vid.setScreenSize(this.sizeSelect.getValue());
+    this.vid.setScreenRatio(this.arSelect.getValue());
+  },
+  onDefaults: function () {    
+    this.filterSwitch.setValue(this.vid.getFilterEnabledDefault());
+    this.sizeSelect.setValue(this.vid.getScreenSizeDefault());
+    this.arSelect.setValue(this.vid.getScreenRatioDefault());
+  },
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
     desc.innerHTML =
       '<div class="tabcontent__title">Display Settings</div>\n' +
-      '<p class="center">The following settings are used to control the screen display.\n' +
-      '<div class="dialog-grid">\n' +
-      '  <div class="dialog-cell-name">Screen size:</div>\n' +
-      '  <div class="dialog-cell-value">1x</div>\n' +
-      '  <div class="dialog-cell-name">Aspect ratio:</div>\n' +
-      '  <div class="dialog-cell-value">6:7 (Atari 7800 Aspect Ratio)</div>\n' +
-      '  <div class="dialog-cell-name">Bilinear filter:</div>\n' +
-      '  <div class="dialog-cell-value">Disabled</div>\n' +
-      '</div>';
+      '<p class="center">The following settings are used to control the screen display.</p>';
     rootEl.appendChild(desc);
+    var grid = new Grid();
+    grid.addCell(new LabelCell("Screen size:"));
+    this.sizeSelect = new Select({
+      "2x": 2, "2.5x": 2.5, "3x": 3, "3.5x": 3.5, "4x": 4
+    });
+    grid.addCell(new ContentCell(this.sizeSelect));
+    grid.addCell(new LabelCell("Aspect ratio:"));
+    this.arSelect = new Select({
+      "Pixel perfect (1:1 PAR)" : 1,
+      "Atari 7800 (6:7 PAR)" : 0.857,
+      "Widescreen (16:9)" : 1.334,
+      "Ultra-widescreen (2.37:1)" : 1.778
+    });
+    grid.addCell(new ContentCell(this.arSelect));    
+    grid.addCell(new LabelCell("Apply filter:"));
+    this.filterSwitch = new ToggleSwitch("Toggle Filter");
+    grid.addCell(new ContentCell(this.filterSwitch));
+    rootEl.appendChild(grid.createElement());
   }
 });
 

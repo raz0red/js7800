@@ -4,6 +4,7 @@ import * as Events from "./events.js"
 
 var Component = UiCommon.Component;
 var Button = UiCommon.Button;
+var ToggleSwitch = UiCommon.ToggleSwitch;
 
 var addProps = Utils.addProps;
 var js7800 = null;
@@ -20,6 +21,55 @@ addProps(DialogButton.prototype, {
   getClass: function () {
     return "dialog-button";
   },
+});
+
+//
+// Dialog Toggle Switch
+//
+
+function DialogToggleSwitch(title) {
+  ToggleSwitch.call(this, title);
+}
+DialogToggleSwitch.prototype = Object.create(ToggleSwitch.prototype);
+addProps(DialogToggleSwitch.prototype, {
+  getClass: function () {
+     return "dialog-switch";
+  },
+});
+
+//
+// Dialog Select
+//
+
+function DialogSelect(opts) {
+  Component.call(this);
+  this.opts = opts;
+}
+DialogSelect.prototype = Object.create(Component.prototype);
+addProps(DialogSelect.prototype, {
+  select: null,
+  getClass: function () {
+     return "dialog-select";
+  },
+  setValue: function(val) {
+    this.select.value = val;
+  },
+  getValue: function() {
+    return this.select.value;
+  },
+  doCreateElement: function() {
+    var div = document.createElement("div");    
+    var sel = document.createElement("select");
+    div.appendChild(sel);
+    this.select = sel;
+    for (var name in this.opts)  {
+      var opt = document.createElement('option');
+      opt.text = name;
+      opt.value = this.opts[name];
+      this.select.add(opt);
+    }
+    return div;
+  }
 });
 
 //
@@ -48,7 +98,7 @@ function Dialog(title, isReadOnly) {
 
   var that = this;
   this.windowResizeFunc = function (e) {
-    that.modalEl.style['padding-top'] = "" +
+    that.modalEl.style.paddingTop =
       (((window.innerHeight - that.contentEl.offsetHeight) / 2) | 0) + "px";
   };
 }
@@ -107,7 +157,7 @@ addProps(Dialog.prototype, {
     var dialog = this;
 
     var defDiv = document.createElement("div");
-    defDiv.style['flex-grow'] = 1;    
+    defDiv.style.flexGrow = 1;    
 
     if (this.isReadOnly) {
       var cancel = new DialogButton("Close");
@@ -330,6 +380,85 @@ addProps(TabbedDialog.prototype, {
   },
 });
 
+//
+// Dialog Cells
+//
+
+function Cell() {
+  Component.call(this);
+}
+Cell.prototype = Object.create(Component.prototype);
+addProps(Cell.prototype, {
+  doCreateElement: function () {
+    return document.createElement("div");
+  }
+});
+
+
+function LabelCell(label) {
+  Cell.call(this);
+  this.label = label;
+}
+LabelCell.prototype = Object.create(Cell.prototype);
+addProps(LabelCell.prototype, {
+  getClass: function () {
+    return "dialog-cell-label";
+  },
+  doCreateElement: function () {
+    var el = Cell.prototype.doCreateElement.call(this);
+    if (this.label) {
+      el.appendChild(document.createTextNode(this.label))
+    }
+    return el;
+  }
+});
+
+function ContentCell(content) {
+  Cell.call(this);
+  this.content = content;
+}
+ContentCell.prototype = Object.create(Cell.prototype);
+addProps(ContentCell.prototype, {
+  getClass: function () {
+    return "dialog-cell-content";
+  },
+  doCreateElement: function() {
+    var el = Cell.prototype.doCreateElement.call(this);
+    if ((typeof this.content) === 'string') {
+      el.appendChild(document.createTextNode(this.content));
+    } else {
+      el.appendChild(this.content.createElement());
+    }
+    return el;
+  }
+});
+
+//
+// Dialog Grid
+//
+
+function Grid() {
+  Component.call(this);
+  this.cells = [];
+}
+Grid.prototype = Object.create(Component.prototype);
+addProps(Grid.prototype, {
+  getClass: function () {
+    return "dialog-grid";
+  },
+  doCreateElement: function () {
+    var root = document.createElement("div");
+    for (var i = 0; i < this.cells.length; i++) {
+      root.appendChild(this.cells[i].createElement());
+    }
+    return root;
+  },
+  addCell: function(cell) {
+    this.cells.push(cell);
+  }
+});
+
+
 Events.addListener(new Events.Listener("siteInit",
   function (event) {
     js7800 = event.js7800;
@@ -339,7 +468,12 @@ Events.addListener(new Events.Listener("siteInit",
 export {
   Dialog,
   DialogButton,
+  DialogToggleSwitch,
+  DialogSelect,
   TabbedDialog,
   TabSet,
-  Tab
+  Tab,
+  Grid,
+  LabelCell,
+  ContentCell
 }

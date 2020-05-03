@@ -30,6 +30,7 @@ var soundStore = Sound.Store;
 var updateInput = Input.updateInput;
 var flipImage = Video.flipImage;
 
+var mainContainer = null;
 var canvas = null;
 var controlsDiv = null;
 var logoDiv = null;
@@ -223,9 +224,9 @@ function addElements(id) {
   }
 
   // border-container
-  var mainContainer = document.createElement("div");
+  mainContainer = document.createElement("div");
   mainContainer.className = mainContainer.id = "js7800";
-  mainContainer.style.width = Video.DEFAULT_WIDTH + "px";
+  //mainContainer.style.width = Video.DEFAULT_WIDTH + "px";
   container.appendChild(mainContainer);
 
   // fullscreen-container
@@ -277,6 +278,7 @@ function init(id) {
     // Fire init event
     Events.fireEvent("init", {
       canvas: canvas,
+      mainContainer: mainContainer,
       controlsDiv: controlsDiv,
       keyboardData: keyboardData,
       Region: Region

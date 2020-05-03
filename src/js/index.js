@@ -7,6 +7,7 @@ import * as Keys from "./web/keys.js"
 import * as Pads from "./web/pad.js"
 import * as Memory from "./prosystem/Memory.js"
 import * as Cartridge from "./prosystem/Cartridge.js"
+import * as Video from "./web/video.js"
 import { md5 } from "./3rdparty/md5.js"
 
 export { 
@@ -19,5 +20,6 @@ export {
     Keys,
     Pads,
     Memory,
+    Video,
     md5
 }

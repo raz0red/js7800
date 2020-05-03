@@ -36,8 +36,8 @@ addProps(AboutTab.prototype, {
   },
   showVideo: function () {
     this.played = true;
-    this.iframe.setAttribute('src', 'https://player.vimeo.com/video/411891457?autoplay=1&api=1&background=true&mute=0');    
-    this.top.style['cursor'] = 'auto';
+    this.iframe.setAttribute('src', 'https://player.vimeo.com/video/411891457?autoplay=1&api=1&background=true&mute=0&loop=true');    
+    this.top.style.cursor = 'auto';
     this.top.style.opacity = ".4";
     this.top.removeEventListener("click", this.fClick);       
     var that = this;    
@@ -50,7 +50,7 @@ addProps(AboutTab.prototype, {
   onShow: function () {
     this.hideVideo();    
     this.played = false;
-    this.top.style['cursor'] = 'pointer';
+    this.top.style.cursor = 'pointer';
     this.top.addEventListener("click", this.fClick);        
   },
   onHide: function () {    
@@ -85,7 +85,7 @@ addProps(AboutTab.prototype, {
         'developed by Greg Stanton\n' +
       '</p>';
     var outer = document.createElement('div');
-    outer.style['text-align'] = 'center';
+    outer.style.textAlign = 'center';
     about.appendChild(outer);
     this.wrapperEl = document.createElement('div');
     this.wrapperEl.className = 'about-atari';

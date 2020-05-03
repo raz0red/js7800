@@ -1956,6 +1956,17 @@ region=1
 flags=0
 pokey450=true
 xm=true
+[160dc0e869961f683e59f1bebef0cb8d]
+title=Pac-Man XM
+type=1
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=true
+xm=true
+hsc=true
 [8cb66c6ed5b379181b1420d8e4758834]
 title=Pactron 1984 (Hack)
 type=0

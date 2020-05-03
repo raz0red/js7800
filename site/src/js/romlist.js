@@ -47,7 +47,7 @@ function RomList(selects) {
         for (var i = 0; i < files.length; i++) {
           var file = files[i];
           var opt = document.createElement('option');
-          opt.appendChild(document.createTextNode(file.name));
+          opt.text = file.name;
           opt.value = file.path;
           parentEl.appendChild(opt);
         }
@@ -69,7 +69,7 @@ function RomList(selects) {
 
     clearSelect(select);
     var opt = document.createElement('option');
-    opt.appendChild(document.createTextNode("Select Atari 7800 Cartridge..."));
+    opt.text = "Select Atari 7800 Cartridge...";
     opt.disabled = true;
     opt.selected = true;
     select.appendChild(opt);

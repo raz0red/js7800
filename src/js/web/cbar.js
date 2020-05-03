@@ -19,6 +19,7 @@ import infoImgSrc from '../../images/information-outline.svg'
 var addProps = Utils.addProps;
 var Component = UiCommon.Component;
 var Button = UiCommon.Button;
+var ToggleSwitch = UiCommon.ToggleSwitch;
 
 /* Control Group */
 function ControlGroup() {
@@ -132,36 +133,6 @@ addProps(ToggleImageButton.prototype, {
   getValue: function () {
     return this.value;
   }
-});
-
-/* Toggle Switch */
-function ToggleSwitch(title) {
-  Component.call(this);
-  this.title = title;
-  this.cb = null;
-}
-ToggleSwitch.prototype = Object.create(Component.prototype);
-addProps(ToggleSwitch.prototype, {
-  getClass: function () {
-    return "js7800__controls-switch";
-  },
-  doCreateElement: function () {
-    var toggle = document.createElement("label");
-    toggle.setAttribute("title", this.title);
-    var cb = document.createElement("input");
-    this.cb = cb;
-    cb.setAttribute("type", "checkbox");
-    var self = this;
-    cb.onclick = function (event) { self.onClick(event) };
-    toggle.appendChild(cb);
-    var span = document.createElement("span");
-    span.className = "js7800__controls-switch-slider";
-    toggle.appendChild(span);
-    return toggle;
-  },
-  setValue(on) { this.cb.checked = on; },
-  getValue() { return this.cb.checked; },
-  onClick: function (event) { }
 });
 
 var groupStart = new ControlGroupStart();

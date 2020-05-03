@@ -11,28 +11,46 @@ var PAL_ATARI_BLIT_TOP_Y = 26;
 var PAL_ATARI_HEIGHT = 240;
 var ATARI_CANVAS_HEIGHT = 240;
 
-var HxW_AR = 1.1416;
-var WxH_AR = 0.876;
-var DEFAULT_WIDTH = 548;
-var DEFAULT_HEIGHT = 480;
-
 /** Snow */
 var displaySnow = true;
-
+/** The blit surface */
 var blitSurface = new Array(ATARI_WIDTH * ATARI_BLIT_HEIGHT);
-
 /** The atari canvas */
 var canvas = null;
 /** The atari context */
 var context = null;
 /** The controls div */
 var controlsDiv = null;
+/** The main container */
+var mainContainer = null;
 /** The atari image data */
 var image;
 /** The atari image data */
 var imageData;
 /** The palette */
 var palette8 = new Array(256);
+/** The filter style (bilinear) */
+var filterStyle = 'initial';
+/** The default filter */
+var DEFAULT_FILTER = false;
+/** Whether the filter is enabled */
+var filterEnabled = DEFAULT_FILTER;
+/** The default screen size */
+var DEFAULT_SIZE = 2;
+/** The screen size */
+var screenSize = DEFAULT_SIZE;
+/** The default aspect ratio */
+var DEFAULT_RATIO = 1; /** 1:1 */
+/** The aspect ratio */
+var screenRatio = DEFAULT_RATIO;
+/** The current width */
+var currentWidth = 0
+/** The current height */
+var currentHeight = 0;
+/** Height x Width AR */
+var HxW_AR = 0;
+/** Width x Height AR */
+var WxH_AR = 0;
 
 /** Cartridge shadow */
 var cartridgeRegion = 0;
@@ -84,21 +102,28 @@ function flipImage() {
   context.putImageData(image, 0, 0);
 }
 
-function init(canvasIn, controlsDivIn) {
+function init(canvasIn, controlsDivIn, mainContainerIn) {
   Maria.SetSurface(blitSurface);
   if (!canvas) {
     canvas = canvasIn;
     controlsDiv = controlsDivIn;
+    mainContainer = mainContainerIn;
     context = canvas.getContext('2d');
     image = context.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
     imageData = image.data;
-  }
+  }  
   clearCanvas();
-  resizeCanvas();
+  resizeScreen();  
+
+  // Set initial filter value
+  filterStyle = getComputedStyle(canvas)['image-rendering'];
+  setFilterEnabled(filterEnabled);
 }
 
 Events.addListener(new Events.Listener("init",
-  function (event) { init(event.canvas, event.controlsDiv); }));
+  function (event) { init(
+    event.canvas, event.controlsDiv, event.mainContainer); 
+  }));
 
 function clearCanvas() {
   // set alpha to opaque 
@@ -139,7 +164,7 @@ function resizeCanvas() {
   if (canvas) {
     var fullScreen = document.fullscreenElement;
     if (fullScreen) {
-      var height = window.innerHeight - controlsDiv.offsetHeight;
+      var height = window.innerHeight - controlsDiv.offsetHeight;      
       var width = window.innerWidth;
 
       var newHeight = height;
@@ -151,8 +176,8 @@ function resizeCanvas() {
       canvas.style.width = newWidth + "px";
       canvas.style.height = newHeight + "px";
     } else {
-      canvas.style.width = DEFAULT_WIDTH + "px";
-      canvas.style.height = DEFAULT_HEIGHT + "px";
+      canvas.style.width = currentWidth + "px";
+      canvas.style.height = currentHeight + "px";
     }
     Events.fireEvent("fullscreen", fullScreen ? true : false);
   }
@@ -169,6 +194,54 @@ function getCanvas() {
 
 function stopScreenSnow() { 
   displaySnow = false; 
+}
+
+function setFilterEnabled(val) {
+  filterEnabled = val;
+  canvas.style.imageRendering = (val ? 'initial' :  filterStyle);  
+}
+
+function isFilterEnabled() {
+  return filterEnabled;  
+}
+
+function getFilterEnabledDefault() {
+  return DEFAULT_FILTER;
+}
+
+function resizeScreen() {
+  currentWidth = (ATARI_WIDTH * screenSize * screenRatio) | 0;
+  currentHeight = ATARI_CANVAS_HEIGHT * screenSize;
+  HxW_AR = (currentWidth / currentHeight);
+  WxH_AR = (currentHeight / currentWidth);
+
+  mainContainer.style.width = currentWidth + "px";
+
+  resizeCanvas();
+}
+
+function setScreenSize(size) {
+  screenSize = size;
+  resizeScreen();
+}
+function getScreenSize() {
+  return screenSize;
+}
+
+function getScreenSizeDefault() {
+  return DEFAULT_SIZE;
+}
+
+function setScreenRatio(ratio) {
+  screenRatio = ratio;
+  resizeScreen();
+}
+function getScreenRatio() {
+  return screenRatio;
+}
+
+function getScreenRatioDefault() {
+  return DEFAULT_RATIO;
 }
 
 function fullScreen() {
@@ -205,11 +278,18 @@ export {
   PAL_ATARI_BLIT_TOP_Y,
   NTSC_ATARI_HEIGHT,
   PAL_ATARI_HEIGHT,
-  DEFAULT_HEIGHT,
-  DEFAULT_WIDTH,
   getCanvas,
   stopScreenSnow,
   fullScreen,
   exitFullScreen,
-  isFullscreen
+  isFullscreen,
+  getFilterEnabledDefault,
+  setFilterEnabled,
+  isFilterEnabled,
+  setScreenSize,
+  getScreenSize,
+  getScreenSizeDefault,
+  setScreenRatio,
+  getScreenRatio,
+  getScreenRatioDefault
 }

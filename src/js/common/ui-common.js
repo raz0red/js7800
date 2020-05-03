@@ -49,7 +49,38 @@ addProps(Button.prototype, {
   onUp: function (event) { }
 });
 
+/* Toggle Switch */
+function ToggleSwitch(title) {
+  Component.call(this);
+  this.title = title;
+  this.cb = null;
+}
+ToggleSwitch.prototype = Object.create(Component.prototype);
+addProps(ToggleSwitch.prototype, {
+  getClass: function () {
+    return "js7800__controls-switch";
+  },
+  doCreateElement: function () {
+    var toggle = document.createElement("label");
+    toggle.setAttribute("title", this.title);
+    var cb = document.createElement("input");
+    this.cb = cb;
+    cb.setAttribute("type", "checkbox");
+    var self = this;
+    cb.onclick = function (event) { self.onClick(event) };
+    toggle.appendChild(cb);
+    var span = document.createElement("span");
+    span.className = this.getClass() + "-slider";
+    toggle.appendChild(span);
+    return toggle;
+  },
+  setValue(on) { this.cb.checked = on; },
+  getValue() { return this.cb.checked; },
+  onClick: function (event) { }
+});
+
 export {
   Component,
-  Button
+  Button,
+  ToggleSwitch
 }
