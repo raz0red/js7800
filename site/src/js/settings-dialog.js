@@ -15,6 +15,7 @@ var Select = DialogModule.DialogSelect;
 var ContentCell = DialogModule.ContentCell;
 var addProps = Util.addProps;
 var js7800 = null;
+var HighScore = null;
 
 //
 // Key target
@@ -459,8 +460,10 @@ addProps(ConsoleControlsGamepad.prototype, {
 // Settings dialog tabs
 //
 
+// Display tab
+
 var displayTab = new Tab("Display");
-addProps(displayTab, {
+addProps(displayTab, {  
   filterSwitch: null,
   sizeSelect: null,
   arSelect: null,
@@ -468,18 +471,18 @@ addProps(displayTab, {
     var vid = js7800.Video;
     this.vid = vid;
     this.filterSwitch.setValue(vid.isFilterEnabled());
-    this.sizeSelect.setValue(vid.getScreenSize());
-    this.arSelect.setValue(vid.getScreenRatio());
+    this.sizeSelect.setValue(vid.getScreenSize().toString());
+    this.arSelect.setValue(vid.getScreenRatio().toString());
   },
   onOk: function () {    
     this.vid.setFilterEnabled(this.filterSwitch.getValue());
-    this.vid.setScreenSize(this.sizeSelect.getValue());
-    this.vid.setScreenRatio(this.arSelect.getValue());
+    this.vid.setScreenSize(parseFloat(this.sizeSelect.getValue()));
+    this.vid.setScreenRatio(parseFloat(this.arSelect.getValue()));
   },
   onDefaults: function () {    
     this.filterSwitch.setValue(this.vid.getFilterEnabledDefault());
-    this.sizeSelect.setValue(this.vid.getScreenSizeDefault());
-    this.arSelect.setValue(this.vid.getScreenRatioDefault());
+    this.sizeSelect.setValue(this.vid.getScreenSizeDefault().toString());
+    this.arSelect.setValue(this.vid.getScreenRatioDefault().toString());
   },
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
@@ -490,15 +493,15 @@ addProps(displayTab, {
     var grid = new Grid();
     grid.addCell(new LabelCell("Screen size:"));
     this.sizeSelect = new Select({
-      "2x": 2, "2.5x": 2.5, "3x": 3, "3.5x": 3.5, "4x": 4
+      "2x": "2", "2.5x": "2.5", "3x": "3", "3.5x": "3.5", "4x": "4"
     });
     grid.addCell(new ContentCell(this.sizeSelect));
     grid.addCell(new LabelCell("Aspect ratio:"));
     this.arSelect = new Select({
-      "Pixel perfect (1:1 PAR)" : 1,
-      "Atari 7800 (6:7 PAR)" : 0.857,
-      "Widescreen (16:9)" : 1.334,
-      "Ultra-widescreen (2.37:1)" : 1.778
+      "Pixel perfect (1:1 PAR)" : "1",
+      "Atari 7800 (6:7 PAR)" : "0.857",
+      "Widescreen (16:9)" : "1.334",
+      "Ultra-widescreen (2.37:1)" : "1.778"
     });
     grid.addCell(new ContentCell(this.arSelect));    
     grid.addCell(new LabelCell("Apply filter:"));
@@ -508,7 +511,66 @@ addProps(displayTab, {
   }
 });
 
-// Display tab
+// High scores tab
+
+var hsTab = new Tab("High Scores");
+addProps(hsTab, {
+  enableSwitch: null,
+  locationSelect: null,
+  desc: null,
+  onShow: function () {    
+    this.updateDesc();
+    this.enableSwitch.setValue(HighScore.getEnabled());
+    this.locationSelect.setValue(HighScore.getGlobal() ? "1" : "0");
+    this.enableSwitch.onClick();
+  },
+  onOk: function () {    
+    HighScore.setEnabled(this.enableSwitch.getValue());
+    HighScore.setGlobal(this.locationSelect.getValue() == "1");
+  },
+  onDefaults: function () {    
+    this.enableSwitch.setValue(HighScore.getEnabledDefault());
+    this.locationSelect.setValue(HighScore.getGlobalDefault() ? "1" : "0");
+    this.enableSwitch.onClick();
+  },
+  updateDesc() {
+    var descText =
+    '<div class="tabcontent__title">High Score Settings</div>\n' +
+    '<p class="center">The following settings control high score persistence.</p>';
+
+    if (HighScore.getDigest()) {
+      descText +=
+        '<p class="center">Changes will not take effect until the next game is loaded.</p>'
+    }
+    this.desc.innerHTML = descText;
+  },
+  createTabContent: function (rootEl) {
+    this.desc = document.createElement("div");
+    rootEl.appendChild(this.desc);
+    this.updateDesc();
+  
+    var grid = new Grid();
+    grid.addCell(new LabelCell("Save scores:"));
+    this.enableSwitch = new ToggleSwitch("Toggle Filter");
+    grid.addCell(new ContentCell(this.enableSwitch));
+
+    var locationLabel = new LabelCell("Save location:");
+    grid.addCell(locationLabel);    
+    this.locationSelect = new Select({
+      "Local (this device only)": "0", 
+      "Global (worldwide leaderboard)": "1"
+    });
+    this.locationSelect.setWidth(16);
+    var locationContent = new ContentCell(this.locationSelect);
+    grid.addCell(locationContent);
+    rootEl.appendChild(grid.createElement());
+
+    this.enableSwitch.onClick = function() {
+      locationLabel.setVisible(this.getValue());
+      locationContent.setVisible(this.getValue());
+    }    
+  }
+});
 
 // Gamepads tab
 var gamepadsTab = new Tab("Gamepads");
@@ -603,6 +665,7 @@ var settingsTabSet = new TabSet();
 settingsTabSet.addTab(displayTab);
 settingsTabSet.addTab(keyboardTab);
 settingsTabSet.addTab(gamepadsTab);
+settingsTabSet.addTab(hsTab);
 settingsTabSet.addTab(new AboutTab(), true);
 
 //
@@ -624,6 +687,7 @@ addProps(SettingsDialog.prototype, {
 Events.addListener(new Events.Listener("siteInit",
   function (event) {
     js7800 = event.js7800;
+    HighScore = event.HighScore;
   }
 ));
 

@@ -7,10 +7,13 @@ var CONSOLE_MAP_NAME = "consoleMap";
 var DISPLAY_FILTER = "displayFilter";
 var DISPLAY_RATIO = "displayRatio";
 var DISPLAY_SIZE = "displaySize";
+var HS_ENABLED = "hsEnabled";
+var HS_GLOBAL = "hsGlobal";
 
 var js7800 = null;
 var kb = null;
 var video = null;
+var HighScore = null;
 
 var localStorageEnabled = false;
 
@@ -95,6 +98,10 @@ function loadPrefs() {
       if (ratio !== undefined ) video.setScreenRatio(ratio);
       var size = prefs[DISPLAY_SIZE];
       if (size !== undefined ) video.setScreenSize(size);
+      var hsEnabled = prefs[HS_ENABLED];
+      if (hsEnabled !== undefined ) HighScore.setEnabled(hsEnabled);
+      var hsGlobal = prefs[HS_GLOBAL];
+      if (hsGlobal !== undefined ) HighScore.setGlobal(hsGlobal);
     }
   } catch (e) {
     Events.fireEvent("showError", "An error occurred loading preferences: " + e);
@@ -115,6 +122,9 @@ function savePrefs() {
     prefs[DISPLAY_FILTER] = video.isFilterEnabled();
     prefs[DISPLAY_SIZE] = video.getScreenSize();
     prefs[DISPLAY_RATIO] = video.getScreenRatio();
+    prefs[HS_ENABLED] = HighScore.getEnabled();
+    prefs[HS_GLOBAL] = HighScore.getGlobal();
+
     localStorage.setItem("prefs", JSON.stringify(prefs));
   } catch (e) {
     Events.fireEvent("showError", "An error occurred saving preferences: " + e);
@@ -179,6 +189,7 @@ Events.addListener(new Events.Listener("siteInit",
     js7800 = event.js7800;
     kb = js7800.Keyboard;
     video = js7800.Video;
+    HighScore = event.HighScore;
     checkLocalStorageAvailable();    
   }));
 

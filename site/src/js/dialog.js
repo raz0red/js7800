@@ -44,6 +44,8 @@ addProps(DialogToggleSwitch.prototype, {
 function DialogSelect(opts) {
   Component.call(this);
   this.opts = opts;
+  this.div = null;
+  this.width = null;
 }
 DialogSelect.prototype = Object.create(Component.prototype);
 addProps(DialogSelect.prototype, {
@@ -57,8 +59,16 @@ addProps(DialogSelect.prototype, {
   getValue: function() {
     return this.select.value;
   },
+  setWidth: function(width /*in em*/) {    
+    this.width = width;
+    if (this.div) {
+      this.div.style.width = this.width + "em";
+    }
+  },
   doCreateElement: function() {
-    var div = document.createElement("div");    
+    var div = document.createElement("div");        
+    this.div = div;
+    if (this.width) this.setWidth(this.width);
     var sel = document.createElement("select");
     div.appendChild(sel);
     this.select = sel;
@@ -389,11 +399,13 @@ function Cell() {
 }
 Cell.prototype = Object.create(Component.prototype);
 addProps(Cell.prototype, {
+  setVisible(val) {
+    this.el.style.display = val ? 'block' : 'none';
+  },
   doCreateElement: function () {
     return document.createElement("div");
   }
 });
-
 
 function LabelCell(label) {
   Cell.call(this);

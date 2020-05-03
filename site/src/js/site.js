@@ -163,12 +163,10 @@ function init(in7800) {
 
   // Create the settings dialog  
   var settingsDialog = new SettingsDialog();  
-  parent.appendChild(settingsDialog.createElement());
   cbar.settingsButton.onClick = function () { settingsDialog.show(); }
 
   // Create the help dialog  
   var helpDialog = new HelpDialog();  
-  parent.appendChild(helpDialog.createElement());
   cbar.helpButton.onClick = function () { helpDialog.show(); }
 
   // Rom list component
@@ -188,8 +186,11 @@ function init(in7800) {
     errorHandler: errorHandler,
     debug: debug,
     HighScore: HighScore,
-    globalHighScores: getRequestParameter("ghs")
   });
+
+  // Build the dialogs
+  parent.appendChild(settingsDialog.createElement());
+  parent.appendChild(helpDialog.createElement());
 
   // Show error event listener
   Events.addListener(new Events.Listener("showError",

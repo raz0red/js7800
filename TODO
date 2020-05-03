@@ -24,3 +24,4 @@
 - Better exception handling (for example, loading global hs, and content is bad, site is down on save and load)
 - Check all XHR calls and handle exceptions appropriately
 - Show rom list loaded successful message (when loading was displayed)
+- Test changes to high score cart mid game (save at end, etc.)

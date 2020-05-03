@@ -13,6 +13,9 @@ var SRAM_SCORE_OFFSET = 0x113D;
 var WRITE_DELAY = 2000; // 2 seconds
 var STORAGE_KEY = "highScoreSRAM";
 
+var GLOBAL_DEFAULT = true;
+var ENABLED_DEFAULT = true;
+
 var js7800 = null;
 var Main = null;
 var debug = false;
@@ -25,7 +28,9 @@ var pending = 0;
 var timeoutId = null;
 var sessionId = null;
 var digest = null;
-var isGlobal = false;
+var isGlobal = GLOBAL_DEFAULT;
+var curGlobal = isGlobal;
+var isEnabled = ENABLED_DEFAULT;
 
 var sram = new Array(SRAM_SIZE);
 
@@ -66,9 +71,12 @@ function onCartLoaded() {
   // Store cartridge digest
   digest = js7800.Cartridge.GetDigest();
 
+  // Set global
+  curGlobal = isGlobal;  
+
   // Set the high score callback appropriately
   Main.setHighScoreCallback(
-    Storage.isLocalStorageEnabled() ? 
+    (isEnabled && Storage.isLocalStorageEnabled()) ? 
       hsCallback : hsNullCallback);
 }
 
@@ -172,7 +180,7 @@ function loadSram(postLoadCallback) {
     postLoadCallback(null);        
   };
   
-  if (isGlobal) {
+  if (curGlobal) {
     loadSramGlobal(fSuccess, fFailure);
   } else {
     loadSramLocal(fSuccess, fFailure);
@@ -216,7 +224,7 @@ function saveSram() {
     console.log("HSC Scores have changed, saving.");    
 
     try {
-      if (isGlobal) {
+      if (curGlobal) {
         saveSramGlobal()
       } else {
         saveSramLocal();
@@ -236,11 +244,6 @@ function init(event) {
 
   // Set the debug flag 
   debug = event.debug;
-
-  // Set global high score 
-  if (event.globalHighScores && (event.globalHighScores == "true")) {
-    isGlobal = true;
-  }
 
   // Generate the default SRAM
   generateDefaultSram(sram);
@@ -271,6 +274,34 @@ function init(event) {
   }
 }
 
+function setEnabled(val) {
+  isEnabled = val;  
+}
+
+function getEnabled() {
+  return isEnabled;
+}
+
+function getEnabledDefault() {
+  return ENABLED_DEFAULT;
+}
+
+function setGlobal(val) {
+  isGlobal = val;
+}
+
+function getGlobal() {
+  return isGlobal;
+}
+
+function getGlobalDefault() {
+  return GLOBAL_DEFAULT; 
+}
+
+function getDigest() {
+  return digest;
+}
+
 Events.addListener(
   new Events.Listener("siteInit", function (event) { init(event) }));
 
@@ -278,5 +309,12 @@ export {
   SRAM_SIZE,
   generateDefaultSram,
   sramToBase64,
-  base64toSram
+  base64toSram,
+  setEnabled,
+  getEnabled,
+  getEnabledDefault,
+  getGlobal,
+  setGlobal,
+  getGlobalDefault,
+  getDigest
 }
