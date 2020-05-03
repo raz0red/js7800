@@ -15,7 +15,11 @@
         {
             "name": "Utilities",
             "path": "romlist-homebrew-utils.json"
-        }
+        },
+        {
+            "name": "High Score Compatible",
+            "path": "romlist-homebrew-highscore.json"
+        }     
     ],
     "files": []
 }
