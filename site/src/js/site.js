@@ -158,6 +158,21 @@ function init(in7800) {
   main.setErrorHandler(errorHandler);
   main.init('js7800__target');
 
+  // Create the description
+  var desc = main.descriptionDiv;
+  desc.className = "instructs";
+  desc.innerHTML = 
+    '<div>Press the <img id="ins_settings_img" src="' + cbar.cogsImgSrc  + '"></img><span id="ins_settings" class="ilink">Settings button</span> to view keyboard mappings.</div>';
+  desc.innerHTML +=
+    '<div class="ihelp">Press the <img id="ins_help_img" src="' + cbar.infoImgSrc  + '"></img><span id="ins_help" class="ilink">Help button</span> for usage instructions.</div>';
+  
+  var fSettings = function() { cbar.settingsButton.onClick(); };
+  var fHelp = function() { cbar.helpButton.onClick(); };
+  document.getElementById('ins_settings').onclick = fSettings;
+  document.getElementById('ins_settings_img').onclick = fSettings;
+  document.getElementById('ins_help').onclick = fHelp;
+  document.getElementById('ins_help_img').onclick = fHelp;
+
   // js7800 parent element
   var parent = document.getElementById('js7800__fullscreen-container');
 

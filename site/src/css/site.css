@@ -874,3 +874,47 @@ input:checked+.dialog-switch-slider:before {
   line-height: 1.5em;
   padding: 0 3em 0 3em;
 }
+
+.instructs {
+  font-size:1.15em;
+  border-radius:1em;
+  opacity:0.8;
+  padding:1em;
+  /* background-color: #1E1E1E;  */
+  background-color: #1F1F1F; 
+  /* background-color: #9c1919; */
+  color:#BBB;
+}
+
+.instructs .ilink {
+  font-weight: bold;
+  color: #CCC;  
+}
+
+.instructs .ilink:hover {
+  color: #FFF;  
+  cursor: pointer;
+}
+
+.instructs img {
+  width: 1.7em;
+  height: 1.7em;
+  margin: 0 .2em;
+  opacity: .8;
+  vertical-align:middle;
+  cursor: pointer;
+}
+
+.instructs img:hover {
+  opacity: 1;
+} 
+
+.instructs div {
+  vertical-align:middle;
+}
+
+.instructs div.ihelp {
+  margin-top:1em;
+}
+
+

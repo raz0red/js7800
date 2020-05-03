@@ -222,5 +222,7 @@ export {
   settingsButton,
   helpButton,
   pauseButton,
-  soundButton
+  soundButton,
+  cogsImgSrc,
+  infoImgSrc
 }

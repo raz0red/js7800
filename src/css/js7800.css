@@ -49,6 +49,10 @@
   opacity: 0;
 }
 
+.js7800__logo .atari7800 {
+  padding: 0 2em;
+}
+
 .js7800__logo--show {
   visibility: visible;
   opacity: 1;

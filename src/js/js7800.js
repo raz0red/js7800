@@ -31,6 +31,7 @@ var updateInput = Input.updateInput;
 var flipImage = Video.flipImage;
 
 var mainContainer = null;
+var descriptionDiv = null;
 var canvas = null;
 var controlsDiv = null;
 var logoDiv = null;
@@ -226,7 +227,6 @@ function addElements(id) {
   // border-container
   mainContainer = document.createElement("div");
   mainContainer.className = mainContainer.id = "js7800";
-  //mainContainer.style.width = Video.DEFAULT_WIDTH + "px";
   container.appendChild(mainContainer);
 
   // fullscreen-container
@@ -260,6 +260,7 @@ function addElements(id) {
   var logoImage = document.createElement("img");
   logoImage.src = logoImageSrc;
   logoImage.alt = "Atari 7800";
+  logoImage.className = 'atari7800';
   logoDiv.appendChild(logoImage);
 
   // controls
@@ -283,6 +284,10 @@ function init(id) {
       keyboardData: keyboardData,
       Region: Region
     });
+
+    // Description
+    descriptionDiv = document.createElement("div");
+    logoDiv.appendChild(descriptionDiv);
 
     Video.startScreenSnow();
     logoDiv.classList.add('js7800__logo--show');
@@ -341,5 +346,6 @@ export {
   setErrorHandler,  
   setLogFps,
   setHighScoreCallback,
-  HighScoreCallback
+  HighScoreCallback,
+  descriptionDiv
 }
