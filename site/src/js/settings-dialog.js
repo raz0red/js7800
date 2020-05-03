@@ -663,10 +663,10 @@ addProps(keyboardTab, {
 
 var settingsTabSet = new TabSet();
 settingsTabSet.addTab(displayTab);
-settingsTabSet.addTab(keyboardTab);
+settingsTabSet.addTab(keyboardTab, true);
 settingsTabSet.addTab(gamepadsTab);
 settingsTabSet.addTab(hsTab);
-settingsTabSet.addTab(new AboutTab(), true);
+settingsTabSet.addTab(new AboutTab());
 
 //
 // Settings dialog
@@ -677,6 +677,9 @@ function SettingsDialog() {
 }
 SettingsDialog.prototype = Object.create(TabbedDialog.prototype);
 addProps(SettingsDialog.prototype, {
+  selectKeyboardTab() {
+    this.getTabSet().onTabClick(keyboardTab);
+  },
   getTabSet: function () { return settingsTabSet; },
   onOk: function () {
     TabbedDialog.prototype.onOk.call(this);
