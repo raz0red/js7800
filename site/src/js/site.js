@@ -122,14 +122,14 @@ function handleRequestParameters() {
     var main = js7800.Main;
     
     // ROM list
-    var rlist = getRequestParameter("romlist");
+    var rlist = getRequestParameter("cartlist");
     if (!rlist) {
       rlist = 'roms/romlist-homebrew.json';
     }
     romList.loadListFromUrl(rlist);
   
     // ROM
-    var rom = getRequestParameter("rom");
+    var rom = getRequestParameter("cart");
     if (rom) {
       loadFromUrl(rom);
     }  
@@ -211,6 +211,12 @@ function init(in7800) {
   // Show error event listener
   Events.addListener(new Events.Listener("showError",
     function (message) { errorHandler(message); }));
+
+  // Cartridge list loaded listener
+  Events.addListener(new Events.Listener("romlistLoaded", function() {
+      var id = showMessage("Succesfully loaded cartridge list.");
+      hideMessage(id, 1000);
+    }));    
 
   // Load preferences
   Storage.loadPrefs();

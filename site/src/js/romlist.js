@@ -125,8 +125,9 @@ function RomList(selects) {
         } else {
           for (var idx = 0; idx < selects.length; idx++) {
             var select = selects[idx];
-            populateSelect(select, ctx.root);
+            populateSelect(select, ctx.root);            
           }
+          Events.fireEvent("romlistLoaded", null);
         }
       }
     }
@@ -156,7 +157,7 @@ function RomList(selects) {
         postRead();
       };
       xhr.onerror = function() {
-        console.log('Error attempting to read rom list.');
+        errorHandler('Error attempting to read cartridge list.<br>(See console log for details)');
       }
       xhr.send();
     }

@@ -53,7 +53,7 @@ function init(event) {
         pauseButton.onClick();      
       }
       setTimeout(function() {      
-        var url = prompt("Enter the URL of a remote ROM file or ROM list");
+        var url = prompt("Enter the URL of a remote Cartridge file or Cartridge list");
         if (url) {
           var trimmed = url.trim();
           if (trimmed.length > 0) {
