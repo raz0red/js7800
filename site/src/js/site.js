@@ -165,9 +165,9 @@ function init(in7800) {
   var desc = main.descriptionDiv;
   desc.className = "instructs";
   desc.innerHTML = 
-    '<div>Press the <img id="ins_settings_img" src="' + cbar.cogsImgSrc + '"></img><span id="ins_settings" class="ilink">Settings button</span> to view current keyboard mappings.</div>';
+    '<div>Press the<img id="ins_settings_img" src="' + cbar.cogsImgSrc + '"></img><span id="ins_settings" class="ilink">Settings button</span> to view current keyboard mappings.</div>';
   desc.innerHTML +=
-    '<div class="ihelp">Press the <img id="ins_help_img" src="' + cbar.infoImgSrc + '"></img><span id="ins_help" class="ilink">Help button</span> for usage instructions.</div>';
+    '<div class="ihelp">Press the<img id="ins_help_img" src="' + cbar.infoImgSrc + '"></img><span id="ins_help" class="ilink">Help button</span> for usage instructions.</div>';
   
   // js7800 parent element
   var parent = document.getElementById('js7800__fullscreen-container');

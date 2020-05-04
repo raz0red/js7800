@@ -899,7 +899,7 @@ input:checked+.dialog-switch-slider:before {
 .instructs img {
   width: 1.7em;
   height: 1.7em;
-  margin: 0 .2em;
+  margin: 0 .2em 0 .3em;
   opacity: .8;
   vertical-align:middle;
   cursor: pointer;
