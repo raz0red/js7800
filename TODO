@@ -15,7 +15,6 @@
   (may be fixed)
 - Remove certain images from pack (controller.png, etc.)
 - Fix drag of logo image
-- Add documentation to intro screen (settings and info buttons w/ direct links)
 - Use init in js7800 to pass common properties around (similar to REGION_NTSC, but for duplicated values).
   Using init eliminates issues with circular dependencies (values were copied previously before init existed)
 - Better exception handling (for example, loading global hs, and content is bad, site is down on save and load)
@@ -24,4 +23,5 @@
 
 - Create new video with pause at beginning, add other content to it, splice multiple commercials
 - Add video option (full screen is fixed multiple) (Full screen scale) fill, integer, .5 steps, .25 steps
+- Use custom dialog instead of "input" for remote files
 

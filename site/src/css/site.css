@@ -878,12 +878,13 @@ input:checked+.dialog-switch-slider:before {
 .instructs {
   font-size:1.15em;
   border-radius:1em;
-  opacity:0.8;
+  opacity:0.875;
   padding:1em;
   /* background-color: #1E1E1E;  */
   background-color: #1F1F1F; 
   /* background-color: #9c1919; */
   color:#BBB;
+  box-shadow: 0 .27em .54em 0 rgba(0, 0, 0, 0.4), 0 .4em 1.34em 0 rgba(0, 0, 0, 0.39);
 }
 
 .instructs .ilink {
@@ -917,4 +918,30 @@ input:checked+.dialog-switch-slider:before {
   margin-top:1em;
 }
 
+.loader-container {
+  display: flex; 
+  justify-content: center; 
+  align-items: center; 
+  height:100%;
+}
 
+.loader {
+  border: 1em solid #999;
+  border-radius: 50%;
+  border-top: 1em solid #8b2429;
+  width: 6em;
+  height: 6em;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
