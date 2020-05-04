@@ -23,4 +23,5 @@
 - Test changes to high score cart mid game (save at end, etc.)
 
 - Create new video with pause at beginning, add other content to it, splice multiple commercials
+- Add video option (full screen is fixed multiple) (Full screen scale) fill, integer, .5 steps, .25 steps
 

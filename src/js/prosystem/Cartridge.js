@@ -283,7 +283,7 @@ function cartridge_ReadHeader(header) {
   cartridge_region = header[57];
   cartridge_flags = 0;
   cartridge_xm = (header[63] & 1) ? true : false;
-  cartridge_hsc_enabled = header[58] & 0x01;
+  cartridge_hsc_enabled = header[58] & 0x03; // HSC or SaveKey /* 0x01; */
 
   // Wii: Updates to header interpretation
   //byte ct1 = header[54];

@@ -179,6 +179,10 @@ function resizeCanvas() {
       canvas.style.width = currentWidth + "px";
       canvas.style.height = currentHeight + "px";
     }
+    /*
+    console.log("Canvas size: " + 
+      canvas.style.width + " by " + canvas.style.height);
+    */
     Events.fireEvent("fullscreen", fullScreen ? true : false);
   }
 }

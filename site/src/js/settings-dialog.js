@@ -493,7 +493,15 @@ addProps(displayTab, {
     var grid = new Grid();
     grid.addCell(new LabelCell("Screen size:"));
     this.sizeSelect = new Select({
-      "2x": "2", "2.5x": "2.5", "3x": "3", "3.5x": "3.5", "4x": "4"
+      "2x": "2", 
+      "2.25x": "2.25", 
+      "2.5x": "2.5", 
+      "2.75x": "2.75", 
+      "3x": "3", 
+      "3.25x": "3.25", 
+      "3.5x": "3.5", 
+      "3.75x": "3.75", 
+      "4x": "4"
     });
     grid.addCell(new ContentCell(this.sizeSelect));
     grid.addCell(new LabelCell("Aspect ratio:"));
