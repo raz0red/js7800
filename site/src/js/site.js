@@ -31,7 +31,7 @@ var errorHandler = function (error, logToConsole) {
   showErrorMessage(error);
 }
 
-function startEmulation(blob) {
+function startEmulation(blob, fromSelect) {
   unzip(blob,
     function (file) {
       var reader = new FileReader();
@@ -42,6 +42,9 @@ function startEmulation(blob) {
         var cart = new Array(len);
         for (var i = 0; i < len; i++) {
           cart[i] = result.charCodeAt(i);
+        }
+        if (!fromSelect) {
+          romList.resetSelection();
         }
         js7800.Main.startEmulation(cart);
       }
@@ -54,7 +57,7 @@ var loadingMessageId = null;
 var loadMessageTimeout = 750;
 var onEmulationStartedCb = null; 
 
-function loadFromUrl(url) {
+function loadFromUrl(url, fromSelect) {
   var urlLower = url.toLowerCase();
   var forceList = (
     urlLower.endsWith(".json") || (urlLower.indexOf(".json?") != -1));
@@ -77,7 +80,7 @@ function loadFromUrl(url) {
       } else if (romList.loadListFromFile(xhr.response) || forceList) {
         hideMessage(loadingMessageId, loadMessageTimeout);
       } else {
-        startEmulation(xhr.response);
+        startEmulation(xhr.response, fromSelect);
       }
     } catch (e) {
       errorHandler(url + " (" + e + ")");

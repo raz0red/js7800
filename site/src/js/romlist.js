@@ -12,7 +12,7 @@ function RomList(selects) {
       var select = selects[iidx];
       select.onchange = function () {
         var value = select.value;
-        loadFromUrl(value);
+        loadFromUrl(value, true);
         this.blur();
         for (var i = 0; i < selects.length; i++) {
           if (selects[i] != select) {
@@ -207,6 +207,12 @@ function RomList(selects) {
 
   this.loadListFromUrl = function (romShareUrl) {
     loadList(romShareUrl, true);
+  }
+
+  this.resetSelection = function() {
+    for (var idx = 0; idx < selects.length; idx++) {
+        selects[idx].selectedIndex = 0;
+    }
   }
 }
 

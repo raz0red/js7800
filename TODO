@@ -5,7 +5,6 @@
 - Evaluate browser specific dependencies (key input, drag, etc.). Should these be external?
 - Add options to support lower performance devices (frame skipping, disable vsync, disable sound)
 - Move switches out of KB (should be input?)
-- Fix zip load issues (AtariAge game... maybe dungeon stalker?, search for .a78 first)
 - Fix top of command bar (not curved, need to fix 10px spacer above command bar)
 - Fix select/reset buttons on mobile (does not stay down while pressed, 
   same issue w/ lightgun, need to use touch events)
@@ -16,11 +15,12 @@
   (may be fixed)
 - Remove certain images from pack (controller.png, etc.)
 - Fix drag of logo image
-- Create new video with pause at beginning, add other content to it, splice multiple commercials
-- Reset ROM select lists when an external rom is loaded (drag, or load, etc.)
 - Add documentation to intro screen (settings and info buttons w/ direct links)
 - Use init in js7800 to pass common properties around (similar to REGION_NTSC, but for duplicated values).
   Using init eliminates issues with circular dependencies (values were copied previously before init existed)
 - Better exception handling (for example, loading global hs, and content is bad, site is down on save and load)
 - Check all XHR calls and handle exceptions appropriately
 - Test changes to high score cart mid game (save at end, etc.)
+
+- Create new video with pause at beginning, add other content to it, splice multiple commercials
+
