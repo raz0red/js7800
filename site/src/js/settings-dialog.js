@@ -568,7 +568,7 @@ addProps(hsTab, {
       "Local (this device only)": "0", 
       "Global (worldwide leaderboard)": "1"
     });
-    this.locationSelect.setWidth(16);
+    this.locationSelect.setWidth(17);
     var locationContent = new ContentCell(this.locationSelect);
     grid.addCell(locationContent);
     rootEl.appendChild(grid.createElement());
