@@ -885,6 +885,7 @@ input:checked+.dialog-switch-slider:before {
   /* background-color: #9c1919; */
   color:#BBB;
   box-shadow: 0 .27em .54em 0 rgba(0, 0, 0, 0.4), 0 .4em 1.34em 0 rgba(0, 0, 0, 0.39);
+  max-width: 40em;
 }
 
 .instructs .ilink {
@@ -927,11 +928,11 @@ input:checked+.dialog-switch-slider:before {
 }
 
 .loader {
-  border: 1em solid #999;
+  border: 12px solid #999;
   border-radius: 50%;
-  border-top: 1em solid #8b2429;
-  width: 6em;
-  height: 6em;
+  border-top: 12px solid #8b2429;
+  width: 80px;
+  height: 80px;
   -webkit-animation: spin 2s linear infinite; /* Safari */
   animation: spin 2s linear infinite;
 }
