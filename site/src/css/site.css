@@ -912,6 +912,7 @@ input:checked+.dialog-switch-slider:before {
 
 .instructs div {
   vertical-align:middle;
+  line-height:1.5em;
 }
 
 .instructs div.ihelp {

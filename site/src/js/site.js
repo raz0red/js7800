@@ -167,7 +167,9 @@ function init(in7800) {
   desc.innerHTML = 
     '<div>Press the<img id="ins_settings_img" src="' + cbar.cogsImgSrc + '"></img><span id="ins_settings" class="ilink">Settings button</span> to view current keyboard mappings.</div>';
   desc.innerHTML +=
-    '<div class="ihelp">Press the<img id="ins_help_img" src="' + cbar.infoImgSrc + '"></img><span id="ins_help" class="ilink">Help button</span> for usage instructions.</div>';
+    '<div class="ihelp">Press the<img id="ins_help_img" src="' + cbar.infoImgSrc + '"></img><span id="ins_help" class="ilink">Help button</span> for detailed usage instructions.</div>';
+    desc.innerHTML +=
+    '<div class="ihelp">Load a cartridge using the drop-down menu or buttons below (you can also drag and drop a local file or remote file link onto the emulator).</div>';
   
   // js7800 parent element
   var parent = document.getElementById('js7800__fullscreen-container');
