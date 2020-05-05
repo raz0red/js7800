@@ -663,6 +663,7 @@ addProps(keyboardTab, {
     var controlsDiv = document.createElement("div");
     rootEl.appendChild(controlsDiv);
     controlsDiv.className = "controls-container";
+    controlsDiv.style = "margin-top:35px"; /* Roboto */
     controlsDiv.appendChild(this.controller1.createElement());
     controlsDiv.appendChild(this.controller2.createElement());
     rootEl.appendChild(this.console.createElement());
