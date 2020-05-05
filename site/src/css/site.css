@@ -978,11 +978,11 @@ input:checked+.dialog-switch-slider:before {
 .docs img {
   border: 1px solid #1c1c1c;
   border-radius: 5px;
-  box-shadow: 5px 5px 10px black;
+  box-shadow: 5px 5px 10px rgb(0, 0, 0, 0.5);
 }
 
 .docs img.right {
-  margin: 1.5em .5em 1.5em 1.5em;
+  margin: 1.5em .5em 1.5em 2em;
   float: right;
 }
 
