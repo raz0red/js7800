@@ -7,6 +7,7 @@ var TabbedDialog = DialogModule.TabbedDialog;
 var TabSet = DialogModule.TabSet;
 var Tab = DialogModule.Tab;
 var addProps = Util.addProps;
+var debug = false;
 
 // 
 // Help Tab
@@ -38,6 +39,7 @@ addProps(HelpTab.prototype, {
       xhr.onload = function () {
         if (xhr.status == 200) {
           that.loaded = true; 
+          that.parent.classList.remove('loader-container');
           that.parent.style.display = 'none';
           that.parent.innerHTML = xhr.responseText;
           setTimeout(function () { that.parent.style.display = 'block' }, 100);
@@ -64,12 +66,20 @@ addProps(HelpTab.prototype, {
 });
 
 var overviewTab = new HelpTab("Overview", "help/overview.html");
-// var loadingTab = new HelpTab("Loading Cartridges", "help/loading.html");
+var cartsTab = new HelpTab("Cartridges", "help/carts.html");
+var cbarTab = new HelpTab("Controls Bar", "help/cbar.html");
+var settingsTab = new HelpTab("Settings Dialog", "help/settings.html");
+var highScoresTab = new HelpTab("High Scores", "help/highscores.html");
 
 var tabSet = new TabSet();
 tabSet.addTab(new AboutTab(), true);
 tabSet.addTab(overviewTab);
-// tabSet.addTab(loadingTab);
+if (Util.getRequestParameter("indev") == "true") { 
+  tabSet.addTab(cartsTab);
+  tabSet.addTab(cbarTab);
+  tabSet.addTab(settingsTab);
+  tabSet.addTab(highScoresTab);
+}
 
 //
 // Help dialog
@@ -80,8 +90,21 @@ function HelpDialog() {
 }
 HelpDialog.prototype = Object.create(TabbedDialog.prototype);
 addProps(HelpDialog.prototype, {
-  getTabSet: function () { return tabSet; }
+  cssLoaded: false,
+  getTabSet: function () { return tabSet; },
+  onShow: function () {
+    if (!this.cssLoaded) {
+      this.cssLoaded = true;
+      var link = document.createElement("link");
+      link.type = "text/css";
+      link.rel = "stylesheet";
+      link.href = "help/css/help.css";
+      document.head.appendChild(link);
+    }
+    TabbedDialog.prototype.onShow.call(this);
+  },
 });
 
 export { HelpDialog }
+
 
