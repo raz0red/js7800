@@ -1,0 +1,241 @@
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.loader {
+  border: 12px solid #999;
+  border-radius: 50%;
+  border-top: 12px solid #8b2429;
+  width: 80px;
+  height: 80px;
+  -webkit-animation: spin 2s linear infinite;
+  /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.docs {
+  margin-bottom: 1em;
+}
+
+.docs img {  
+  border-radius: 8px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4), 0 6px 20px 0 rgba(0, 0, 0, 0.39);
+}
+
+.docs .js7800-img {
+  border: 5px solid black;
+  margin: .8em .5em 1em 2em;
+  float: right;
+}
+
+.docs p {
+  line-height: 1.5em;
+}
+
+.docs ul {
+  list-style-type: square;
+}
+
+.docs li {
+  color: #555;
+}
+
+.docs li span {
+  color: #BBBBBB;
+}
+
+.docs li:not(:last-child) {
+  margin-bottom: .8em;
+}
+
+.dropbtn {
+  background-color: #333;
+  color: white;
+  padding: .3em .6em .3em .6em;
+  font-size: .9em;
+  line-height: 1.5em;
+  border: none;
+  cursor: pointer;
+  opacity: .8;
+  border-radius: .238em;
+  margin: .24em .635em .794em .794em;
+  /*3px 8px 10px 10px;*/
+  /* box-shadow: 0 .635em 1.43em 0 rgba(0, 0, 0, 0.8); */
+  box-shadow: 0 .317em .635em 0 rgba(0, 0, 0, 0.4), 0 .476em 1.587em 0 rgba(0, 0, 0, 0.39);
+}
+
+.dropbtn .down-arrow {
+  font-size: .8em; 
+  padding-left: .4em;
+}
+
+.dropbtn:hover {
+  opacity: 1;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: #363636;
+  min-width: 12.698em;
+  padding: .635em;
+  border-radius: .476em;
+  /* box-shadow: 0 .635em 1.429em .476em rgba(0, 0, 0, 0.8); */
+  /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4), 0 6px 20px 0 rgba(0, 0, 0, 0.39); */
+  box-shadow: 0 .317em .635em 0 rgba(0, 0, 0, 0.4), 0 .476em 1.587em 0 rgba(0, 0, 0, 0.39);
+  z-index: 1;
+}
+
+.dropdown {
+  float: right;
+  position: relative;
+}
+
+.dropdown-content div {
+  color: #ddd;
+  padding: .476em .635em;
+  font-size: .9em;
+  text-decoration: none;
+  display: block;
+  border-radius: .476em;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.dropdown-content div:hover {
+  background-color: #555;
+  opacity: 1;
+  color: #FFF;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.docs-section-title {
+  font-size: 1.04em; 
+  margin: .25em 0; 
+  padding: .25em 0; 
+  font-weight: bold;
+}
+
+.docs-center {
+  text-align: center;
+}
+
+.docs-relative-inline-block {
+  position: relative; 
+  display: inline-block;
+}
+
+.docs-loading-controls-focus {
+  position: absolute;
+  border: 2px solid rgb(187, 49, 56); 
+  border-radius: 5px; 
+  top: 50%; 
+  left: 50%; 
+}
+
+.docs-loading-controls-select-focus {
+  width: 261px; 
+  height: 44px; 
+  transform: translate(-184px, -25px);
+  -moz-transform: translate(-184px, -25px);
+  transform: translate(-184px, -25px);
+}
+
+.docs-loading-controls-file-focus {
+  width: 44px; 
+  height: 44px; 
+  transform: translate(77px, -25px);
+  -moz-transform: translate(77px, -25px);
+  transform: translate(77px, -25px);
+}
+
+.docs-loading-controls-remote-focus {
+  width: 44px; 
+  height: 44px; 
+  transform: translate(122px, -25px);
+  -moz-transform: translate(122px, -25px);
+  transform: translate(122px, -25px);
+}
+
+.docs-loading-controls-select-text {
+  position:absolute; 
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-160px, -9px); 
+  font-size:14px;  
+}
+
+.docs-loading-controls-image {
+  border:10px solid #1a1a1a; 
+  border-radius: 15px; 
+  margin: 15px 0; 
+}
+
+.docs-centered-image {
+  border:20px solid black; 
+  border-radius:15px; 
+  margin:15px 0; 
+}
+
+.docs-grid {
+  line-height: 1.5em;
+  font-size: 0.9em;
+  grid-column-gap: 2em;
+  padding: 1.5em;
+  margin-left: 2em;
+  margin-right: 2em;
+  border-radius: .634em;
+  box-shadow: 0 .317em .635em 0 rgba(0, 0, 0, 0.4), 0 .476em 1.587em 0 rgba(0, 0, 0, 0.39);
+  background-color: #232323;
+}
+
+.docs-grid-label-control {
+  text-align: center;
+}
+
+.docs-grid-control-image {
+  cursor: pointer; 
+  box-shadow: none !important;
+  width: 24px;  
+  height: 24px;  
+  padding: 5px; 
+  background-color: #333; 
+  opacity: 0.7; 
+}
+
+.docs-grid-control-image:hover {
+  opacity: 1;
+}
+
+.docs-controls-bar {
+  border-color: #151515; 
+  border-width: .5em;
+}
