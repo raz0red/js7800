@@ -26,4 +26,5 @@
 - Use custom dialog instead of "input" for remote files
 - Safari only slides the dialog down the first time
 - Provide image sizes for help
+- Ensure images/tables/etc. Margins are the same in the documentation (they seem inconsistent)
 
