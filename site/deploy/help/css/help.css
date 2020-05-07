@@ -210,8 +210,7 @@
   font-size: 0.9em;
   grid-column-gap: 2em;
   padding: 1.5em;
-  margin-left: 2em;
-  margin-right: 2em;
+  margin: 2em;
   border-radius: .634em;
   box-shadow: 0 .317em .635em 0 rgba(0, 0, 0, 0.4), 0 .476em 1.587em 0 rgba(0, 0, 0, 0.39);
   background-color: #232323;
