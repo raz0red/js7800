@@ -25,4 +25,5 @@
 - Add video option (full screen is fixed multiple) (Full screen scale) fill, integer, .5 steps, .25 steps
 - Use custom dialog instead of "input" for remote files
 - Safari only slides the dialog down the first time
+- Provide image sizes for help
 
