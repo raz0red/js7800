@@ -24,7 +24,7 @@
         <span class="fixed">.zip</span> files.
     </p>
     <a name="cartridge-menu"></a>
-    <div class="docs-section-title">Cartridge Menu</div>
+    <div class="docs-section-title">Cartridge Drop-Down Menu</div>
     <p>
         proin libero. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut diam quam nulla porttitor massa id neque
         aliquam vestibulum. Non nisi est sit amet facilisis magna etiam tempor. Pretium nibh ipsum consequat nisl vel
@@ -46,8 +46,8 @@
     <a name="sel-local-file"></a>
     <div class="docs-section-title">Select Local Files</div>
     <p>
-        proin libero. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut diam quam nulla porttitor massa id neque
-        aliquam vestibulum. Non nisi est sit amet facilisis magna etiam tempor. Pretium nibh ipsum consequat nisl vel
+        The "Select Local File" button (highlighted in red below), is used to select and load an Atari 7800 cartridge ROM
+        file that is located on the local device. 
     </p>
     <div class="docs-center">
         <div class="docs-relative-inline-block">
@@ -57,11 +57,14 @@
         </div>
     </div>
     <p>
-        Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim. Scelerisque eu
-        ultrices vitae auctor eu augue. Sollicitudin tempor id eu nisl nunc mi ipsum faucibus vitae. Leo vel orci porta
-        non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper malesuada
-        proin libero. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut diam quam nulla porttitor massa id neque
-        aliquam vestibulum. Non nisi est sit amet facilisis magna etiam tempor. Pretium nibh ipsum consequat nisl vel
+        Once the button is pressed, a file chooser will be displayed that allows 
+        for the selection of a local file. By default, the file chooser limits the files displayed to
+        <span class="fixed">.a78</span>, <span class="fixed">.bin</span>, <span class="fixed">.zip</span>, and <span class="fixed">.json</span> file extensions.        
+    </p>
+    <p>
+        The local file chooser can also be used to select a "cartridge list" file (<span class="fixed">.json</span> file extension). Selecting a "cartridge list" file 
+        will update the contents of the <a href="#cartridge-menu">Cartridge Drop-Down Menu</a>. For more information
+        on cartridge lists, refer to the <a href="https://github.com/raz0red/js7800/wiki/Cartridge%20Lists">Cartridge List GitHub page</a>.
     </p>
     <a name="sel-remote-file"></a>
     <div class="docs-section-title">Select Remote Files</div>
@@ -122,25 +125,60 @@
     <a name="request-params"></a>
     <div class="docs-section-title">Request Parameters</div>
     <p>
-        proin libero. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut diam quam nulla porttitor massa id neque
-        aliquam vestibulum. Non nisi est sit amet facilisis magna etiam tempor. Pretium nibh ipsum consequat nisl vel
+        JS7800 supports the following set of request parameters. Request parameters can be added to the JS7800
+        URL to control various emulator options. For example, the <span class="fixed">cart</span> request
+        parameter can be used to force loading of a specific cartridge when JS7800 is initially displayed.
     </p>
     <div class="dialog-grid docs-grid">
         <div class="dialog-cell-label">
             cart
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            The <span class="fixed">cart</span> request parameter can be used to load a specific cartridge when
+            the emulator page is initially loaded. The following URL will cause the homebrew game, "bonQ", 
+            to load:
+            <p>
+                <div class="fixed-block">
+                    https://raz0red.github.io/js7800/?cart=http://raz0red.github.io/js7800/roms/bonq.a78
+                </div>
+            </p>
         </div>
         <div class="dialog-cell-label">
             cartlist
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero. <a href="javascrip:void">See other section</a>.
+            The <span class="fixed">cartlist</span> request parameter can be used to load a cartridge list into the 
+            <a href="#cartridge-menu">Cartridge Drop-Down Menu</a> when JS7800 is initially loaded.
+            The following URL will cause a list of homebrew demos to be populated in the cartridge drop-down
+            menu:
+            <p>
+                <div class="fixed-block">
+                    https://raz0red.github.io/js7800/?cartlist=http://raz0red.github.io/js7800/roms/romlist-homebrew-demos.json
+                </div>
+            </p>
+            For more information on cartridge lists, refer to the 
+            <a href="https://github.com/raz0red/js7800/wiki/Cartridge%20Lists">Cartridge List GitHub page</a>.
         </div>
     </div>
+    <p>
+        Multiple request parameters can be combined to set more than one option when JS7800 is loaded. 
+        The following URL will load a specific game, "bonQ", and a cartridge list containing homebrew demos:
+    </p>
+    <p>
+        <!-- <a href="https://raz0red.github.io/js7800/?cart=http://raz0red.github.io/js7800/roms/bonq.a78&cartlist=http://raz0red.github.io/js7800/roms/romlist-homebrew-demos.json">
+            <span class="break-word">https://raz0red.github.io/js7800/?cart=http://raz0red.github.io/js7800/roms/bonq.a78&cartlist=http://raz0red.github.io/js7800/roms/romlist-homebrew-demos.json</span>
+        </a> -->
+        <div class="fixed-block">
+            https://raz0red.github.io/js7800/?cart=http://raz0red.github.io/js7800/roms/bonq.a78&cartlist=http://raz0red.github.io/js7800/roms/romlist-homebrew-demos.json
+        </div>
+    </p>
+    <p>
+        Since adding request parameters will typically result in long URLs, the use of the GitHub
+        URL shortening service, <a href="https://git.io/">git.io</a>, is recommended. The following URL is the 
+        shortened version of the example above, containing both 
+        <span class="fixed">cart</span> and <span class="fixed">cartlist</span> request parameters:
+    </p>
+    <p>
+        <div class="fixed-block">https://git.io/JfcmO</div>
+    </p>
 </div>

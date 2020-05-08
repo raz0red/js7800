@@ -1,19 +1,15 @@
 <div class="docs">
     <div class="tabcontent__title">Controls Bar</div>
     <p>
-        proin libero. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut diam quam nulla porttitor massa id neque
-        aliquam vestibulum. Non nisi est sit amet facilisis magna etiam tempor. Pretium nibh ipsum consequat nisl vel
+        The "controls bar", which is located directly beneath the JS7800 emulator screen, is used to control various 
+        aspects of emulation, including access to settings and help dialogs.
     </p>
     <div class="docs-center">
         <img class="docs-centered-image docs-controls-bar"
             src="help/images/cbar.png"></img>
     </div>
     <p>
-        Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim. Scelerisque eu
-        ultrices vitae auctor eu augue. Sollicitudin tempor id eu nisl nunc mi ipsum faucibus vitae. Leo vel orci porta
-        non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper malesuada
-        proin libero. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut diam quam nulla porttitor massa id neque
-        aliquam vestibulum. Non nisi est sit amet facilisis magna etiam tempor. Pretium nibh ipsum consequat nisl vel
+        The buttons and controls that comprise the controls bar are described below.
     </p>
     <div class="dialog-grid docs-grid">
         <div class="dialog-cell-label docs-grid-label-control">
@@ -22,9 +18,7 @@
                 src="help/images/pause.svg"></img>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            Pauses emulation of the current cartridge. Once paused, this button can be used to resume emulation.
         </div>
         <div class="dialog-cell-label docs-grid-label-control">
             <img class="docs-grid-control-image"
@@ -32,68 +26,58 @@
                 src="help/images/volume-high.svg"></img>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            Toggles on and off sound output.
         </div>
         <div class="dialog-cell-label docs-grid-label-control">
             <img class="docs-grid-control-image"
                 src="help/images/restart.svg"></img>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            Restarts the current cartridge. This is equivalent to performing a reload and clean start of the current cartridge. 
         </div>
         <div class="dialog-cell-label docs-grid-label-control">
             <button onclick="this.blur();" class="js7800__controls-button">SELECT</button>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            The select button representes the physical "SELECT" button that is present on the Atari 7800 console.
+            The behavior of this button is cartridge-specific, but is typically used to allow for selection of the game's
+            current settings (difficulty levels, etc.).
         </div>
         <div class="dialog-cell-label docs-grid-label-control">
             <button onclick="this.blur();" class="js7800__controls-button">RESET</button>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            The reset button representes the physical "RESET" button that is present on the Atari 7800 console.
+            The behavior of this button is cartridge-specific, but is typically used to end the current game (if 
+            one is in progress).        
         </div>
         <div class="dialog-cell-label docs-grid-label-control">
             <label class="js7800__controls-switch"><input type="checkbox"><span class="js7800__controls-switch-slider"></span></label>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            Represents the physical left diffidulty switch that is present on the Atari 7800 console. 
+            The behavior of this switch is cartridge-specific.
         </div>        
         <div class="dialog-cell-label docs-grid-label-control">
             <label class="js7800__controls-switch"><input type="checkbox" checked><span class="js7800__controls-switch-slider"></span></label>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            Represents the physical right diffidulty switch that is present on the Atari 7800 console. 
+            The behavior of this switch is cartridge-specific.
         </div>        
         <div class="dialog-cell-label docs-grid-label-control">
             <img class="docs-grid-control-image"
                 src="help/images/information-outline.svg"></img>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            Displays this "Help" dialog.
         </div>
         <div class="dialog-cell-label docs-grid-label-control">
             <img class="docs-grid-control-image"
                 src="help/images/cogs.svg"></img>
         </div>
         <div class="dialog-cell-value">
-                Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-                non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-                proin libero.
+            Displays the "Settings" dialog. See the "Settings Dialog" tab on the left for detailed information.
         </div>
         <div class="dialog-cell-label docs-grid-label-control">
             <img class="docs-grid-control-image"
@@ -101,9 +85,7 @@
                 src="help/images/fullscreen.svg"></img>
         </div>
         <div class="dialog-cell-value">
-            Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim.
-            non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper
-            proin libero.
+            Toggles between fullscreen and non-fullscreen modes.
         </div>
     </div>
 </div>

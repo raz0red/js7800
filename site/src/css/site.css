@@ -26,8 +26,8 @@ img {
   user-select: none;
 }
 
-.fixed {
-  font-family: 'Courier New', Courier, monospace;
+.break-word {
+  overflow-wrap: break-word;
 }
 
 .header {

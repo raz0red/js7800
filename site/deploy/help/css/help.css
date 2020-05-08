@@ -39,6 +39,10 @@
 
 .docs {
   margin-bottom: 1em;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text; 
 }
 
 .docs img {  
@@ -237,4 +241,30 @@
 .docs-controls-bar {
   border-color: #151515; 
   border-width: .5em;
+}
+
+.fixed-block {
+  font-family: 'Courier New', Courier, monospace;  
+  overflow-wrap: break-word;
+  background-color: #232323; 
+  padding:1em; 
+  font-size:.9em; 
+  border-radius:.5em; 
+  color:#bbb
+}
+
+.docs-grid .fixed-block {
+  background-color: #333;  
+}
+
+.fixed {
+  font-family: 'Courier New', Courier, monospace;
+  background-color: #2E2E2E;
+  padding: .15em .2em;
+  border-radius: .2em;
+  margin: 0 .2em;
+}
+
+.docs-grid .fixed {
+  background-color: #3C3C3C;  
 }

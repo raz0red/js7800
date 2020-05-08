@@ -27,4 +27,5 @@
 - Safari only slides the dialog down the first time
 - Provide image sizes for help
 - Ensure images/tables/etc. Margins are the same in the documentation (they seem inconsistent)
+- Table alignment throughout help seems a bit off (text is not aligned with icons, etc. in command bar help)
 
