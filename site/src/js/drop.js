@@ -20,7 +20,7 @@ function fileDropHandler(ev) {
         break;
       } else if (item.kind === 'string' &&
         (item.type.match('^text/uri-list') || item.type.match('^text/plain'))) {
-        item.getAsString(function (url) {
+        item.getAsString(function (url) {          
           loadFromUrl(url);
         });
       }
