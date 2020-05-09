@@ -27,7 +27,7 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 * Partial Expansion Module (XM) support
 * Enhanced bank switching and cartridge detection
 
-## Under consideration for future relases
+## Under consideration for future releases
 
 * Mobile support (virtual buttons, proper screen sizing, etc.)
 * Updating the emulation core to integrate accuracy and compatibility improvements that are part of the incredible [A7800 emulator](http://7800.8bitdev.org/index.php/A7800_Emulator)
