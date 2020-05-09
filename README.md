@@ -9,74 +9,21 @@ JS7800 is an enhanced JavaScript port of the ProSystem Atari 7800 emulator that 
 
 https://raz0red.github.io/js7800/
 
+In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an updated version of a modern browser (Chrome, Firefox, Safari) on a capably configured system.
+
 [![JS7800](https://github.com/raz0red/js7800/raw/master/screenshots/screenshot.png)](http://js7800.org)
 
-## JavaScript Module
+## Features
 
-This particular repository contains the JS7800 JavaScript Module. A JavaScript Module is a self-contained reusable component that can be utilized as part of a larger application. The JS7800 module is distributed as a single JavaScript file that contains all of the required JavaScript code, CSS, and images for the emulator to execute. 
+* Global high score tracking (for HSC compatible games)
+* Customizable keyboard mappings
+* Gamepad compatibility (with dual-analog support for Robotron-style games)
+* Full screen support
+* Multiple aspect ratios
+* Ability to enable/disable video filters
+* Drag and drop support for local files and remote file links
+* Cartridge list support
+* Light gun support (via mouse)
+* Partial Expansion Module (XM) support
+* Enhanced bank switching and cartridge detection
 
-Packaging the emulator as a JavaScript module allows the component to be easily embedded for different devices and form factors (web, mobile, tablet, etc.). A separate repository is currently being developed that will embed the module and provide many additional features such as settings dialogs, persistence between sessions, and the ability to save and restore states. This README will be updated to reflect the various other related repositories once they become available.
-
-## Loading Cartridges (ROMs)
-
-The method for loading cartridges will vary based on the application that is embedding the JS7800 module.
-
-## Controls
-
-The following section contains the "default" controller mappings for JS7800. It is important to note that the default mappings may be modified by a particular application that is embedding the JS7800 module (globally or via user-defined values). 
-
-### General:
-  
-    F2 : Select                   (Atari 7800 Console)
-    F3 : Reset                    (Atari 7800 Console)
-    F4 : Pause                    (Atari 7800 Console)
-    F5 : Left difficulty switch   (Atari 7800 Console)
-    F6 : Right difficulty switch  (Atari 7800 Console)
-
-    F9 : Switch to "Full Screen" display
-                    
-### Joysticks:
-
-The following input methods are available for games that require joysticks.
-    
-##### Gamepads:
-
-JS7800 supports the use of up to two gamepads for joystick-based games. Gamepad testing has been extremely limited (Chrome and Edge on Windows with Switch, Xbox 360, PS3, and PS4 controllers).
-
-     Controller 1:
-     
-         D-pad              : Move
-         Left analog        : Move
-         B (or equivalent)  : Left button
-         A (or equivalent)  : Right button
-         Right analog       : Move/controller 2 (directional fire for Robotron and TiME Salvo)
-       
-     Controller 2:
-     
-         D-pad              : Move
-         Left analog        : Move
-         B (or equivalent)  : Left button
-         A (or equivalent)  : Right button
-    
-##### Keyboard:
-
-JS7800 also supports keyboard input for joystick-based games.
-    
-     Controller 1:
-     
-         Arrow keys    : Move
-         Z             : Left button
-         X             : Right button
-       
-     Controller 2:
-     
-         I, J, K, L    : Move
-         N             : Left button
-         M             : Right button
-
-### Lightgun:
-
-For games that support the use of a light gun (Alien Brigade, Crossbow, etc.), JS7800 provides the ability to use a mouse for input.
-
-     Mouse              : Move crosshairs
-     Left mouse button  : Fire gun
