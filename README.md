@@ -11,7 +11,7 @@ https://raz0red.github.io/js7800/
 
 In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an updated version of a modern browser (Chrome, Firefox, Safari) on a capably configured system.
 
-[![JS7800](https://github.com/raz0red/js7800/raw/master/screenshots/screenshot.png)](http://js7800.org)
+[![JS7800](https://github.com/raz0red/js7800/raw/master/screenshots/screenshot.png)](https://raz0red.github.io/js7800/)
 
 ## Features
 
