@@ -27,3 +27,8 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 * Partial Expansion Module (XM) support
 * Enhanced bank switching and cartridge detection
 
+## Documentation
+
+JS7800 provides detailed documenation via the "Information/Help" icon in the commands bar located directly below the emulator screen.
+
+For information on the cartridge list format and more, please refer to the [JS7800 Wiki](https://github.com/raz0red/js7800/wiki).
