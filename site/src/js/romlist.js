@@ -56,10 +56,12 @@ function RomList(selects) {
           var folders = parent.folders;
           for (var i = 0; i < folders.length; i++) {
             var folder = folders[i];
-            var group = document.createElement("optgroup");
-            group.setAttribute("label", folder.name);
-            parentEl.appendChild(group);
-            addChildren(group, folder);
+            if (folder.name && (folder.path || folder.children)) {
+              var group = document.createElement("optgroup");
+              group.setAttribute("label", folder.name);
+              parentEl.appendChild(group);
+              addChildren(group, folder);
+            }
           }
         }
       } finally {
@@ -91,11 +93,15 @@ function RomList(selects) {
 
       // Walk files
       var outFiles = [];
-      var files = result.files;
+      var files = result.files;      
       if (files) {
-        for (var i = 0; i < files.length; i++) {
-          outFiles[i] = files[i];
-          outFiles[i].path = getPath(urlPrefix, files[i].path);
+        for (var i = 0; i < files.length; i++) {          
+          var file = files[i];
+          if (file.path && file.name) {
+            var outf = files[i];
+            outf.path = getPath(urlPrefix, files[i].path);
+            outFiles.push(outf);                        
+          }
         }
       }
       current.files = outFiles;
@@ -104,13 +110,16 @@ function RomList(selects) {
       var outFolders = [];
       var folders = result.folders;
       if (folders) {
-        for (var i = 0; i < folders.length; i++) {
-          outFolders[i] = folders[i];
+        for (var i = 0; i < folders.length; i++) {          
           if (folders[i].children) {
-            new ReadList(ctx, outFolders[i]).fromList(folders[i].children, urlPrefix + "/");
-          } else {
-            outFolders[i].path = getPath(urlPrefix, folders[i].path);
-            new ReadList(ctx, outFolders[i]).fromUrl(outFolders[i].path);
+            var outFolder = folders[i];
+            outFolders.push(outFolder);
+            new ReadList(ctx, outFolder).fromList(folders[i].children, urlPrefix + "/");
+          } else if (folders[i].path) {
+            var outFolder = folders[i];
+            outFolders.push(outFolder);
+            outFolder.path = getPath(urlPrefix, folders[i].path);
+            new ReadList(ctx, outFolder).fromUrl(outFolder.path);
           }
         }
       }

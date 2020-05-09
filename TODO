@@ -21,12 +21,9 @@
 - Check all XHR calls and handle exceptions appropriately
 - Test changes to high score cart mid game (save at end, etc.)
 
-- Create new video with pause at beginning, add other content to it, splice multiple commercials
 - Add video option (full screen is fixed multiple) (Full screen scale) fill, integer, .5 steps, .25 steps
 - Use custom dialog instead of "input" for remote files
-- Safari only slides the dialog down the first time
-- Provide image sizes for help
 - Ensure images/tables/etc. Margins are the same in the documentation (they seem inconsistent)
 - Table alignment throughout help seems a bit off (text is not aligned with icons, etc. in command bar help)
 - Walk through all of the documentation pages and ensure styles have been properly added to css files
-
+- Provide image sizes for help
