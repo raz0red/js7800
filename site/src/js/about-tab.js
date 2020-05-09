@@ -45,7 +45,7 @@ addProps(AboutTab.prototype, {
       that.top.style.display = 'none';
       that.logoEl.style.display = 'none';
       that.videoEl.style.display = 'inline-block';        
-    }, 5 * 1000);    
+    }, 10 * 1000);    
   },
   onShow: function () {
     this.hideVideo();    
