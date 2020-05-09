@@ -14,7 +14,7 @@
     <p>
         The different ways that cartridges can be loaded into JS7800 are detailed throughout the remainder of this tab.
         JS7800 should be compatible with the vast majority of cartridge ROMs available for the Atari 7800 (both
-        original retail and homebrew releases). 
+        original retail and homebrew releases).
     </p>
     <p>
         Atari 7800 cartridge ROMs typically have a <span class="fixed">.bin</span> or
@@ -46,8 +46,8 @@
     <a name="sel-local-file"></a>
     <div class="docs-section-title">Select Local Files</div>
     <p>
-        The "Select Local File" button (highlighted in red below), is used to select and load an Atari 7800 cartridge ROM
-        file that is located on the local device. 
+        The "Select Local File" button (highlighted in red below), is used to select and load an Atari 7800 cartridge
+        ROM file that is located on the local device.
     </p>
     <div class="docs-center">
         <div class="docs-relative-inline-block">
@@ -57,20 +57,22 @@
         </div>
     </div>
     <p>
-        Once the button is pressed, a file chooser will be displayed that allows 
+        Once the button is pressed, a file chooser will be displayed that allows
         for the selection of a local file. By default, the file chooser limits the files displayed to
-        <span class="fixed">.a78</span>, <span class="fixed">.bin</span>, <span class="fixed">.zip</span>, and <span class="fixed">.json</span> file extensions.        
+        <span class="fixed">.a78</span>, <span class="fixed">.bin</span>, <span class="fixed">.zip</span>, 
+        and <span class="fixed">.json</span> file extensions.
     </p>
     <p>
-        The local file chooser can also be used to select a "cartridge list" file (<span class="fixed">.json</span> file extension). Selecting a "cartridge list" file 
-        will update the contents of the <a href="#cartridge-menu">Cartridge Drop-Down Menu</a>. For more information
-        on cartridge lists, refer to the <a href="https://github.com/raz0red/js7800/wiki/Cartridge%20Lists">Cartridge List GitHub page</a>.
+        The local file chooser can also be used to select a "cartridge list" file (<span class="fixed">.json</span> file
+        extension). Selecting a "cartridge list" file will update the contents of the 
+        <a href="#cartridge-menu">Cartridge Drop-Down Menu</a>. For more information on cartridge lists, refer to 
+        the <a href="https://github.com/raz0red/js7800/wiki/Cartridge%20Lists">Cartridge List GitHub page</a>.
     </p>
     <a name="sel-remote-file"></a>
     <div class="docs-section-title">Select Remote Files</div>
     <p>
-        proin libero. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut diam quam nulla porttitor massa id neque
-        aliquam vestibulum. Non nisi est sit amet facilisis magna etiam tempor. Pretium nibh ipsum consequat nisl vel
+        The "Select Remote Files" button (highlighted in red below), is used to specify the URL of a remote
+        Atari 7800 cartridge ROM.
     </p>
     <div class="docs-center">
         <div class="docs-relative-inline-block">
@@ -80,47 +82,58 @@
         </div>
     </div>
     <p>
-        Arcu non sodales neque sodales ut etiam sit amet nisl. At quis risus sed vulputate odio ut enim. Scelerisque eu
-        ultrices vitae auctor eu augue. Sollicitudin tempor id eu nisl nunc mi ipsum faucibus vitae. Leo vel orci porta
-        non pulvinar neque. Hac habitasse platea dictumst quisque sagittis purus. Sapien et ligula ullamcorper malesuada
-        proin libero. Dolor sit amet consectetur adipiscing elit ut aliquam. Ut diam quam nulla porttitor massa id neque
-        aliquam vestibulum. Non nisi est sit amet facilisis magna etiam tempor. Pretium nibh ipsum consequat nisl vel
+        Once the button is pressed, an input dialog will be displayed that allows for specifying the URL
+        to a remote ROM file. For example, entering the following URL will cause the homebrew game, "bonQ", to be
+        loaded: <div class="fixed-block">http://raz0red.github.io/js7800/roms/bonq.a78</div>
+    </p>
+    <p>
+        The remote file chooser can also be used to select a remote "cartridge list" file 
+        (<span class="fixed">.json</span> file extension). Selecting a "cartridge list" file will update the 
+        contents of the <a href="#cartridge-menu">Cartridge Drop-Down Menu</a>. For more information
+        on cartridge lists, refer to the 
+        <a href="https://github.com/raz0red/js7800/wiki/Cartridge%20Lists">Cartridge List GitHub page</a>.
     </p>
     <a name="drag-and-drop-files"></a>
     <div class="docs-section-title">Drag and Drop Files</div>
     <p>
-        pretium lectus. Sem fringilla ut morbi tincidunt augue interdum. Interdum velit laoreet id donec ultrices
-        tincidunt arcu. Et molestie ac feugiat sed lectus. Sem et tortor consequat id porta nibh. Mauris vitae ultricies
-        leo integer malesuada nunc. Eget nunc scelerisque viverra mauris in aliquam sem. Ut morbi tincidunt augue
-        interdum velit euismod in.
-
+        Dragging and dropping local Atari 7800 cartridge ROMs can be used as alternative to selecting
+        files via the local file browser (see <a href="#sel-local-file">Select Local Files</a>).
     </p>
     <div class="docs-center">
         <img class="docs-centered-image" src="help/images/dragfile.gif"></img>
     </div>
     <p>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-        magna aliqua. Nascetur ridiculus mus mauris vitae. Etiam tempor orci eu lobortis. Gravida cum sociis natoque
-        penatibus et magnis. Consequat id porta nibh venenatis cras sed. Elit duis tristique sollicitudin nibh. In
-        hendrerit gravida rutrum quisque. Et molestie ac feugiat sed lectus vestibulum mattis ullamcorper velit. Eget
+        As demonstrated above, local ROM files can be loaded by simply dragging and dropping them onto the emulator
+        from File Explorer on Windows or Finder on the Mac.
+    </p>
+    <p>
+        In addition to cartridge ROM files, "cartridge list" files (<span class="fixed">.json</span> file extension) can also be
+        dragged and dropped onto the emulator. Dragging and dropping a "cartridge list" file will cause the contents of the
+        <a href="#cartridge-menu">Cartridge Drop-Down Menu</a> to be updated. For more information
+        on cartridge lists, refer to the <a href="https://github.com/raz0red/js7800/wiki/Cartridge%20Lists">Cartridge List GitHub page</a>.
     </p>
     <a name="drag-and-drop-links"></a>
     <div class="docs-section-title">Drag and Drop Links</div>
     <p>
-        velit aliquet sagittis id consectetur. Convallis tellus id interdum velit laoreet id donec ultrices. Venenatis
-        urna cursus eget nunc scelerisque viverra. Et malesuada fames ac turpis egestas integer eget aliquet. Enim diam
-        vulputate ut pharetra sit amet aliquam id. Facilisis leo vel fringilla est. Sit amet mattis vulputate enim.
-        Commodo nulla facilisi nullam vehicula ipsum a arcu cursus. Purus semper eget duis at tellus.
+        Dragging and dropping links that point to remote Atari 7800 cartridge ROMs can be used as alternative to specifying
+        URLs via the remote file chooser (see <a href="#sel-remote-file">Select Remote Files</a>).
     </p>
     <div class="docs-center">
         <img class="docs-centered-image" src="help/images/draglink.gif"></img>
     </div>
     <p>
-        Ipsum nunc aliquet bibendum enim facilisis gravida neque convallis. Massa vitae tortor condimentum lacinia quis
-        vel eros donec ac. Molestie nunc non blandit massa enim. Nec ultrices dui sapien eget mi proin sed libero. A
-        condimentum vitae sapien pellentesque. Purus semper eget duis at tellus. Tellus in metus vulputate eu. Aenean et
-        tortor at risus viverra adipiscing at in. Morbi tristique senectus et netus. Nisl purus in mollis nunc. Massa
-        tempor nec feugiat nisl pretium. Faucibus interdum posuere lorem ipsum.
+        As demonstrated above, ROMs can be loaded by simply dragging and dropping remote file links onto the emulator. 
+        In the specific example above, a link is being dragged from the 
+        <a href="https://atariage.com/forums/forum/52-atari-7800-programming/">AtariAge Atari 7800 Programming Forum</a>,
+        a great source for both in development and completed homebrew titles. It is also worth noting that some links 
+        on the AtariAge forum require the dragging to be performed via the "download count" link 
+        versus the game title link (as shown above).
+    </p>
+    <p>
+        In addition to cartridge ROM file links, "cartridge list" file links can also be
+        dragged and dropped onto the emulator. Dragging and dropping a "cartridge list" file link will cause the contents of the
+        <a href="#cartridge-menu">Cartridge Drop-Down Menu</a> to be updated. For more information
+        on cartridge lists, refer to the <a href="https://github.com/raz0red/js7800/wiki/Cartridge%20Lists">Cartridge List GitHub page</a>.
     </p>
     <a name="request-params"></a>
     <div class="docs-section-title">Request Parameters</div>
@@ -135,7 +148,7 @@
         </div>
         <div class="dialog-cell-value">
             The <span class="fixed">cart</span> request parameter can be used to load a specific cartridge when
-            the emulator page is initially loaded. The following URL will cause the homebrew game, "bonQ", 
+            the emulator page is initially loaded. The following URL will cause the homebrew game, "bonQ",
             to load:
             <p>
                 <div class="fixed-block">
@@ -147,7 +160,7 @@
             cartlist
         </div>
         <div class="dialog-cell-value">
-            The <span class="fixed">cartlist</span> request parameter can be used to load a cartridge list into the 
+            The <span class="fixed">cartlist</span> request parameter can be used to load a cartridge list into the
             <a href="#cartridge-menu">Cartridge Drop-Down Menu</a> when JS7800 is initially loaded.
             The following URL will cause a list of homebrew demos to be populated in the cartridge drop-down
             menu:
@@ -156,12 +169,12 @@
                     https://raz0red.github.io/js7800/?cartlist=http://raz0red.github.io/js7800/roms/romlist-homebrew-demos.json
                 </div>
             </p>
-            For more information on cartridge lists, refer to the 
+            For more information on cartridge lists, refer to the
             <a href="https://github.com/raz0red/js7800/wiki/Cartridge%20Lists">Cartridge List GitHub page</a>.
         </div>
     </div>
     <p>
-        Multiple request parameters can be combined to set more than one option when JS7800 is loaded. 
+        Multiple request parameters can be combined to set more than one option when JS7800 is loaded.
         The following URL will load a specific game, "bonQ", and a cartridge list containing homebrew demos:
     </p>
     <p>
@@ -174,8 +187,8 @@
     </p>
     <p>
         Since adding request parameters will typically result in long URLs, the use of the GitHub
-        URL shortening service, <a href="https://git.io/">git.io</a>, is recommended. The following URL is the 
-        shortened version of the example above, containing both 
+        URL shortening service, <a href="https://git.io/">git.io</a>, is recommended. The following URL is the
+        shortened version of the example above, containing both
         <span class="fixed">cart</span> and <span class="fixed">cartlist</span> request parameters:
     </p>
     <p>
