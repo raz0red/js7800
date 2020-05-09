@@ -22,7 +22,7 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 * Multiple aspect ratios
 * Ability to enable/disable video filters
 * Drag and drop support for local files and remote file links
-* Cartridge list support
+* Cartridge list support (see [JS7800 Wiki](https://github.com/raz0red/js7800/wiki/Cartridge%20Lists))
 * Light gun support (via mouse)
 * Partial Expansion Module (XM) support
 * Enhanced bank switching and cartridge detection
