@@ -29,6 +29,6 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 
 ## Documentation
 
-JS7800 provides detailed documenation via the "Information/Help" icon in the commands bar located directly below the emulator screen.
+JS7800 provides detailed documentation via the "Information/Help" button located in the commands bar directly below the emulator screen.
 
 For information on the cartridge list format and more, please refer to the [JS7800 Wiki](https://github.com/raz0red/js7800/wiki).
