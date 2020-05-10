@@ -27,3 +27,5 @@
 - Table alignment throughout help seems a bit off (text is not aligned with icons, etc. in command bar help)
 - Walk through all of the documentation pages and ensure styles have been properly added to css files
 - Provide image sizes for help
+- Add message when lightgun game is loaded (state to use mouse or touch, etc.)
+- Add message when global high scores are saved successfully

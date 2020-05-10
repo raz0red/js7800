@@ -74,12 +74,10 @@ var highScoresTab = new HelpTab("High Scores", "help/highscores.html");
 var tabSet = new TabSet();
 tabSet.addTab(new AboutTab(), true);
 tabSet.addTab(overviewTab);
-if (Util.getRequestParameter("indev") == "true") { 
-  tabSet.addTab(cartsTab);
-  tabSet.addTab(cbarTab);
-  tabSet.addTab(settingsTab);
-  tabSet.addTab(highScoresTab);
-}
+tabSet.addTab(cartsTab);
+tabSet.addTab(cbarTab);
+tabSet.addTab(settingsTab);
+tabSet.addTab(highScoresTab);
 
 //
 // Help dialog

@@ -675,7 +675,7 @@ settingsTabSet.addTab(displayTab);
 settingsTabSet.addTab(keyboardTab, true);
 settingsTabSet.addTab(gamepadsTab);
 settingsTabSet.addTab(hsTab);
-settingsTabSet.addTab(new AboutTab());
+// settingsTabSet.addTab(new AboutTab());
 
 //
 // Settings dialog
