@@ -31,6 +31,7 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 
 * Mobile support (virtual buttons, proper screen sizing, etc.)
 * Paddle controller support (via mouse)
+* Additional XM support (Yamaha sound)
 * Updating the emulation core to integrate accuracy and compatibility improvements that are part of the incredible [A7800 emulator](http://7800.8bitdev.org/index.php/A7800_Emulator)
 * Save/load state support
 * Network-based multiplayer support
