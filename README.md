@@ -7,7 +7,7 @@ Ported by raz0red
 
 JS7800 is an enhanced JavaScript port of the ProSystem Atari 7800 emulator that was originally developed by Greg Stanton.
 
-https://raz0red.github.io/js7800/
+https://raz0red.github.io/js7800
 
 In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an updated version of a modern browser (Chrome, Firefox, Safari) on a capably configured system.
 
@@ -30,6 +30,7 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 ## Under future consideration
 
 * Mobile support (virtual buttons, proper screen sizing, etc.)
+* Frame skipping and related options for improved compatibility across devices
 * Paddle controller support (via mouse)
 * Additional XM support (Yamaha sound)
 * Updating the emulation core to integrate accuracy and compatibility improvements that are part of the incredible [A7800 emulator](http://7800.8bitdev.org/index.php/A7800_Emulator)
