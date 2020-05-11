@@ -27,7 +27,7 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 * Partial Expansion Module (XM) support
 * Enhanced bank switching and cartridge detection
 
-## Under future consideration
+## Future consideration
 
 * Mobile support (virtual buttons, proper screen sizing, etc.)
 * Frame skipping and related options for improved compatibility across devices
