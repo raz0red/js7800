@@ -8,6 +8,7 @@ import * as Pads from "./web/pad.js"
 import * as Memory from "./prosystem/Memory.js"
 import * as Cartridge from "./prosystem/Cartridge.js"
 import * as Video from "./web/video.js"
+import * as Region from "./prosystem/Region.js"
 import { md5 } from "./3rdparty/md5.js"
 
 export { 
@@ -21,5 +22,6 @@ export {
     Pads,
     Memory,
     Video,
+    Region,
     md5
 }

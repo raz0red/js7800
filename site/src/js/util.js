@@ -8,7 +8,6 @@ var h = window.location.hostname.toLowerCase();
 
 if (!String.prototype.endsWith) {
   String.prototype.endsWith = function (search, this_len) {
-    console.log('endswith!');
     if (this_len === undefined || this_len > this.length) {
       this_len = this.length;
     }

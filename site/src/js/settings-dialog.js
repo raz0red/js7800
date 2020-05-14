@@ -467,17 +467,22 @@ addProps(displayTab, {
   filterSwitch: null,
   sizeSelect: null,
   arSelect: null,
+  palSelect: null,
   onShow: function () {    
     var vid = js7800.Video;
     this.vid = vid;
     this.filterSwitch.setValue(vid.isFilterEnabled());
     this.sizeSelect.setValue(vid.getScreenSize().toString());
     this.arSelect.setValue(vid.getScreenRatio().toString());
+    this.palSelect.setValue(js7800.Region.getPaletteIndex().toString());
   },
   onOk: function () {    
     this.vid.setFilterEnabled(this.filterSwitch.getValue());
     this.vid.setScreenSize(parseFloat(this.sizeSelect.getValue()));
     this.vid.setScreenRatio(parseFloat(this.arSelect.getValue()));
+    js7800.Region.setPaletteIndex(parseInt(this.palSelect.getValue()));
+    this.vid.initPalette8();
+
   },
   onDefaults: function () {    
     this.filterSwitch.setValue(this.vid.getFilterEnabledDefault());
@@ -512,9 +517,18 @@ addProps(displayTab, {
       "Ultra-widescreen (2.37:1)" : "1.778"
     });
     grid.addCell(new ContentCell(this.arSelect));    
+    grid.addCell(new LabelCell("Palette:"));
+    this.palSelect = new Select({
+      "ProSystem default": "0", 
+      "Cool (25.7)": "1", 
+      "Warm (26.7)": "2", 
+      "Hot (27.7)": "3"
+    });
+    grid.addCell(new ContentCell(this.palSelect));
     grid.addCell(new LabelCell("Apply filter:"));
     this.filterSwitch = new ToggleSwitch("Toggle Filter");
     grid.addCell(new ContentCell(this.filterSwitch));
+
     rootEl.appendChild(grid.createElement());
   }
 });

@@ -58,9 +58,9 @@ var cartridgeRegion = 0;
 function initPalette8() {
   var palette = null;
   if (cartridgeRegion == Region.REGION_PAL) {
-    palette = Region.REGION_PALETTE_PAL;
+    palette = Region.getPalPalette(); //Region.REGION_PALETTE_PAL;
   } else {
-    palette = Region.REGION_PALETTE_NTSC;
+    palette = Region.getNtscPalette(); //Region.REGION_PALETTE_NTSC;
   }
 
   for (var index = 0; index < 256; index++) {
@@ -295,5 +295,6 @@ export {
   getScreenSizeDefault,
   setScreenRatio,
   getScreenRatio,
-  getScreenRatioDefault
+  getScreenRatioDefault,
+  initPalette8
 }
