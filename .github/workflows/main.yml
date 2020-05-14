@@ -39,7 +39,7 @@ jobs:
         name: site
         path: site/deploy
 
-    - name: Deploy to GitHub pages
+    - name: Deploy to GitHub pages (master)
       uses: JamesIves/github-pages-deploy-action@releases/v3
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       with:
@@ -47,4 +47,14 @@ jobs:
         BASE_BRANCH: master
         BRANCH: gh-pages
         FOLDER: site/deploy
-        CLEAN: true
+        CLEAN_EXCLUDE: '["staging"]'
+
+    - name: Deploy to GitHub pages (staging)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: staging
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: staging
