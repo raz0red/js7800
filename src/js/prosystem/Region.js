@@ -29,12 +29,12 @@ import * as Maria from "./Maria.js"
 import * as Palette from "./Palette.js"
 import { Rect } from "./Rect.js"
 
-import N257_PAL_B from '../palettes/NTSC/NTSC_257-PROSYSTEM.pal'
-import N267_PAL_B from '../palettes/NTSC/NTSC_267-PROSYSTEM.pal'
-import N277_PAL_B from '../palettes/NTSC/NTSC_277-PROSYSTEM.pal'
-import P257_PAL_B from '../palettes/PAL/PAL_257-PROSYSTEM.pal'
-import P267_PAL_B from '../palettes/PAL/PAL_267-PROSYSTEM.pal'
-import P277_PAL_B from '../palettes/PAL/PAL_277-PROSYSTEM.pal'
+import N257_PAL_B from '../../palettes/NTSC/JS7800_NTSC_257_Cool.pal'
+import N267_PAL_B from '../../palettes/NTSC/JS7800_NTSC_267_Warm.pal'
+import N277_PAL_B from '../../palettes/NTSC/JS7800_NTSC_277_Hot.pal'
+import P257_PAL_B from '../../palettes/PAL/JS7800_PAL_257_Cool.pal'
+import P267_PAL_B from '../../palettes/PAL/JS7800_PAL_267_Warm.pal'
+import P277_PAL_B from '../../palettes/PAL/JS7800_PAL_277_Hot.pal'
 
 var NTSC_257_PAL = Palette.FromBase64(N257_PAL_B);
 var NTSC_267_PAL = Palette.FromBase64(N267_PAL_B);
@@ -226,8 +226,11 @@ var PAL_PAL_INDEX = {
   3: PAL_277_PAL
 };
 
+// The default pallete index
+var PALETTE_DEFAULT = 2;
+
 // The current palette index
-var palIdx = 0;
+var palIdx = PALETTE_DEFAULT;
 
 // ----------------------------------------------------------------------------
 // Reset
@@ -281,6 +284,10 @@ function setPaletteIndex(idx) {
   palIdx = idx;
 }
 
+function getPaletteIndexDefault() {
+  return PALETTE_DEFAULT;
+}
+
 export {
   REGION_NTSC,
   REGION_PAL,
@@ -291,5 +298,6 @@ export {
   getNtscPalette,
   getPalPalette,
   getPaletteIndex,
-  setPaletteIndex
+  setPaletteIndex,
+  getPaletteIndexDefault
 }

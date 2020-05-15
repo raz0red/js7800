@@ -9,10 +9,12 @@ var DISPLAY_RATIO = "displayRatio";
 var DISPLAY_SIZE = "displaySize";
 var HS_ENABLED = "hsEnabled";
 var HS_GLOBAL = "hsGlobal";
+var PALETTE = "palette";
 
 var js7800 = null;
 var kb = null;
 var video = null;
+var region = null;
 var HighScore = null;
 
 var localStorageEnabled = false;
@@ -102,6 +104,8 @@ function loadPrefs() {
       if (hsEnabled !== undefined ) HighScore.setEnabled(hsEnabled);
       var hsGlobal = prefs[HS_GLOBAL];
       if (hsGlobal !== undefined ) HighScore.setGlobal(hsGlobal);
+      var palette = prefs[PALETTE];
+      if (palette !== undefined ) region.setPaletteIndex(palette);
     }
   } catch (e) {
     Events.fireEvent("showError", "An error occurred loading preferences: " + e);
@@ -124,6 +128,7 @@ function savePrefs() {
     prefs[DISPLAY_RATIO] = video.getScreenRatio();
     prefs[HS_ENABLED] = HighScore.getEnabled();
     prefs[HS_GLOBAL] = HighScore.getGlobal();
+    prefs[PALETTE] = region.getPaletteIndex();
 
     localStorage.setItem("prefs", JSON.stringify(prefs));
   } catch (e) {
@@ -189,6 +194,7 @@ Events.addListener(new Events.Listener("siteInit",
     js7800 = event.js7800;
     kb = js7800.Keyboard;
     video = js7800.Video;
+    region = js7800.Region;
     HighScore = event.HighScore;
     checkLocalStorageAvailable();    
   }));

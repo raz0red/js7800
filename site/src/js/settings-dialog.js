@@ -488,6 +488,7 @@ addProps(displayTab, {
     this.filterSwitch.setValue(this.vid.getFilterEnabledDefault());
     this.sizeSelect.setValue(this.vid.getScreenSizeDefault().toString());
     this.arSelect.setValue(this.vid.getScreenRatioDefault().toString());
+    this.palSelect.setValue(js7800.Region.getPaletteIndexDefault().toString());
   },
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
