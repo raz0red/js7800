@@ -10,6 +10,7 @@ var DISPLAY_SIZE = "displaySize";
 var HS_ENABLED = "hsEnabled";
 var HS_GLOBAL = "hsGlobal";
 var PALETTE = "palette";
+var FS = "fullscreen";
 
 var js7800 = null;
 var kb = null;
@@ -106,6 +107,8 @@ function loadPrefs() {
       if (hsGlobal !== undefined ) HighScore.setGlobal(hsGlobal);
       var palette = prefs[PALETTE];
       if (palette !== undefined ) region.setPaletteIndex(palette);
+      var fs = prefs[FS];
+      if (fs !== undefined ) video.setFullscreenMode(fs);
     }
   } catch (e) {
     Events.fireEvent("showError", "An error occurred loading preferences: " + e);
@@ -129,6 +132,7 @@ function savePrefs() {
     prefs[HS_ENABLED] = HighScore.getEnabled();
     prefs[HS_GLOBAL] = HighScore.getGlobal();
     prefs[PALETTE] = region.getPaletteIndex();
+    prefs[FS] = video.getFullscreenMode();
 
     localStorage.setItem("prefs", JSON.stringify(prefs));
   } catch (e) {

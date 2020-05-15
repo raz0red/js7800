@@ -157,9 +157,12 @@ function init(in7800) {
   // Must be done prior to initializing js7800
   var fsSelect = createFullscreenSelect();
 
+  // Check whether debug has been set
+  debug = checkDebugParam();  
+
   // Configure and init js7800 module
   main.setErrorHandler(errorHandler);
-  main.init('js7800__target');
+  main.init('js7800__target', {debug: debug});
 
   // Create the description
   var desc = main.descriptionDiv;
@@ -193,10 +196,6 @@ function init(in7800) {
   // Rom list component
   romList = new RomList(
     [document.getElementById('cartselect__select'), fsSelect]);
-
-  // Check whether debug has been set
-  debug = checkDebugParam();
-  main.setLogFps(debug);
 
   // Fire init event
   Events.fireEvent("siteInit", {
