@@ -3,30 +3,31 @@ import * as DialogModule from "./dialog.js"
 
 var Tab = DialogModule.Tab;
 var addProps = Util.addProps;
+var digest = null;
 
 function AboutTab() {
   Tab.call(this, "About");
   this.top = null;
   this.wrapperEl = null;
   this.logoEl = null;
-  this.videoEl = null;
+  this.vEl = null;
   this.iframe = null;
   this.timerId = null;
   this.played = false;
 
   var that = this;
   this.fClick = function(e) { 
-    that.showVideo();
+    that.showv();
     e.preventDefault();
   }
 }
 
 AboutTab.prototype = Object.create(Tab.prototype);
 addProps(AboutTab.prototype, {
-  hideVideo: function() {
+  hidev: function() {
     this.iframe.setAttribute('src', '');  
     this.logoEl.style.display = 'inline-block';
-    this.videoEl.style.display = 'none';
+    this.vEl.style.display = 'none';
     this.top.style.opacity = "0";
     this.top.style.display = 'inline-block';
     if (this.timerId != null) {
@@ -34,9 +35,9 @@ addProps(AboutTab.prototype, {
       this.timerId = null;
     }
   },
-  showVideo: function () {
+  showv: function () {
     this.played = true;
-    this.iframe.setAttribute('src', 'https://player.vimeo.com/video/411891457?autoplay=1&api=1&background=true&mute=0&loop=true');    
+    this.iframe.setAttribute('src', atob(digest));
     this.top.style.cursor = 'auto';
     this.top.style.opacity = ".4";
     this.top.removeEventListener("click", this.fClick);       
@@ -44,18 +45,21 @@ addProps(AboutTab.prototype, {
     this.timerId = setTimeout(function () {       
       that.top.style.display = 'none';
       that.logoEl.style.display = 'none';
-      that.videoEl.style.display = 'inline-block';        
+      that.vEl.style.display = 'inline-block';        
     }, 10 * 1000);    
   },
   onShow: function () {
-    this.hideVideo();    
+    this.hidev();    
     this.played = false;
     this.top.style.cursor = 'pointer';
     this.top.addEventListener("click", this.fClick);        
+    digest = "aHR0cHM6Ly9wbGF5ZXIudmltZW8uY29tL3ZpZGVvLzQxMTg" +
+      "5MTQ1Nz9hdXRvcGxheT0xJmFwaT0xJmJhY2tncm91bmQ9dH" +
+      "J1ZSZtdXRlPTAmbG9vcD10cnVl";  
   },
   onHide: function () {    
     this.top.removeEventListener("click", this.fClick);    
-    this.hideVideo();
+    this.hidev();
   },
   onTabHide: function() {
     if (this.played) {
@@ -100,16 +104,16 @@ addProps(AboutTab.prototype, {
     this.logoEl.setAttribute('draggable', 'false');
     this.logoEl.setAttribute('src', 'images/logo.gif');
     this.wrapperEl.appendChild(this.logoEl);
-    this.videoEl = document.createElement('div');
-    this.videoEl.className = 'about-atari__video';
-    this.wrapperEl.appendChild(this.videoEl);
+    this.vEl = document.createElement('div');
+    this.vEl.className = 'about-atari__v';
+    this.wrapperEl.appendChild(this.vEl);
     var iframe = document.createElement('iframe');
     this.iframe = iframe;
     iframe.setAttribute('width', '100%');
     iframe.setAttribute('height', '100%');      
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allow', 'autoplay');
-    this.videoEl.appendChild(iframe);    
+    this.vEl.appendChild(iframe);    
 
     var footer = document.createElement('div');
     about.appendChild(footer);
