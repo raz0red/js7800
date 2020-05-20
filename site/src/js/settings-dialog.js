@@ -532,11 +532,11 @@ addProps(displayTab, {
     // Create a better solution (nested groups)
     this.palSelect = new Select({
       "ProSystem default": "0", 
-      "OptGroup1": "Light",
+      "OptGroup1": "Dark",
       "Cool (25.7)": "1", 
       "Warm (26.7)": "2",             
       "Hot (27.7)": "3",
-      "OptGroup2": "Dark",
+      "OptGroup2": "Light",
       "Cool (25.7) ": "4", 
       "Warm (26.7) ": "5", 
       "Hot (27.7) ": "6"
