@@ -528,11 +528,18 @@ addProps(displayTab, {
     });
     grid.addCell(new ContentCell(this.fsSelect));
     grid.addCell(new LabelCell("Palette:"));
+    // TODO: This is a very hacky way to support option groups,
+    // Create a better solution (nested groups)
     this.palSelect = new Select({
       "ProSystem default": "0", 
+      "OptGroup1": "Light",
       "Cool (25.7)": "1", 
-      "Warm (26.7)": "2", 
-      "Hot (27.7)": "3"
+      "Warm (26.7)": "2",             
+      "Hot (27.7)": "3",
+      "OptGroup2": "Dark",
+      "Cool (25.7) ": "4", 
+      "Warm (26.7) ": "5", 
+      "Hot (27.7) ": "6"
     });
     grid.addCell(new ContentCell(this.palSelect));
     grid.addCell(new LabelCell("Apply filter:"));

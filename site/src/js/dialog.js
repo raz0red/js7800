@@ -72,11 +72,24 @@ addProps(DialogSelect.prototype, {
     var sel = document.createElement("select");
     div.appendChild(sel);
     this.select = sel;
+    var group = null;
     for (var name in this.opts)  {
+      // TODO: This is a very hacky way to support option groups,
+      // Create a better solution (nested groups)
+      if (name.startsWith('OptGroup')) {
+        group = document.createElement('optgroup');
+        group.setAttribute("label", this.opts[name]);
+        this.select.add(group);
+        continue;
+      }
       var opt = document.createElement('option');
       opt.text = name;
       opt.value = this.opts[name];
-      this.select.add(opt);
+      if (group != null) {
+        group.appendChild(opt);
+      } else {
+        this.select.add(opt);
+      }
     }
     return div;
   }

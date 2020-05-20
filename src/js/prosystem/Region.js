@@ -29,12 +29,19 @@ import * as Maria from "./Maria.js"
 import * as Palette from "./Palette.js"
 import { Rect } from "./Rect.js"
 
-import N257_PAL_B from '../../palettes/NTSC/JS7800_NTSC_257_Cool.pal'
-import N267_PAL_B from '../../palettes/NTSC/JS7800_NTSC_267_Warm.pal'
-import N277_PAL_B from '../../palettes/NTSC/JS7800_NTSC_277_Hot.pal'
-import P257_PAL_B from '../../palettes/PAL/JS7800_PAL_257_Cool.pal'
-import P267_PAL_B from '../../palettes/PAL/JS7800_PAL_267_Warm.pal'
-import P277_PAL_B from '../../palettes/PAL/JS7800_PAL_277_Hot.pal'
+import N257_PAL_B from '../../palettes/NTSC/JS7800_NTSC_257_Cool-DK.pal'
+import N267_PAL_B from '../../palettes/NTSC/JS7800_NTSC_267_Warm-DK.pal'
+import N277_PAL_B from '../../palettes/NTSC/JS7800_NTSC_277_Hot-DK.pal'
+import P257_PAL_B from '../../palettes/PAL/JS7800_PAL_257_Cool-DK.pal'
+import P267_PAL_B from '../../palettes/PAL/JS7800_PAL_267_Warm-DK.pal'
+import P277_PAL_B from '../../palettes/PAL/JS7800_PAL_277_Hot-DK.pal'
+import N257_LT_PAL_B from '../../palettes/NTSC/JS7800_NTSC_257_Cool-LT.pal'
+import N267_LT_PAL_B from '../../palettes/NTSC/JS7800_NTSC_267_Warm-LT.pal'
+import N277_LT_PAL_B from '../../palettes/NTSC/JS7800_NTSC_277_Hot-LT.pal'
+import P257_LT_PAL_B from '../../palettes/PAL/JS7800_PAL_257_Cool-LT.pal'
+import P267_LT_PAL_B from '../../palettes/PAL/JS7800_PAL_267_Warm-LT.pal'
+import P277_LT_PAL_B from '../../palettes/PAL/JS7800_PAL_277_Hot-LT.pal'
+
 
 var NTSC_257_PAL = Palette.FromBase64(N257_PAL_B);
 var NTSC_267_PAL = Palette.FromBase64(N267_PAL_B);
@@ -42,6 +49,12 @@ var NTSC_277_PAL = Palette.FromBase64(N277_PAL_B);
 var PAL_257_PAL = Palette.FromBase64(P257_PAL_B);
 var PAL_267_PAL = Palette.FromBase64(P267_PAL_B);
 var PAL_277_PAL = Palette.FromBase64(P277_PAL_B);
+var NTSC_257_LT_PAL = Palette.FromBase64(N257_LT_PAL_B);
+var NTSC_267_LT_PAL = Palette.FromBase64(N267_LT_PAL_B);
+var NTSC_277_LT_PAL = Palette.FromBase64(N277_LT_PAL_B);
+var PAL_257_LT_PAL = Palette.FromBase64(P257_LT_PAL_B);
+var PAL_267_LT_PAL = Palette.FromBase64(P267_LT_PAL_B);
+var PAL_277_LT_PAL = Palette.FromBase64(P277_LT_PAL_B);
 
 var REGION_NTSC = 0;
 var REGION_PAL = 1;
@@ -214,16 +227,22 @@ var REGION_PALETTE_PAL = [
 
 var NTSC_PAL_INDEX = {
   0: REGION_PALETTE_NTSC,
-  1: NTSC_257_PAL,
-  2: NTSC_267_PAL,
-  3: NTSC_277_PAL
+  1: NTSC_257_LT_PAL,
+  2: NTSC_267_LT_PAL,
+  3: NTSC_277_LT_PAL,
+  4: NTSC_257_PAL,
+  5: NTSC_267_PAL,
+  6: NTSC_277_PAL
 };
 
 var PAL_PAL_INDEX = {
   0: REGION_PALETTE_PAL,
-  1: PAL_257_PAL,
-  2: PAL_267_PAL,
-  3: PAL_277_PAL
+  1: PAL_257_LT_PAL,
+  2: PAL_267_LT_PAL,
+  3: PAL_277_LT_PAL,
+  4: PAL_257_PAL,
+  5: PAL_267_PAL,
+  6: PAL_277_PAL
 };
 
 // The default pallete index
