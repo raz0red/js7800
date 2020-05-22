@@ -12,15 +12,21 @@
   },
   "scripts": {
     "build": 
-      "npm run dbConvert && npm run buildModule && npm run buildSite",
+      "npm run dbConvert && npm run buildModule && npm run buildSite && npm run buildLeaderboard",
     "buildModule": 
       "webpack --mode=production",
     "buildSite": 
       "webpack --mode=production --config site/webpack.config.js",
+    "buildLeaderboard": 
+      "webpack --mode=production --config site/leaderboard/webpack.config.js",
     "webpackWatch": 
       "webpack --watch --mode=production",
     "webpackWatchDebug": 
-      "webpack -d --watch",
+      "webpack -d --watch ",
+    "webpackWatchLeaderboard": 
+      "webpack --watch --mode=production --config site/leaderboard/webpack.config.js",
+    "webpackWatchLeaderboardDebug": 
+      "webpack -d --watch --config site/leaderboard/webpack.config.js",
     "devServer": 
       "webpack-dev-server --mode=production --host 0.0.0.0",
     "devServerDebug": 

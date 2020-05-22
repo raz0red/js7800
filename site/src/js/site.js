@@ -11,6 +11,7 @@ import { SettingsDialog } from "./settings-dialog.js"
 import { HelpDialog } from "./help-dialog.js"
 
 import css from '../css/site.css'
+import messageCss from '../css/common/message-common.css'
 
 var showMessage = Message.showMessage;
 var hideMessage = Message.hideMessage;
