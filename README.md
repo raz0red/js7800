@@ -43,3 +43,9 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 JS7800 includes integrated documentation via the "Help/Information" button located in the commands bar directly below the emulator screen.
 
 For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki/Cartridge%20Lists) format,  [request parameters](https://github.com/raz0red/js7800/wiki/Request%20Parameters), and more, refer to the [JS7800 Wiki](https://github.com/raz0red/js7800/wiki).
+
+## Change log
+
+### 05/16/20 (0.0.0)
+    - Initial release
+
