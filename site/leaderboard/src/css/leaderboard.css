@@ -296,4 +296,5 @@ body {
 .scores-table-table TD.noscores {
   text-align: center;
   padding: 1.5em;  
+  background-color: #191919;
 }

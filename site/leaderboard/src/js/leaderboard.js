@@ -160,37 +160,47 @@ function loadScores(digest) {
     console.log(scores);
     var newBody = document.createElement('tbody');
     var lastDiff = "";
-    for(var i = 0; i < scores.length; i++) {
-      var s = scores[i];
+    if (scores.length == 0) {
       var row = document.createElement("tr");
-      if (s.rank == 1) {
-        row.className = 'firstPlace';
-      }
-
-      var td = document.createElement("td");
-      var diff = s.diff;      
-      td.appendChild(document.createTextNode(lastDiff == diff ? '' : diff));
-      lastDiff = diff;
-      row.appendChild(td);
       td = document.createElement("td");
-      td.className =  'rank';
-      td.appendChild(document.createTextNode(s.rank + "."));
+      td.className =  'noscores';
+      td.appendChild(document.createTextNode("No scores currently exist for this game."));
+      td.setAttribute("colspan", "5");
       row.appendChild(td);
-      td = document.createElement("td");
-      td.appendChild(document.createTextNode(s.initials_str));
-      td.className =  'callout player';
-      row.appendChild(td);
-      td = document.createElement("td");
-      // td.className =  'callout';
-      td.appendChild(document.createTextNode(s.score));
-      row.appendChild(td);
-      td = document.createElement("td");
-      var d = new Date(s.epoch * 1000);        
-      td.appendChild(document.createTextNode(d.toLocaleString()));
-      row.appendChild(td);
-
       newBody.appendChild(row);
-    }    
+    } else {
+      for(var i = 0; i < scores.length; i++) {
+        var s = scores[i];
+        var row = document.createElement("tr");
+        if (s.rank == 1) {
+          row.className = 'firstPlace';
+        }
+
+        var td = document.createElement("td");
+        var diff = s.diff;      
+        td.appendChild(document.createTextNode(lastDiff == diff ? '' : diff));
+        lastDiff = diff;
+        row.appendChild(td);
+        td = document.createElement("td");
+        td.className =  'rank';
+        td.appendChild(document.createTextNode(s.rank + "."));
+        row.appendChild(td);
+        td = document.createElement("td");
+        td.appendChild(document.createTextNode(s.initials_str));
+        td.className =  'callout player';
+        row.appendChild(td);
+        td = document.createElement("td");
+        // td.className =  'callout';
+        td.appendChild(document.createTextNode(s.score));
+        row.appendChild(td);
+        td = document.createElement("td");
+        var d = new Date(s.epoch * 1000);        
+        td.appendChild(document.createTextNode(d.toLocaleString()));
+        row.appendChild(td);
+
+        newBody.appendChild(row);
+      }    
+    }
     tableBodyEl.parentNode.replaceChild(newBody, tableBodyEl);
     tableBodyEl = newBody;
 
