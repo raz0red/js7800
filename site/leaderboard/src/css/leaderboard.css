@@ -298,3 +298,49 @@ body {
   padding: 1.5em;  
   background-color: #191919;
 }
+
+.loader-container {
+  visibility: hidden;
+  position: fixed;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* height: 100%;
+  width: 100%; */
+  background-color: #111;
+  opacity: .7;
+  /* border: 1px solid red; */
+}
+
+.loader {  
+  border: 12px solid #999;
+  border-radius: 50%;
+  border-top: 12px solid #8b2429;
+  width: 80px;
+  height: 80px;
+  -webkit-animation: spin 2s linear infinite;
+  /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

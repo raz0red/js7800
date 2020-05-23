@@ -10,7 +10,9 @@ var recentScoresEl = null;
 var competitiveGamesEl = null;
 var gameSelectEl = null;
 var scoresTableEl = null;
+var scoresTableTableEl = null;
 var tableBodyEl = null;
+var loaderContainerEl = null;
 
 function errorHandler(message) {
   Message.showErrorMessage(message);
@@ -128,7 +130,8 @@ function updateMostCompetitive(games) {
 
     var scores = document.createElement('div');
     scores.className = 'infobox-entry-normal';
-    scores.appendChild(document.createTextNode(row.count + " scores"));    
+    scores.appendChild(document.createTextNode(
+      row.count + " scores " + " / " + row.players + " players"));    
 
     entry.appendChild(game);
     entry.appendChild(diff);
@@ -155,62 +158,70 @@ function refreshSummary() {
 }
 
 function loadScores(digest) {
+  var style = window.getComputedStyle(scoresTableEl, null);
+  loaderContainerEl.style.width = style.getPropertyValue("width");
+  loaderContainerEl.style.height = style.getPropertyValue("height");
+  loaderContainerEl.style.visibility = 'visible';
   gameSelectEl.disabled = true;
-  read(Util.getUrlPrefix() + "/scoreboard-scores.php?d=" + digest, function(scores) {
-    console.log(scores);
-    var newBody = document.createElement('tbody');
-    var lastDiff = "";
-    if (scores.length == 0) {
-      var row = document.createElement("tr");
-      td = document.createElement("td");
-      td.className =  'noscores';
-      td.appendChild(document.createTextNode("No scores currently exist for this game."));
-      td.setAttribute("colspan", "5");
-      row.appendChild(td);
-      newBody.appendChild(row);
-    } else {
-      for(var i = 0; i < scores.length; i++) {
-        var s = scores[i];
+  setTimeout(function() {
+    read(Util.getUrlPrefix() + "/scoreboard-scores.php?d=" + digest, function(scores) {
+      console.log(scores);
+      var newBody = document.createElement('tbody');
+      var lastDiff = "";
+      if (scores.length == 0) {
         var row = document.createElement("tr");
-        if (s.rank == 1) {
-          row.className = 'firstPlace';
-        }
-
-        var td = document.createElement("td");
-        var diff = s.diff;      
-        td.appendChild(document.createTextNode(lastDiff == diff ? '' : diff));
-        lastDiff = diff;
-        row.appendChild(td);
         td = document.createElement("td");
-        td.className =  'rank';
-        td.appendChild(document.createTextNode(s.rank + "."));
+        td.className =  'noscores';
+        td.appendChild(document.createTextNode("No scores currently exist for this game."));
+        td.setAttribute("colspan", "5");
         row.appendChild(td);
-        td = document.createElement("td");
-        td.appendChild(document.createTextNode(s.initials_str));
-        td.className =  'callout player';
-        row.appendChild(td);
-        td = document.createElement("td");
-        // td.className =  'callout';
-        td.appendChild(document.createTextNode(s.score));
-        row.appendChild(td);
-        td = document.createElement("td");
-        var d = new Date(s.epoch * 1000);        
-        td.appendChild(document.createTextNode(d.toLocaleString()));
-        row.appendChild(td);
-
         newBody.appendChild(row);
-      }    
-    }
-    tableBodyEl.parentNode.replaceChild(newBody, tableBodyEl);
-    tableBodyEl = newBody;
+      } else {
+        for(var i = 0; i < scores.length; i++) {
+          var s = scores[i];
+          var row = document.createElement("tr");
+          if (s.rank == 1) {
+            row.className = 'firstPlace';
+          }
 
-    gameSelectEl.disabled = false;
-    gameSelectEl.blur();
-    // setTimeout(function() {gameSelectEl.focus()}, 10);
-  }, function(error) {
-    gameSelectEl.disabled = false;
-    errorHandler(error);
-  }); 
+          var td = document.createElement("td");
+          var diff = s.diff;      
+          td.appendChild(document.createTextNode(lastDiff == diff ? '' : diff));
+          lastDiff = diff;
+          row.appendChild(td);
+          td = document.createElement("td");
+          td.className =  'rank';
+          td.appendChild(document.createTextNode(s.rank + "."));
+          row.appendChild(td);
+          td = document.createElement("td");
+          td.appendChild(document.createTextNode(s.initials_str));
+          td.className =  'callout player';
+          row.appendChild(td);
+          td = document.createElement("td");
+          // td.className =  'callout';
+          td.appendChild(document.createTextNode(s.score));
+          row.appendChild(td);
+          td = document.createElement("td");
+          var d = new Date(s.epoch * 1000);        
+          td.appendChild(document.createTextNode(d.toLocaleString()));
+          row.appendChild(td);
+
+          newBody.appendChild(row);
+        }    
+      }
+      tableBodyEl.parentNode.replaceChild(newBody, tableBodyEl);
+      tableBodyEl = newBody;
+
+      loaderContainerEl.style.visibility = 'hidden';
+      gameSelectEl.disabled = false;
+      gameSelectEl.blur();
+      // setTimeout(function() {gameSelectEl.focus()}, 10);
+    }, function(error) {
+      loaderContainerEl.style.visibility = 'hidden';
+      gameSelectEl.disabled = false;
+      errorHandler(error);
+    }); 
+  }, 300);
 }
 
 function loadGamesList() {
@@ -247,9 +258,12 @@ function start() {
   recentScoresEl = document.getElementById('recent-scores');
   competitiveGamesEl = document.getElementById('most-competitive');
   gameSelectEl = document.getElementById('games-select-select');  
-  scoresTableEl = document.getElementById('scores-table-table');
-  tableBodyEl = document.createElement('tbody');
-  scoresTableEl.appendChild(tableBodyEl);
+  scoresTableEl = document.getElementById('scores-table');
+  scoresTableTableEl = document.getElementById('scores-table-table');
+  loaderContainerEl = document.getElementById("loader-container");
+  tableBodyEl = document.createElement('tbody');  
+  scoresTableTableEl.appendChild(tableBodyEl);
+
   loadGamesList();
   refreshSummary();
 }
