@@ -4,6 +4,7 @@ import * as Message from '../../../src/js/common/message-common.js'
 import * as Util from '../../../src/js/common/util-common.js'
 
 var REFRESH_INTERVAL = 60 * 1000;
+
 var topPlayers10El = null;
 var topPlayersEl = null;
 var recentScoresEl = null;
@@ -143,7 +144,6 @@ function updateMostCompetitive(games) {
 
 function refreshSummary() {
   read(Util.getUrlPrefix() + "/scoreboard-summary.php", function(summary) {
-    console.log(summary);
     updateTopPlayers(summary.topScoresByPlayer, true);
     updateTopPlayers(summary.totalPointsByPlayer, false);
     updateRecentScores(summary.recentScores);
@@ -157,15 +157,18 @@ function refreshSummary() {
   setTimeout(refreshSummary, REFRESH_INTERVAL);
 }
 
-function loadScores(digest) {
+function loadScores(digest, push) {
   var style = window.getComputedStyle(scoresTableEl, null);
   loaderContainerEl.style.width = style.getPropertyValue("width");
   loaderContainerEl.style.height = style.getPropertyValue("height");
   loaderContainerEl.style.visibility = 'visible';
-  gameSelectEl.disabled = true;
+  if (push) {
+    window.history.pushState({"d": digest}, "", "?d=" + digest);   
+  }
+  gameSelectEl.value = digest;
+  gameSelectEl.disabled = true;  
   setTimeout(function() {
     read(Util.getUrlPrefix() + "/scoreboard-scores.php?d=" + digest, function(scores) {
-      console.log(scores);
       var newBody = document.createElement('tbody');
       var lastDiff = "";
       if (scores.length == 0) {
@@ -198,7 +201,6 @@ function loadScores(digest) {
           td.className =  'callout player';
           row.appendChild(td);
           td = document.createElement("td");
-          // td.className =  'callout';
           td.appendChild(document.createTextNode(s.score));
           row.appendChild(td);
           td = document.createElement("td");
@@ -215,7 +217,6 @@ function loadScores(digest) {
       loaderContainerEl.style.visibility = 'hidden';
       gameSelectEl.disabled = false;
       gameSelectEl.blur();
-      // setTimeout(function() {gameSelectEl.focus()}, 10);
     }, function(error) {
       loaderContainerEl.style.visibility = 'hidden';
       gameSelectEl.disabled = false;
@@ -224,30 +225,28 @@ function loadScores(digest) {
   }, 300);
 }
 
+function selectDefaultItem() {
+  var digest = Util.getRequestParameter("d");
+  if (!digest && gameSelectEl.options.length > 0) {
+    digest = gameSelectEl.options[0].value;
+  }
+  if (digest) {
+    loadScores(digest, false);
+  }
+}
+
 function loadGamesList() {
   read(Util.getUrlPrefix() + "/scoreboard-games.php", function(games) {
-    gameSelectEl.onchange = function() {
-      window.history.pushState(null, "", "?d=" + this.value);   
-      loadScores(this.value);   
+    gameSelectEl.onchange = function() {      
+      loadScores(this.value, true);   
     };
-    console.log(games);
-    var digest = Util.getRequestParameter("d");
-    var d = digest ? digest : null;
     for(var g in games) {
       var option = document.createElement("option");
       option.text = g;
       option.value = games[g];
-      if (d == null) {
-        d = option.value;        
-        option.setAttribute('selected', 'selected');
-      } else if (d == option.value) {
-        option.setAttribute('selected', 'selected');
-      }
       gameSelectEl.add(option);
     }  
-    if (d) {
-      loadScores(d);
-    }
+    selectDefaultItem();
   }, errorHandler); 
 }
 
@@ -263,6 +262,15 @@ function start() {
   loaderContainerEl = document.getElementById("loader-container");
   tableBodyEl = document.createElement('tbody');  
   scoresTableTableEl.appendChild(tableBodyEl);
+
+  window.addEventListener('popstate', function(event) {
+    var state = event.state;
+    if (state && state.d) {
+      loadScores(state.d, false);
+    } else {      
+      selectDefaultItem();      
+    }
+  });  
 
   loadGamesList();
   refreshSummary();
