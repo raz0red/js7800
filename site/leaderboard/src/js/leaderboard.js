@@ -14,6 +14,9 @@ var scoresTableEl = null;
 var scoresTableTableEl = null;
 var tableBodyEl = null;
 var loaderContainerEl = null;
+var currentScores = null;
+var filterSelectEl = null;
+var currentDigest = null;
 
 function errorHandler(message) {
   Message.showErrorMessage(message);
@@ -73,38 +76,44 @@ function updateRecentScores(scores) {
   var el = recentScoresEl;
   while (el.firstChild) el.removeChild(el.firstChild);
   for (var i = 0; i < scores.length; i++) {
-    var row = scores[i];
-    if (i > 0) {
-      var sep = document.createElement('div');
-      sep.className = 'infobox-entry-separator';
-      el.appendChild(sep);
-    }
-    var entry = document.createElement('div');
-    entry.className = 'infobox-entry';
+    var ii = i;
+    (function () {
+      var row = scores[ii];
+      if (i > 0) {
+        var sep = document.createElement('div');
+        sep.className = 'infobox-entry-separator';
+        el.appendChild(sep);
+      }
+      var entry = document.createElement('div');
+      entry.className = 'infobox-entry infobox-entry-select';
+      entry.onclick = function() {
+        loadScoresAndPushHistory(row.digest, row.did);
+      }
 
-    var player = document.createElement('div');
-    player.className = 'infobox-entry-callout';
-    player.innerHTML = row.initials_str + " &bull; " + row.score;
+      var player = document.createElement('div');
+      player.className = 'infobox-entry-callout';
+      player.innerHTML = row.initials_str + " &bull; " + row.score;
 
-    var game = document.createElement('div');
-    game.className = 'infobox-entry-normal';
-    game.appendChild(document.createTextNode(row.game));    
+      var game = document.createElement('div');
+      game.className = 'infobox-entry-normal';
+      game.appendChild(document.createTextNode(row.game));    
 
-    var diff = document.createElement('div');
-    diff.className = 'infobox-entry-normal';
-    diff.appendChild(document.createTextNode(row.diff));    
+      var diff = document.createElement('div');
+      diff.className = 'infobox-entry-normal';
+      diff.appendChild(document.createTextNode(row.diff));    
 
-    var time = document.createElement('div');
-    time.className = 'infobox-entry-normal';
-    var d = new Date(row.epoch * 1000);        
-    time.appendChild(document.createTextNode(d.toLocaleString()));    
+      var time = document.createElement('div');
+      time.className = 'infobox-entry-normal';
+      var d = new Date(row.epoch * 1000);        
+      time.appendChild(document.createTextNode(d.toLocaleString()));    
 
-    entry.appendChild(player);
-    entry.appendChild(game);
-    entry.appendChild(diff);
-    entry.appendChild(time);
+      entry.appendChild(player);
+      entry.appendChild(game);
+      entry.appendChild(diff);
+      entry.appendChild(time);
 
-    el.appendChild(entry);
+      el.appendChild(entry);
+    })();
   }  
 }
 
@@ -112,33 +121,38 @@ function updateMostCompetitive(games) {
   var el = competitiveGamesEl;
   while (el.firstChild) el.removeChild(el.firstChild);
   for (var i = 0; i < games.length; i++) {
-    var row = games[i];
-    if (i > 0) {
-      var sep = document.createElement('div');
-      sep.className = 'infobox-entry-separator';
-      el.appendChild(sep);
-    }
-    var entry = document.createElement('div');
-    entry.className = 'infobox-entry';
-
-    var game = document.createElement('div');
-    game.className = 'infobox-entry-callout';
-    game.appendChild(document.createTextNode(row.game));    
-
-    var diff = document.createElement('div');
-    diff.className = 'infobox-entry-normal';
-    diff.appendChild(document.createTextNode(row.diff));    
-
-    var scores = document.createElement('div');
-    scores.className = 'infobox-entry-normal';
-    scores.appendChild(document.createTextNode(
-      row.count + " scores " + " / " + row.players + " players"));    
-
-    entry.appendChild(game);
-    entry.appendChild(diff);
-    entry.appendChild(scores);
-
-    el.appendChild(entry);
+    var ii = i;
+    (function () {
+      var row = games[ii];
+      if (i > 0) {
+        var sep = document.createElement('div');
+        sep.className = 'infobox-entry-separator';
+        el.appendChild(sep);
+      }
+      var entry = document.createElement('div');
+      entry.className = 'infobox-entry infobox-entry-select';
+      entry.onclick = function() {
+        loadScoresAndPushHistory(row.digest, row.did);
+      }
+      var game = document.createElement('div');
+      game.className = 'infobox-entry-callout';
+      game.appendChild(document.createTextNode(row.game));    
+  
+      var diff = document.createElement('div');
+      diff.className = 'infobox-entry-normal';
+      diff.appendChild(document.createTextNode(row.diff));    
+  
+      var scores = document.createElement('div');
+      scores.className = 'infobox-entry-normal';
+      scores.appendChild(document.createTextNode(
+        row.count + " scores " + " / " + row.players + " players"));    
+  
+      entry.appendChild(game);
+      entry.appendChild(diff);
+      entry.appendChild(scores);
+  
+      el.appendChild(entry);  
+    })();
   }
 }
 
@@ -157,62 +171,123 @@ function refreshSummary() {
   setTimeout(refreshSummary, REFRESH_INTERVAL);
 }
 
-function loadScores(digest, push) {
+function updateScoresTable(filter) {
+  var scores = currentScores;
+  var newBody = document.createElement('tbody');
+  var lastDiff = "";
+
+  if (filter !== undefined) {
+    filterSelectEl.value = filter;
+  }
+
+  if (scores.length == 0) {
+    var row = document.createElement("tr");
+    td = document.createElement("td");
+    td.className =  'noscores';
+    td.appendChild(document.createTextNode("No scores currently exist for this game."));
+    td.setAttribute("colspan", "5");
+    row.appendChild(td);
+    newBody.appendChild(row);
+  } else {
+    for(var i = 0; i < scores.length; i++) {
+      var s = scores[i];
+      if ((filter === undefined) ||
+          (filter === 'all') ||
+          (filter == s.did.toString())) {
+        var row = document.createElement("tr");
+        if (s.rank == 1) {
+          row.className = 'firstPlace';
+        }
+        var td = document.createElement("td");
+        var diff = s.diff;      
+        td.appendChild(document.createTextNode(lastDiff == diff ? '' : diff));
+        lastDiff = diff;
+        row.appendChild(td);
+        td = document.createElement("td");
+        td.className =  'rank';
+        td.appendChild(document.createTextNode(s.rank + "."));
+        row.appendChild(td);
+        td = document.createElement("td");
+        td.appendChild(document.createTextNode(s.initials_str));
+        td.className =  'callout player';
+        row.appendChild(td);
+        td = document.createElement("td");
+        td.appendChild(document.createTextNode(s.score));
+        row.appendChild(td);
+        td = document.createElement("td");
+        var d = new Date(s.epoch * 1000);        
+        td.appendChild(document.createTextNode(d.toLocaleString()));
+        row.appendChild(td);
+
+        newBody.appendChild(row);
+      }
+    }    
+  }
+  tableBodyEl.parentNode.replaceChild(newBody, tableBodyEl);
+  tableBodyEl = newBody;
+}
+
+function updateSettingsList() {
+  var scores = currentScores;
+
+  var len = filterSelectEl.options.length;
+  for (var i = len; i; i--) {
+    var par = filterSelectEl.options[i - 1].parentNode;
+    par.removeChild(filterSelectEl.options[i - 1]);
+  }
+
+  var option = document.createElement("option");
+  option.text = '(All)';
+  option.value = 'all'
+  filterSelectEl.add(option);
+
+  var dids = {};
+  var settings = [];
+  for(var i = 0; i < scores.length; i++) {
+    var s = scores[i];
+    var did = s.did;    
+    var didStr = did.toString();
+    var d = dids[didStr];
+    if (d === undefined) {
+      settings.push({"did": didStr, "diff": s.diff});
+      dids[didStr] = true;
+    }
+  }
+
+  // settings.sort(function(a, b) {
+  //   var da = a.diff.toUpperCase();
+  //   var db = b.diff.toUpperCase();
+  //   if (da < db) {
+  //     return -1;
+  //   }
+  //   if (da > db) {
+  //     return 1;
+  //   }
+  //   return 0;
+  // });
+
+  for(var i = 0; i < settings.length; i++) {
+    var s = settings[i];
+    var option = document.createElement("option");
+    option.text = s.diff;
+    option.value = s.did;
+    filterSelectEl.add(option);
+  }  
+}
+
+function loadScores(digest, filter) {
+  currentDigest = digest;
   var style = window.getComputedStyle(scoresTableEl, null);
   loaderContainerEl.style.width = style.getPropertyValue("width");
   loaderContainerEl.style.height = style.getPropertyValue("height");
   loaderContainerEl.style.visibility = 'visible';
-  if (push) {
-    window.history.pushState({"d": digest}, "", "?d=" + digest);   
-  }
   gameSelectEl.value = digest;
   gameSelectEl.disabled = true;  
   setTimeout(function() {
     read(Util.getUrlPrefix() + "/scoreboard-scores.php?d=" + digest, function(scores) {
-      var newBody = document.createElement('tbody');
-      var lastDiff = "";
-      if (scores.length == 0) {
-        var row = document.createElement("tr");
-        td = document.createElement("td");
-        td.className =  'noscores';
-        td.appendChild(document.createTextNode("No scores currently exist for this game."));
-        td.setAttribute("colspan", "5");
-        row.appendChild(td);
-        newBody.appendChild(row);
-      } else {
-        for(var i = 0; i < scores.length; i++) {
-          var s = scores[i];
-          var row = document.createElement("tr");
-          if (s.rank == 1) {
-            row.className = 'firstPlace';
-          }
-
-          var td = document.createElement("td");
-          var diff = s.diff;      
-          td.appendChild(document.createTextNode(lastDiff == diff ? '' : diff));
-          lastDiff = diff;
-          row.appendChild(td);
-          td = document.createElement("td");
-          td.className =  'rank';
-          td.appendChild(document.createTextNode(s.rank + "."));
-          row.appendChild(td);
-          td = document.createElement("td");
-          td.appendChild(document.createTextNode(s.initials_str));
-          td.className =  'callout player';
-          row.appendChild(td);
-          td = document.createElement("td");
-          td.appendChild(document.createTextNode(s.score));
-          row.appendChild(td);
-          td = document.createElement("td");
-          var d = new Date(s.epoch * 1000);        
-          td.appendChild(document.createTextNode(d.toLocaleString()));
-          row.appendChild(td);
-
-          newBody.appendChild(row);
-        }    
-      }
-      tableBodyEl.parentNode.replaceChild(newBody, tableBodyEl);
-      tableBodyEl = newBody;
+      currentScores = scores;
+      updateSettingsList();
+      updateScoresTable(filter);      
 
       loaderContainerEl.style.visibility = 'hidden';
       gameSelectEl.disabled = false;
@@ -227,18 +302,34 @@ function loadScores(digest, push) {
 
 function selectDefaultItem() {
   var digest = Util.getRequestParameter("d");
+  var filter = Util.getRequestParameter("f");
   if (!digest && gameSelectEl.options.length > 0) {
     digest = gameSelectEl.options[0].value;
   }
   if (digest) {
-    loadScores(digest, false);
+    loadScores(digest, filter);
   }
+}
+
+function pushHistory(digest, filter) {
+  var state = {"d": digest};
+  var url = "?d=" + digest;
+  if (filter !== undefined) {
+    state.f = filter;
+    url += "&f=" + filter;
+  }
+  window.history.pushState(state, "", url);
+}
+
+function loadScoresAndPushHistory(digest, filter) {
+  pushHistory(digest, filter);
+  loadScores(digest, filter);   
 }
 
 function loadGamesList() {
   read(Util.getUrlPrefix() + "/scoreboard-games.php", function(games) {
     gameSelectEl.onchange = function() {      
-      loadScores(this.value, true);   
+      loadScoresAndPushHistory(this.value);
     };
     for(var g in games) {
       var option = document.createElement("option");
@@ -260,13 +351,19 @@ function start() {
   scoresTableEl = document.getElementById('scores-table');
   scoresTableTableEl = document.getElementById('scores-table-table');
   loaderContainerEl = document.getElementById("loader-container");
+  filterSelectEl = document.getElementById("games-select-filter");
   tableBodyEl = document.createElement('tbody');  
   scoresTableTableEl.appendChild(tableBodyEl);
+
+  filterSelectEl.onchange = function() {      
+    pushHistory(currentDigest, this.value);
+    updateScoresTable(this.value);   
+  };
 
   window.addEventListener('popstate', function(event) {
     var state = event.state;
     if (state && state.d) {
-      loadScores(state.d, false);
+      loadScores(state.d, state.f);
     } else {      
       selectDefaultItem();      
     }

@@ -72,12 +72,13 @@ body {
   color: #BBBBBB;
   line-height: 1.5em;
   font-size: 1em;
-  padding: .8em;
+  padding: .8em .4em;
   border-radius: .634em;
   box-shadow: 0 .317em .635em 0 rgba(0, 0, 0, 0.4), 0 .476em 1.587em 0 rgba(0, 0, 0, 0.39);
   background-color: #191919;
   margin-bottom: 2em;
   visibility: hidden;
+  
 }
 
 .infobox-scores {
@@ -92,9 +93,9 @@ body {
   font-weight: bold;
   text-align: center;
   padding: .3em;
-  margin-bottom: .2em;
+  margin: 0 .5em .6em .5em;
   font-size: 1.1em;
-  color: #777;
+  color: #888;
   border: 1px solid #333;
   background-color: #222;
   border-radius: .3em;
@@ -105,8 +106,19 @@ body {
   font-size: 1em;
   line-height: 1em;
   vertical-align: middle;
-  padding-top: .6em;
+  margin-top: .6em;
   /* border: 1px solid yellow; */
+  border-radius: .4em;
+  padding: 0 .4em;
+  opacity: .8;
+}
+
+.infobox-entry-select:hover {
+  /* background-color:#282828; */
+  /* background-color:#702426; */
+  background-color:#8b2429;
+  cursor: pointer;
+  opacity: 1;
 }
 
 .infobox-entry-flex {
@@ -120,7 +132,7 @@ body {
 
 .infobox-entry-callout {
   font-size: 1.1em;
-  color: #CCC;
+  color: #FFF;
   line-height: 1.5em;
   overflow: hidden;
   /* border: 1px solid green; */
@@ -128,7 +140,7 @@ body {
 
 .infobox-entry-normal {
   font-size:.9em; 
-  color:#999;
+  color:#BBB;
   line-height: 1.5em;
   overflow: hidden;
   /* border: 1px solid blue; */
@@ -140,32 +152,41 @@ body {
 
 .infobox-entry-separator {
   padding-top: .6em;
+  margin: 0 .6em;
   border-bottom:1px solid #292929; 
   height: 0px; 
 }
 
 .game-select-outer {
   text-align: center; 
-  margin-bottom: 1.5em; 
-  margin-top: .5em;
+  margin-bottom: 1em; 
+  padding-top: .5em;
+  padding-bottom: .5em;
+  background-color: #292929;
+  border-radius: .5em;
+  border: 1px solid #383838;
 }
 
 .game-select-inner {
-  display: flex; 
-  justify-content: center; 
+  display: inline-grid;  
+  grid-template-columns: auto 1fr;  
+  /* grid-column-gap: 5px; */
+  grid-row-gap:.5em;  
+  justify-content: right; 
   align-items: center;
 }
 
 .game-select-label {
-  font-size: 1.2em; 
+  font-size: 1.15em; 
   font-weight: bold; 
   padding-right: 1em; 
-  color: #777;
+  color: #888;
+  text-align: right;
 }
 
 .game-select {
   opacity: .8;
-  font-size: 1.2em;
+  font-size: 1.15em;
   color: #fff;
   position: relative;
   display: flex;
