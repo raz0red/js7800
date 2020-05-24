@@ -112,13 +112,6 @@ function createFullscreenSelect() {
   });
   cbar.getGroup(1).addChildAtIndex(2, fsSelectComp);
 
-  // Listen for full screen change vents
-  Events.addListener(
-    new Events.Listener("fullscreen",
-      function (isFullscreen) {
-        fsSelect.style.display = isFullscreen ? "flex" : "none";
-      }));
-
   return fsSelectSel;
 }
 
@@ -179,9 +172,20 @@ function init(in7800) {
   var parent = document.getElementById('js7800__fullscreen-container');
 
   // Set the leaderboard button
-  cbar.leaderboardButton.onClick = function () { 
+  var lbBUtton = cbar.leaderboardButton;
+  lbBUtton.onClick = function () { 
     window.open('leaderboard', '_blank','noopener'); 
   }
+
+  // Listen for full screen change events
+  Events.addListener(
+    new Events.Listener("fullscreen",
+      function (isFullscreen) {
+        lbBUtton.getElement().style.display = 
+          isFullscreen ? "none" : "block";
+        fsSelect.parentElement.style.display = 
+          isFullscreen ? "flex" : "none";          
+      }));  
 
   // Create the settings dialog  
   var settingsDialog = new SettingsDialog();  
