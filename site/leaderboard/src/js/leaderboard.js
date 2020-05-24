@@ -92,7 +92,7 @@ function updateRecentScores(scores) {
       var entry = document.createElement('div');
       entry.className = 'infobox-entry infobox-entry-select';
       entry.onclick = function() {
-        loadScoresAndPushHistory(row.digest, row.did);
+        loadScoresAndPushHistory(row.digest, row.giddid);
       }
 
       var player = document.createElement('div');
@@ -137,7 +137,7 @@ function updateMostCompetitive(games) {
       var entry = document.createElement('div');
       entry.className = 'infobox-entry infobox-entry-select';
       entry.onclick = function() {
-        loadScoresAndPushHistory(row.digest, row.did);
+        loadScoresAndPushHistory(row.digest, row.giddid);
       }
       var game = document.createElement('div');
       game.className = 'infobox-entry-callout';

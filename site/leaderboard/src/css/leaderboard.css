@@ -192,7 +192,7 @@ body {
   color: #fff;
   position: relative;
   display: flex;
-  width: 16em;
+  width: 22em;
   height: 1.8em;
   line-height: 1.8em;
   background: black;
@@ -213,6 +213,7 @@ body {
   padding: 0 .3em;
   font-size: 1em;
   color: #ce2f37;
+  background-color: #1C1C1C;
   cursor: pointer;
   pointer-events: none;
 }
@@ -369,14 +370,14 @@ body {
 }
 
 .controls-left {
-  min-width:10em;
+  min-width:8em;
 }
 
 .controls-right {
   display: flex; 
   align-items: flex-end; 
   justify-content: flex-end; 
-  min-width:10em;
+  min-width:8em;
   padding-right:.5em;
 }
 
