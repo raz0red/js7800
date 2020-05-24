@@ -15,6 +15,8 @@ import playImgSrc from '../../images/play.svg'
 import pauseImgSrc from '../../images/pause.svg'
 import restartImgSrc from '../../images/restart.svg'
 import infoImgSrc from '../../images/information-outline.svg'
+import medalImgSrc from '../../images/medal.svg'
+// import medalImgSrc from '../../images/trophy-variant.svg'
 
 var addProps = Utils.addProps;
 var Component = UiCommon.Component;
@@ -163,6 +165,9 @@ rightDiffSwitch.onClick = function () { Kb.setRightDiffSet(!this.getValue()) }
 group.addChild(rightDiffSwitch);
 
 var groupEnd = new ControlGroupEnd();
+var leaderboardButton = new ImageButton("Leaderboard", medalImgSrc);
+leaderboardButton.onClick = function () { Events.fireEvent("showError", "Not implemented."); }
+groupEnd.addChild(leaderboardButton);
 var helpButton = new ImageButton("Help / Info", infoImgSrc);
 helpButton.onClick = function () { Events.fireEvent("showError", "Not implemented."); }
 groupEnd.addChild(helpButton);
@@ -219,10 +224,12 @@ export {
   getGroup,
   Component,
   Button,
+  leaderboardButton,
   settingsButton,
   helpButton,
   pauseButton,
   soundButton,
   cogsImgSrc,
-  infoImgSrc
+  infoImgSrc,
+  medalImgSrc
 }

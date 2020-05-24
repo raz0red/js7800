@@ -178,6 +178,11 @@ function init(in7800) {
   // js7800 parent element
   var parent = document.getElementById('js7800__fullscreen-container');
 
+  // Set the leaderboard button
+  cbar.leaderboardButton.onClick = function () { 
+    window.open('leaderboard', '_blank','noopener'); 
+  }
+
   // Create the settings dialog  
   var settingsDialog = new SettingsDialog();  
   cbar.settingsButton.onClick = function () { settingsDialog.show(); }

@@ -404,3 +404,15 @@ body {
 #play-button {
   display: none;
 }
+
+a, 
+a:visited
+a:active {
+  font-weight: bold;
+  text-decoration: none;
+  color: #BBB;  
+}
+
+a:hover {
+  color: #DDD;  
+}
