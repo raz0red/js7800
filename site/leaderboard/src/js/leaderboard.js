@@ -283,9 +283,6 @@ function updateSettingsList() {
 
 function loadScores(digest, filter) {
   currentDigest = digest;
-  var style = window.getComputedStyle(scoresTableEl, null);
-  loaderContainerEl.style.width = style.getPropertyValue("width");
-  loaderContainerEl.style.height = style.getPropertyValue("height");
   loaderContainerEl.style.visibility = 'visible';
   gameSelectEl.value = digest;
   gameSelectEl.disabled = true;  
