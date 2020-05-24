@@ -246,7 +246,7 @@ var PAL_PAL_INDEX = {
 };
 
 // The default pallete index
-var PALETTE_DEFAULT = 2;
+var PALETTE_DEFAULT = 3;
 
 // The current palette index
 var palIdx = PALETTE_DEFAULT;

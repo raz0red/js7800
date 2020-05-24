@@ -533,13 +533,13 @@ addProps(displayTab, {
     this.palSelect = new Select({
       "ProSystem default": "0", 
       "OptGroup1": "Dark",
-      "Cool (25.7)": "1", 
-      "Warm (26.7)": "2",             
-      "Hot (27.7)": "3",
+      "Cool (Dark)": "1", 
+      "Warm (Dark)": "2",             
+      "Hot (Dark)": "3",
       "OptGroup2": "Light",
-      "Cool (25.7) ": "4", 
-      "Warm (26.7) ": "5", 
-      "Hot (27.7) ": "6"
+      "Cool (Light) ": "4", 
+      "Warm (Light) ": "5", 
+      "Hot (Light) ": "6"
     });
     grid.addCell(new ContentCell(this.palSelect));
     grid.addCell(new LabelCell("Apply filter:"));
