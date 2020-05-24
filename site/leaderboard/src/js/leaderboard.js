@@ -1,5 +1,7 @@
 import css from '../css/leaderboard.css'
 import messageCss from '../../../src/css/common/message-common.css'
+import restartImgSrc from '../images/restart.svg'
+import gamepadImgSrc from '../images/gamepad-square.svg'
 import * as Message from '../../../src/js/common/message-common.js'
 import * as Util from '../../../src/js/common/util-common.js'
 
@@ -17,6 +19,9 @@ var loaderContainerEl = null;
 var currentScores = null;
 var filterSelectEl = null;
 var currentDigest = null;
+var currentCart = null;
+var currentFilter = null;
+var playEl = null;
 
 function errorHandler(message) {
   Message.showErrorMessage(message);
@@ -172,6 +177,7 @@ function refreshSummary() {
 }
 
 function updateScoresTable(filter) {
+  currentFilter = filter;
   var scores = currentScores;
   var newBody = document.createElement('tbody');
   var lastDiff = "";
@@ -188,8 +194,8 @@ function updateScoresTable(filter) {
     td.setAttribute("colspan", "5");
     row.appendChild(td);
     newBody.appendChild(row);
-  } else {
-    for(var i = 0; i < scores.length; i++) {
+  } else {    
+    for(var i = 0; i < scores.length; i++) {      
       var s = scores[i];
       if ((filter === undefined) ||
           (filter === 'all') ||
@@ -285,7 +291,14 @@ function loadScores(digest, filter) {
   gameSelectEl.disabled = true;  
   setTimeout(function() {
     read(Util.getUrlPrefix() + "/scoreboard-scores.php?d=" + digest, function(scores) {
-      currentScores = scores;
+      currentScores = scores.scores;
+      currentCart = null;
+      if (scores.cart) {
+        currentCart = scores.cart;
+        playEl.style.display = 'inline-block';
+      } else {
+        playEl.style.display = 'none';
+      }
       updateSettingsList();
       updateScoresTable(filter);      
 
@@ -354,6 +367,31 @@ function start() {
   filterSelectEl = document.getElementById("games-select-filter");
   tableBodyEl = document.createElement('tbody');  
   scoresTableTableEl.appendChild(tableBodyEl);
+
+  // Restart button
+  var restartEl = document.getElementById("restart-button");
+  restartEl.onclick = function() {
+    loadScores(currentDigest, currentFilter)
+  }; 
+  var img = document.createElement("img");  
+  img.className = "button-image";
+  img.src = restartImgSrc;
+  img.setAttribute("title", "Refresh");
+  restartEl.appendChild(img);
+
+  // Play button
+  playEl = document.getElementById("play-button");
+  playEl.onclick = function() {
+    if (currentCart) {
+      window.open('../?cart=' + currentCart,
+        '_blank','noopener'); 
+    }
+  }
+  var img = document.createElement("img");  
+  img.className = "button-image";
+  img.setAttribute("title", "Play");
+  img.src = gamepadImgSrc;
+  playEl.appendChild(img);
 
   filterSelectEl.onchange = function() {      
     pushHistory(currentDigest, this.value);

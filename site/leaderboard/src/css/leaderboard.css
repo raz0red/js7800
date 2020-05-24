@@ -158,6 +158,8 @@ body {
 }
 
 .game-select-outer {
+  display: flex;
+  justify-content: center;
   text-align: center; 
   margin-bottom: 1em; 
   padding-top: .5em;
@@ -364,4 +366,36 @@ body {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.controls-left {
+  min-width:10em;
+}
+
+.controls-right {
+  display: flex; 
+  align-items: flex-end; 
+  justify-content: flex-end; 
+  min-width:10em;
+  padding-right:.5em;
+}
+
+.controls-center {
+  flex-grow: 1;
+}
+
+.button-image {
+  width: 1.8em;
+  height: 1.8em;
+  opacity: .6;
+  margin: 0 .6em 0 0;
+}
+
+.button-image:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+
+#play-button {
+  display: none;
 }
