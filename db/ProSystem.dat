@@ -1956,39 +1956,6 @@ region=1
 flags=0
 pokey450=true
 xm=true
-[160dc0e869961f683e59f1bebef0cb8d]
-title=Pac-Man XM
-type=1
-pokey=false
-controller1=1
-controller2=1
-region=0
-flags=0
-pokey450=true
-xm=true
-hsc=true
-[fd21132e11fccc642875b01672dba905]
-title=Pac-Man XM
-type=1
-pokey=false
-controller1=1
-controller2=1
-region=0
-flags=0
-pokey450=true
-xm=true
-hsc=true
-[9ca5be2f14ca9fe8032ef754098ad471]
-title=Pac-Man XM
-type=1
-pokey=false
-controller1=1
-controller2=1
-region=0
-flags=0
-pokey450=true
-xm=false
-hsc=true
 [e84976a3529915ac91b964fab03aedb2]
 title=Pac-Man XM
 type=1
@@ -2001,6 +1968,17 @@ pokey450=true
 xm=false
 hsc=true
 [08055591f95a54a34dd90d90ae5dec24]
+title=Pac-Man XM
+type=1
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=true
+xm=false
+hsc=true
+[9fac7d0433dc3d936efce5c713488b08]
 title=Pac-Man XM
 type=1
 pokey=false
