@@ -162,7 +162,8 @@ function updateMostCompetitive(games) {
 }
 
 function refreshSummary() {
-  read(Util.getUrlPrefix() + "/scoreboard-summary.php", function(summary) {
+  read(Util.getUrlPrefix() + "/scoreboard-summary-cached.php", function(summary) {
+    //console.log(summary);
     updateTopPlayers(summary.topScoresByPlayer, true);
     updateTopPlayers(summary.totalPointsByPlayer, false);
     updateRecentScores(summary.recentScores);
