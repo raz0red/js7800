@@ -23,6 +23,11 @@ var currentCart = null;
 var currentFilter = null;
 var playEl = null;
 
+var NO_CACHE_PARAM_NAME = "noCache";
+var noCacheParam = Util.getRequestParameter(NO_CACHE_PARAM_NAME);
+var noCacheValue = noCacheParam && (noCacheParam == "1" || noCacheParam == "true"); 
+var SUMMARY_URL = noCacheValue ? "/scoreboard-summary.php" : "/scoreboard-summary-cached.php"
+
 function errorHandler(message) {
   Message.showErrorMessage(message);
   console.error(message);
@@ -162,7 +167,7 @@ function updateMostCompetitive(games) {
 }
 
 function refreshSummary() {
-  read(Util.getUrlPrefix() + "/scoreboard-summary-cached.php", function(summary) {
+  read(Util.getUrlPrefix() + SUMMARY_URL, function(summary) {
     //console.log(summary);
     updateTopPlayers(summary.topScoresByPlayer, true);
     updateTopPlayers(summary.totalPointsByPlayer, false);
@@ -328,6 +333,9 @@ function pushHistory(digest, filter) {
   if (filter !== undefined) {
     state.f = filter;
     url += "&f=" + filter;
+  }
+  if (noCacheValue) {
+    url += "&" + NO_CACHE_PARAM_NAME + "=true";
   }
   window.history.pushState(state, "", url);
 }
