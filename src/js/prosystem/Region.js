@@ -29,6 +29,33 @@ import * as Maria from "./Maria.js"
 import * as Palette from "./Palette.js"
 import { Rect } from "./Rect.js"
 
+import N257_PAL_B from '../../palettes/NTSC/JS7800_NTSC_257_Cool-DK.pal'
+import N267_PAL_B from '../../palettes/NTSC/JS7800_NTSC_267_Warm-DK.pal'
+import N277_PAL_B from '../../palettes/NTSC/JS7800_NTSC_277_Hot-DK.pal'
+import P257_PAL_B from '../../palettes/PAL/JS7800_PAL_257_Cool-DK.pal'
+import P267_PAL_B from '../../palettes/PAL/JS7800_PAL_267_Warm-DK.pal'
+import P277_PAL_B from '../../palettes/PAL/JS7800_PAL_277_Hot-DK.pal'
+import N257_LT_PAL_B from '../../palettes/NTSC/JS7800_NTSC_257_Cool-LT.pal'
+import N267_LT_PAL_B from '../../palettes/NTSC/JS7800_NTSC_267_Warm-LT.pal'
+import N277_LT_PAL_B from '../../palettes/NTSC/JS7800_NTSC_277_Hot-LT.pal'
+import P257_LT_PAL_B from '../../palettes/PAL/JS7800_PAL_257_Cool-LT.pal'
+import P267_LT_PAL_B from '../../palettes/PAL/JS7800_PAL_267_Warm-LT.pal'
+import P277_LT_PAL_B from '../../palettes/PAL/JS7800_PAL_277_Hot-LT.pal'
+
+
+var NTSC_257_PAL = Palette.FromBase64(N257_PAL_B);
+var NTSC_267_PAL = Palette.FromBase64(N267_PAL_B);
+var NTSC_277_PAL = Palette.FromBase64(N277_PAL_B);
+var PAL_257_PAL = Palette.FromBase64(P257_PAL_B);
+var PAL_267_PAL = Palette.FromBase64(P267_PAL_B);
+var PAL_277_PAL = Palette.FromBase64(P277_PAL_B);
+var NTSC_257_LT_PAL = Palette.FromBase64(N257_LT_PAL_B);
+var NTSC_267_LT_PAL = Palette.FromBase64(N267_LT_PAL_B);
+var NTSC_277_LT_PAL = Palette.FromBase64(N277_LT_PAL_B);
+var PAL_257_LT_PAL = Palette.FromBase64(P257_LT_PAL_B);
+var PAL_267_LT_PAL = Palette.FromBase64(P267_LT_PAL_B);
+var PAL_277_LT_PAL = Palette.FromBase64(P277_LT_PAL_B);
+
 var REGION_NTSC = 0;
 var REGION_PAL = 1;
 var REGION_AUTO = 2;
@@ -198,6 +225,32 @@ var REGION_PALETTE_PAL = [
   0xd6, 0xe1, 0x49, 0xe4, 0xf0, 0x4e, 0xf2, 0xff, 0x53, 0xf2, 0xff, 0x53,
 ];
 
+var NTSC_PAL_INDEX = {
+  0: REGION_PALETTE_NTSC,
+  1: NTSC_257_PAL,
+  2: NTSC_267_PAL,
+  3: NTSC_277_PAL,
+  4: NTSC_257_LT_PAL,
+  5: NTSC_267_LT_PAL,
+  6: NTSC_277_LT_PAL
+};
+
+var PAL_PAL_INDEX = {
+  0: REGION_PALETTE_PAL,
+  1: PAL_257_PAL,
+  2: PAL_267_PAL,
+  3: PAL_277_PAL,
+  4: PAL_257_LT_PAL,
+  5: PAL_267_LT_PAL,
+  6: PAL_277_LT_PAL
+};
+
+// The default pallete index
+var PALETTE_DEFAULT = 3;
+
+// The current palette index
+var palIdx = PALETTE_DEFAULT;
+
 // ----------------------------------------------------------------------------
 // Reset
 // ----------------------------------------------------------------------------
@@ -209,8 +262,8 @@ function region_Reset() {
     Maria.displayArea.Copy(REGION_DISPLAY_AREA_PAL);
     //maria_visibleArea = REGION_VISIBLE_AREA_PAL;
     Maria.visibleArea.Copy(REGION_VISIBLE_AREA_PAL);
-    if (Palette.GetPaletteDefault())
-      Palette.Load(REGION_PALETTE_PAL);  // Added check for default - bberlin
+     if (Palette.GetPaletteDefault())
+       Palette.Load(PAL_PAL_INDEX[palIdx] /*REGION_PALETTE_PAL*/);  // Added check for default - bberlin
     ProSystem.SetFrequency(REGION_FREQUENCY_PAL);
     ProSystem.SetScanlines(REGION_SCANLINES_PAL);
     //#ifndef WII    
@@ -223,8 +276,8 @@ function region_Reset() {
     Maria.displayArea.Copy(REGION_DISPLAY_AREA_NTSC);
     //maria_visibleArea = REGION_VISIBLE_AREA_NTSC;
     Maria.visibleArea.Copy(REGION_VISIBLE_AREA_NTSC);
-    if (Palette.GetPaletteDefault())
-      Palette.Load(REGION_PALETTE_NTSC);  // Added check for default - bberlin
+     if (Palette.GetPaletteDefault())
+       Palette.Load(NTSC_PAL_INDEX[palIdx] /*REGION_PALETTE_NTSC*/);  // Added check for default - bberlin
     ProSystem.SetFrequency(REGION_FREQUENCY_NTSC);
     ProSystem.SetScanlines(REGION_SCANLINES_NTSC);
     //#ifndef WII    
@@ -234,11 +287,36 @@ function region_Reset() {
   }
 }
 
+function getNtscPalette() {
+  return NTSC_PAL_INDEX[palIdx];
+}
+
+function getPalPalette() {
+  return PAL_PAL_INDEX[palIdx];
+}
+
+function getPaletteIndex() {
+  return palIdx;
+}
+
+function setPaletteIndex(idx) {
+  palIdx = idx;
+}
+
+function getPaletteIndexDefault() {
+  return PALETTE_DEFAULT;
+}
+
 export {
   REGION_NTSC,
   REGION_PAL,
   REGION_AUTO,
   REGION_PALETTE_NTSC,
   REGION_PALETTE_PAL,
-  region_Reset as Reset
+  region_Reset as Reset,
+  getNtscPalette,
+  getPalPalette,
+  getPaletteIndex,
+  setPaletteIndex,
+  getPaletteIndexDefault
 }

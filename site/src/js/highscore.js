@@ -190,7 +190,7 @@ function loadSram(postLoadCallback) {
 function saveSramGlobal() {
   console.log("Writing High Score SRAM to global storage.");
   var xhr = new XMLHttpRequest();
-  xhr.open('POST', Util.getUrlPrefix() + "/save.php?sid=" + sessionId);
+  xhr.open('POST', Util.getUrlPrefix() + "/save.php?sid=" + sessionId + "&d=" + digest);
   xhr.onload = function () {
     if (xhr.status == 200) {
       console.log("Successfully saved global high scores for game");

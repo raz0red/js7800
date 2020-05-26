@@ -31,6 +31,7 @@ var updateInput = Input.updateInput;
 var flipImage = Video.flipImage;
 
 var mainContainer = null;
+var innerContainer = null;
 var descriptionDiv = null;
 var canvas = null;
 var controlsDiv = null;
@@ -38,7 +39,7 @@ var logoDiv = null;
 var starting = false;
 var currentCart = null;
 var highScoreCallback = new HighScoreCallback();
-var logFps = false;
+var debug = false;
 
 var errorHandler = function (message) {
   alert(message);
@@ -147,7 +148,7 @@ function startEmu(cart, isRestart) {
           fc++;
           if ((fc % debugFrequency) == 0) {
             var elapsed = Date.now() - start;
-            if (logFps) {
+            if (debug) {
               console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
                 (1000.0 / (elapsed / fc)).toFixed(2),
                 (Riot.GetTimerCount() % 1000),
@@ -235,7 +236,7 @@ function addElements(id) {
   mainContainer.appendChild(fullscreenContainer);
 
   // inner-container
-  var innerContainer = document.createElement("div");
+  innerContainer = document.createElement("div");
   innerContainer.id = innerContainer.className = "js7800__inner-container";
   fullscreenContainer.appendChild(innerContainer);
 
@@ -269,20 +270,29 @@ function addElements(id) {
   fullscreenContainer.appendChild(controlsDiv);
 }
 
-function init(id) {
+function init(id, props) {
   if (!initialized) {
     initialized = true;
 
     // Add the HTML elements
     addElements(id);
 
+    debug = false;
+    if (props) {
+      if (props.debug) {
+        debug = props.debug;
+      }
+    }
+
     // Fire init event
     Events.fireEvent("init", {
       canvas: canvas,
       mainContainer: mainContainer,
+      innerContainer: innerContainer,
       controlsDiv: controlsDiv,
       keyboardData: keyboardData,
-      Region: Region
+      Region: Region,
+      debug: debug
     });
 
     // Description
@@ -299,10 +309,6 @@ function init(id) {
 
 function setErrorHandler(handler) {
   errorHandler = handler;
-}
-
-function setLogFps(val) {
-  logFps = val;
 }
 
 var hidden, visibilityChange;
@@ -344,7 +350,6 @@ export {
   startEmulation,
   restart,
   setErrorHandler,  
-  setLogFps,
   setHighScoreCallback,
   HighScoreCallback,
   descriptionDiv

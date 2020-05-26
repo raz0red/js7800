@@ -16,27 +16,27 @@
                 "files": [        
                     {
                         "name": "3D Test Demo 1 (PAL)",
-                        "path": "3D Test Demo 1 (PAL) (20180102).a78"
+                        "path": "3DTestDemo1.a78"
                     },
                     {
                         "name": "Demo X",
-                        "path": "Demo X (v1_01F) (20100423).a78"
+                        "path": "DemoX.a78"
                     },        
                     {
                         "name": "Merry Christmas 2012",
-                        "path": "Merry Christmas 2012 e-card (v1_10F) (20121227).a78"            
+                        "path": "MerryChristmas2012.a78"            
                     },
                     {
                         "name": "Multi-Lock On",
-                        "path": "Multi-Lock On (20140311).a78"            
+                        "path": "MultiLockOn.a78"            
                     },
                     {
                         "name": "Soft Cell - Tainted Love",
-                        "path": "Soft Cell - Tainted Love (Music Demo) (20140311).a78"            
+                        "path": "SoftCellTaintedLove.a78"            
                     },
                     {
                         "name": "Untum Intro (PAL)",
-                        "path": "Untum Intro (PAL) (20181228).a78"            
+                        "path": "UntumIntro.a78"            
                     }                        
                 ]
             }            
@@ -48,7 +48,11 @@
                 "files": [
                     {
                         "name": "7800 Utility Cart",
-                        "path": "7800 Utility Cart (20161210).a78"            
+                        "path": "7800UtilityCart.a78"            
+                    },
+                    {
+                        "name": "Color Selector Demo",
+                        "path": "ColorSelectorDemo.a78"            
                     }
                 ]
             }

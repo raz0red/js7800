@@ -11,11 +11,13 @@ import { SettingsDialog } from "./settings-dialog.js"
 import { HelpDialog } from "./help-dialog.js"
 
 import css from '../css/site.css'
+import messageCss from '../css/common/message-common.css'
 
 var showMessage = Message.showMessage;
 var hideMessage = Message.hideMessage;
 var showErrorMessage = Message.showErrorMessage;
 var getRequestParameter = Util.getRequestParameter;
+var highScoreCartEnabled = false;
 var debug = false;
 
 var js7800 = null;
@@ -111,13 +113,6 @@ function createFullscreenSelect() {
   });
   cbar.getGroup(1).addChildAtIndex(2, fsSelectComp);
 
-  // Listen for full screen change vents
-  Events.addListener(
-    new Events.Listener("fullscreen",
-      function (isFullscreen) {
-        fsSelect.style.display = isFullscreen ? "flex" : "none";
-      }));
-
   return fsSelectSel;
 }
 
@@ -157,9 +152,12 @@ function init(in7800) {
   // Must be done prior to initializing js7800
   var fsSelect = createFullscreenSelect();
 
+  // Check whether debug has been set
+  debug = checkDebugParam();  
+
   // Configure and init js7800 module
   main.setErrorHandler(errorHandler);
-  main.init('js7800__target');
+  main.init('js7800__target', {debug: debug});
 
   // Create the description
   var desc = main.descriptionDiv;
@@ -173,6 +171,33 @@ function init(in7800) {
   
   // js7800 parent element
   var parent = document.getElementById('js7800__fullscreen-container');
+
+  Events.addListener(
+    new Events.Listener("onHighScoreCartLoaded", 
+    function(loaded) {  
+      highScoreCartEnabled = loaded;
+    }
+  ));
+
+  // Set the leaderboard button
+  var lbBUtton = cbar.leaderboardButton;
+  lbBUtton.onClick = function () { 
+    var url = "leaderboard";
+    if (highScoreCartEnabled) {
+      url += "?d=" + HighScore.getDigest();
+    }
+    window.open(url, '_blank'/*,'noopener'*/); 
+  }
+
+  // Listen for full screen change events
+  Events.addListener(
+    new Events.Listener("fullscreen",
+      function (isFullscreen) {
+        lbBUtton.getElement().style.display = 
+          isFullscreen ? "none" : "block";
+        fsSelect.parentElement.style.display = 
+          isFullscreen ? "flex" : "none";          
+      }));  
 
   // Create the settings dialog  
   var settingsDialog = new SettingsDialog();  
@@ -193,10 +218,6 @@ function init(in7800) {
   // Rom list component
   romList = new RomList(
     [document.getElementById('cartselect__select'), fsSelect]);
-
-  // Check whether debug has been set
-  debug = checkDebugParam();
-  main.setLogFps(debug);
 
   // Fire init event
   Events.fireEvent("siteInit", {

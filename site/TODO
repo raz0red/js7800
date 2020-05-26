@@ -21,7 +21,6 @@
 - Check all XHR calls and handle exceptions appropriately
 - Test changes to high score cart mid game (save at end, etc.)
 
-- Add video option (full screen is fixed multiple) (Full screen scale) fill, integer, .5 steps, .25 steps
 - Use custom dialog instead of "input" for remote files
 - Ensure images/tables/etc. Margins are the same in the documentation (they seem inconsistent)
 - Table alignment throughout help seems a bit off (text is not aligned with icons, etc. in command bar help)
@@ -29,3 +28,4 @@
 - Provide image sizes for help
 - Add message when lightgun game is loaded (state to use mouse or touch, etc.)
 - Add message when global high scores are saved successfully
+- Bug if you click on select or reset and pull mouse away, does not receive button up event, keeps clicking

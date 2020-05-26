@@ -3,7 +3,11 @@
     "files": [
         {
             "name": "7800 Utility Cart",
-            "path": "7800 Utility Cart (20161210).a78"            
+            "path": "7800UtilityCart.a78"            
+        },
+        {
+            "name": "Color Selector Demo",
+            "path": "ColorSelectorDemo.a78"            
         }
     ]
 }

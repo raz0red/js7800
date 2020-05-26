@@ -21,6 +21,14 @@ module.exports = {
         use: ['style-loader', 'css-loader'],
       },
       {
+        test: /\.(pal)$/i,
+        use: [
+          {
+            loader: 'url-loader',
+          },
+        ],
+      },
+      {
         test: /\.(png|jp(e*)g|svg|gif)$/,
         use: [{
           loader: 'url-loader',

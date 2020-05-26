@@ -467,22 +467,31 @@ addProps(displayTab, {
   filterSwitch: null,
   sizeSelect: null,
   arSelect: null,
+  palSelect: null,
+  fsSelect: null,
   onShow: function () {    
     var vid = js7800.Video;
     this.vid = vid;
     this.filterSwitch.setValue(vid.isFilterEnabled());
     this.sizeSelect.setValue(vid.getScreenSize().toString());
     this.arSelect.setValue(vid.getScreenRatio().toString());
+    this.fsSelect.setValue(vid.getFullscreenMode().toString());
+    this.palSelect.setValue(js7800.Region.getPaletteIndex().toString());    
   },
   onOk: function () {    
     this.vid.setFilterEnabled(this.filterSwitch.getValue());
     this.vid.setScreenSize(parseFloat(this.sizeSelect.getValue()));
     this.vid.setScreenRatio(parseFloat(this.arSelect.getValue()));
+    this.vid.setFullscreenMode(parseInt(this.fsSelect.getValue()));
+    js7800.Region.setPaletteIndex(parseInt(this.palSelect.getValue()));
+    this.vid.initPalette8();
   },
-  onDefaults: function () {    
+  onDefaults: function () {      
     this.filterSwitch.setValue(this.vid.getFilterEnabledDefault());
     this.sizeSelect.setValue(this.vid.getScreenSizeDefault().toString());
     this.arSelect.setValue(this.vid.getScreenRatioDefault().toString());
+    this.palSelect.setValue(js7800.Region.getPaletteIndexDefault().toString());
+    this.fsSelect.setValue(this.vid.getFullscreenModeDefault().toString());
   },
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
@@ -512,9 +521,31 @@ addProps(displayTab, {
       "Ultra-widescreen (2.37:1)" : "1.778"
     });
     grid.addCell(new ContentCell(this.arSelect));    
+    grid.addCell(new LabelCell("Fullscreen:"));
+    this.fsSelect =  new Select({
+      "Fill screen" : "0",
+      "Integer scaling (height)" : "1"
+    });
+    grid.addCell(new ContentCell(this.fsSelect));
+    grid.addCell(new LabelCell("Palette:"));
+    // TODO: This is a very hacky way to support option groups,
+    // Create a better solution (nested groups)
+    this.palSelect = new Select({
+      "ProSystem default": "0", 
+      "OptGroup1": "Dark",
+      "Cool (Dark)": "1", 
+      "Warm (Dark)": "2",             
+      "Hot (Dark)": "3",
+      "OptGroup2": "Light",
+      "Cool (Light) ": "4", 
+      "Warm (Light) ": "5", 
+      "Hot (Light) ": "6"
+    });
+    grid.addCell(new ContentCell(this.palSelect));
     grid.addCell(new LabelCell("Apply filter:"));
     this.filterSwitch = new ToggleSwitch("Toggle Filter");
     grid.addCell(new ContentCell(this.filterSwitch));
+
     rootEl.appendChild(grid.createElement());
   }
 });

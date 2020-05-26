@@ -23,6 +23,8 @@ var context = null;
 var controlsDiv = null;
 /** The main container */
 var mainContainer = null;
+/** The inner container */
+var innerContainer = null;
 /** The atari image data */
 var image;
 /** The atari image data */
@@ -51,6 +53,12 @@ var currentHeight = 0;
 var HxW_AR = 0;
 /** Width x Height AR */
 var WxH_AR = 0;
+/** Default fullscreen mode */
+var DEFAULT_FS = 0;
+/** Fullscreen scale mode (0 = fill, 1 = integer) */
+var fullscreenMode = DEFAULT_FS;
+/** Whether debug is enabled */
+var debug = false;
 
 /** Cartridge shadow */
 var cartridgeRegion = 0;
@@ -58,9 +66,9 @@ var cartridgeRegion = 0;
 function initPalette8() {
   var palette = null;
   if (cartridgeRegion == Region.REGION_PAL) {
-    palette = Region.REGION_PALETTE_PAL;
+    palette = Region.getPalPalette(); //Region.REGION_PALETTE_PAL;
   } else {
-    palette = Region.REGION_PALETTE_NTSC;
+    palette = Region.getNtscPalette(); //Region.REGION_PALETTE_NTSC;
   }
 
   for (var index = 0; index < 256; index++) {
@@ -102,12 +110,14 @@ function flipImage() {
   context.putImageData(image, 0, 0);
 }
 
-function init(canvasIn, controlsDivIn, mainContainerIn) {
+function init(event) {
   Maria.SetSurface(blitSurface);
   if (!canvas) {
-    canvas = canvasIn;
-    controlsDiv = controlsDivIn;
-    mainContainer = mainContainerIn;
+    canvas = event.canvas;
+    controlsDiv = event.controlsDiv;
+    mainContainer = event.mainContainer;
+    innerContainer = event.innerContainer;
+    debug = event.debug;
     context = canvas.getContext('2d');
     image = context.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
     imageData = image.data;
@@ -121,9 +131,7 @@ function init(canvasIn, controlsDivIn, mainContainerIn) {
 }
 
 Events.addListener(new Events.Listener("init",
-  function (event) { init(
-    event.canvas, event.controlsDiv, event.mainContainer); 
-  }));
+  function (event) { init(event) }));
 
 function clearCanvas() {
   // set alpha to opaque 
@@ -161,11 +169,15 @@ function startSnow() {
 }
 
 function resizeCanvas() {
+
   if (canvas) {
     var fullScreen = document.fullscreenElement;
     if (fullScreen) {
       var height = window.innerHeight - controlsDiv.offsetHeight;      
-      var width = window.innerWidth;
+      var width = window.innerWidth;      
+
+      // Resize the inner container
+      innerContainer.style.height = height + "px";
 
       var newHeight = height;
       var newWidth = newHeight * HxW_AR;
@@ -173,16 +185,38 @@ function resizeCanvas() {
         newWidth = width;
         newHeight = newWidth * WxH_AR;
       }
+      
+      var multHeight = 0;
+      var imult = ((newHeight / ATARI_CANVAS_HEIGHT) | 0);
+      if (fullscreenMode == 1 /* integer height scaling */) {
+        multHeight = imult;
+      }       
+      if (imult < 2) {
+        multHeight = 2;
+      } 
+      if (multHeight > 0) {
+        newHeight = ATARI_CANVAS_HEIGHT * multHeight;
+        newWidth = newHeight * HxW_AR;
+      }
+
       canvas.style.width = newWidth + "px";
       canvas.style.height = newHeight + "px";
+
+      // Add padding to center the screen
+      canvas.style.paddingTop = (((height - newHeight) / 2) | 0) + "px";
+
     } else {
+      innerContainer.style.removeProperty("height");
+      canvas.style.removeProperty("padding-top");
       canvas.style.width = currentWidth + "px";
       canvas.style.height = currentHeight + "px";
     }
-    /*
-    console.log("Canvas size: " + 
-      canvas.style.width + " by " + canvas.style.height);
-    */
+
+    if (debug) {
+      console.log("Canvas size: " + 
+        canvas.style.width + " by " + canvas.style.height);
+    }
+
     Events.fireEvent("fullscreen", fullScreen ? true : false);
   }
 }
@@ -248,6 +282,19 @@ function getScreenRatioDefault() {
   return DEFAULT_RATIO;
 }
 
+function getFullscreenModeDefault() {
+  return DEFAULT_FS;
+}
+
+function setFullscreenMode(mode) {
+  fullscreenMode = mode;
+  resizeCanvas();
+}
+
+function getFullscreenMode() {
+  return fullscreenMode;
+}
+
 function fullScreen() {
   var fsContainer = document.getElementById("js7800__fullscreen-container");
   if (!isFullscreen()) {
@@ -295,5 +342,9 @@ export {
   getScreenSizeDefault,
   setScreenRatio,
   getScreenRatio,
-  getScreenRatioDefault
+  getScreenRatioDefault,
+  getFullscreenModeDefault,
+  setFullscreenMode,
+  getFullscreenMode,
+  initPalette8
 }
