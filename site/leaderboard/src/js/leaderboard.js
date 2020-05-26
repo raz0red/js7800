@@ -22,6 +22,7 @@ var currentDigest = null;
 var currentCart = null;
 var currentFilter = null;
 var playEl = null;
+var cartHashes = {};
 
 var NO_CACHE_PARAM_NAME = "noCache";
 var noCacheParam = Util.getRequestParameter(NO_CACHE_PARAM_NAME);
@@ -182,15 +183,27 @@ function refreshSummary() {
   setTimeout(refreshSummary, REFRESH_INTERVAL);
 }
 
-function updateScoresTable(filter) {
-  currentFilter = filter;
+function updateScoresTable(filter) {  
   var scores = currentScores;
   var newBody = document.createElement('tbody');
   var lastDiff = "";
 
+  var foundFilter = false;
   if (filter !== undefined) {
-    filterSelectEl.value = filter;
+    for (var i = 0; i < filterSelectEl.length; i++){
+      var option = filterSelectEl.options[i];
+      if (option.value == filter) {
+        filterSelectEl.value = filter;
+        foundFilter = true;
+        break;
+      }
+    }  
   }
+
+  if (!foundFilter) {
+    filter = null;
+  }
+  currentFilter = filter;
 
   if (scores.length == 0) {
     var row = document.createElement("tr");
@@ -204,6 +217,7 @@ function updateScoresTable(filter) {
     for(var i = 0; i < scores.length; i++) {      
       var s = scores[i];
       if ((filter === undefined) ||
+          (filter === null) ||
           (filter === 'all') ||
           (filter == s.did.toString())) {
         var row = document.createElement("tr");
@@ -319,6 +333,11 @@ function loadScores(digest, filter) {
 function selectDefaultItem() {
   var digest = Util.getRequestParameter("d");
   var filter = Util.getRequestParameter("f");
+  if (digest && !cartHashes[digest]) {
+    console.log(cartHashes);
+    digest = null;
+    console.log('set to null');
+  }
   if (!digest && gameSelectEl.options.length > 0) {
     digest = gameSelectEl.options[0].value;
   }
@@ -353,7 +372,9 @@ function loadGamesList() {
     for(var g in games) {
       var option = document.createElement("option");
       option.text = g;
-      option.value = games[g];
+      var value = games[g];
+      cartHashes[value] = value;
+      option.value = value;
       gameSelectEl.add(option);
     }  
     selectDefaultItem();
@@ -389,8 +410,7 @@ function start() {
   playEl = document.getElementById("play-button");
   playEl.onclick = function() {
     if (currentCart) {
-      window.open('../?cart=' + currentCart,
-        '_blank','noopener'); 
+      window.open('../?cart=' + currentCart, '_blank' /*, 'noopener'*/); 
     }
   }
   var img = document.createElement("img");  

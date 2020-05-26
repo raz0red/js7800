@@ -17,6 +17,7 @@ var showMessage = Message.showMessage;
 var hideMessage = Message.hideMessage;
 var showErrorMessage = Message.showErrorMessage;
 var getRequestParameter = Util.getRequestParameter;
+var highScoreCartEnabled = false;
 var debug = false;
 
 var js7800 = null;
@@ -171,10 +172,21 @@ function init(in7800) {
   // js7800 parent element
   var parent = document.getElementById('js7800__fullscreen-container');
 
+  Events.addListener(
+    new Events.Listener("onHighScoreCartLoaded", 
+    function(loaded) {  
+      highScoreCartEnabled = loaded;
+    }
+  ));
+
   // Set the leaderboard button
   var lbBUtton = cbar.leaderboardButton;
   lbBUtton.onClick = function () { 
-    window.open('leaderboard', '_blank','noopener'); 
+    var url = "leaderboard";
+    if (highScoreCartEnabled) {
+      url += "?d=" + HighScore.getDigest();
+    }
+    window.open(url, '_blank'/*,'noopener'*/); 
   }
 
   // Listen for full screen change events

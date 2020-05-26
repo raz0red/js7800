@@ -81,12 +81,12 @@ addProps(AboutTab.prototype, {
     
     header.innerHTML =
       '<p class=\"center\">\n' +
-        '<span class=\"about-label\">by raz0red</span><a href=\"https://github.com/raz0red/js7800\" target=\"_blank\" rel=\"noopener\"><img\n' +
+        '<span class=\"about-label\">by raz0red</span><a href=\"https://github.com/raz0red/js7800\" target=\"_blank\"><img\n' +
           'class=\"about-logo\" src=\"images/github-logo.svg\" draggable="false" alt=\"GitHub: JS7800 by raz0red\"\n' +
           'title=\"GitHub: JS7800 by raz0red\"></a>\n' +
       '</p>\n' +
       '<p class=\"center\">\n' +
-        'JS7800 is an enhanced JavaScript port of the <a href="https://gstanton.github.io/ProSystem1_3/" target=\"_blank\" rel=\"noopener\">ProSystem Atari 7800 emulator</a> that was originally\n' +
+        'JS7800 is an enhanced JavaScript port of the <a href="https://gstanton.github.io/ProSystem1_3/" target=\"_blank\">ProSystem Atari 7800 emulator</a> that was originally\n' +
         'developed by Greg Stanton\n' +
       '</p>';
     var outer = document.createElement('div');
@@ -119,10 +119,10 @@ addProps(AboutTab.prototype, {
     about.appendChild(footer);
     footer.innerHTML =
       '<p class=\"center\">\n' +
-        'Atari 7800 controller illustration was created by Mark Davis (<a href="https://vectogram.us/" target=\"_blank\" rel=\"noopener\">Vect-O-Gram</a>)<br>\n' + 
-        'Portions of the Pokey code were adapted from the <a href="https://www.mamedev.org/" target=\"_blank\" rel=\"noopener\">MAME</a> implementation<br>\n' +
-        'MD5 support was developed by Joseph Myers (<a href="http://www.myersdaily.org/joseph/javascript/md5-text.html" target=\"_blank\" rel=\"noopener\">MD5.js</a>)<br>\n' +      
-        'Zip support was developed by Gildas Lormeau (<a href="http://gildas-lormeau.github.io/zip.js" target=\"_blank\" rel=\"noopener\">Zip.js</a>)\n' +      
+        'Atari 7800 controller illustration was created by Mark Davis (<a href="https://vectogram.us/" target=\"_blank\">Vect-O-Gram</a>)<br>\n' + 
+        'Portions of the Pokey code were adapted from the <a href="https://www.mamedev.org/" target=\"_blank\">MAME</a> implementation<br>\n' +
+        'MD5 support was developed by Joseph Myers (<a href="http://www.myersdaily.org/joseph/javascript/md5-text.html" target=\"_blank\">MD5.js</a>)<br>\n' +      
+        'Zip support was developed by Gildas Lormeau (<a href="http://gildas-lormeau.github.io/zip.js" target=\"_blank\">Zip.js</a>)\n' +      
       '</p>';
   }
 });
