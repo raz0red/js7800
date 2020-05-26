@@ -3,31 +3,31 @@
     "files": [
         {
             "name": "Arkanoid",
-            "path": "arkanoid.78b.a78"            
+            "path": "Arkanoid.a78"            
         },
         {
             "name": "Dragon's Cache",
-            "path": "DragonsCache_3_26_2020.bas.a78"            
+            "path": "DragonsCache.a78"            
         },
         {
             "name": "Dragon's Descent",
-            "path": "DragonsDescent_3_28_2020.bas.a78"            
+            "path": "DragonsDescent.a78"            
         },
         {
             "name": "Flappy Bird",
-            "path": "Flappy Bird (Beta) (20141221).a78"            
+            "path": "FlappyBird.a78"            
         },
         {
             "name": "GoSub",
-            "path": "GoSub (v37) (20190825).a78"            
+            "path": "GoSub.a78"            
         },
         {
             "name": "Legend of Silverpeak (no sound)",
-            "path": "Legend of Silverpeak (20180101).a78"            
+            "path": "LegendofSilverpeak.a78"            
         },
         {
             "name": "Spire of the Ancients",
-            "path": "SotA NTSC.a78"            
+            "path": "SotA.a78"            
         }            
     ]
 }
