@@ -1677,6 +1677,16 @@ controller1=1
 controller2=1
 region=1
 flags=0
+[4a702b995fca8591e2d14268cb123447]
+title=Millie and Molly
+type=3
+pokey=true
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=true
+hsc=false
 [9ff38ea62004201d870caa8bd9463525]
 title=Moon Cresta (NTSC)
 type=0

@@ -27,7 +27,7 @@ var cartHashes = {};
 var NO_CACHE_PARAM_NAME = "noCache";
 var noCacheParam = Util.getRequestParameter(NO_CACHE_PARAM_NAME);
 var noCacheValue = noCacheParam && (noCacheParam == "1" || noCacheParam == "true"); 
-var SUMMARY_URL = noCacheValue ? "/scoreboard-summary.php" : "/scoreboard-summary-cached.php"
+var SUMMARY_URL = noCacheValue ? "/scoreboard-summary.php" : "/scoreboard-summary-cached-gen.php"
 
 function errorHandler(message) {
   Message.showErrorMessage(message);
