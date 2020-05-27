@@ -1677,6 +1677,16 @@ controller1=1
 controller2=1
 region=1
 flags=0
+[4a702b995fca8591e2d14268cb123447]
+title=Millie and Molly
+type=3
+pokey=true
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=true
+hsc=false
 [9ff38ea62004201d870caa8bd9463525]
 title=Moon Cresta (NTSC)
 type=0
@@ -1979,6 +1989,17 @@ pokey450=true
 xm=false
 hsc=true
 [9fac7d0433dc3d936efce5c713488b08]
+title=Pac-Man XM
+type=1
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=true
+xm=false
+hsc=true
+[f3f4482b3551667a52d9b657e15cd2bf]
 title=Pac-Man XM
 type=1
 pokey=false
