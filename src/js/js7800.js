@@ -57,11 +57,15 @@ var keyboardData = new Array(19);
 var initialized = false;
 var forceAdjustTimestamp = false;
 
-function sync(callback) {
+function sync(callback, afterTimeout) {
   if (vsync) {
     requestAnimationFrame(callback);
   } else {
-    callback();
+    if (!afterTimeout) {
+      setTimeout(callback, 0);
+    } else {
+      callback();
+    }
   }
 }
 
@@ -166,9 +170,9 @@ function startEmu(cart, isRestart) {
           }
           var wait = (nextTimestamp - now);
           if (wait > 0) {
-            setTimeout(function () { sync(f); }, wait);
+            setTimeout(function () { sync(f, true); }, wait);
           } else {
-            sync(f);
+            sync(f, false);
           }
 
           fc++;
@@ -192,13 +196,13 @@ function startEmu(cart, isRestart) {
         } else {
           setTimeout(function () {
             forceAdjustTimestamp = true;
-            sync(f);
+            sync(f, true);
           }, 100);
         }
       }
     };
     var nextTimestamp = Date.now() + frameTicks;
-    setTimeout(function () { sync(f) }, frameTicks);
+    setTimeout(function () { sync(f, true) }, frameTicks);
   };
   // Reset w/ callback
   ProSystem.Reset(postResetCallback);
