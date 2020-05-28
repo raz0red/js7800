@@ -469,6 +469,8 @@ addProps(displayTab, {
   arSelect: null,
   palSelect: null,
   fsSelect: null,
+  vsyncSwitch: null,
+  skipSelect: null,
   onShow: function () {    
     var vid = js7800.Video;
     this.vid = vid;
@@ -476,7 +478,9 @@ addProps(displayTab, {
     this.sizeSelect.setValue(vid.getScreenSize().toString());
     this.arSelect.setValue(vid.getScreenRatio().toString());
     this.fsSelect.setValue(vid.getFullscreenMode().toString());
-    this.palSelect.setValue(js7800.Region.getPaletteIndex().toString());    
+    this.palSelect.setValue(js7800.Region.getPaletteIndex().toString());   
+    this.vsyncSwitch.setValue(js7800.Main.isVsyncEnabled()); 
+    this.skipSelect.setValue(js7800.Main.getSkipLevel().toString());   
   },
   onOk: function () {    
     this.vid.setFilterEnabled(this.filterSwitch.getValue());
@@ -485,6 +489,8 @@ addProps(displayTab, {
     this.vid.setFullscreenMode(parseInt(this.fsSelect.getValue()));
     js7800.Region.setPaletteIndex(parseInt(this.palSelect.getValue()));
     this.vid.initPalette8();
+    js7800.Main.setVsyncEnabled(this.vsyncSwitch.getValue());
+    js7800.Main.setSkipLevel(parseInt(this.skipSelect.getValue()));   
   },
   onDefaults: function () {      
     this.filterSwitch.setValue(this.vid.getFilterEnabledDefault());
@@ -492,6 +498,8 @@ addProps(displayTab, {
     this.arSelect.setValue(this.vid.getScreenRatioDefault().toString());
     this.palSelect.setValue(js7800.Region.getPaletteIndexDefault().toString());
     this.fsSelect.setValue(this.vid.getFullscreenModeDefault().toString());
+    this.vsyncSwitch.setValue(js7800.Main.getVsyncEnabledDefault());
+    this.skipSelect.setValue(js7800.Main.getSkipLevelDefault().toString());   
   },
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
@@ -545,6 +553,19 @@ addProps(displayTab, {
     grid.addCell(new LabelCell("Apply filter:"));
     this.filterSwitch = new ToggleSwitch("Toggle Filter");
     grid.addCell(new ContentCell(this.filterSwitch));
+
+    grid.addCell(new LabelCell("Vertical sync:"));
+    this.vsyncSwitch = new ToggleSwitch("Vertical Sync");
+    grid.addCell(new ContentCell(this.vsyncSwitch));
+
+    grid.addCell(new LabelCell("Frame skip:"));
+    this.skipSelect =  new Select({
+      "(None)" : "0",
+      "Low" : "1",
+      "Medium (50%)" : "2",
+      "High" : "3"
+    });
+    grid.addCell(new ContentCell(this.skipSelect));
 
     rootEl.appendChild(grid.createElement());
   }

@@ -40,6 +40,12 @@ var starting = false;
 var currentCart = null;
 var highScoreCallback = new HighScoreCallback();
 var debug = false;
+var VSYNC_DEFAULT = true;
+var vsync = VSYNC_DEFAULT;
+var SKIP_LEVEL_DEFAULT = 0;
+var skipLevel = SKIP_LEVEL_DEFAULT;
+var fskip = 0;
+var fskipcount = 0;
 
 var errorHandler = function (message) {
   alert(message);
@@ -50,6 +56,14 @@ var keyboardData = new Array(19);
 
 var initialized = false;
 var forceAdjustTimestamp = false;
+
+function sync(callback) {
+  if (vsync) {
+    requestAnimationFrame(callback);
+  } else {
+    callback();
+  }
+}
 
 function startEmu(cart, isRestart) {
   currentCart = cart;
@@ -105,6 +119,9 @@ function startEmu(cart, isRestart) {
 
     starting = false;
 
+    // Update frame skip
+    updateFrameSkip();
+
     var start = Date.now();
     var fc = 0;
     var frequency = ProSystem.GetFrequency();
@@ -113,6 +130,7 @@ function startEmu(cart, isRestart) {
     var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
     var isActive = ProSystem.IsActive;
     var isPaused = ProSystem.IsPaused;
+    var fs = 0;
 
     // Enable mouse tracking if lightgun game
     Mouse.enableMouseTracking(Cartridge.IsLightGunEnabled());
@@ -126,7 +144,14 @@ function startEmu(cart, isRestart) {
         if (!isPaused()) {
           updateInput();
           executeFrame(keyboardData);
-          flipImage();
+
+          if (fs >= fskip) {
+            flipImage();
+          }
+          if (++fs >= fskipcount) {            
+            fs = 0;
+          }
+
           soundStore();
 
           nextTimestamp += frameTicks;
@@ -140,18 +165,19 @@ function startEmu(cart, isRestart) {
           }
           var wait = (nextTimestamp - now);
           if (wait > 0) {
-            setTimeout(function () { requestAnimationFrame(f); }, wait);
+            setTimeout(function () { sync(f); }, wait);
           } else {
-            requestAnimationFrame(f);
+            sync(f);
           }
 
           fc++;
           if ((fc % debugFrequency) == 0) {
             var elapsed = Date.now() - start;
             if (debug) {
-              console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
+              console.log("v:%s, timer: %d, vsync: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
                 (1000.0 / (elapsed / fc)).toFixed(2),
                 (Riot.GetTimerCount() % 1000),
+                vsync ? 1 : 0,
                 ProSystem.GetDebugWsync() ? 1 : 0,
                 ProSystem.GetDebugWsyncCount(),
                 ProSystem.GetDebugCycleStealing() ? 1 : 0,
@@ -165,13 +191,13 @@ function startEmu(cart, isRestart) {
         } else {
           setTimeout(function () {
             forceAdjustTimestamp = true;
-            requestAnimationFrame(f);
+            sync(f);
           }, 100);
         }
       }
     };
     var nextTimestamp = Date.now() + frameTicks;
-    setTimeout(function () { requestAnimationFrame(f) }, frameTicks);
+    setTimeout(function () { sync(f) }, frameTicks);
   };
   // Reset w/ callback
   ProSystem.Reset(postResetCallback);
@@ -343,6 +369,75 @@ function setHighScoreCallback(cb) {
   Events.fireEvent("highScoreCallbackChanged", highScoreCallback);
 }
 
+function isVsyncEnabled() {
+  return vsync;
+}
+
+function setVsyncEnabled(val) {
+  vsync = val;
+}
+
+function getVsyncEnabledDefault() {
+  return VSYNC_DEFAULT;
+}
+
+function updateFrameSkip() {
+  var freq = ProSystem.GetFrequency();
+  if (freq == 60) {
+    switch(skipLevel) {
+      case 0:
+        fskip = 0;
+        fskipcount = 0;
+        break;
+      case 1:
+        fskip = 1;
+        fskipcount = 4;
+        break;
+      case 2:
+        fskip = 1;
+        fskipcount = 2;
+        break;
+      case 3:
+        fskip = 3;
+        fskipcount = 4;
+        break;
+    }
+  } else {
+    switch(skipLevel) {
+      case 0:
+        fskip = 0;
+        fskipcount = 0;
+        break;
+      case 1:
+        fskip = 1;
+        fskipcount = 5;
+        break;
+      case 2:
+        fskip = 1;
+        fskipcount = 2;
+        break;
+      case 3:
+        fskip = 4;
+        fskipcount = 5;
+        break;
+    }
+  }
+  console.log("Updated skip count: "+ fskip + ", " + fskipcount);
+}
+
+function getSkipLevelDefault() {
+  return SKIP_LEVEL_DEFAULT;
+}
+
+function getSkipLevel() {
+  return skipLevel;
+}
+
+function setSkipLevel(val) {
+  skipLevel = val;
+  updateFrameSkip();
+}
+
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 export {
@@ -352,5 +447,11 @@ export {
   setErrorHandler,  
   setHighScoreCallback,
   HighScoreCallback,
-  descriptionDiv
+  descriptionDiv,
+  isVsyncEnabled,
+  setVsyncEnabled,
+  getVsyncEnabledDefault,
+  getSkipLevelDefault,
+  getSkipLevel,
+  setSkipLevel
 }
