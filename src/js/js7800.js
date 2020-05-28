@@ -145,11 +145,14 @@ function startEmu(cart, isRestart) {
           updateInput();
           executeFrame(keyboardData);
 
-          if (fs >= fskip) {
-            flipImage();
-          }
-          if (++fs >= fskipcount) {            
-            fs = 0;
+          // Frame skipping
+          if (fskip > 0) {
+            if (fs >= fskip) {
+              flipImage();
+            }
+            if (++fs >= fskipcount) {            
+              fs = 0;
+            }
           }
 
           soundStore();
@@ -384,41 +387,33 @@ function getVsyncEnabledDefault() {
 function updateFrameSkip() {
   var freq = ProSystem.GetFrequency();
   if (freq == 60) {
-    switch(skipLevel) {
+    switch (skipLevel) {
       case 0:
-        fskip = 0;
-        fskipcount = 0;
+        fskip = 0; fskipcount = 0;
         break;
       case 1:
-        fskip = 1;
-        fskipcount = 4;
+        fskip = 1; fskipcount = 4;
         break;
       case 2:
-        fskip = 1;
-        fskipcount = 2;
+        fskip = 1; fskipcount = 2;
         break;
       case 3:
-        fskip = 3;
-        fskipcount = 4;
+        fskip = 3; fskipcount = 4;
         break;
     }
   } else {
-    switch(skipLevel) {
+    switch (skipLevel) {
       case 0:
-        fskip = 0;
-        fskipcount = 0;
+        fskip = 0; fskipcount = 0;
         break;
       case 1:
-        fskip = 1;
-        fskipcount = 5;
+        fskip = 1; fskipcount = 5;
         break;
       case 2:
-        fskip = 1;
-        fskipcount = 2;
+        fskip = 1; fskipcount = 2;
         break;
       case 3:
-        fskip = 4;
-        fskipcount = 5;
+        fskip = 4; fskipcount = 5;
         break;
     }
   }
