@@ -146,13 +146,11 @@ function startEmu(cart, isRestart) {
           executeFrame(keyboardData);
 
           // Frame skipping
-          if (fskip > 0) {
-            if (fs >= fskip) {
-              flipImage();
-            }
-            if (++fs >= fskipcount) {            
-              fs = 0;
-            }
+          if ((fskip == 0) || (fs >= fskip)) {
+            flipImage();
+          }
+          if (++fs >= fskipcount) {            
+            fs = 0;
           }
 
           soundStore();
