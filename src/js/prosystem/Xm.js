@@ -71,7 +71,7 @@ function xm_Reset() {
   xm_ym_enabled = false;
   xm_48kram_enabled = false;
   xm_bank0_enabled = false;
-  xm_bank1_enabled = false;  
+  xm_bank1_enabled = false;
   xm_ramwe_disabled = false;
   dma_active = false;
   cntrl1 = 0;
@@ -79,7 +79,7 @@ function xm_Reset() {
   cntrl3 = 0;
   cntrl4 = 0;
   cntrl5 = 0;
-  ym_addr = 0;  
+  ym_addr = 0;
   YM.reset();
 }
 
@@ -92,25 +92,25 @@ function xm_Read(address) {
   } else if (xm_ym_enabled && (address >= 0x0460 && address <= 0x0461)) {
     b = address & 1 ? YM.getStatus() : 0;
     //console.log("Read from YM: %d %d", address, b);
-    return b; 
+    return b;
   } else if (xm_mem_enabled && (address >= 0x4000 && address < 0x8000)) {
     //console.log("read: " + address);
     if (!xm_ramwe_disabled) {
       var offset = address - 0x4000;
       if (xm_48kram_enabled) {
-        return m_ram[offset];    
+        return m_ram[offset];
       } else {
-        if (xm_bank0_enabled && (offset < 0x2000)) {          
+        if (xm_bank0_enabled && (offset < 0x2000)) {
           if (dma_active) {
-            return xm_ram[((offset&0x1fff) + (((cntrl3&15) * 0x2000))) | ((cntrl1&1)<<8)];
+            return xm_ram[((offset & 0x1fff) + (((cntrl3 & 15) * 0x2000))) | ((cntrl1 & 1) << 8)];
           } else {
-            return xm_ram[((offset&0x1fff) + (((cntrl2&15) * 0x2000))) | ((cntrl1&1)<<8)];
+            return xm_ram[((offset & 0x1fff) + (((cntrl2 & 15) * 0x2000))) | ((cntrl1 & 1) << 8)];
           }
-        } else if(xm_bank1_enabled && ((offset >= 0x2000) && (offset < 0x4000))) {
+        } else if (xm_bank1_enabled && ((offset >= 0x2000) && (offset < 0x4000))) {
           if (dma_active) {
-            return xm_ram[((offset&0x1fff) + ((((cntrl3>>4)&15) * 0x2000))) | ((cntrl1&2)<<7)];
+            return xm_ram[((offset & 0x1fff) + ((((cntrl3 >> 4) & 15) * 0x2000))) | ((cntrl1 & 2) << 7)];
           } else {
-            return xm_ram[((offset&0x1fff) + ((((cntrl2>>4)&15) * 0x2000))) | ((cntrl1&2)<<7)];
+            return xm_ram[((offset & 0x1fff) + ((((cntrl2 >> 4) & 15) * 0x2000))) | ((cntrl1 & 2) << 7)];
           }
         }
       }
@@ -126,32 +126,32 @@ function xm_Write(address, data) {
   } else if (xm_ym_enabled && (address >= 0x0460 && address <= 0x0461)) {
     //console.log("Wrote to YM: %d %d", address, data);
     if (address & 1) {
-      YM.setReg(ym_addr, data);      
+      YM.setReg(ym_addr, data);
     } else {
-      ym_addr = data;      
+      ym_addr = data;
     }
   } else if (xm_mem_enabled && (address >= 0x4000 && address < 0x8000)) {
     var offset = address - 0x4000;
     if (xm_48kram_enabled) {
       //console.log("write byte1:" + data);
-      m_ram[offset] = data;      
+      m_ram[offset] = data;
     } else {
       if (xm_bank0_enabled && (offset < 0x2000)) {
         //console.log("write byte2:" + offset + ", " + data);
-        xm_ram[(offset&0x1fff) + (((cntrl2&15) * 0x2000))] = data;
-      } else if(xm_bank1_enabled && ((offset >= 0x2000) && (offset < 0x4000))) {
+        xm_ram[(offset & 0x1fff) + (((cntrl2 & 15) * 0x2000))] = data;
+      } else if (xm_bank1_enabled && ((offset >= 0x2000) && (offset < 0x4000))) {
         //console.log("write byte3:" + data);
-				xm_ram[(offset&0x1fff) + ((((cntrl2>>4)&15) * 0x2000))] = data;
+        xm_ram[(offset & 0x1fff) + ((((cntrl2 >> 4) & 15) * 0x2000))] = data;
       }
     }
-  } else if (address >= 0x0470 && address < 0x0480) {  
+  } else if (address >= 0x0470 && address < 0x0480) {
     if (address == 0x0470) {
       //console.log("Wrote CNTRL1: %d", data);
       cntrl1 = data;
-      xm_pokey_enabled = cntrl1 & 0x10;      
+      xm_pokey_enabled = cntrl1 & 0x10;
       xm_bank0_enabled = cntrl1 & 0x20;
       xm_bank1_enabled = cntrl1 & 0x40;
-      xm_ym_enabled = cntrl1 & 0x80;  
+      xm_ym_enabled = cntrl1 & 0x80;
     } else if (address == 0x0478) {
       //console.log("Wrote CNTRL2 %d",  data);
       cntrl2 = data;
@@ -168,8 +168,8 @@ function xm_Write(address, data) {
       xm_ramwe_disabled = cntrl5 & 2;
     }
 
-    xm_mem_enabled = xm_48kram_enabled || xm_bank0_enabled || xm_bank1_enabled;    
-    
+    xm_mem_enabled = xm_48kram_enabled || xm_bank0_enabled || xm_bank1_enabled;
+
     /*
     console.log("xm_pokey_enabled: %d, xm_ym_enabled: %d, " +
       "xm_mem_enabled: %d, 48k ram: %d, bank0: %d, bank1: %d, ramwedisabled: %d",      
@@ -181,7 +181,7 @@ function xm_Write(address, data) {
       xm_bank1_enabled ? 1 : 0,
       xm_ramwe_disabled ? 1 : 0
     );
-    */    
+    */
   }
 }
 
