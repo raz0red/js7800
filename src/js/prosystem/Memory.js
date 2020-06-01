@@ -23,7 +23,7 @@
 // Memory.cpp
 // ----------------------------------------------------------------------------
 
-import * as Xm from "./ExpansionModule.js"
+import * as Xm from "./Xm.js"
 import * as Pokey from "./Pokey.js"
 import * as Cartridge from "./Cartridge.js"
 import * as Riot from "./Riot.js"
@@ -39,6 +39,7 @@ var riot_SetDRA = Riot.SetDRA
 var riot_SetTimer = Riot.SetTimer
 var xm_IsPokeyEnabled = Xm.IsPokeyEnabled;
 var xm_IsMemEnabled = Xm.IsMemEnabled;
+var xm_IsYmEnabled = Xm.IsYmEnabled;
 var xm_Read = Xm.Read;
 var xm_Write = Xm.Write;
 
@@ -111,12 +112,12 @@ function _memory_Read(address) {
   //byte tmp_byte;
   var tmp_byte;
 
-  if (cartridge_xm) {
-    if ((address >= 0x0470 && address < 0x0480) ||
-      (xm_IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
-      (xm_IsMemEnabled() && (address >= 0x4000 && address < 0x8000))) {
-      return xm_Read(address);
-    }
+  if (cartridge_xm && 
+      ((address >= 0x0470 && address < 0x0480) ||
+        (xm_IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
+        (xm_IsMemEnabled() && (address >= 0x4000 && address < 0x8000)) || 
+        (xm_IsYmEnabled() && (address >= 0x0460 && address <= 0x0461)))) {      
+    return xm_Read(address);
   }
 
   if (cartridge_pokey && (
@@ -163,9 +164,10 @@ function memory_Write(address, data) {
   }
 
   if (cartridge_xm &&
-    ((address >= 0x0470 && address < 0x0480) ||
-      ((xm_IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
-        (xm_IsMemEnabled() && (address >= 0x4000 && address < 0x8000))))) {
+      ((address >= 0x0470 && address < 0x0480) ||
+        (xm_IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
+        (xm_IsMemEnabled() && (address >= 0x4000 && address < 0x8000)) ||
+        (xm_IsYmEnabled() && (address >= 0x0460 && address <= 0x0461)))) {
     xm_Write(address, data);
     return;
   }

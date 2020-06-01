@@ -30,18 +30,15 @@ zip.js is an open-source library (BSD license) for zipping and unzipping files.
 
 Joseph Myers does not specify a particular license for his work.
 
-===== MAME =====
+===== FM Sound Generator =====
 
-Portions of the Pokey code are from the MAME implementation
+FM Sound Generator with OPN/OPM interface
+Copyright (C) by cisc 1998, 2003.
 
-[https://www.mamedev.org/]
+[http://retropc.net/cisc/sound/]
 
-The MAME project as a whole is distributed under the terms of the GNU General
-Public License, 2 (GPL-2.0), since it contains code made available under 
-multiple GPL-compatible licenses. A great majority of files (over 90% including
-core files) are under the BSD-3-Clause License and we would encourage new 
-contributors to distribute files under this license.
+===== FM Sound Generator (JavaScript) =====
 
-Please note that MAME is a registered trademark of Gregory Ember, and 
-permission is required to use the "MAME" name, logo or wordmark.
+(C) 2020 Kuma
 
+[http://www2.tokai.or.jp/mrnkmzu/]

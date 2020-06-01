@@ -28,7 +28,8 @@ import * as Sally from "./Sally.js"
 import { Rect } from "./Rect.js"
 import { Pair } from "./Pair.js"
 
-var memory_ram = Memory.ram;
+var ram = Memory.ram;
+var ramf = Memory.Read;
 var sally_ExecuteNMI = Sally.ExecuteNMI;
 
 var BACKGRND    = 32;
@@ -78,6 +79,8 @@ var maria_h16 = 0;
 //static byte maria_wmode;
 var maria_wmode = 0;
 
+var dr = false;
+
 // ----------------------------------------------------------------------------
 // StoreCell
 // ----------------------------------------------------------------------------
@@ -89,7 +92,7 @@ function maria_StoreCell1(data) {
     }
     else {
       //byte kmode = memory_ram[CTRL] & 4;
-      var kmode = memory_ram[CTRL] & 4;
+      var kmode = ram[CTRL] & 4;
       if (kmode) {
         maria_lineRAM[maria_horizontal] = 0;
       }
@@ -110,7 +113,7 @@ function maria_StoreCell2(high, low) {
     }
     else {
       //byte kmode = memory_ram[CTRL] & 4;
-      var kmode = memory_ram[CTRL] & 4;
+      var kmode = ram[CTRL] & 4;
       if (kmode) {
         maria_lineRAM[maria_horizontal] = 0;
       }
@@ -149,11 +152,11 @@ function maria_GetColor(data) {
   data &= 0xFF;
   if (data & 3) {
     //return atari_pal8[memory_ram[BACKGRND + data]];
-    return memory_ram[BACKGRND + data];
+    return ram[BACKGRND + data];
   }
   else {
     // return atari_pal8[memory_ram[BACKGRND]];
-    return memory_ram[BACKGRND];
+    return ram[BACKGRND];
   }
 }
 
@@ -163,7 +166,7 @@ function maria_GetColor(data) {
 //static inline void maria_StoreGraphic( ) {
 function maria_StoreGraphic() {
   //byte data = memory_ram[maria_pp.w];
-  var data = memory_ram[maria_pp.getW()];
+  var data = (dr ? ram[maria_pp.getW()] : ramf(maria_pp.getW()));
   if (maria_wmode) {
     if (maria_IsHolyDMA()) {
       // #if 0 // Wii: disabled due to rendering in Kangaroo mode
@@ -206,7 +209,7 @@ function maria_StoreGraphic() {
 //static inline void maria_WriteLineRAM(byte * buffer) {
 function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
   //byte rmode = memory_ram[CTRL] & 3;
-  var rmode = memory_ram[CTRL] & 3;
+  var rmode = ram[CTRL] & 3;
   var pixel = offset;
   if (rmode == 0) {
     // 160A/B
@@ -274,7 +277,7 @@ function maria_StoreLineRAM() {
   }
 
   //byte mode = memory_ram[maria_dp.w + 1];
-  var mode = memory_ram[maria_dp.getW() + 1];
+  var mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
   while (mode & 0x5f) {
     //byte width;
     var width = 0;
@@ -282,18 +285,18 @@ function maria_StoreLineRAM() {
     var indirect = 0;
 
     //maria_pp.b.l = memory_ram[maria_dp.w];
-    maria_pp.setBL(memory_ram[maria_dp.getW()]);
+    maria_pp.setBL((dr ? ram[maria_dp.getW()] : ramf(maria_dp.getW())));
     //maria_pp.b.h = memory_ram[maria_dp.w + 2];
-    maria_pp.setBH(memory_ram[maria_dp.getW() + 2]);
+    maria_pp.setBH((dr ? ram[maria_dp.getW() + 2] : ramf(maria_dp.getW() + 2)));
 
     if (mode & 31) {
       maria_cycles += 8; // Maria cycles (Header 4 byte)
       //maria_palette = (memory_ram[maria_dp.w + 1] & 224) >> 3;
-      maria_palette = ((memory_ram[maria_dp.getW() + 1] & 224) >>> 3) & 0xFF;
+      maria_palette = (((dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 3];
-      maria_horizontal = memory_ram[maria_dp.getW() + 3];
+      maria_horizontal = (dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3));
       //width = memory_ram[maria_dp.w + 1] & 31;
-      width = memory_ram[maria_dp.getW() + 1] & 31;
+      width = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 31;
       //width = ((~width) & 31) + 1;
       width = (((~width) & 31) + 1) & 0xFF;
       //maria_dp.w += 4;
@@ -302,15 +305,15 @@ function maria_StoreLineRAM() {
     else {
       maria_cycles += 12; // Maria cycles (Header 5 byte)
       //maria_palette = (memory_ram[maria_dp.w + 3] & 224) >> 3;
-      maria_palette = ((memory_ram[maria_dp.getW() + 3] & 224) >>> 3) & 0xFF;
+      maria_palette = (((dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3)) & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 4];
-      maria_horizontal = memory_ram[maria_dp.getW() + 4];
+      maria_horizontal = (dr ? ram[maria_dp.getW() + 4] : ramf(maria_dp.getW() + 4));
       //indirect = memory_ram[maria_dp.w + 1] & 32;
-      indirect = memory_ram[maria_dp.getW() + 1] & 32;
+      indirect = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 32;
       //maria_wmode = memory_ram[maria_dp.w + 1] & 128;
-      maria_wmode = memory_ram[maria_dp.getW() + 1] & 128;
+      maria_wmode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 128;
       //width = memory_ram[maria_dp.w + 3] & 31;
-      width = memory_ram[maria_dp.getW() + 3] & 31;
+      width = (dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3)) & 31;
       //width = (width == 0) ? 32 : ((~width) & 31) + 1;
       width = ((width == 0) ? 32 : ((~width) & 31) + 1) & 0xFF;
       //maria_dp.w += 5;
@@ -328,7 +331,7 @@ function maria_StoreLineRAM() {
     }
     else {
       //byte cwidth = memory_ram[CTRL] & 16;
-      var cwidth = memory_ram[CTRL] & 16;
+      var cwidth = ram[CTRL] & 16;
       //pair basePP = maria_pp;
       //var basePP = maria_pp.clone();
       basePP.copy(maria_pp);
@@ -336,9 +339,9 @@ function maria_StoreLineRAM() {
       for (var index = 0; index < width; index++) {
         maria_cycles += 3; // Maria cycles (Indirect)
         //maria_pp.b.l = memory_ram[basePP.w++];
-        maria_pp.setBL(memory_ram[basePP.wPlusPlus()]);
+        maria_pp.setBL((dr ? ram[basePP.wPlusPlus()] : ramf(basePP.wPlusPlus())));
         //maria_pp.b.h = memory_ram[CHARBASE] + maria_offset;
-        maria_pp.setBH(memory_ram[CHARBASE] + maria_offset);
+        maria_pp.setBH(ram[CHARBASE] + maria_offset);
         maria_cycles += 3; // Maria cycles (Indirect, 1 byte)
         maria_StoreGraphic();
         if (cwidth) {
@@ -348,7 +351,7 @@ function maria_StoreLineRAM() {
       }
     }
     //mode = memory_ram[maria_dp.w + 1];
-    mode = memory_ram[maria_dp.getW() + 1];
+    mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
   }
 }
 
@@ -395,7 +398,7 @@ function maria_RenderScanline(maria_scanline) {
   //
   // Displays the background color when Maria is disabled (if applicable)
   //
-  if (((memory_ram[CTRL] & 96) != 64) &&
+  if (((ram[CTRL] & 96) != 64) &&
     maria_scanline >= maria_visibleArea.top &&
     maria_scanline <= maria_visibleArea.bottom /*&&
   (!lightgun_enabled || wii_lightgun_flash)*/) {
@@ -412,26 +415,26 @@ function maria_RenderScanline(maria_scanline) {
     }
   }
 
-  if ((memory_ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {
+  if ((ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {
     maria_cycles += 5; // Maria cycles (DMA Startup)
     if (maria_scanline == maria_displayArea.top) {
       maria_cycles += 10; // Maria cycles (End of VBLANK)
       //maria_dpp.b.l = memory_ram[DPPL];
-      maria_dpp.setBL(memory_ram[DPPL]);
+      maria_dpp.setBL(ram[DPPL]);
       //maria_dpp.b.h = memory_ram[DPPH];
-      maria_dpp.setBH(memory_ram[DPPH]);
+      maria_dpp.setBH(ram[DPPH]);
       //maria_h08 = memory_ram[maria_dpp.w] & 32;
-      maria_h08 = memory_ram[maria_dpp.getW()] & 32;
+      maria_h08 = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 32;
       //maria_h16 = memory_ram[maria_dpp.w] & 64;
-      maria_h16 = memory_ram[maria_dpp.getW()] & 64;
+      maria_h16 = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 64;
       //maria_offset = memory_ram[maria_dpp.w] & 15;
-      maria_offset = memory_ram[maria_dpp.getW()] & 15;
+      maria_offset = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 15;
       //maria_dp.b.l = memory_ram[maria_dpp.w + 2];
-      maria_dp.setBL(memory_ram[maria_dpp.getW() + 2]);
+      maria_dp.setBL((dr ? ram[maria_dpp.getW() + 2] : ramf(maria_dpp.getW() + 2)));
       //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
-      maria_dp.setBH(memory_ram[maria_dpp.getW() + 1]);
+      maria_dp.setBH((dr ? ram[maria_dpp.getW() + 1] : ramf(maria_dpp.getW() + 1)));
       //if (memory_ram[maria_dpp.w] & 128) {
-      if (memory_ram[maria_dpp.getW()] & 128) {
+      if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
         maria_cycles += 20; // Maria cycles (NMI)  /*29, 16, 20*/
         sally_ExecuteNMI();
       }
@@ -442,9 +445,9 @@ function maria_RenderScanline(maria_scanline) {
     }
     if (maria_scanline != maria_displayArea.bottom) {
       //maria_dp.b.l = memory_ram[maria_dpp.w + 2];
-      maria_dp.setBL(memory_ram[maria_dpp.getW() + 2]);
+      maria_dp.setBL((dr ? ram[maria_dpp.getW() + 2] : ramf(maria_dpp.getW() + 2)));
       //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
-      maria_dp.setBH(memory_ram[maria_dpp.getW() + 1]);
+      maria_dp.setBH((dr ? ram[maria_dpp.getW() + 1] : ramf(maria_dpp.getW() + 1)));
       maria_StoreLineRAM();
       maria_offset--;
       if (maria_offset < 0) {
@@ -452,13 +455,13 @@ function maria_RenderScanline(maria_scanline) {
         //maria_dpp.w += 3;
         maria_dpp.wPlusEqual(3);
         //maria_h08 = memory_ram[maria_dpp.w] & 32;
-        maria_h08 = memory_ram[maria_dpp.getW()] & 32;
+        maria_h08 = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 32;
         //maria_h16 = memory_ram[maria_dpp.w] & 64;
-        maria_h16 = memory_ram[maria_dpp.getW()] & 64;
+        maria_h16 = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 64;
         //maria_offset = memory_ram[maria_dpp.w] & 15;
-        maria_offset = memory_ram[maria_dpp.getW()] & 15;
+        maria_offset = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 15;
         //if (memory_ram[maria_dpp.w] & 128) {
-        if (memory_ram[maria_dpp.getW()] & 128) {
+        if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
           maria_cycles += 20; // Maria cycles (NMI) /*29, 16, 20*/
           sally_ExecuteNMI();
         }
