@@ -92,7 +92,7 @@ function startEmu(cart, isRestart) {
   console.log("  High score cart enabled: %s", Cartridge.IsHighScoreCartEnabled() ? "true" : "false");
 
   // Fire on cartridge loaded event
-  Events.fireEvent("onCartridgeLoaded");
+  Events.fireEvent("onCartridgeLoaded", Cartridge);
 
   // Reset keyboard data
   Input.resetKeyboardData();

@@ -25,6 +25,7 @@
 
 import * as Memory from "./Memory.js"
 import * as Sally from "./Sally.js"
+import * as Events from "../events.js"
 import { Rect } from "./Rect.js"
 import { Pair } from "./Pair.js"
 
@@ -79,6 +80,7 @@ var maria_h16 = 0;
 //static byte maria_wmode;
 var maria_wmode = 0;
 
+// Whether to access RAM directly
 var dr = false;
 
 // ----------------------------------------------------------------------------
@@ -489,6 +491,12 @@ function maria_Clear() {
 function SetSurface(surface) { 
   maria_surface = surface; 
 }
+
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", function(cart) {
+    dr = !cart.IsXmEnabled();
+    console.log("Maria RAM Direct: " + dr);
+  }));  
 
 export {
   maria_Clear as Clear,
