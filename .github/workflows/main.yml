@@ -58,24 +58,3 @@ jobs:
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: staging
-
-    - name: Deploy to GitHub pages (perf)
-      uses: JamesIves/github-pages-deploy-action@releases/v3
-      if: github.event_name == 'push' && github.ref == 'refs/heads/perf'
-      with:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BASE_BRANCH: perf
-        BRANCH: gh-pages
-        FOLDER: site/deploy
-        TARGET_FOLDER: perf
-
-    - name: Deploy to GitHub pages (audio)
-      uses: JamesIves/github-pages-deploy-action@releases/v3
-      if: github.event_name == 'push' && github.ref == 'refs/heads/audio'
-      with:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BASE_BRANCH: audio
-        BRANCH: gh-pages
-        FOLDER: site/deploy
-        TARGET_FOLDER: audio
-
