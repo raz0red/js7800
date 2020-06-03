@@ -27,7 +27,7 @@ import * as WebMouse from "../web/mouse.js"
 import * as Region from "./Region.js"
 import * as Sound from "./Sound.js"
 import * as Pokey from "./Pokey.js"
-import * as Xm from "./ExpansionModule.js"
+import * as Xm from "./Xm.js"
 import * as Memory from "./Memory.js"
 import * as Cartridge from "./Cartridge.js"
 import * as Maria from "./Maria.js"
@@ -108,8 +108,8 @@ function prosystem_Reset(postResetCallback) {
     Sally.Reset(); // WII
     Region.Reset();
     Tia.Clear();
-    Pokey.Reset();
-    Xm.Reset();
+    Pokey.Reset();    
+    Xm.Reset();    
 
     Memory.Reset();
     Maria.Clear();
@@ -264,7 +264,9 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       }
     }
 
+    Xm.setDmaActive(true);
     cycles = maria_RenderScanline(maria_scanline);
+    Xm.setDmaActive(false);
 
     if (cycle_stealing) {
       prosystem_cycles += cycles;
