@@ -11,12 +11,14 @@ var HS_ENABLED = "hsEnabled";
 var HS_GLOBAL = "hsGlobal";
 var PALETTE = "palette";
 var FS = "fullscreen";
+var XM_MODE = "xmMode";
 
 var js7800 = null;
 var kb = null;
 var video = null;
 var region = null;
 var HighScore = null;
+var Cartridge = null;
 
 var localStorageEnabled = false;
 
@@ -107,6 +109,8 @@ function loadPrefs() {
       if (hsGlobal !== undefined ) HighScore.setGlobal(hsGlobal);
       var palette = prefs[PALETTE];
       if (palette !== undefined ) region.setPaletteIndex(palette);
+      var xmMode = prefs[XM_MODE];
+      if (xmMode !== undefined ) Cartridge.SetXmMode(xmMode);
       var fs = prefs[FS];
       if (fs !== undefined ) video.setFullscreenMode(fs);
     }
@@ -133,6 +137,7 @@ function savePrefs() {
     prefs[HS_GLOBAL] = HighScore.getGlobal();
     prefs[PALETTE] = region.getPaletteIndex();
     prefs[FS] = video.getFullscreenMode();
+    prefs[XM_MODE] = Cartridge.GetXmMode();
 
     localStorage.setItem("prefs", JSON.stringify(prefs));
   } catch (e) {
@@ -199,6 +204,7 @@ Events.addListener(new Events.Listener("siteInit",
     kb = js7800.Keyboard;
     video = js7800.Video;
     region = js7800.Region;
+    Cartridge = js7800.Cartridge;
     HighScore = event.HighScore;
     checkLocalStorageAvailable();    
   }));

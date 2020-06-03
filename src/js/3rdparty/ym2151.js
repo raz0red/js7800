@@ -1,3 +1,34 @@
+/*
+ * English conversion (see LICENSE-third-party for more details)
+ *
+ * [Copyright and disclaimer]
+ * - The source code is the author (cisc@retropc.net ), and it is owned by 
+ *   the owner of the copyright.
+ * 
+ * - The source code is provided AS IS
+ *   It does not contain any implied or express warranties.
+ * 
+ * - Using or not using the source code
+ *   It is expected that the information will be disclosed in a timely manner.
+ *   The author is not responsible for any damage.
+ *
+ * - The source code is freely modified and included as long as it meets the
+ *   following restrictions, it can be distributed and used.
+ * 
+ *   1. Indicate the origin of the software (author, copyright).
+ *   2. Free software must be used for distribution.
+ *   3. When distributing the modified source code, make explicit the content 
+ *      of the modification.
+ *   4. When you distribute the source code, do not modify this text in any 
+ *      way, it is to be attached as it is.
+ *
+ *   We would appreciate it if you could contact the author at the time of
+ *   publication.
+ *
+ *   A part of the source code for commercial software (including shareware),
+ *   it is necessary to obtain the agreement of the author in advance when 
+ *   incorporating the whole.
+ */
 var __extends = function (t, e) {
   for (var i in e)
     if (e.hasOwnProperty(i)) t[i] = e[i];
@@ -770,7 +801,6 @@ var FM;
     };
     e.fbtable = [31, 7, 6, 5, 4, 3, 2, 1];
     e.kftable = new Array(64);
-    e.muted = 0;	// +neo
     return e
   }();
   t.Channel4 = s;
@@ -1274,16 +1304,15 @@ var FM;
       }
       return this.noise
     };
-    //// TODO: change Mix* to use this.ch[ch].muted
     i.prototype.MixSub = function (t, e) {
-      if (t & 16384 /*!this.ch[0].muted*/) e[this.pan[0]] = this.ch[0].Calc();
-      if (t & 4096 /*!this.ch[1].muted*/) e[this.pan[1]] += this.ch[1].Calc();
-      if (t & 1024 /*!this.ch[2].muted*/) e[this.pan[2]] += this.ch[2].Calc();
-      if (t & 256 /*!this.ch[3].muted*/) e[this.pan[3]] += this.ch[3].Calc();
-      if (t & 64 /*!this.ch[4].muted*/) e[this.pan[4]] += this.ch[4].Calc();
-      if (t & 16 /*!this.ch[5].muted*/) e[this.pan[5]] += this.ch[5].Calc();
-      if (t & 4 /*!this.ch[6].muted*/) e[this.pan[6]] += this.ch[6].Calc();
-      if (t & 1 /*!this.ch[7].muted*/) {
+      if (t & 16384) e[this.pan[0]] = this.ch[0].Calc();
+      if (t & 4096) e[this.pan[1]] += this.ch[1].Calc();
+      if (t & 1024) e[this.pan[2]] += this.ch[2].Calc();
+      if (t & 256) e[this.pan[3]] += this.ch[3].Calc();
+      if (t & 64) e[this.pan[4]] += this.ch[4].Calc();
+      if (t & 16) e[this.pan[5]] += this.ch[5].Calc();
+      if (t & 4) e[this.pan[6]] += this.ch[6].Calc();
+      if (t & 1) {
         if (this.noisedelta & 128) {
           e[this.pan[7]] += this.ch[7].CalcN(this.Noise())
         } else {
@@ -1292,14 +1321,14 @@ var FM;
       }
     };
     i.prototype.MixSubL = function (t, e) {
-      if (t & 16384 /* !this.ch[0].muted*/) e[this.pan[0]] = this.ch[0].CalcL();
-      if (t & 4096 /*!this.ch[1].muted*/) e[this.pan[1]] += this.ch[1].CalcL();
-      if (t & 1024 /*!this.ch[2].muted*/) e[this.pan[2]] += this.ch[2].CalcL();
-      if (t & 256 /*!this.ch[3].muted*/) e[this.pan[3]] += this.ch[3].CalcL();
-      if (t & 64 /*!this.ch[4].muted*/) e[this.pan[4]] += this.ch[4].CalcL();
-      if (t & 16 /*!this.ch[5].muted*/) e[this.pan[5]] += this.ch[5].CalcL();
-      if (t & 4 /*!this.ch[6].muted*/) e[this.pan[6]] += this.ch[6].CalcL();
-      if (t & 1 /*!this.ch[7].muted*/) {
+      if (t & 16384) e[this.pan[0]] = this.ch[0].CalcL();
+      if (t & 4096) e[this.pan[1]] += this.ch[1].CalcL();
+      if (t & 1024) e[this.pan[2]] += this.ch[2].CalcL();
+      if (t & 256) e[this.pan[3]] += this.ch[3].CalcL();
+      if (t & 64) e[this.pan[4]] += this.ch[4].CalcL();
+      if (t & 16) e[this.pan[5]] += this.ch[5].CalcL();
+      if (t & 4) e[this.pan[6]] += this.ch[6].CalcL();
+      if (t & 1) {
         if (this.noisedelta & 128) {
           e[this.pan[7]] += this.ch[7].CalcLN(this.Noise())
         } else {
@@ -1307,30 +1336,6 @@ var FM;
         }
       }
     };
-    /*
-    i.prototype.Mix = function (t, e, i) {
-      var s = 0;
-      for (var a = 0; a < 8; a++) {
-        s = s << 2 | this.ch[a].Prepare()
-      }
-      if (this.reg01 & 2) {
-        s &= 21845
-      }
-      var h = new Array(4);
-      for (a = 0; a < i; a++) {
-        h[1] = h[2] = h[3] = 0;
-        this.LFO();
-        if (s & 43690) {
-          this.MixSubL(s, h)
-        } else {
-          this.MixSub(s, h)
-        }
-        t[a] = h[1] + h[3];
-        e[a] = h[2] + h[3]
-      }
-    };
-    i.prototype.attenuation = (1 << 16);
-    */
     var h = new Array(4);
     i.prototype.mixStereo = function (t, i, e) {
       var s = 0;
@@ -1352,15 +1357,9 @@ var FM;
         }
 
         t[n++] = ((h[1] + h[3] + h[2] + h[3])/(2*128));
-        //t[n++] = (h[2] + h[3])  / 192;/** _sc*/;        
-        // t[n++] += (h[1] + h[3]) * _sc;
-        // t[n++] += (h[2] + h[3]) * _sc;        
-        //t[a] = h[1] + h[3];
-        //e[a] = h[2] + h[3]
       }
     };
     i.prototype.Intr = function (t) { };
-    i.prototype.toggle = function (ch, m) { this.ch[ch].muted = !m; };	// +neo
     return i
   }(t.Timer);
   t.OPM = e
@@ -1374,9 +1373,6 @@ console.log("YM Init: " + result);
 
 function reset() {
   Ym2151.Reset();
-  // Ym2151.SetReg(20, 42);
-  // for (var q = 0; q < 8; ++q) Ym2151.SetReg(56 + q, 0);
-  // Ym2151.SetReg(15, 0);  
 }
 
 function setReg(reg, value) {
