@@ -740,7 +740,7 @@ addProps(advancedTab, {
     });
     var xmContent = new ContentCell(this.xmSelect);
     grid.addCell(xmContent);
-    grid.addCell(new LabelCell("Frame skip:"));
+    grid.addCell(new LabelCell("Frame skipping:"));
     this.skipSelect =  new Select({
       "(None)" : "0",
       "Low" : "1",
