@@ -11,12 +11,9 @@ var HS_ENABLED = "hsEnabled";
 var HS_GLOBAL = "hsGlobal";
 var PALETTE = "palette";
 var FS = "fullscreen";
-<<<<<<< HEAD
 var FRAME_SKIP = "frameSkip";
 var VSYNC = "vsync";
-=======
 var XM_MODE = "xmMode";
->>>>>>> bcb2db50f739dffa99b690cb3142c3b731dd904e
 
 var js7800 = null;
 var kb = null;
