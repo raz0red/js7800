@@ -210,7 +210,7 @@ function pokey_setSampleRate(rate) {
 // ----------------------------------------------------------------------------
 //void pokey_Reset() {
 function pokey_Reset() {
-  var pokey_debug_count = 0; //100;
+  pokey_debug_count = 0; //100;
 
   pot_scanline = 0;
   pokey_soundCntr = 0;
