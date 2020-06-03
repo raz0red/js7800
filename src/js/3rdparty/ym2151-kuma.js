@@ -1,33 +1,32 @@
 /*
- * English conversion (see LICENSE-third-party for more details)
+ * FM Sound Generator with OPN/OPM interface
+ * Copyright (C) by cisc 1998, 2003.
+ * 
+ * English conversion via Google Translate 
+ * (see LICENSE-third-party for more details)
  *
- * [Copyright and disclaimer]
- * - The source code is the author (cisc@retropc.net ), and it is owned by 
- *   the owner of the copyright.
- * 
- * - The source code is provided AS IS
- *   It does not contain any implied or express warranties.
- * 
- * - Using or not using the source code
- *   It is expected that the information will be disclosed in a timely manner.
+ * - The author of this source code (cisc@retropc.net) owns the copyright.
+ * - This source code is provided as it is,
+ *   No warranty is implied or expressed.
+ * - Using this source code, not using it
+ *   Occurred or expected to occur regarding unavailable
  *   The author is not responsible for any damage.
- *
- * - The source code is freely modified and included as long as it meets the
- *   following restrictions, it can be distributed and used.
+ * - This source code can be freely modified/embedded as long as the following
+ *   restrictions are met:
+ *   It can be distributed and used.
  * 
- *   1. Indicate the origin of the software (author, copyright).
- *   2. Free software must be used for distribution.
- *   3. When distributing the modified source code, make explicit the content 
- *      of the modification.
- *   4. When you distribute the source code, do not modify this text in any 
- *      way, it is to be attached as it is.
- *
- *   We would appreciate it if you could contact the author at the time of
- *   publication.
- *
- *   A part of the source code for commercial software (including shareware),
- *   it is necessary to obtain the agreement of the author in advance when 
- *   incorporating the whole.
+ *   1. Specify the origin (author, copyright) of this software.
+ *   2. Use free software when distributing.
+ *   3. When distributing the modified source code, specify the modification
+ *      contents.
+ *   4. Do not modify this text at all when distributing the source code
+ *      Please attach it as it is.
+ * 
+ * We would appreciate it if you could contact the author when publishing.
+ * 
+ * A part of this source code in commercial software (including shareware), or
+ * It is necessary to obtain the author's agreement before incorporating all 
+ * of them.
  */
 var __extends =
   (this && this.__extends) ||
