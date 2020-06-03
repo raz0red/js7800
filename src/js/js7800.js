@@ -99,7 +99,10 @@ function startEmu(cart, isRestart) {
   console.log("  Controller 2: %d", Cartridge.GetController2());
   console.log("  Region: %s", Cartridge.GetRegion() == 1 ? "PAL" : "NTSC");
   console.log("  Flags: %d", Cartridge.GetFlags());
-  console.log("  XM: %s", Cartridge.IsXmEnabled() ? "true" : "false");
+  console.log("  XM: %s, mode: %s", 
+    Cartridge.IsXmEnabled() ? "true" : "false",
+    (Cartridge.GetXmMode() == 2 ? "Automatic" : (Cartridge.GetXmMode() ? "Enabled" : "Disabled"))
+  );
   console.log("  Right switch: %d", Cartridge.GetRightSwitch());
   console.log("  Left switch: %d", Cartridge.GetLeftSwitch());
   console.log("  Swap buttons: %s", Cartridge.IsSwapButtons() ? "true" : "false");
@@ -110,7 +113,7 @@ function startEmu(cart, isRestart) {
   console.log("  High score cart enabled: %s", Cartridge.IsHighScoreCartEnabled() ? "true" : "false");
 
   // Fire on cartridge loaded event
-  Events.fireEvent("onCartridgeLoaded");
+  Events.fireEvent("onCartridgeLoaded", Cartridge);
 
   // Reset keyboard data
   Input.resetKeyboardData();

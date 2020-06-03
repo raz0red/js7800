@@ -11,8 +11,12 @@ var HS_ENABLED = "hsEnabled";
 var HS_GLOBAL = "hsGlobal";
 var PALETTE = "palette";
 var FS = "fullscreen";
+<<<<<<< HEAD
 var FRAME_SKIP = "frameSkip";
 var VSYNC = "vsync";
+=======
+var XM_MODE = "xmMode";
+>>>>>>> bcb2db50f739dffa99b690cb3142c3b731dd904e
 
 var js7800 = null;
 var kb = null;
@@ -20,6 +24,7 @@ var video = null;
 var region = null;
 var main = null;
 var HighScore = null;
+var Cartridge = null;
 
 var localStorageEnabled = false;
 
@@ -116,6 +121,8 @@ function loadPrefs() {
       if (vsync !== undefined ) main.setVsyncEnabled(vsync);
       var frameSkip = prefs[FRAME_SKIP];
       if (frameSkip !== undefined ) main.setSkipLevel(frameSkip);
+      var xmMode = prefs[XM_MODE];
+      if (xmMode !== undefined ) Cartridge.SetXmMode(xmMode);
     }
   } catch (e) {
     Events.fireEvent("showError", "An error occurred loading preferences: " + e);
@@ -142,6 +149,7 @@ function savePrefs() {
     prefs[FS] = video.getFullscreenMode();
     prefs[VSYNC] = main.isVsyncEnabled();
     prefs[FRAME_SKIP] = main.getSkipLevel();
+    prefs[XM_MODE] = Cartridge.GetXmMode();
 
     localStorage.setItem("prefs", JSON.stringify(prefs));
   } catch (e) {
@@ -208,6 +216,7 @@ Events.addListener(new Events.Listener("siteInit",
     kb = js7800.Keyboard;
     video = js7800.Video;
     region = js7800.Region;
+    Cartridge = js7800.Cartridge;
     HighScore = event.HighScore;
     main = js7800.Main;
     checkLocalStorageAvailable();    

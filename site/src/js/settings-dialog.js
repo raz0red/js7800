@@ -16,6 +16,7 @@ var ContentCell = DialogModule.ContentCell;
 var addProps = Util.addProps;
 var js7800 = null;
 var HighScore = null;
+var Cartridge = null;
 
 //
 // Key target
@@ -722,11 +723,46 @@ addProps(keyboardTab, {
   }
 });
 
+// Advanced tab
+var advancedTab = new Tab("Advanced");
+addProps(advancedTab, {
+  xmSelect: null,
+  onShow: function () {    
+    this.xmSelect.setValue(Cartridge.GetXmMode().toString());
+  },
+  onOk: function () {    
+    Cartridge.SetXmMode(parseInt(this.xmSelect.getValue()));
+  },
+  onDefaults: function () {    
+    this.xmSelect.setValue(Cartridge.GetXmModeDefault().toString());
+  },
+  createTabContent: function (rootEl) {
+    var desc = document.createElement("div");
+    desc.innerHTML =
+      '<div class="tabcontent__title">Advanced</div>\n' +
+      '<p class="center">The following settings provide the ability to configure advanced features.</p>';
+    rootEl.appendChild(desc);
+
+    var grid = new Grid();
+    var xmLabel = new LabelCell("Expansion Module (XM):");
+    grid.addCell(xmLabel);    
+    this.xmSelect = new Select({
+      "(automatic)": "2", 
+      "Enabled": "1",
+      "Disabled": "0"
+    });
+    var xmContent = new ContentCell(this.xmSelect);
+    grid.addCell(xmContent);
+    rootEl.appendChild(grid.createElement());
+  }
+});
+
 var settingsTabSet = new TabSet();
 settingsTabSet.addTab(displayTab);
 settingsTabSet.addTab(keyboardTab, true);
 settingsTabSet.addTab(gamepadsTab);
 settingsTabSet.addTab(hsTab);
+settingsTabSet.addTab(advancedTab);
 // settingsTabSet.addTab(new AboutTab());
 
 //
@@ -752,6 +788,7 @@ Events.addListener(new Events.Listener("siteInit",
   function (event) {
     js7800 = event.js7800;
     HighScore = event.HighScore;
+    Cartridge = js7800.Cartridge;
   }
 ));
 

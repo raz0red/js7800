@@ -13,11 +13,10 @@ var mixbuffer = new Array(SOUNDBUFSIZE);
 var mixhead = 0;
 var mixtail = 0;
 
-function storeSound(sample, length) {
+function storeSound(sample, ym, length) {
   for (var i = 0; i < length; i++) {
-    var v = (sample[i] / 255);
-    //var v = (sample[i]-128)/128;
-    mixbuffer[mixhead++] = v;
+
+    mixbuffer[mixhead++] = ym ? (((sample[i]/255) + (ym[i]/128)) / 2) : (sample[i]/255);
     if (mixhead == SOUNDBUFSIZE)
       mixhead = 0;
   }
