@@ -1321,7 +1321,7 @@ var FM;
       (i.prototype.LFO = function () {
         var t;
         3 !== this.lfowaveform
-          ? ((t = (this.lfo_count_ >> 15) & 510), this.chip.SetPML(this.pmtable[this.lfowaveform][t] * ((this.pmd / 128) | 0) + 128), this.chip.SetAML(this.amtable[this.lfowaveform][t] * ((this.amd / 128) | 0)))
+          ? ((t = (this.lfo_count_ >> 15) & 510), this.chip.SetPML(this.pmtable[this.lfowaveform][t] * ((this.pmd / 128) /*| 0*/) + 128), this.chip.SetAML(this.amtable[this.lfowaveform][t] * ((this.amd / 128) /*| 0*/)))
           : -131072 & (this.lfo_count_ ^ this.lfo_count_prev_) &&
           ((t = 255 & ((((32768 * Math.random()) | 0) / 17) | 0)), this.chip.SetPML(((((t - 128) * this.pmd) / 128) | 0) + 128), this.chip.SetAML(((t * this.amd) / 128) | 0)),
           (this.lfo_count_prev_ = this.lfo_count_),

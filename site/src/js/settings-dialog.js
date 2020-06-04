@@ -731,7 +731,7 @@ addProps(advancedTab, {
     rootEl.appendChild(desc);
 
     var grid = new Grid();
-    var xmLabel = new LabelCell("Expansion Module (XM):");
+    var xmLabel = new LabelCell("Expansion module (XM):");
     grid.addCell(xmLabel);    
     this.xmSelect = new Select({
       "(Automatic)": "2", 
