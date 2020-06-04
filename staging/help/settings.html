@@ -7,6 +7,7 @@
             <div onclick="window.location.href='#keyboard-settings'">Keyboard</div>
             <div onclick="window.location.href='#gamepads-settings'">Gamepads</div>
             <div onclick="window.location.href='#hs-settings'">High Scores</div>
+            <div onclick="window.location.href='#advanced-settings'">Advanced</div>
         </div>
     </div>
     <p>
@@ -163,6 +164,49 @@
                 The save location pull-down is used to select where high scores are 
                 read from and persisted to. High scores can be retained locally (on the local device only) 
                 or globally (on the central high score server).
+            </div>
+        </div>
+    </p>
+    <a name="advanced-settings"></a>
+    <div class="docs-section-title">Advanced Settings</div>
+    <p>
+        The "Advanced" settings tab (shown below) is used to control the configuration of advanced features.         
+    <div class="docs-center">
+        <img class="docs-loading-controls-image" style="border-color: #222222" src="help/images/advanced.png"></img>
+    </div>
+    <p>
+        Each of the fields present on the "Advanced" settings tab are described below.
+    </p>
+    <p>
+        <div class="dialog-grid docs-grid">
+            <div class="dialog-cell-label">
+                Expansion module (XM)
+            </div>
+            <div class="dialog-cell-value">
+                The expansion module setting controls whether the Atari 7800 Expansion Module (XM) is enabled.
+                There are three possible values for this setting, "(Automatic)", "Enabled", and "Disabled".
+                "(Automatic)" determines whether to enable or disable the expansion
+                module based on the cartridge header and JS7800 internal cartridge
+                database. See <a href="http://www.atarimuseum.com/videogames/consoles/7800/expansion/" target="_blank">this page</a> 
+                for more details on the Atari 7800 Expansion Module (XM).             
+            </div>
+            <div class="dialog-cell-label">
+                Frame skipping
+            </div>
+            <div class="dialog-cell-value">
+                The frame skipping setting controls the quantity of frames that should be skipped (not rendered). 
+                By default, frame skipping is disabled (no frames are skipped). Frame skipping can be 
+                utilized as a means of addressing performance issues experienced with JS7800. This setting
+                is typically combined with disabling of the "vertical sync" setting (see below).
+            </div>
+            <div class="dialog-cell-label">
+                Vertical sync
+            </div>
+            <div class="dialog-cell-value">
+                The vertical sync setting controls whether the frame rate of JS7800 is synchronized with the 
+                refresh rate of the monitor. Vertical sync attempts to eliminate display artifacts such as 
+                screen tearing. This setting can be disabled as a means of addressing performance issues
+                experienced with JS7800.
             </div>
         </div>
     </p>
