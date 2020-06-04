@@ -2004,7 +2004,7 @@ controller2=1
 region=0
 flags=1
 pokey450=true
-xm=false
+xm=true
 hsc=true
 [c0fcce51fa95f4e1d69e1ca6aa2ce5a8]
 title=Pac-Man XM
@@ -2015,7 +2015,7 @@ controller2=1
 region=0
 flags=1
 pokey450=true
-xm=false
+xm=true
 hsc=true
 [8cb66c6ed5b379181b1420d8e4758834]
 title=Pactron 1984 (Hack)
