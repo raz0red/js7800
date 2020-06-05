@@ -47,7 +47,7 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 ## Change log
 
 ### 05/26/20 (0.0.1)
-    - Ability to select a color palette ("Cool", "Warm", and "Dark") in "Dark" and "Light" variations
+    - Ability to select a color palette ("Cool", "Warm", and "Hot") in "Dark" and "Light" variations
     - "Fullscreen" scaling option (Integer vs. Fill)
     - "Global Leaderboard" page
     - Contextual launch of "Global Leaderboard" via controls bar
