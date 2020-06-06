@@ -120,9 +120,9 @@ addProps(AboutTab.prototype, {
     footer.innerHTML =
       '<p class=\"center\">\n' +
         'Atari 7800 controller illustration was created by Mark Davis (<a href="https://vectogram.us/" target=\"_blank\">Vect-O-Gram</a>)<br>\n' + 
-        'Portions of the Pokey code were adapted from the <a href="https://www.mamedev.org/" target=\"_blank\">MAME</a> implementation<br>\n' +
         'MD5 support was developed by Joseph Myers (<a href="http://www.myersdaily.org/joseph/javascript/md5-text.html" target=\"_blank\">MD5.js</a>)<br>\n' +      
-        'Zip support was developed by Gildas Lormeau (<a href="http://gildas-lormeau.github.io/zip.js" target=\"_blank\">Zip.js</a>)\n' +      
+        'Zip support was developed by Gildas Lormeau (<a href="http://gildas-lormeau.github.io/zip.js" target=\"_blank\">Zip.js</a>)<br>\n' +      
+        'YM2151 support was ported from <a href="http://retropc.net/cisc/sound/" target=\"_blank\">FM Sound Generator</a> by <a href="http://www2.tokai.or.jp/mrnkmzu/" target=\"_blank\">Kuma</a>\n' +
       '</p>';
   }
 });

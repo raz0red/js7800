@@ -24,15 +24,13 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 * Drag and drop support for local files and remote file links
 * Cartridge list support (see [JS7800 Wiki](https://github.com/raz0red/js7800/wiki/Cartridge%20Lists))
 * Light gun support (via mouse)
-* Partial Expansion Module (XM) support
+* Expansion Module (XM) support
 * Enhanced bank switching and cartridge detection
 
 ## Future consideration
 
 * Mobile support (virtual buttons, proper screen sizing, etc.)
-* Frame skipping and related options for improved compatibility across devices
 * Paddle controller support (via mouse)
-* Additional XM support (Yamaha sound)
 * Updating the emulation core to integrate accuracy and compatibility improvements that are part of the incredible [A7800 emulator](http://7800.8bitdev.org/index.php/A7800_Emulator)
 * Save/load state support
 * Network-based multiplayer support

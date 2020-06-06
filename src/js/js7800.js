@@ -40,6 +40,12 @@ var starting = false;
 var currentCart = null;
 var highScoreCallback = new HighScoreCallback();
 var debug = false;
+var VSYNC_DEFAULT = true;
+var vsync = VSYNC_DEFAULT;
+var SKIP_LEVEL_DEFAULT = 0;
+var skipLevel = SKIP_LEVEL_DEFAULT;
+var fskip = 0;
+var fskipcount = 0;
 
 var errorHandler = function (message) {
   alert(message);
@@ -50,6 +56,18 @@ var keyboardData = new Array(19);
 
 var initialized = false;
 var forceAdjustTimestamp = false;
+
+function sync(callback, afterTimeout) {
+  if (vsync) {
+    requestAnimationFrame(callback);
+  } else {
+    if (!afterTimeout) {
+      setTimeout(callback, 0);
+    } else {
+      callback();
+    }
+  }
+}
 
 function startEmu(cart, isRestart) {
   currentCart = cart;
@@ -81,7 +99,10 @@ function startEmu(cart, isRestart) {
   console.log("  Controller 2: %d", Cartridge.GetController2());
   console.log("  Region: %s", Cartridge.GetRegion() == 1 ? "PAL" : "NTSC");
   console.log("  Flags: %d", Cartridge.GetFlags());
-  console.log("  XM: %s", Cartridge.IsXmEnabled() ? "true" : "false");
+  console.log("  XM: %s, mode: %s", 
+    Cartridge.IsXmEnabled() ? "true" : "false",
+    (Cartridge.GetXmMode() == 2 ? "Automatic" : (Cartridge.GetXmMode() ? "Enabled" : "Disabled"))
+  );
   console.log("  Right switch: %d", Cartridge.GetRightSwitch());
   console.log("  Left switch: %d", Cartridge.GetLeftSwitch());
   console.log("  Swap buttons: %s", Cartridge.IsSwapButtons() ? "true" : "false");
@@ -92,7 +113,7 @@ function startEmu(cart, isRestart) {
   console.log("  High score cart enabled: %s", Cartridge.IsHighScoreCartEnabled() ? "true" : "false");
 
   // Fire on cartridge loaded event
-  Events.fireEvent("onCartridgeLoaded");
+  Events.fireEvent("onCartridgeLoaded", Cartridge);
 
   // Reset keyboard data
   Input.resetKeyboardData();
@@ -105,6 +126,9 @@ function startEmu(cart, isRestart) {
 
     starting = false;
 
+    // Update frame skip
+    updateFrameSkip();
+
     var start = Date.now();
     var fc = 0;
     var frequency = ProSystem.GetFrequency();
@@ -112,7 +136,9 @@ function startEmu(cart, isRestart) {
     var frameTicks = (1000.0 / frequency) /*| 0*/;
     var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
     var isActive = ProSystem.IsActive;
-    var isPaused = ProSystem.IsPaused;
+    var isPaused = ProSystem.IsPaused;    
+    var fs = 0;
+    var avgWait = 0;
 
     // Enable mouse tracking if lightgun game
     Mouse.enableMouseTracking(Cartridge.IsLightGunEnabled());
@@ -126,7 +152,15 @@ function startEmu(cart, isRestart) {
         if (!isPaused()) {
           updateInput();
           executeFrame(keyboardData);
-          flipImage();
+
+          // Frame skipping
+          if ((fskip == 0) || (fs >= fskip)) {
+            flipImage();
+          }
+          if (++fs >= fskipcount) {            
+            fs = 0;
+          }
+
           soundStore();
 
           nextTimestamp += frameTicks;
@@ -136,22 +170,26 @@ function startEmu(cart, isRestart) {
             nextTimestamp = now;
             fc = 0;
             start = now;
+            avgWait = 0;
             console.log("adjusted next timestamp.");
           }
           var wait = (nextTimestamp - now);
+          avgWait += wait;
           if (wait > 0) {
-            setTimeout(function () { requestAnimationFrame(f); }, wait);
+            setTimeout(function () { sync(f, true); }, wait);
           } else {
-            requestAnimationFrame(f);
+            sync(f, false);
           }
 
           fc++;
           if ((fc % debugFrequency) == 0) {
             var elapsed = Date.now() - start;
             if (debug) {
-              console.log("v:%s, timer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
+              console.log("v:%s, vsync: %d, %stimer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
                 (1000.0 / (elapsed / fc)).toFixed(2),
-                (Riot.GetTimerCount() % 1000),
+                vsync ? 1 : 0,
+                (vsync ? "" : ("wait: " + ((avgWait / fc) * frequency).toFixed(2) + ", ")),
+                (Riot.GetTimerCount() % 1000),                
                 ProSystem.GetDebugWsync() ? 1 : 0,
                 ProSystem.GetDebugWsyncCount(),
                 ProSystem.GetDebugCycleStealing() ? 1 : 0,
@@ -161,17 +199,18 @@ function startEmu(cart, isRestart) {
             }
             start = Date.now();
             fc = 0;
+            avgWait = 0;
           }
         } else {
           setTimeout(function () {
             forceAdjustTimestamp = true;
-            requestAnimationFrame(f);
+            sync(f, true);
           }, 100);
         }
       }
     };
     var nextTimestamp = Date.now() + frameTicks;
-    setTimeout(function () { requestAnimationFrame(f) }, frameTicks);
+    setTimeout(function () { sync(f, true) }, frameTicks);
   };
   // Reset w/ callback
   ProSystem.Reset(postResetCallback);
@@ -343,6 +382,67 @@ function setHighScoreCallback(cb) {
   Events.fireEvent("highScoreCallbackChanged", highScoreCallback);
 }
 
+function isVsyncEnabled() {
+  return vsync;
+}
+
+function setVsyncEnabled(val) {
+  vsync = val;
+}
+
+function getVsyncEnabledDefault() {
+  return VSYNC_DEFAULT;
+}
+
+function updateFrameSkip() {
+  var freq = ProSystem.GetFrequency();
+  if (freq == 60) {
+    switch (skipLevel) {
+      case 0:
+        fskip = 0; fskipcount = 0;
+        break;
+      case 1:
+        fskip = 1; fskipcount = 4;
+        break;
+      case 2:
+        fskip = 1; fskipcount = 2;
+        break;
+      case 3:
+        fskip = 3; fskipcount = 4;
+        break;
+    }
+  } else {
+    switch (skipLevel) {
+      case 0:
+        fskip = 0; fskipcount = 0;
+        break;
+      case 1:
+        fskip = 1; fskipcount = 5;
+        break;
+      case 2:
+        fskip = 1; fskipcount = 2;
+        break;
+      case 3:
+        fskip = 4; fskipcount = 5;
+        break;
+    }
+  }
+  console.log("Updated skip count: "+ fskip + ", " + fskipcount);
+}
+
+function getSkipLevelDefault() {
+  return SKIP_LEVEL_DEFAULT;
+}
+
+function getSkipLevel() {
+  return skipLevel;
+}
+
+function setSkipLevel(val) {
+  skipLevel = val;
+  updateFrameSkip();
+}
+
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 export {
@@ -352,5 +452,11 @@ export {
   setErrorHandler,  
   setHighScoreCallback,
   HighScoreCallback,
-  descriptionDiv
+  descriptionDiv,
+  isVsyncEnabled,
+  setVsyncEnabled,
+  getVsyncEnabledDefault,
+  getSkipLevelDefault,
+  getSkipLevel,
+  setSkipLevel
 }

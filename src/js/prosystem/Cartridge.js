@@ -100,6 +100,10 @@ var cartridge_swap_buttons = false;
 //bool cartridge_hsc_enabled = false;
 var cartridge_hsc_enabled = false;
 
+// 0: Disabled, 1: Enabled, 2: Automatic
+var XM_MODE_DEFAULT = 2;
+var xm_mode = XM_MODE_DEFAULT;
+
 // Whether the cartridge has accessed the high score ROM (indicates that the
 // SRAM should be persisted when the cartridge is unloaded)
 //bool high_score_set = false;
@@ -689,7 +693,7 @@ function IsPokey450Enabled() {
 }
 
 function IsXmEnabled() { 
-  return cartridge_xm; 
+return xm_mode == 2 ? cartridge_xm : xm_mode;
 }
 
 function IsSwapButtons() { 
@@ -824,6 +828,18 @@ function IsHighScoreCartEnabled() {
   return cartridge_hsc_enabled;
 }
 
+function SetXmMode(m) {
+  xm_mode = m;
+}
+
+function GetXmMode() {
+  return xm_mode;
+}
+
+function GetXmModeDefault() {
+  return XM_MODE_DEFAULT;
+}
+
 function init(e) {
   REGION_NTSC = e.Region.REGION_NTSC;
 
@@ -865,6 +881,9 @@ export {
   SetRegion,
   SetFlags,
   SetXm,
+  SetXmMode,
+  GetXmMode,
+  GetXmModeDefault,
   SetHblank,
   SetCrossX,
   SetCrossY,

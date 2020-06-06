@@ -16,6 +16,7 @@ var ContentCell = DialogModule.ContentCell;
 var addProps = Util.addProps;
 var js7800 = null;
 var HighScore = null;
+var Cartridge = null;
 
 //
 // Key target
@@ -476,7 +477,7 @@ addProps(displayTab, {
     this.sizeSelect.setValue(vid.getScreenSize().toString());
     this.arSelect.setValue(vid.getScreenRatio().toString());
     this.fsSelect.setValue(vid.getFullscreenMode().toString());
-    this.palSelect.setValue(js7800.Region.getPaletteIndex().toString());    
+    this.palSelect.setValue(js7800.Region.getPaletteIndex().toString());   
   },
   onOk: function () {    
     this.vid.setFilterEnabled(this.filterSwitch.getValue());
@@ -701,11 +702,65 @@ addProps(keyboardTab, {
   }
 });
 
+// Advanced tab
+var advancedTab = new Tab("Advanced");
+addProps(advancedTab, {
+  xmSelect: null,
+  vsyncSwitch: null,
+  skipSelect: null,
+  onShow: function () {    
+    this.xmSelect.setValue(Cartridge.GetXmMode().toString());
+    this.vsyncSwitch.setValue(js7800.Main.isVsyncEnabled()); 
+    this.skipSelect.setValue(js7800.Main.getSkipLevel().toString());   
+  },
+  onOk: function () {    
+    Cartridge.SetXmMode(parseInt(this.xmSelect.getValue()));
+    js7800.Main.setVsyncEnabled(this.vsyncSwitch.getValue());
+    js7800.Main.setSkipLevel(parseInt(this.skipSelect.getValue()));   
+  },
+  onDefaults: function () {    
+    this.xmSelect.setValue(Cartridge.GetXmModeDefault().toString());
+    this.vsyncSwitch.setValue(js7800.Main.getVsyncEnabledDefault());
+    this.skipSelect.setValue(js7800.Main.getSkipLevelDefault().toString());   
+  },
+  createTabContent: function (rootEl) {
+    var desc = document.createElement("div");
+    desc.innerHTML =
+      '<div class="tabcontent__title">Advanced</div>\n' +
+      '<p class="center">The following settings provide the ability to configure advanced features.</p>';
+    rootEl.appendChild(desc);
+
+    var grid = new Grid();
+    var xmLabel = new LabelCell("Expansion module (XM):");
+    grid.addCell(xmLabel);    
+    this.xmSelect = new Select({
+      "(Automatic)": "2", 
+      "Enabled": "1",
+      "Disabled": "0"
+    });
+    var xmContent = new ContentCell(this.xmSelect);
+    grid.addCell(xmContent);
+    grid.addCell(new LabelCell("Frame skipping:"));
+    this.skipSelect =  new Select({
+      "(None)" : "0",
+      "Low" : "1",
+      "Medium (50%)" : "2",
+      "High" : "3"
+    });
+    grid.addCell(new ContentCell(this.skipSelect));
+    grid.addCell(new LabelCell("Vertical sync:"));
+    this.vsyncSwitch = new ToggleSwitch("Vertical Sync");
+    grid.addCell(new ContentCell(this.vsyncSwitch));    
+    rootEl.appendChild(grid.createElement());
+  }
+});
+
 var settingsTabSet = new TabSet();
 settingsTabSet.addTab(displayTab);
 settingsTabSet.addTab(keyboardTab, true);
 settingsTabSet.addTab(gamepadsTab);
 settingsTabSet.addTab(hsTab);
+settingsTabSet.addTab(advancedTab);
 // settingsTabSet.addTab(new AboutTab());
 
 //
@@ -731,6 +786,7 @@ Events.addListener(new Events.Listener("siteInit",
   function (event) {
     js7800 = event.js7800;
     HighScore = event.HighScore;
+    Cartridge = js7800.Cartridge;
   }
 ));
 

@@ -30,18 +30,67 @@ zip.js is an open-source library (BSD license) for zipping and unzipping files.
 
 Joseph Myers does not specify a particular license for his work.
 
-===== MAME =====
+===== FM Sound Generator =====
 
-Portions of the Pokey code are from the MAME implementation
+FM Sound Generator with OPN/OPM interface
+Copyright (C) by cisc 1998, 2003.
 
-[https://www.mamedev.org/]
+[http://retropc.net/cisc/sound/]
 
-The MAME project as a whole is distributed under the terms of the GNU General
-Public License, 2 (GPL-2.0), since it contains code made available under 
-multiple GPL-compatible licenses. A great majority of files (over 90% including
-core files) are under the BSD-3-Clause License and we would encourage new 
-contributors to distribute files under this license.
+[Copyright and disclaimer, English translation via Google Translate]
 
-Please note that MAME is a registered trademark of Gregory Ember, and 
-permission is required to use the "MAME" name, logo or wordmark.
+- The author of this source code (cisc@retropc.net) owns the copyright.
+- This source code is provided as it is,
+  No warranty is implied or expressed.
+- Using this source code, not using it
+  Occurred or expected to occur regarding unavailable
+  The author is not responsible for any damage.
+- This source code can be freely modified/embedded as long as the following
+  restrictions are met:
+  It can be distributed and used.
 
+  1. Specify the origin (author, copyright) of this software.
+  2. Use free software when distributing.
+  3. When distributing the modified source code, specify the modification
+     contents.
+  4. Do not modify this text at all when distributing the source code
+     Please attach it as it is.
+
+ We would appreciate it if you could contact the author when publishing.
+ 
+ A part of this source code in commercial software (including shareware), or
+ It is necessary to obtain the author's agreement before incorporating all 
+ of them.
+
+[Copyright and disclaimer, Original]
+
+【著作権、免責規定】
+
+	・本ソースコードは作者(cisc@retropc.net) が著作権を所有しています。
+	
+	・本ソースコードはあるがままに提供されるものであり，
+	  暗黙及び明示的な保証を一切含みません．
+	  
+	・本ソースコードを利用したこと，利用しなかったこと，
+	  利用できなかったことに関して生じたあるいは生じると予測される
+	  損害について，作者は一切責任を負いません．
+	  
+	・本ソースコードは，以下の制限を満たす限り自由に改変・組み込み・
+	  配布・利用することができます．
+	  
+	  1. 本ソフトの由来(作者, 著作権)を明記すること.
+	  2. 配布する際にはフリーソフトとすること．
+	  3. 改変したソースコードを配布する際は改変内容を明示すること.
+	  4. ソースコードを配布する際にはこのテキストを一切改変せずに
+	     そのまま添付すること．
+	  
+	・公開の際に作者への連絡を頂ければ幸いです．
+	
+	・商用ソフト(シェアウェア含む) に本ソースコードの一部，または
+	  全部を組み込む際には，事前に作者の合意を得る必要があります．
+
+===== FM Sound Generator (JavaScript) =====
+
+(C) 2020 Kuma
+
+[http://www2.tokai.or.jp/mrnkmzu/]
