@@ -557,20 +557,24 @@ var hsTab = new Tab("High Scores");
 addProps(hsTab, {
   enableSwitch: null,
   locationSelect: null,
+  fallbackSwitch: null,
   desc: null,
   onShow: function () {    
     this.updateDesc();
     this.enableSwitch.setValue(HighScore.getEnabled());
     this.locationSelect.setValue(HighScore.getGlobal() ? "1" : "0");
+    this.fallbackSwitch.setValue(HighScore.isLocalFallback());
     this.enableSwitch.onClick();
   },
   onOk: function () {    
     HighScore.setEnabled(this.enableSwitch.getValue());
     HighScore.setGlobal(this.locationSelect.getValue() == "1");
+    HighScore.setLocalFallback(this.fallbackSwitch.getValue());
   },
   onDefaults: function () {    
     this.enableSwitch.setValue(HighScore.getEnabledDefault());
     this.locationSelect.setValue(HighScore.getGlobalDefault() ? "1" : "0");
+    this.fallbackSwitch.setValue(HighScore.getLocalFallbackDefault());
     this.enableSwitch.onClick();
   },
   updateDesc() {
@@ -585,6 +589,7 @@ addProps(hsTab, {
     this.desc.innerHTML = descText;
   },
   createTabContent: function (rootEl) {
+    var that = this;
     this.desc = document.createElement("div");
     rootEl.appendChild(this.desc);
     this.updateDesc();
@@ -599,16 +604,32 @@ addProps(hsTab, {
     this.locationSelect = new Select({
       "Local (this device only)": "0", 
       "Global (worldwide leaderboard)": "1"
-    });
+    });    
+
     this.locationSelect.setWidth(17);
     var locationContent = new ContentCell(this.locationSelect);
     grid.addCell(locationContent);
+
+    var fallbackLabel = new LabelCell("Local fallback:");
+    grid.addCell(fallbackLabel);
+    this.fallbackSwitch = new ToggleSwitch("Local Fallback");
+    var fallbackContent = new ContentCell(this.fallbackSwitch);
+    grid.addCell(fallbackContent);
+
     rootEl.appendChild(grid.createElement());
 
     this.enableSwitch.onClick = function() {
-      locationLabel.setVisible(this.getValue());
-      locationContent.setVisible(this.getValue());
+      var v = this.getValue();
+      locationLabel.setVisible(v);
+      locationContent.setVisible(v);
+      that.locationSelect.onChange();
     }    
+
+    this.locationSelect.onChange = function() {
+      var v = (this.getValue() == "1") && that.enableSwitch.getValue();
+      fallbackLabel.setVisible(v);
+      fallbackContent.setVisible(v);
+    }
   }
 });
 

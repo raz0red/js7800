@@ -9,6 +9,7 @@ var DISPLAY_RATIO = "displayRatio";
 var DISPLAY_SIZE = "displaySize";
 var HS_ENABLED = "hsEnabled";
 var HS_GLOBAL = "hsGlobal";
+var HS_FALLBACK = "hsFallback";
 var PALETTE = "palette";
 var FS = "fullscreen";
 var FRAME_SKIP = "frameSkip";
@@ -110,6 +111,8 @@ function loadPrefs() {
       if (hsEnabled !== undefined ) HighScore.setEnabled(hsEnabled);
       var hsGlobal = prefs[HS_GLOBAL];
       if (hsGlobal !== undefined ) HighScore.setGlobal(hsGlobal);
+      var hsFallback = prefs[HS_FALLBACK]
+      if (hsFallback !== undefined ) HighScore.setLocalFallback(hsFallback);
       var palette = prefs[PALETTE];
       if (palette !== undefined ) region.setPaletteIndex(palette);
       var fs = prefs[FS];
@@ -142,6 +145,7 @@ function savePrefs() {
     prefs[DISPLAY_RATIO] = video.getScreenRatio();
     prefs[HS_ENABLED] = HighScore.getEnabled();
     prefs[HS_GLOBAL] = HighScore.getGlobal();
+    prefs[HS_FALLBACK] = HighScore.isLocalFallback();
     prefs[PALETTE] = region.getPaletteIndex();
     prefs[FS] = video.getFullscreenMode();
     prefs[VSYNC] = main.isVsyncEnabled();
