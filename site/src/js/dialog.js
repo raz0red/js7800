@@ -65,11 +65,14 @@ addProps(DialogSelect.prototype, {
       this.div.style.width = this.width + "em";
     }
   },
+  onChange: function() {},
   doCreateElement: function() {
+    var that = this;
     var div = document.createElement("div");        
     this.div = div;
     if (this.width) this.setWidth(this.width);
     var sel = document.createElement("select");
+    sel.onchange = function() { that.onChange(); }
     div.appendChild(sel);
     this.select = sel;
     var group = null;

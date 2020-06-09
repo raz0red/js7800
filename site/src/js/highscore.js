@@ -15,6 +15,7 @@ var STORAGE_KEY = "highScoreSRAM";
 
 var GLOBAL_DEFAULT = true;
 var ENABLED_DEFAULT = true;
+var FALLBACK_DEFAULT = true;
 
 var js7800 = null;
 var Main = null;
@@ -31,6 +32,7 @@ var digest = null;
 var isGlobal = GLOBAL_DEFAULT;
 var curGlobal = isGlobal;
 var isEnabled = ENABLED_DEFAULT;
+var isFallbackEnabled = FALLBACK_DEFAULT;
 
 var sram = new Array(SRAM_SIZE);
 
@@ -76,7 +78,7 @@ function onCartLoaded() {
 
   // Set the high score callback appropriately
   Main.setHighScoreCallback(
-    (isEnabled && Storage.isLocalStorageEnabled()) ? 
+    (isEnabled && (Storage.isLocalStorageEnabled() || curGlobal)) ? 
       hsCallback : hsNullCallback);
 }
 
@@ -132,12 +134,24 @@ function loadSramGlobal(success, failure) {
       // Hide message
       Message.hideMessage(mid, 1000);
     } else if(xhr.status == 204) {
+      var localSram = null;
+      // Attempt to use local storage (callbacks are synchronous)
+      if (isFallbackEnabled) {
+        loadSramLocal(
+          function(sram) { localSram = sram; curGlobal = false; }, 
+          function() {} );
+      }
+
       // Rom not supported
       var msg = "Global loaderboard not currently supported for this game.";
+      if (!curGlobal) {
+        msg += "<br><br>Using local storage for high scores.";
+      }
+
       mid = Message.showMessage(msg);
       console.log(msg);
-      success(null);
-      Message.hideMessage(mid, 1500);
+      success(localSram);
+      Message.hideMessage(mid, curGlobal ? 1500 : 3000);
     } else {
       failure("Error reading global leaderboard (" + 
         xhr.status + ": " + xhr.statusText +")");
@@ -298,6 +312,18 @@ function getGlobalDefault() {
   return GLOBAL_DEFAULT; 
 }
 
+function setLocalFallback(val) {
+  isFallbackEnabled = val;
+}
+
+function isLocalFallback() {
+  return isFallbackEnabled;
+}
+
+function getLocalFallbackDefault() {
+  return FALLBACK_DEFAULT; 
+}
+
 function getDigest() {
   return digest;
 }
@@ -316,5 +342,8 @@ export {
   getGlobal,
   setGlobal,
   getGlobalDefault,
+  isLocalFallback,
+  setLocalFallback,
+  getLocalFallbackDefault,
   getDigest
 }
