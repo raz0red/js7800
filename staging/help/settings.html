@@ -143,7 +143,7 @@
         compatible cartridges. For a cartridge to be considered compatible, it must identify itself as 
         supporting the High Score Cartridge (HSC) via its header (<span class="fixed">.a78</span> file extension).         
     <div class="docs-center">
-        <img class="docs-loading-controls-image" style="border-color: #1f1f1f" src="help/images/hssettings.png"></img>
+        <img class="docs-loading-controls-image" style="border-color: #222222" src="help/images/hssettings.png"></img>
     </div>
     <p>
         See the "High Scores" help tab on the left for detailed information regarding the use of 
@@ -164,6 +164,14 @@
                 The save location pull-down is used to select where high scores are 
                 read from and persisted to. High scores can be retained locally (on the local device only) 
                 or globally (on the central high score server).
+            </div>
+            <div class="dialog-cell-label">
+                Local fallback
+            </div>
+            <div class="dialog-cell-value">
+                The local fallback switch controls whether high scores should be stored locally for games
+                that are not supported by the global high score server. This option is only available when 
+                the save location has been set to global (see "Save location" above).
             </div>
         </div>
     </p>
