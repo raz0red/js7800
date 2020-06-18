@@ -44,6 +44,16 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 
 ## Change log
 
+### 06/18/20 (0.0.2)
+    - XM implementation has been updated to be consistent with the released hardware
+    - Initial support for the Yamaha (YM2151) sound chip
+    - Ability to disable vertical sync ("Advanced" tab of settings dialog)
+    - Zanac and Side-Crawler's Dance Yamaha music demos added to default cartridge list
+    - XM memory test added to default cartridge list
+    - By default, high scores for games that are not supported by the Global High Score server 
+      will be stored locally
+    - Resolved defect where Global High Scores were not supported when local storage was disabled
+
 ### 05/26/20 (0.0.1)
     - Ability to select a color palette ("Cool", "Warm", and "Hot") in "Dark" and "Light" variations
     - "Fullscreen" scaling option (Integer vs. Fill)
