@@ -114,11 +114,11 @@ var SALLY_IRQ = {
 
 //static const byte SALLY_CYCLES[256] = { ... }
 var SALLY_CYCLES = [
-  7, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 0, 0, 4, 6, 0, // 0 - 15
+  7, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 2 /* ANC */, 0, 4, 6, 0, // 0 - 15
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 16 - 31
-  6, 6, 0, 0, 3, 3, 5, 0, 4, 2, 2, 0, 4, 4, 6, 0, // 32 - 47
+  6, 6, 0, 0, 3, 3, 5, 0, 4, 2, 2, 2 /* ANC */, 4, 4, 6, 0, // 32 - 47
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 48 - 63
-  6, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 0, 3, 4, 6, 0, // 64 - 79
+  6, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 2 /* ALR (ASR) */, 3, 4, 6, 0, // 64 - 79
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 80 - 95
   6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, // 96 - 111
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 112 - 127
@@ -2037,6 +2037,26 @@ function sally_ExecuteInstruction() {
       sally_AbsoluteX();
       sally_INC();
       return sally_cycles;
+    case 0x4b: /* ALR (ASR) */     
+      //console.log("ALR (ASR)");
+      sally_Immediate();
+      sally_AND();
+      sally_LSRA();
+      return sally_cycles;
+    case 0x0b: /* ANC */  
+    case 0x2b: /* ANC */      
+      /*console.log("ANC");*/
+      sally_Immediate();
+      sally_AND();
+      var temp = sally_p;
+      if (sally_a & 128) {
+        sally_p |= SALLY_FLAG.C;
+      }
+      else {
+        //sally_p &= ~SALLY_FLAG.C;
+        sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
+      }    
+      return sally_cycles;
     case 0xff:
     case 0xfc:
     case 0xfb:
@@ -2109,7 +2129,6 @@ function sally_ExecuteInstruction() {
     case 0x53:
     case 0x52:
     case 0x4f:
-    case 0x4b:
     case 0x47:
     case 0x44:
     case 0x43:
@@ -2123,7 +2142,6 @@ function sally_ExecuteInstruction() {
     case 0x33:
     case 0x32:
     case 0x2f:
-    case 0x2b:
     case 0x27:
     case 0x23:
     case 0x22:
@@ -2137,7 +2155,6 @@ function sally_ExecuteInstruction() {
     case 0x12:
     case 0x0f:
     case 0x0c:
-    case 0x0b:
     case 0x07:
     case 0x04:
     case 0x03:
