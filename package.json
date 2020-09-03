@@ -11,32 +11,19 @@
     "url": "git://github.com/raz0red/js7800.git"
   },
   "scripts": {
-    "build": 
-      "npm run dbConvert && npm run buildModule && npm run buildSite && npm run buildLeaderboard",
-    "buildModule": 
-      "webpack --mode=production",
-    "buildSite": 
-      "webpack --mode=production --config site/webpack.config.js",
-    "buildLeaderboard": 
-      "webpack --mode=production --config site/leaderboard/webpack.config.js",
-    "webpackWatch": 
-      "webpack --watch --mode=production",
-    "webpackWatchDebug": 
-      "webpack -d --watch ",
-    "webpackWatchLeaderboard": 
-      "webpack --watch --mode=production --config site/leaderboard/webpack.config.js",
-    "webpackWatchLeaderboardDebug": 
-      "webpack -d --watch --config site/leaderboard/webpack.config.js",
-    "devServer": 
-      "webpack-dev-server --mode=production --host 0.0.0.0",
-    "devServerDebug": 
-      "webpack-dev-server -d --host 0.0.0.0",
-    "devServerSite": 
-      "webpack-dev-server --config site/webpack.config.js --mode=production --host 0.0.0.0",
-    "devServerDebugSite": 
-      "webpack-dev-server --config site/webpack.config.js -d --host 0.0.0.0",
-    "dbConvert": 
-      "node db/convert.js db/ProSystem.dat > src/js/prosystem/ProSystemDat.js"
+    "build": "npm run dbConvert && npm run buildModule && npm run buildSite && npm run buildLeaderboard",
+    "buildModule": "webpack --mode=production",
+    "buildSite": "webpack --mode=production --config site/webpack.config.js",
+    "buildLeaderboard": "webpack --mode=production --config site/leaderboard/webpack.config.js",
+    "webpackWatch": "webpack --watch --mode=production",
+    "webpackWatchDebug": "webpack -d --watch ",
+    "webpackWatchLeaderboard": "webpack --watch --mode=production --config site/leaderboard/webpack.config.js",
+    "webpackWatchLeaderboardDebug": "webpack -d --watch --config site/leaderboard/webpack.config.js",
+    "devServer": "webpack-dev-server --mode=production --host 0.0.0.0",
+    "devServerDebug": "webpack-dev-server -d --host 0.0.0.0",
+    "devServerSite": "webpack-dev-server --config site/webpack.config.js --mode=production --host 0.0.0.0",
+    "devServerDebugSite": "webpack-dev-server --config site/webpack.config.js -d --host 0.0.0.0",
+    "dbConvert": "node db/convert.js db/ProSystem.dat > src/js/prosystem/ProSystemDat.js"
   },
   "dependencies": {
     "fullscreen-api-polyfill": "^1.1.2",
