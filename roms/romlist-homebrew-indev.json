@@ -22,8 +22,16 @@
             "path": "GoSub.a78"            
         },
         {
+            "name": "Knight Guy: Castle Days",
+            "path": "knightguy.a78"            
+        },
+        {
             "name": "Legend of Silverpeak (no sound)",
             "path": "LegendofSilverpeak.a78"            
+        },
+        {
+            "name": "Popeye 7800: Mini-game",
+            "path": "PopeyeMiniGame.a78"            
         },
         {
             "name": "Spire of the Ancients",
