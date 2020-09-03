@@ -44,6 +44,17 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 
 ## Change log
 
+### 09/03/20 (0.0.3)
+    - Added support for undocumented ASR and ANC opcodes (fixes graphical glitches with
+      "Popeye 7800: Mini-game")
+    - Added global high score support for the latest version of "Pac-Man XM"
+    - Added "Popeye 7800: Mini-game" and "Knight Guy: Castle Days" to the default list of 
+      in-development games
+    - Updated to the latest versions of "Dragon's Cache", "Dragon's Descent", "GoSub", and
+      "Spire of the Ancients"
+    - Updating to the latest version of "Dragon's Descent" required the global high scores for
+      this game to be reset (the latest version modified the way high scores were stored)
+
 ### 06/18/20 (0.0.2)
     - XM implementation has been updated to be consistent with the released hardware
     - Initial support for the Yamaha (YM2151) sound chip
