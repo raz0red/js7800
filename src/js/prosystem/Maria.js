@@ -169,6 +169,7 @@ function maria_GetColor(data) {
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreGraphic( ) {
 function maria_StoreGraphic() {
+  var count = 3;
   //byte data = memory_ram[maria_pp.w];
   var data = (dr ? ram[maria_pp.getW()] : ramf(maria_pp.getW()));
   if (maria_wmode) {
@@ -179,6 +180,7 @@ function maria_StoreGraphic() {
       // #endif      
       //maria_horizontal += 2;
       maria_horizontal = (maria_horizontal + 2) & 0xFF;
+      count = 0;
     }
     else {
       maria_StoreCell2((data & 12), (data & 192) >>> 6);
@@ -195,6 +197,7 @@ function maria_StoreGraphic() {
       // #endif      
       //maria_horizontal += 4;
       maria_horizontal = (maria_horizontal + 4) & 0xFF;
+      count = 0;
     }
     else {
       maria_StoreCell1((data & 192) >>> 6);
@@ -205,6 +208,8 @@ function maria_StoreGraphic() {
   }
   //maria_pp.w++;
   maria_pp.wPlusPlus();
+
+  return count;
 }
 
 // ----------------------------------------------------------------------------
@@ -285,7 +290,7 @@ function maria_StoreLineRAM() {
   //byte mode = memory_ram[maria_dp.w + 1];
   var mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
   while (mode & 0x5f) {
-    if (count >= MARIA_CYCLE_LIMIT) return;
+    if (count >= MARIA_CYCLE_LIMIT) return count;
 
     //byte width;
     var width = 0;
@@ -335,8 +340,7 @@ function maria_StoreLineRAM() {
       maria_pp.bhPlusEqual(maria_offset);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
-        count += 3;
-        maria_StoreGraphic();
+        count += maria_StoreGraphic();
         if (count >= MARIA_CYCLE_LIMIT) return count;
       }
     }
@@ -354,13 +358,11 @@ function maria_StoreLineRAM() {
         maria_pp.setBL((dr ? ram[basePP.wPlusPlus()] : ramf(basePP.wPlusPlus())));
         //maria_pp.b.h = memory_ram[CHARBASE] + maria_offset;
         maria_pp.setBH(ram[CHARBASE] + maria_offset);
-        count += 3; // Maria cycles (Indirect, 1 byte)
-        maria_StoreGraphic();
+        count += maria_StoreGraphic(); // Maria cycles (Indirect, 1 byte)        
         if (count >= MARIA_CYCLE_LIMIT) return count;
 
         if (cwidth) {
-          count += 3; // Maria cycles (Indirect, 2 bytes)
-          maria_StoreGraphic();
+          count += maria_StoreGraphic();
           if (count >= MARIA_CYCLE_LIMIT) return count;
         }
       }
