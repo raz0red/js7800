@@ -42,6 +42,8 @@ var CTRL        = 60;
 var MARIA_SURFACE_SIZE = 77440;
 var MARIA_LINERAM_SIZE = 160;
 
+var MARIA_CYCLE_LIMIT = 428;
+
 //extern unsigned char* wii_sdl_get_blit_addr();
 //extern unsigned int wii_lightgun_flash;
 //extern unsigned int wii_lightgun_flash;
@@ -273,6 +275,8 @@ var basePP = new Pair();
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreLineRAM() {
 function maria_StoreLineRAM() {
+  var count = 0;
+
   //for (int index = 0; index < MARIA_LINERAM_SIZE; index++) {
   for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
     maria_lineRAM[index] = 0;
@@ -281,6 +285,8 @@ function maria_StoreLineRAM() {
   //byte mode = memory_ram[maria_dp.w + 1];
   var mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
   while (mode & 0x5f) {
+    if (count >= MARIA_CYCLE_LIMIT) return;
+
     //byte width;
     var width = 0;
     //byte indirect = 0;
@@ -292,7 +298,8 @@ function maria_StoreLineRAM() {
     maria_pp.setBH((dr ? ram[maria_dp.getW() + 2] : ramf(maria_dp.getW() + 2)));
 
     if (mode & 31) {
-      maria_cycles += 8; // Maria cycles (Header 4 byte)
+      count += 8; // Maria cycles (Header 4 byte)
+
       //maria_palette = (memory_ram[maria_dp.w + 1] & 224) >> 3;
       maria_palette = (((dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 3];
@@ -305,7 +312,8 @@ function maria_StoreLineRAM() {
       maria_dp.wPlusEqual(4);
     }
     else {
-      maria_cycles += 12; // Maria cycles (Header 5 byte)
+      count += 12; // Maria cycles (Header 5 byte)
+
       //maria_palette = (memory_ram[maria_dp.w + 3] & 224) >> 3;
       maria_palette = (((dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3)) & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 4];
@@ -327,8 +335,9 @@ function maria_StoreLineRAM() {
       maria_pp.bhPlusEqual(maria_offset);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
-        maria_cycles += 3; // Maria cycles (Direct graphic read)
+        count += 3;
         maria_StoreGraphic();
+        if (count >= MARIA_CYCLE_LIMIT) return count;
       }
     }
     else {
@@ -339,22 +348,28 @@ function maria_StoreLineRAM() {
       basePP.copy(maria_pp);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
-        maria_cycles += 3; // Maria cycles (Indirect)
+        count += 3; // Maria cycles (Indirect)        
+
         //maria_pp.b.l = memory_ram[basePP.w++];
         maria_pp.setBL((dr ? ram[basePP.wPlusPlus()] : ramf(basePP.wPlusPlus())));
         //maria_pp.b.h = memory_ram[CHARBASE] + maria_offset;
         maria_pp.setBH(ram[CHARBASE] + maria_offset);
-        maria_cycles += 3; // Maria cycles (Indirect, 1 byte)
+        count += 3; // Maria cycles (Indirect, 1 byte)
         maria_StoreGraphic();
+        if (count >= MARIA_CYCLE_LIMIT) return count;
+
         if (cwidth) {
-          maria_cycles += 3; // Maria cycles (Indirect, 2 bytes)
+          count += 3;
           maria_StoreGraphic();
+          if (count >= MARIA_CYCLE_LIMIT) return count;
         }
       }
     }
     //mode = memory_ram[maria_dp.w + 1];
     mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
   }
+
+  return count;
 }
 
 // ----------------------------------------------------------------------------
@@ -450,7 +465,7 @@ function maria_RenderScanline(maria_scanline) {
       maria_dp.setBL((dr ? ram[maria_dpp.getW() + 2] : ramf(maria_dpp.getW() + 2)));
       //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
       maria_dp.setBH((dr ? ram[maria_dpp.getW() + 1] : ramf(maria_dpp.getW() + 1)));
-      maria_StoreLineRAM();
+      maria_cycles += maria_StoreLineRAM();
       maria_offset--;
       if (maria_offset < 0) {
         maria_cycles += 10; // Maria cycles (Last line of zone) ( /*20*/ 

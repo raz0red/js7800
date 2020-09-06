@@ -123,9 +123,9 @@ var SALLY_CYCLES = [
   6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, // 96 - 111
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 112 - 127
   0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
-  2, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
+  2, 6, 0, 0, 4, 4, 4, 4 /* SAX */, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
   2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // 160 - 175
-  2, 5, 0, 0, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
+  2, 5, 0, 6 /* LAX */, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 192 - 207
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 208 - 223
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 222 - 239
@@ -2057,6 +2057,25 @@ function sally_ExecuteInstruction() {
         sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
       }    
       return sally_cycles;
+    case 0xb3:      
+      sally_IndirectY();
+      sally_LDA();
+      sally_TAX();
+      return sally_cycles;
+    case 0x97:
+      sally_ZeroPageY();
+      sally_PHP();
+      sally_PHA();
+      sally_stx();
+      sally_AND();
+      sally_STA();
+      sally_PLA();
+      sally_PLP();      
+      return sally_cycles;
+    case 0x64:   
+    case 0x89:
+      // No-op       
+      return sally_cycles;
     case 0xff:
     case 0xfc:
     case 0xfb:
@@ -2086,7 +2105,6 @@ function sally_ExecuteInstruction() {
     case 0xbf:
     case 0xbb:
     case 0xb7:
-    case 0xb3:
     case 0xb2:
     case 0xaf:
     case 0xab:
@@ -2096,12 +2114,10 @@ function sally_ExecuteInstruction() {
     case 0x9e:
     case 0x9c:
     case 0x9b:
-    case 0x97:
     case 0x93:
     case 0x92:
     case 0x8f:
     case 0x8b:
-    case 0x89:
     case 0x87:
     case 0x83:
     case 0x82:
@@ -2117,7 +2133,6 @@ function sally_ExecuteInstruction() {
     case 0x6f:
     case 0x6b:
     case 0x67:
-    case 0x64:
     case 0x63:
     case 0x62:
     case 0x5f:
@@ -2159,6 +2174,7 @@ function sally_ExecuteInstruction() {
     case 0x04:
     case 0x03:
     case 0x02:
+      console.log('nothing done for opcode: ' + sally_opcode.toString(16));
       return sally_cycles;
     /*      
           l_0xff:

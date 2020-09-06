@@ -261,7 +261,7 @@ function memory_Write(address, data) {
         if (address >= 8256 && address <= 8447) {
           memory_ram[address - 8192] = data;
         }
-        else if (address >= 8512 && address <= 8702) {
+        else if (address >= 8512 && address <= 8703) {
           memory_ram[address - 8192] = data;
         }
         else if (address >= 64 && address <= 255) {
@@ -269,6 +269,12 @@ function memory_Write(address, data) {
         }
         else if (address >= 320 && address <= 511) {
           memory_ram[address + 8192] = data;
+        }
+        else if (address >= 10240 && address <= 12287) {
+          memory_ram[address - 2048] = data;
+        }
+        else if (address >= 8192 && address <= 10239) {
+          memory_ram[address + 2048] = data;
         }
         break;
     }

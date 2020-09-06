@@ -149,6 +149,14 @@ controller1=1
 controller2=1
 region=1
 flags=0
+[56cd3b40ceb8f82e45c8fb60ccb40256]
+title=Bouncing Balls Demo
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=1
+flags=0
 [5a09946e57dbe30408a8f253a28d07db]
 title=Centipede
 type=0
