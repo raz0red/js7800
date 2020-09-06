@@ -2174,7 +2174,7 @@ function sally_ExecuteInstruction() {
     case 0x04:
     case 0x03:
     case 0x02:
-      console.log('nothing done for opcode: ' + sally_opcode.toString(16));
+      //console.log('unmapped opcode: ' + sally_opcode.toString(16));
       return sally_cycles;
     /*      
           l_0xff:

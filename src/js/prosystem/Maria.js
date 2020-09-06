@@ -359,7 +359,7 @@ function maria_StoreLineRAM() {
         if (count >= MARIA_CYCLE_LIMIT) return count;
 
         if (cwidth) {
-          count += 3;
+          count += 3; // Maria cycles (Indirect, 2 bytes)
           maria_StoreGraphic();
           if (count >= MARIA_CYCLE_LIMIT) return count;
         }
