@@ -195,6 +195,9 @@ function memory_Write(address, data) {
     }
 
     // INPTCTRL
+    // Diagnosed by RevEng
+    // Multiple addresses are used to set INPTCTRL
+    // Lack Mode needs to be set
     if (address >= 0 && address <= 0xf) {      
       if (!lock) {        
         if (data & 1) {

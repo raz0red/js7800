@@ -369,7 +369,12 @@ function sally_ADC() {
       ah = (ah + 1) & 0xFFFF;
     }
 
-    // Set Z flag
+    // Set Z flag properly in decimal mode
+    // Diagnosed by RevEng
+    // The 6502 Z flag doesn't seem to understand decimal mode, so it gets set 
+    // as if you had added things without decimal mode enabled, 
+    // where $55+$AB=$00. So A7800 and visual 6502 both set Z, 
+    // but unfortunately z is clear in JS7800.
     var ztemp = new Pair();
     ztemp.setW(sally_a + data + (sally_p & SALLY_FLAG.C));
     if (!ztemp.getBL()) {
@@ -879,6 +884,8 @@ function sally_PHP() {
   //tmp |= SALLY_FLAG.B;
   //sally_Push(tmp);
 
+  // Diagnosed by RevEng
+  // Software instructions BRK & PHP will push the B flag as being 1  
   sally_p |= SALLY_FLAG.B;
   sally_Push(sally_p);  
 }
@@ -1019,7 +1026,13 @@ function sally_SBC() {
   var data = memory_Read(sally_address.getW());
 
   if (sally_p & SALLY_FLAG.D) {
-    // Set Z flag
+    
+    // Set Z flag properly in decimal mode
+    // Diagnosed by RevEng
+    // The 6502 Z flag doesn't seem to understand decimal mode, so it gets set 
+    // as if you had added things without decimal mode enabled, 
+    // where $55+$AB=$00. So A7800 and visual 6502 both set Z, 
+    // but unfortunately z is clear in JS7800.
     var ztemp = new Pair();
     ztemp.setW(sally_a - data - !(sally_p & SALLY_FLAG.C));
 
@@ -1218,12 +1231,9 @@ function sally_Reset() {
   sally_pc.setW(0);
 
   sally_debug_count = 0; // 100;
-  history = new Array();
 }
 
 var sally_debug_count = 0; //100;
-
-var history = new Array();
 
 // ----------------------------------------------------------------------------
 // ExecuteInstruction
@@ -1302,20 +1312,6 @@ function sally_ExecuteInstruction() {
   sally_opcode = memory_Read(opcodeMem);
   sally_cycles = SALLY_CYCLES[sally_opcode];
 
-  if (history != null ) {
-    history.push([opcodeMem, sally_opcode]);
-    if (history.length > 100) {
-      history.shift();
-    }
-
-    if (opcodeMem == 0xF026)  {    
-      for (var i = 0; i < history.length; i++) {
-        console.log("0x" + history[i][0].toString(16) + ", " + "0x" + history[i][1].toString(16));
-      }
-      console.log("Y: " + sally_y);  
-      history = null;
-    }    
-  }
   //goto *a_jump_table[sally_opcode];
 
   if (sally_cycles === undefined) {
@@ -2385,7 +2381,7 @@ function sally_ExecuteIRQ() {
     sally_pc.setBL(memory_ram[SALLY_IRQ.L]);
     //sally_pc.b.h = memory_ram[SALLY_IRQ.H];
     sally_pc.setBH(memory_ram[SALLY_IRQ.H]);
-  //console.log("Execute IRQ: " + (memory_ram[SALLY_IRQ.L] | memory_ram[SALLY_IRQ.H] << 8))      
+    //console.log("Execute IRQ: " + (memory_ram[SALLY_IRQ.L] | memory_ram[SALLY_IRQ.H] << 8))      
   }
   return 7;
 }
