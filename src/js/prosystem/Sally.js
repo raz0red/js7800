@@ -862,7 +862,12 @@ function sally_PHA() {
 // PHP
 // ----------------------------------------------------------------------------
 function sally_PHP() {
-  sally_Push(sally_p);
+  //var tmp = sally_p;
+  //tmp |= SALLY_FLAG.B;
+  //sally_Push(tmp);
+
+  sally_p |= SALLY_FLAG.B;
+  sally_Push(sally_p);  
 }
 
 // ----------------------------------------------------------------------------
@@ -1186,9 +1191,12 @@ function sally_Reset() {
   sally_pc.setW(0);
 
   sally_debug_count = 0; // 100;
+  history = new Array();
 }
 
 var sally_debug_count = 0; //100;
+
+var history = new Array();
 
 // ----------------------------------------------------------------------------
 // ExecuteInstruction
@@ -1267,6 +1275,20 @@ function sally_ExecuteInstruction() {
   sally_opcode = memory_Read(opcodeMem);
   sally_cycles = SALLY_CYCLES[sally_opcode];
 
+  if (history != null ) {
+    history.push([opcodeMem, sally_opcode]);
+    if (history.length > 100) {
+      history.shift();
+    }
+
+    if (opcodeMem == 0xF026)  {    
+      for (var i = 0; i < history.length; i++) {
+        console.log("0x" + history[i][0].toString(16) + ", " + "0x" + history[i][1].toString(16));
+      }
+      console.log("Y: " + sally_y);  
+      history = null;
+    }    
+  }
   //goto *a_jump_table[sally_opcode];
 
   if (sally_cycles === undefined) {
@@ -2037,15 +2059,14 @@ function sally_ExecuteInstruction() {
       sally_AbsoluteX();
       sally_INC();
       return sally_cycles;
-    case 0x4b: /* ALR (ASR) */     
+    case 0x4b: // ALR (ASR) 
       //console.log("ALR (ASR)");
       sally_Immediate();
       sally_AND();
       sally_LSRA();
       return sally_cycles;
-    case 0x0b: /* ANC */  
-    case 0x2b: /* ANC */      
-      /*console.log("ANC");*/
+    case 0x0b: // ANC   
+    case 0x2b: // ANC 
       sally_Immediate();
       sally_AND();
       var temp = sally_p;
@@ -2296,6 +2317,7 @@ function sally_ExecuteRES() {
   sally_pc.setBL(memory_ram[SALLY_RES.L]);
   //sally_pc.b.h = memory_ram[SALLY_RES.H];
   sally_pc.setBH(memory_ram[SALLY_RES.H]);
+  //console.log("Execute RES: " + (memory_ram[SALLY_RES.L] | memory_ram[SALLY_RES.H] << 8))
   return 6;
 }
 
@@ -2315,6 +2337,7 @@ function sally_ExecuteNMI() {
   sally_pc.setBL(memory_ram[SALLY_NMI.L]);
   //sally_pc.b.h = memory_ram[SALLY_NMI.H];
   sally_pc.setBH(memory_ram[SALLY_NMI.H]);
+  //console.log("Execute NMI: " + (memory_ram[SALLY_NMI.L] | memory_ram[SALLY_NMI.H] << 8))  
   return 7;
 }
 
@@ -2335,6 +2358,7 @@ function sally_ExecuteIRQ() {
     sally_pc.setBL(memory_ram[SALLY_IRQ.L]);
     //sally_pc.b.h = memory_ram[SALLY_IRQ.H];
     sally_pc.setBH(memory_ram[SALLY_IRQ.H]);
+  //console.log("Execute IRQ: " + (memory_ram[SALLY_IRQ.L] | memory_ram[SALLY_IRQ.H] << 8))      
   }
   return 7;
 }

@@ -180,7 +180,7 @@ function maria_StoreGraphic() {
       // #endif      
       //maria_horizontal += 2;
       maria_horizontal = (maria_horizontal + 2) & 0xFF;
-      count = 0;
+      count = 1;
     }
     else {
       maria_StoreCell2((data & 12), (data & 192) >>> 6);
@@ -197,7 +197,7 @@ function maria_StoreGraphic() {
       // #endif      
       //maria_horizontal += 4;
       maria_horizontal = (maria_horizontal + 4) & 0xFF;
-      count = 0;
+      count = 1;
     }
     else {
       maria_StoreCell1((data & 192) >>> 6);

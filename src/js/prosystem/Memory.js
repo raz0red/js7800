@@ -87,6 +87,8 @@ var cartridge_pokey450 = false;
 var cartridge_flags = 0;
 var cartridge_xm = false;
 
+var lock = false;
+
 // ----------------------------------------------------------------------------
 // Reset
 // ----------------------------------------------------------------------------
@@ -103,6 +105,8 @@ function memory_Reset() {
 
   // Debug, reset write count to High Score SRAM
   //hs_sram_write_count = 0;
+
+  lock = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -190,93 +194,112 @@ function memory_Write(address, data) {
       }
     }
 
-    switch (address) {
-      case WSYNC:
-        if (!(cartridge_flags & 128)) {
-          //memory_ram[WSYNC] = true;
-          memory_ram[WSYNC] = 1;
+    // INPTCTRL
+    if (address >= 0 && address <= 0xf) {      
+      if (!lock) {        
+        if (data & 1) {
+          lock = true; 
+          //console.log("LOCK!:" + data); 
         }
-        break;
-      case INPTCTRL:
-        if (data == 22 && Cartridge.IsLoaded()) {
+
+       if ((data&4) && Cartridge.IsLoaded()) {
           Cartridge.Store();
+          //console.log("CART STORE!");
         }
-        else if (data == 2 && Bios.IsEnabled()) {
+        else if (!(data&4) && Bios.IsEnabled()) {
           Bios.Store();
+          //console.log("BIOS STORE!");
         }
-        break;
-      case INPT0:
-      case INPT1:
-      case INPT2:
-      case INPT3:
-      case INPT4:
-      case INPT5:
-        break;
-      case AUDC0:
-        tia_SetRegister(AUDC0, data);
-        break;
-      case AUDC1:
-        tia_SetRegister(AUDC1, data);
-        break;
-      case AUDF0:
-        tia_SetRegister(AUDF0, data);
-        break;
-      case AUDF1:
-        tia_SetRegister(AUDF1, data);
-        break;
-      case AUDV0:
-        tia_SetRegister(AUDV0, data);
-        break;
-      case AUDV1:
-        tia_SetRegister(AUDV1, data);
-        break;
+      }
+    } else {
+      switch (address) {
+        case WSYNC:
+          if (!(cartridge_flags & 128)) {
+            //memory_ram[WSYNC] = true;
+            memory_ram[WSYNC] = 1;
+          }
+          break;
+        // case INPTCTRL:
+        //   if (data == 22 && Cartridge.IsLoaded()) {
+        //     Cartridge.Store();
+        //   }
+        //   else if (data == 2 && Bios.IsEnabled()) {
+        //     Bios.Store();
+        //   }
+        //   break;
+        case INPT0:
+        case INPT1:
+        case INPT2:
+        case INPT3:
+        case INPT4:
+        case INPT5:
+          break;
+        case AUDC0:
+          tia_SetRegister(AUDC0, data);
+          break;
+        case AUDC1:
+          tia_SetRegister(AUDC1, data);
+          break;
+        case AUDF0:
+          tia_SetRegister(AUDF0, data);
+          break;
+        case AUDF1:
+          tia_SetRegister(AUDF1, data);
+          break;
+        case AUDV0:
+          tia_SetRegister(AUDV0, data);
+          break;
+        case AUDV1:
+          tia_SetRegister(AUDV1, data);
+          break;
 
-      case SWCHB:
-        /*gdement:  Writing here actually writes to DRB inside the RIOT chip.
-      This value only indirectly affects output of SWCHB.*/
-        riot_SetDRB(data);
-        break;
+        case SWCHB:
+          /*gdement:  Writing here actually writes to DRB inside the RIOT chip.
+        This value only indirectly affects output of SWCHB.*/
+          riot_SetDRB(data);
+          break;
 
-      case SWCHA:
-        riot_SetDRA(data);
-        break;
-      case TIM1T:
-      case TIM1T | 0x8:
-        riot_SetTimer(TIM1T, data);
-        break;
-      case TIM8T:
-      case TIM8T | 0x8:
-        riot_SetTimer(TIM8T, data);
-        break;
-      case TIM64T:
-      case TIM64T | 0x8:
-        riot_SetTimer(TIM64T, data);
-        break;
-      case T1024T:
-      case T1024T | 0x8:
-        riot_SetTimer(T1024T, data);
-        break;
-      default:
-        memory_ram[address] = data;
-        if (address >= 8256 && address <= 8447) {
-          memory_ram[address - 8192] = data;
-        }
-        else if (address >= 8512 && address <= 8703) {
-          memory_ram[address - 8192] = data;
-        }
-        else if (address >= 64 && address <= 255) {
-          memory_ram[address + 8192] = data;
-        }
-        else if (address >= 320 && address <= 511) {
-          memory_ram[address + 8192] = data;
-        }
-        else if (address >= 10240 && address <= 12287) {
-          memory_ram[address - 2048] = data;
-        }
-        else if (address >= 8192 && address <= 10239) {
-          memory_ram[address + 2048] = data;
-        }
-        break;
+        case SWCHA:
+          riot_SetDRA(data);
+          break;
+        case TIM1T:
+        case TIM1T | 0x8:
+          riot_SetTimer(TIM1T, data);
+          break;
+        case TIM8T:
+        case TIM8T | 0x8:
+          riot_SetTimer(TIM8T, data);
+          break;
+        case TIM64T:
+        case TIM64T | 0x8:
+          riot_SetTimer(TIM64T, data);
+          break;
+        case T1024T:
+        case T1024T | 0x8:
+          riot_SetTimer(T1024T, data);
+          break;
+        default:
+          memory_ram[address] = data;
+          if (address >= 8256 && address <= 8447) {
+            memory_ram[address - 8192] = data;
+          }
+          else if (address >= 8512 && address <= 8703) {
+            memory_ram[address - 8192] = data;
+          }
+          else if (address >= 64 && address <= 255) {
+            memory_ram[address + 8192] = data;
+          }
+          else if (address >= 320 && address <= 511) {
+            memory_ram[address + 8192] = data;
+          }
+          else if (address >= 10240 && address <= 12287) {
+            memory_ram[address - 2048] = data;
+          }
+          else if (address >= 8192 && address <= 10239) {
+            memory_ram[address + 2048] = data;
+          }
+          break;
+      }
     }
   }
   else {
