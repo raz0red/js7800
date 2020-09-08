@@ -2,6 +2,10 @@
     "folders": [],
     "files": [        
         {
+            "name": "101 Sprite Demo",
+            "path": "101SpriteDemo.a78"
+        },        
+        {
             "name": "1E78 (PAL)",
             "path": "1E78.a78"
         },        
@@ -9,10 +13,6 @@
             "name": "3D Test Demo 1 (PAL)",
             "path": "3DTestDemo1.a78"
         },
-        {
-            "name": "Bouncing Balls (PAL)",
-            "path": "BouncingBalls.a78"
-        },        
         {
             "name": "Demo X",
             "path": "DemoX.a78"
