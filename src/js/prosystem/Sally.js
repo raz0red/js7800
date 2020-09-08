@@ -369,6 +369,18 @@ function sally_ADC() {
       ah = (ah + 1) & 0xFFFF;
     }
 
+    // Set Z flag
+    var ztemp = new Pair();
+    ztemp.setW(sally_a + data + (sally_p & SALLY_FLAG.C));
+    if (!ztemp.getBL()) {
+      sally_p |= SALLY_FLAG.Z;
+    }
+    else {
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
+    }
+
+    /*
     if (!(sally_a + data + (sally_p & SALLY_FLAG.C))) {
       sally_p |= SALLY_FLAG.Z;
     }
@@ -376,6 +388,7 @@ function sally_ADC() {
       //sally_p &= ~SALLY_FLAG.Z;
       sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
     }
+    */
 
     if ((ah & 8) != 0) {
       sally_p |= SALLY_FLAG.N;
@@ -1006,6 +1019,10 @@ function sally_SBC() {
   var data = memory_Read(sally_address.getW());
 
   if (sally_p & SALLY_FLAG.D) {
+    // Set Z flag
+    var ztemp = new Pair();
+    ztemp.setW(sally_a - data - !(sally_p & SALLY_FLAG.C));
+
     //word al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
     var al = ((sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C)) & 0xFFFF;
     //word ah = (sally_a >> 4) - (data >> 4);
@@ -1048,6 +1065,16 @@ function sally_SBC() {
 
     //sally_Flags(temp.b.l);
     sally_Flags(temp.getBL());
+
+    // Z flag
+    if (!ztemp.getBL()) {
+      sally_p |= SALLY_FLAG.Z;
+    }
+    else {
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
+    }
+
     //sally_a = (ah << 4) | (al & 15);
     sally_a = ((ah << 4) | (al & 15)) & 0xFF;
   }
