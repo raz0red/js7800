@@ -211,7 +211,7 @@ function memory_Write(address, data) {
       if (!lock) {        
         if (data & 1) {
           lock = true; 
-          console.log("LOCK!:" + data); 
+          //console.log("LOCK!:" + data); 
         }
        if ((data&4) && Cartridge.IsLoaded()) {
           if (!Cartridge.IsStored()) {            
