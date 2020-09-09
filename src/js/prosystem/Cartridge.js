@@ -312,7 +312,11 @@ function cartridge_ReadHeader(header) {
       //int old_type = cartridge_type;
       var old_type = cartridge_type;
       cartridge_type = CARTRIDGE_TYPE_SUPERCART;
-      console.log("Update: (0x01) bit1: %d, %d", old_type, cartridge_type);
+      console.log("Update: (0x01) bit1: %d, %d", old_type, cartridge_type);      
+      if (cartridge_size > 0x10000) {
+        console.log("Updating supercart by size: ");
+        cartridge_SetTypeBySize(cartridge_size);
+      }
     } else if (cartridge_size <= 0x10000 && ((ct1 & 0x04) == 0x04)) { // Size < 64k && BIT2 (Normal RAM: ?) ram at $4000 ) 
       //int old_type = cartridge_type;
       var old_type = cartridge_type;

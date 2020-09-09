@@ -123,9 +123,9 @@ var SALLY_CYCLES = [
   6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, // 96 - 111
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 112 - 127
   0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
-  2, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
+  2, 6, 0, 0, 4, 4, 4, 4 /* SAX */, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
   2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // 160 - 175
-  2, 5, 0, 0, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
+  2, 5, 0, 6 /* LAX */, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 192 - 207
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 208 - 223
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 222 - 239
@@ -369,6 +369,23 @@ function sally_ADC() {
       ah = (ah + 1) & 0xFFFF;
     }
 
+    // Set Z flag properly in decimal mode
+    // Diagnosed by RevEng
+    // The 6502 Z flag doesn't seem to understand decimal mode, so it gets set 
+    // as if you had added things without decimal mode enabled, 
+    // where $55+$AB=$00. So A7800 and visual 6502 both set Z, 
+    // but unfortunately z is clear in JS7800.
+    var ztemp = new Pair();
+    ztemp.setW(sally_a + data + (sally_p & SALLY_FLAG.C));
+    if (!ztemp.getBL()) {
+      sally_p |= SALLY_FLAG.Z;
+    }
+    else {
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
+    }
+
+    /*
     if (!(sally_a + data + (sally_p & SALLY_FLAG.C))) {
       sally_p |= SALLY_FLAG.Z;
     }
@@ -376,6 +393,7 @@ function sally_ADC() {
       //sally_p &= ~SALLY_FLAG.Z;
       sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
     }
+    */
 
     if ((ah & 8) != 0) {
       sally_p |= SALLY_FLAG.N;
@@ -862,6 +880,13 @@ function sally_PHA() {
 // PHP
 // ----------------------------------------------------------------------------
 function sally_PHP() {
+  //var tmp = sally_p;
+  //tmp |= SALLY_FLAG.B;
+  //sally_Push(tmp);
+
+  // Diagnosed by RevEng
+  // Software instructions BRK & PHP will push the B flag as being 1  
+  sally_p |= SALLY_FLAG.B;
   sally_Push(sally_p);
 }
 
@@ -1001,6 +1026,16 @@ function sally_SBC() {
   var data = memory_Read(sally_address.getW());
 
   if (sally_p & SALLY_FLAG.D) {
+    
+    // Set Z flag properly in decimal mode
+    // Diagnosed by RevEng
+    // The 6502 Z flag doesn't seem to understand decimal mode, so it gets set 
+    // as if you had added things without decimal mode enabled, 
+    // where $55+$AB=$00. So A7800 and visual 6502 both set Z, 
+    // but unfortunately z is clear in JS7800.
+    var ztemp = new Pair();
+    ztemp.setW(sally_a - data - !(sally_p & SALLY_FLAG.C));
+
     //word al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
     var al = ((sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C)) & 0xFFFF;
     //word ah = (sally_a >> 4) - (data >> 4);
@@ -1043,6 +1078,16 @@ function sally_SBC() {
 
     //sally_Flags(temp.b.l);
     sally_Flags(temp.getBL());
+
+    // Z flag
+    if (!ztemp.getBL()) {
+      sally_p |= SALLY_FLAG.Z;
+    }
+    else {
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
+    }
+
     //sally_a = (ah << 4) | (al & 15);
     sally_a = ((ah << 4) | (al & 15)) & 0xFF;
   }
@@ -2037,15 +2082,14 @@ function sally_ExecuteInstruction() {
       sally_AbsoluteX();
       sally_INC();
       return sally_cycles;
-    case 0x4b: /* ALR (ASR) */     
+    case 0x4b: // ALR (ASR) 
       //console.log("ALR (ASR)");
       sally_Immediate();
       sally_AND();
       sally_LSRA();
       return sally_cycles;
-    case 0x0b: /* ANC */  
-    case 0x2b: /* ANC */      
-      /*console.log("ANC");*/
+    case 0x0b: // ANC   
+    case 0x2b: // ANC 
       sally_Immediate();
       sally_AND();
       var temp = sally_p;
@@ -2056,6 +2100,25 @@ function sally_ExecuteInstruction() {
         //sally_p &= ~SALLY_FLAG.C;
         sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
       }    
+      return sally_cycles;
+    case 0xb3:      
+      sally_IndirectY();
+      sally_LDA();
+      sally_TAX();
+      return sally_cycles;
+    case 0x97:
+      sally_ZeroPageY();
+      sally_PHP();
+      sally_PHA();
+      sally_stx();
+      sally_AND();
+      sally_STA();
+      sally_PLA();
+      sally_PLP();      
+      return sally_cycles;
+    case 0x64:   
+    case 0x89:
+      // No-op       
       return sally_cycles;
     case 0xff:
     case 0xfc:
@@ -2086,7 +2149,6 @@ function sally_ExecuteInstruction() {
     case 0xbf:
     case 0xbb:
     case 0xb7:
-    case 0xb3:
     case 0xb2:
     case 0xaf:
     case 0xab:
@@ -2096,12 +2158,10 @@ function sally_ExecuteInstruction() {
     case 0x9e:
     case 0x9c:
     case 0x9b:
-    case 0x97:
     case 0x93:
     case 0x92:
     case 0x8f:
     case 0x8b:
-    case 0x89:
     case 0x87:
     case 0x83:
     case 0x82:
@@ -2117,7 +2177,6 @@ function sally_ExecuteInstruction() {
     case 0x6f:
     case 0x6b:
     case 0x67:
-    case 0x64:
     case 0x63:
     case 0x62:
     case 0x5f:
@@ -2159,6 +2218,7 @@ function sally_ExecuteInstruction() {
     case 0x04:
     case 0x03:
     case 0x02:
+      //console.log('unmapped opcode: ' + sally_opcode.toString(16));
       return sally_cycles;
     /*      
           l_0xff:
@@ -2280,6 +2340,7 @@ function sally_ExecuteRES() {
   sally_pc.setBL(memory_ram[SALLY_RES.L]);
   //sally_pc.b.h = memory_ram[SALLY_RES.H];
   sally_pc.setBH(memory_ram[SALLY_RES.H]);
+  //console.log("Execute RES: " + (memory_ram[SALLY_RES.L] | memory_ram[SALLY_RES.H] << 8))
   return 6;
 }
 
@@ -2299,6 +2360,7 @@ function sally_ExecuteNMI() {
   sally_pc.setBL(memory_ram[SALLY_NMI.L]);
   //sally_pc.b.h = memory_ram[SALLY_NMI.H];
   sally_pc.setBH(memory_ram[SALLY_NMI.H]);
+  //console.log("Execute NMI: " + (memory_ram[SALLY_NMI.L] | memory_ram[SALLY_NMI.H] << 8))  
   return 7;
 }
 
@@ -2319,6 +2381,7 @@ function sally_ExecuteIRQ() {
     sally_pc.setBL(memory_ram[SALLY_IRQ.L]);
     //sally_pc.b.h = memory_ram[SALLY_IRQ.H];
     sally_pc.setBH(memory_ram[SALLY_IRQ.H]);
+    //console.log("Execute IRQ: " + (memory_ram[SALLY_IRQ.L] | memory_ram[SALLY_IRQ.H] << 8))      
   }
   return 7;
 }

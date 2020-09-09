@@ -87,6 +87,8 @@ var cartridge_pokey450 = false;
 var cartridge_flags = 0;
 var cartridge_xm = false;
 
+var lock = false;
+
 // ----------------------------------------------------------------------------
 // Reset
 // ----------------------------------------------------------------------------
@@ -103,6 +105,8 @@ function memory_Reset() {
 
   // Debug, reset write count to High Score SRAM
   //hs_sram_write_count = 0;
+
+  lock = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -190,6 +194,27 @@ function memory_Write(address, data) {
       }
     }
 
+    // INPTCTRL
+    // Diagnosed by RevEng
+    // Multiple addresses are used to set INPTCTRL
+    // Lack Mode needs to be set
+    if (address >= 0 && address <= 0xf) {      
+      if (!lock) {        
+        if (data & 1) {
+          lock = true; 
+          //console.log("LOCK!:" + data); 
+        }
+
+       if ((data&4) && Cartridge.IsLoaded()) {
+          Cartridge.Store();
+          //console.log("CART STORE!");
+        }
+        else if (!(data&4) && Bios.IsEnabled()) {
+          Bios.Store();
+          //console.log("BIOS STORE!");
+        }
+      }
+    } else {
     switch (address) {
       case WSYNC:
         if (!(cartridge_flags & 128)) {
@@ -197,14 +222,14 @@ function memory_Write(address, data) {
           memory_ram[WSYNC] = 1;
         }
         break;
-      case INPTCTRL:
-        if (data == 22 && Cartridge.IsLoaded()) {
-          Cartridge.Store();
-        }
-        else if (data == 2 && Bios.IsEnabled()) {
-          Bios.Store();
-        }
-        break;
+        // case INPTCTRL:
+        //   if (data == 22 && Cartridge.IsLoaded()) {
+        //     Cartridge.Store();
+        //   }
+        //   else if (data == 2 && Bios.IsEnabled()) {
+        //     Bios.Store();
+        //   }
+        //   break;
       case INPT0:
       case INPT1:
       case INPT2:
@@ -261,7 +286,7 @@ function memory_Write(address, data) {
         if (address >= 8256 && address <= 8447) {
           memory_ram[address - 8192] = data;
         }
-        else if (address >= 8512 && address <= 8702) {
+          else if (address >= 8512 && address <= 8703) {
           memory_ram[address - 8192] = data;
         }
         else if (address >= 64 && address <= 255) {
@@ -270,7 +295,14 @@ function memory_Write(address, data) {
         else if (address >= 320 && address <= 511) {
           memory_ram[address + 8192] = data;
         }
+          else if (address >= 10240 && address <= 12287) {
+            memory_ram[address - 2048] = data;
+          }
+          else if (address >= 8192 && address <= 10239) {
+            memory_ram[address + 2048] = data;
+          }
         break;
+      }
     }
   }
   else {
