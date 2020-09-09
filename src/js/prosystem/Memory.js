@@ -78,6 +78,10 @@ var memory_ram = new Array(MEMORY_SIZE);
 //byte memory_rom[MEMORY_SIZE] = {0};
 var memory_rom = new Array(MEMORY_SIZE);
 
+var tmp_cart_memory_ram = new Array(MEMORY_SIZE);
+var tmp_cart_memory_rom = new Array(MEMORY_SIZE);
+var tmp_cart_memory_enabled = false;
+
 //int hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
 //var hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
 
@@ -96,17 +100,22 @@ function memory_Reset() {
   //uint index;
   var index;
   for (index = 0; index < MEMORY_SIZE; index++) {
+    
     memory_ram[index] = 0;
     memory_rom[index] = 1;
+    tmp_cart_memory_ram[index] = 0;
+    tmp_cart_memory_rom[index] = 1;
   }
   for (index = 0; index < 16384; index++) {
     memory_rom[index] = 0;
+    tmp_cart_memory_rom[index] = 0;
   }
 
   // Debug, reset write count to High Score SRAM
   //hs_sram_write_count = 0;
 
   lock = false;
+  tmp_cart_memory_enabled = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -202,16 +211,34 @@ function memory_Write(address, data) {
       if (!lock) {        
         if (data & 1) {
           lock = true; 
-          //console.log("LOCK!:" + data); 
+          console.log("LOCK!:" + data); 
         }
-
        if ((data&4) && Cartridge.IsLoaded()) {
-          Cartridge.Store();
-          //console.log("CART STORE!");
+          if (!Cartridge.IsStored()) {            
+            Cartridge.Store();
+          } else if (tmp_cart_memory_enabled) {
+            //console.log("CART STORE, copy from tmp cart");
+            tmp_cart_memory_enabled = false;
+            var bios_size = Bios.Size();
+            var offset = tmp_cart_memory_ram.length - bios_size;
+            for (var i = 0; i < bios_size; i++) {              
+              memory_ram[offset + i] = tmp_cart_memory_ram[offset + i];
+              memory_rom[offset + i] = tmp_cart_memory_rom[offset + i];
+            }              
+          }
         }
         else if (!(data&4) && Bios.IsEnabled()) {
+          if (Cartridge.IsStored() && !tmp_cart_memory_enabled) {
+            //console.log("BIOS STORE, copy to tmp cart");
+            tmp_cart_memory_enabled = true;
+            var bios_size = Bios.Size();
+            var offset = tmp_cart_memory_ram.length - bios_size;
+            for (var i = 0; i < bios_size; i++) {            
+              tmp_cart_memory_ram[offset + i] = memory_ram[offset + i];
+              tmp_cart_memory_rom[offset + i] = memory_rom[offset + i];
+            }
+          }
           Bios.Store();
-          //console.log("BIOS STORE!");
         }
       }
     } else {
