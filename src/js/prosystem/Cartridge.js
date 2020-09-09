@@ -118,6 +118,8 @@ var cartridge_buffer = null; // Will be an Array()
 //static uint cartridge_size = 0;
 var cartridge_size = 0;
 
+var cartridge_stored = false;
+
 // ----------------------------------------------------------------------------
 // HasHeader
 // ----------------------------------------------------------------------------
@@ -450,6 +452,8 @@ function cartridge_Load(data, size) {
 // ----------------------------------------------------------------------------
 //void cartridge_Store() {
 function cartridge_Store() {
+  cartridge_stored = true;
+  //console.log("### CART STORE");
   switch (cartridge_type) {
     case CARTRIDGE_TYPE_NORMAL:
       //memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer,);
@@ -597,6 +601,7 @@ function cartridge_IsLoaded() {
 // ----------------------------------------------------------------------------
 //void cartridge_Release() {
 function cartridge_Release() {
+  cartridge_stored = false;
   high_score_cart_loaded = false;
 
   //if (cartridge_buffer != NULL) {
@@ -844,6 +849,10 @@ function GetXmModeDefault() {
   return XM_MODE_DEFAULT;
 }
 
+function cartridge_IsStored() {
+  return cartridge_stored;
+}
+
 function init(e) {
   REGION_NTSC = e.Region.REGION_NTSC;
 
@@ -904,7 +913,8 @@ export {
   cartridge_Write as Write,
   cartridge_Store as Store,
   cartridge_Release as Release,
-  cartridge_LoadHighScoreCart as LoadHighScoreCart
+  cartridge_LoadHighScoreCart as LoadHighScoreCart,
+  cartridge_IsStored as IsStored
 }
 
 // // The memory location of the high score cartridge SRAM
