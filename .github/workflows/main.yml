@@ -47,7 +47,7 @@ jobs:
         BASE_BRANCH: master
         BRANCH: gh-pages
         FOLDER: site/deploy
-        CLEAN_EXCLUDE: '["staging", "perf", "audio", "mobile"]'
+        CLEAN_EXCLUDE: '["staging", "mobile", "cycles"]'
 
     - name: Deploy to GitHub pages (staging)
       uses: JamesIves/github-pages-deploy-action@releases/v3
@@ -58,6 +58,16 @@ jobs:
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: staging
+
+    - name: Deploy to GitHub pages (cycles)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/cycles'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: cycles
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: cycles
 
     - name: Deploy to GitHub pages (mobile)
       uses: JamesIves/github-pages-deploy-action@releases/v3
