@@ -511,7 +511,7 @@ function maria_RenderScanline(maria_scanline) {
       }
     }
   }
-  return maria_cycles + extra_cycles;
+  return maria_cycles /*+ extra_cycles*/;
 }
 
 // ----------------------------------------------------------------------------
