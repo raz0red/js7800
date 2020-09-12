@@ -39,7 +39,7 @@ var HS_SRAM_SIZE = 2048;
 
 var highScoreCallback = null;
 
-var HBLANK_DEFAULT = 34;
+var HBLANK_DEFAULT = 28;
 var REGION_NTSC = null; 
 var CARTRIDGE_TYPE_NORMAL = 0;
 var CARTRIDGE_TYPE_SUPERCART = 1;
@@ -90,7 +90,7 @@ var cartridge_xm = false;
 //bool cartridge_disable_bios = false;
 var cartridge_disable_bios = false;
 //uint cartridge_hblank = 34;
-var cartridge_hblank = 34;
+var cartridge_hblank = 28;
 //byte cartridge_left_switch = 1;
 var cartridge_left_switch = 1;
 //byte cartridge_right_switch = 0;

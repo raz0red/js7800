@@ -83,7 +83,7 @@ var maria_scanline = 1;
 var cartridge_pokey = false;
 var cartridge_flags = 0;
 var cartridge_xm = false;
-var cartridge_hblank = 34;
+var cartridge_hblank = 28;
 
 // Set the scanlines for Pokey
 Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
@@ -150,11 +150,6 @@ function prosystem_FireLightGun() {
   }
 }
 
-//uint prosystem_extra_cycles = 0;
-var prosystem_extra_cycles = 0;
-
-//uint dbg_saved_cycles = 0;
-var dbg_saved_cycles = 0;
 //uint dbg_wsync_count = 0;
 var dbg_wsync_count = 0;
 //uint dbg_maria_cycles = 0;
@@ -193,8 +188,6 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
   riot_SetInput(input);
 
-  prosystem_extra_cycles = 0;
-  dbg_saved_cycles = 0; // debug
   dbg_wsync_count = 0;  // debug
   dbg_maria_cycles = 0; // debug
   dbg_p6502_cycles = 0; // debug    
@@ -224,28 +217,18 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     //uint cycles = 0;
     var cycles = 0;
 
-    if (!cycle_stealing || (memory_ram[CTRL] & 96) != 64) {
-      // Exact cycle counts when Maria is disabled        
-      (prosystem_cycles %= CYCLES_PER_SCANLINE) | 0;
-      prosystem_extra_cycles = 0;
-    }
-    else {
-      prosystem_extra_cycles = ((prosystem_cycles % CYCLES_PER_SCANLINE) | 0);
-      dbg_saved_cycles += prosystem_extra_cycles;
-
-      // Some fudge for Maria cycles. Unfortunately Maria cycle counting
-      // isn't exact (This adds some extra cycles).
-      prosystem_cycles = 0;
-    }
+    (prosystem_cycles %= CYCLES_PER_SCANLINE) | 0;
 
     // If lightgun is enabled, check to see if it should be fired
     if (lightgun) prosystem_FireLightGun();
 
-    while (prosystem_cycles < cartridge_hblank) {
+    var hblank_cycles = 0;
+    while (hblank_cycles < cartridge_hblank) {
       cycles = sally_ExecuteInstruction();
-      prosystem_cycles += (cycles << 2);
-      if (Sally.half_cycle) prosystem_cycles += 2;
-
+      hblank_cycles += (cycles << 2);
+      if (Sally.half_cycle)  {
+        hblank_cycles += 2;
+      }
       dbg_p6502_cycles += (cycles << 2); // debug
 
       if (riot_IsTimingEnabled()) {
@@ -264,7 +247,9 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       }
     }
 
-    Xm.setDmaActive(true);
+    prosystem_cycles += hblank_cycles;
+
+    Xm.setDmaActive(true);    
     cycles = maria_RenderScanline(maria_scanline);
     Xm.setDmaActive(false);
 
@@ -387,14 +372,6 @@ function GetCycles() {
   return prosystem_cycles; 
 }
 
-function GetExtraCycles() { 
-  return prosystem_extra_cycles; 
-}
-
-function GetDebugSavedCycles() { 
-  return dbg_saved_cycles; 
-}
-
 function GetDebugWsyncCount() { 
   return dbg_wsync_count; 
 }
@@ -444,8 +421,6 @@ export {
   GetScanlines,
   SetScanlines,
   GetCycles,
-  GetExtraCycles,
-  GetDebugSavedCycles,
   GetDebugWsyncCount,
   GetDebugMariaCycles,
   GetDebug6502Cycles,

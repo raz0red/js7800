@@ -185,7 +185,7 @@ function startEmu(cart, isRestart) {
           if ((fc % debugFrequency) == 0) {
             var elapsed = Date.now() - start;
             if (debug) {
-              console.log("v:%s, vsync: %d, %stimer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
+              console.log("v:%s, vsync: %d, %stimer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d",
                 (1000.0 / (elapsed / fc)).toFixed(2),
                 vsync ? 1 : 0,
                 (vsync ? "" : ("wait: " + ((avgWait / fc) * frequency).toFixed(2) + ", ")),
@@ -194,8 +194,7 @@ function startEmu(cart, isRestart) {
                 ProSystem.GetDebugWsyncCount(),
                 ProSystem.GetDebugCycleStealing() ? 1 : 0,
                 ProSystem.GetDebugMariaCycles(),
-                ProSystem.GetDebug6502Cycles(),
-                ProSystem.GetDebugSavedCycles());
+                ProSystem.GetDebug6502Cycles());
             }
             start = Date.now();
             fc = 0;

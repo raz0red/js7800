@@ -314,9 +314,7 @@ function pokey_GetRegister(address) {
     case POKEY_RANDOM:
       //ullong curr_scanline_counter =
       var curr_scanline_counter =
-        (random_scanline_counter +
-          ProSystem.GetCycles() +
-          ProSystem.GetExtraCycles());
+        (random_scanline_counter + ProSystem.GetCycles());
 
       if (SKCTL & SK_RESET) {
         //ullong adjust = ((curr_scanline_counter - prev_random_scanline_counter) >> 2);
