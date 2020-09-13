@@ -60,7 +60,9 @@ var maria_visibleArea = new Rect(0, 26, 319, 248);
 var maria_surface = null;
 
 //static byte maria_lineRAM[MARIA_LINERAM_SIZE];
-var maria_lineRAM = new Array(MARIA_LINERAM_SIZE);
+var maria_lineRAM_buffers = [new Array(MARIA_LINERAM_SIZE), new Array(MARIA_LINERAM_SIZE)];
+var maria_lineRAM_index = 0;
+var maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
 //static uint maria_cycles;
 var maria_cycles = 0;
 var extra_cycles = 0;
@@ -293,9 +295,9 @@ var basePP = new Pair();
 //static inline void maria_StoreLineRAM() {
 function maria_StoreLineRAM() {
   //for (int index = 0; index < MARIA_LINERAM_SIZE; index++) {
-  for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
-    maria_lineRAM[index] = 0;
-  }
+  // for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
+  //   maria_lineRAM[index] = 0;
+  // }
 
   //byte mode = memory_ram[maria_dp.w + 1];
   var mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
@@ -407,6 +409,11 @@ function maria_Reset() {
     maria_surface[index] = 0;
   }
 
+  for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
+    maria_lineRAM_buffers[0][index] = 0;
+    maria_lineRAM_buffers[1][index] = 0;
+  }
+
   //
   // WII
   //
@@ -459,6 +466,8 @@ function maria_RenderScanline(maria_scanline) {
     }
   }
 
+  maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
+
   if ((ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {
     maria_cycles += 16; // Maria cycles (DMA Startup)
     if (maria_scanline == maria_displayArea.top) {
@@ -481,10 +490,7 @@ function maria_RenderScanline(maria_scanline) {
         extra_cycles += (sally_ExecuteNMI() << 2);
       }
     }
-    else if (maria_scanline >= maria_visibleArea.top && maria_scanline <= maria_visibleArea.bottom) {
-      //maria_WriteLineRAM(maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
-      maria_WriteLineRAM(maria_surface, ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
-    }
+
     if (maria_scanline != maria_displayArea.bottom) {
       //maria_cycles += 4;
       //maria_dp.b.l = memory_ram[maria_dpp.w + 2];
@@ -511,6 +517,19 @@ function maria_RenderScanline(maria_scanline) {
       }
     }
   }
+
+  maria_lineRAM_index = 1 - maria_lineRAM_index;
+  maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
+
+  if (maria_scanline != maria_displayArea.top && maria_scanline >= maria_visibleArea.top && maria_scanline <= maria_visibleArea.bottom) {
+    //maria_WriteLineRAM(maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
+    maria_WriteLineRAM(maria_surface, ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
+
+    for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
+      maria_lineRAM[index] = 0;
+    }  
+  }
+
   return maria_cycles /*+ extra_cycles*/;
 }
 
