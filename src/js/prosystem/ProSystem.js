@@ -46,8 +46,11 @@ var riot_IsTimingEnabled = Riot.IsTimingEnabled;
 var riot_UpdateTimer = Riot.UpdateTimer;
 var maria_displayArea = Maria.displayArea;
 var maria_RenderScanline = Maria.RenderScanline;
+var maria_IsNMI = Maria.IsNMI;
+var MARIA_CYCLE_LIMIT = Maria.MARIA_CYCLE_LIMIT;
 var memory_ram = Memory.ram;
 var sally_ExecuteInstruction = Sally.ExecuteInstruction;
+var sally_ExecuteNMI = Sally.ExecuteNMI;
 var isLightGunEnabled = Cartridge.IsLightGunEnabled;
 
 var INPT4 = 12;
@@ -183,7 +186,6 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   dbg_cycle_stealing = cycle_stealing;
 
   // Is the lightgun enabled for the current frame?
-  //bool lightgun =
   var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
   riot_SetInput(input);
@@ -224,18 +226,19 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     var hblank_cycles = 0;
     while (hblank_cycles < cartridge_hblank) {
-      cycles = sally_ExecuteInstruction();
-      hblank_cycles += (cycles << 2);
+      cycles = (sally_ExecuteInstruction() << 2);
+      hblank_cycles += cycles;
+      prosystem_cycles += cycles;
       if (Sally.half_cycle)  {
         hblank_cycles += 2;
+        prosystem_cycles += 2;
       }
-      dbg_p6502_cycles += (cycles << 2); // debug
+      dbg_p6502_cycles += cycles; // debug
 
       if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles);
+        riot_UpdateTimer(cycles >>> 2);
       }
 
-      // If lightgun is enabled, check to see if it should be fired
       if (lightgun) prosystem_FireLightGun();
 
       if (memory_ram[WSYNC] && wsync) {
@@ -245,35 +248,47 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
         wsync_scanline = true;
         break;
       }
-    }
-
-    prosystem_cycles += hblank_cycles;
+    }    
 
     Xm.setDmaActive(true);    
     cycles = maria_RenderScanline(maria_scanline);
     Xm.setDmaActive(false);
-
-    if (cycle_stealing) {
-      prosystem_cycles += cycles;
+    
+    if (cycle_stealing) {      
+      var old_cycles = prosystem_cycles;
+      if (cycles >= MARIA_CYCLE_LIMIT)
+        prosystem_cycles = CYCLES_PER_SCANLINE;
+      else        
+        prosystem_cycles += cycles;
       dbg_maria_cycles += cycles; // debug
 
       if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles >>> 2);
-      }
+        riot_UpdateTimer((prosystem_cycles - old_cycles) >>> 2);
+      }        
     }
 
-    while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
-      cycles = sally_ExecuteInstruction();
-      prosystem_cycles += (cycles << 2);
-      if (Sally.half_cycle) prosystem_cycles += 2;
+    if (lightgun) prosystem_FireLightGun();
 
-      dbg_p6502_cycles += (cycles << 2); // debug
+    if (maria_IsNMI()) {
+        var count = sally_ExecuteNMI() << 2;
+        if (prosystem_cycles < CYCLES_PER_SCANLINE) {
+          prosystem_cycles += count;
+        }
+    }
+    
+    if (lightgun) prosystem_FireLightGun();
+
+    while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
+      cycles = (sally_ExecuteInstruction() << 2);
+      prosystem_cycles += cycles;
+      if (Sally.half_cycle) prosystem_cycles += 2;
+      dbg_p6502_cycles += cycles; // debug
 
       // If lightgun is enabled, check to see if it should be fired
       if (lightgun) prosystem_FireLightGun();
 
       if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles);
+        riot_UpdateTimer(cycles >>> 2);
       }
 
       if (memory_ram[WSYNC] && wsync) {
@@ -294,7 +309,6 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       prosystem_cycles = CYCLES_PER_SCANLINE;
     }
 
-    // If lightgun is enabled, check to see if it should be fired
     if (lightgun) prosystem_FireLightGun();
 
     Tia_Process(2);
