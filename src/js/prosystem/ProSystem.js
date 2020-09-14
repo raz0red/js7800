@@ -127,7 +127,7 @@ function prosystem_Reset(postResetCallback) {
 
     var postHsLoad = function(isSuccess) {
       Events.fireEvent("onHighScoreCartLoaded", isSuccess);
-      prosystem_cycles = Sally.ExecuteRES();
+      prosystem_cycles = Sally.ExecuteRES() << 4;
       prosystem_active = true;  
       // Invoke post reset callback
       postResetCallback();
@@ -207,8 +207,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     if (maria_scanline == maria_displayArea.top) {
       memory_ram[MSTAT] = 0;
-    }
-    else if (maria_scanline == maria_displayArea.bottom) {
+    } else if (maria_scanline == maria_displayArea.bottom) {
       memory_ram[MSTAT] = 128;
     }
 
@@ -224,16 +223,12 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     // If lightgun is enabled, check to see if it should be fired
     if (lightgun) prosystem_FireLightGun();
 
-    var hblank_cycles = 0;
-    while (hblank_cycles < cartridge_hblank) {
+    while (prosystem_cycles < cartridge_hblank) {
       cycles = (sally_ExecuteInstruction() << 2);
-      hblank_cycles += cycles;
       prosystem_cycles += cycles;
       if (Sally.half_cycle)  {
-        hblank_cycles += 2;
         prosystem_cycles += 2;
       }
-      dbg_p6502_cycles += cycles; // debug
 
       if (riot_IsTimingEnabled()) {
         riot_UpdateTimer(cycles >>> 2);
@@ -256,8 +251,10 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     
     if (cycle_stealing) {      
       var old_cycles = prosystem_cycles;
-      if (cycles >= MARIA_CYCLE_LIMIT)
+      if (cycles >= MARIA_CYCLE_LIMIT) {
+        wsync_scanline = true;
         prosystem_cycles = CYCLES_PER_SCANLINE;
+      }
       else        
         prosystem_cycles += cycles;
       dbg_maria_cycles += cycles; // debug
@@ -270,9 +267,10 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     if (lightgun) prosystem_FireLightGun();
 
     if (maria_IsNMI()) {
-        var count = sally_ExecuteNMI() << 2;
-        if (prosystem_cycles < CYCLES_PER_SCANLINE) {
-          prosystem_cycles += count;
+        var cycles = sally_ExecuteNMI() << 2;
+        prosystem_cycles += cycles;
+        if (riot_IsTimingEnabled()) {
+          riot_UpdateTimer(cycles >>> 2);
         }
     }
     
@@ -282,7 +280,6 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       cycles = (sally_ExecuteInstruction() << 2);
       prosystem_cycles += cycles;
       if (Sally.half_cycle) prosystem_cycles += 2;
-      dbg_p6502_cycles += cycles; // debug
 
       // If lightgun is enabled, check to see if it should be fired
       if (lightgun) prosystem_FireLightGun();
@@ -308,6 +305,8 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       }
       prosystem_cycles = CYCLES_PER_SCANLINE;
     }
+
+    dbg_p6502_cycles += prosystem_cycles; // debug
 
     if (lightgun) prosystem_FireLightGun();
 
