@@ -352,6 +352,9 @@ function maria_StoreLineRAM() {
       maria_pp.bhPlusEqual(maria_offset);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
+        if (maria_cycles >= MARIA_CYCLE_LIMIT) 
+          break;
+
         if (maria_IsHolyDMA()) {
           if (!dma_hole_known) {
             maria_cycles += 3;
@@ -361,7 +364,6 @@ function maria_StoreLineRAM() {
           maria_cycles += 3;
         }
         maria_StoreGraphic();
-        if (maria_cycles >= MARIA_CYCLE_LIMIT) return;
       }
     }
     else {
@@ -372,6 +374,9 @@ function maria_StoreLineRAM() {
       basePP.copy(maria_pp);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
+        if (maria_cycles >= MARIA_CYCLE_LIMIT) 
+          break;
+
         if (maria_IsHolyDMA()) {
           if (!dma_hole_known) {
             maria_cycles += 3;
@@ -390,12 +395,19 @@ function maria_StoreLineRAM() {
         maria_StoreGraphic(); // Maria cycles (Indirect, 1 byte)        
         if (cwidth) {
           maria_StoreGraphic();
-        } 
-        if (maria_cycles >= MARIA_CYCLE_LIMIT) return;
+        }
       }
     }
     //mode = memory_ram[maria_dp.w + 1];
     mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
+  }
+
+	// Last Line post-render DMA cycle penalties...
+  if (maria_offset == 0) {
+    maria_cycles += 6; // extra shutdown time
+    if ((dr ? ram[maria_dpp.getW() + 3] : ramf(maria_dpp.getW() + 3)) & 128) {
+      maria_cycles += 17; // interrupt overhead
+    }  
   }
 }
 
@@ -513,7 +525,6 @@ function maria_RenderScanline(maria_scanline) {
 
       if (maria_scanline > maria_displayArea.top) {
         if (maria_offset == 0) {
-          maria_cycles += 6; // Maria cycles (Last line of zone)
           //maria_dpp.w += 3;
           maria_dpp.wPlusEqual(3);
           //maria_h08 = memory_ram[maria_dpp.w] & 32;
@@ -524,7 +535,6 @@ function maria_RenderScanline(maria_scanline) {
           maria_offset = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 15;
           //if (memory_ram[maria_dpp.w] & 128) {
           if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
-            maria_cycles += 17; // Maria cycles (NMI) 
             nmi = true;
           }
         } else {
