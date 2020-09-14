@@ -207,7 +207,8 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     if (maria_scanline == maria_displayArea.top) {
       memory_ram[MSTAT] = 0;
-    } else if (maria_scanline == maria_displayArea.bottom) {
+    }
+    else if (maria_scanline == maria_displayArea.bottom) {
       memory_ram[MSTAT] = 128;
     }
 
@@ -218,6 +219,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     //uint cycles = 0;
     var cycles = 0;
 
+    // Reset ProSystem cycles for current frame
     (prosystem_cycles %= CYCLES_PER_SCANLINE) | 0;
 
     // If lightgun is enabled, check to see if it should be fired
@@ -225,20 +227,20 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     while (prosystem_cycles < cartridge_hblank) {
       cycles = (sally_ExecuteInstruction() << 2);
-      prosystem_cycles += cycles;
+      prosystem_cycles += cycles;      
+      if (lightgun) prosystem_FireLightGun();
+
       if (Sally.half_cycle)  {
         prosystem_cycles += 2;
+        if (lightgun) prosystem_FireLightGun();
       }
 
       if (riot_IsTimingEnabled()) {
         riot_UpdateTimer(cycles >>> 2);
       }
 
-      if (lightgun) prosystem_FireLightGun();
-
       if (memory_ram[WSYNC] && wsync) {
         dbg_wsync_count++; // debug
-        //memory_ram[WSYNC] = false;
         memory_ram[WSYNC] = 0;
         wsync_scanline = true;
         break;
@@ -263,26 +265,31 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
         riot_UpdateTimer((prosystem_cycles - old_cycles) >>> 2);
       }        
     }
-
-    if (lightgun) prosystem_FireLightGun();
-
+    
+    // https://atariage.com/forums/topic/201163-the-truth-about-wsync-and-other-scanline-issues/
+    // - The 6502 requires two cycles to acknowledge the NMI.
+    // - 0-6 cycles pass as the 6502 finishes the currently executing instruction.
+    // Interrupt entry takes 7 cycles.
     if (maria_IsNMI()) {
-        var cycles = sally_ExecuteNMI() << 2;
-        prosystem_cycles += cycles;
-        if (riot_IsTimingEnabled()) {
-          riot_UpdateTimer(cycles >>> 2);
-        }
+      cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
+      cycles += sally_ExecuteNMI() << 2; // Interrupt takes 7 cycles
+      if (!wsync_scanline) {
+        prosystem_cycles += cycles;        
+      }
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer(cycles >>> 2);
+      }          
     }
     
-    if (lightgun) prosystem_FireLightGun();
-
     while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
       cycles = (sally_ExecuteInstruction() << 2);
       prosystem_cycles += cycles;
-      if (Sally.half_cycle) prosystem_cycles += 2;
-
-      // If lightgun is enabled, check to see if it should be fired
       if (lightgun) prosystem_FireLightGun();
+
+      if (Sally.half_cycle) {
+         prosystem_cycles += 2;
+         if (lightgun) prosystem_FireLightGun();
+      }
 
       if (riot_IsTimingEnabled()) {
         riot_UpdateTimer(cycles >>> 2);
@@ -290,7 +297,6 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
       if (memory_ram[WSYNC] && wsync) {
         dbg_wsync_count++; // debug
-        //memory_ram[WSYNC] = false;
         memory_ram[WSYNC] = 0;
         wsync_scanline = true;
         break;
