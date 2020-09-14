@@ -98,7 +98,6 @@ function startEmu(cart, isRestart) {
   console.log("  Controller 1: %d", Cartridge.GetController1());
   console.log("  Controller 2: %d", Cartridge.GetController2());
   console.log("  Region: %s", Cartridge.GetRegion() == 1 ? "PAL" : "NTSC");
-  console.log("  Flags: %d", Cartridge.GetFlags());
   console.log("  XM: %s, mode: %s", 
     Cartridge.IsXmEnabled() ? "true" : "false",
     (Cartridge.GetXmMode() == 2 ? "Automatic" : (Cartridge.GetXmMode() ? "Enabled" : "Disabled"))
@@ -185,14 +184,12 @@ function startEmu(cart, isRestart) {
           if ((fc % debugFrequency) == 0) {
             var elapsed = Date.now() - start;
             if (debug) {
-              console.log("v:%s, vsync: %d, %stimer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d",
+              console.log("v:%s, vsync: %d, %stimer: %d, wsync: %d, mar: %d, cpu: %d",
                 (1000.0 / (elapsed / fc)).toFixed(2),
                 vsync ? 1 : 0,
                 (vsync ? "" : ("wait: " + ((avgWait / fc) * frequency).toFixed(2) + ", ")),
                 (Riot.GetTimerCount() % 1000),                
-                ProSystem.GetDebugWsync() ? 1 : 0,
                 ProSystem.GetDebugWsyncCount(),
-                ProSystem.GetDebugCycleStealing() ? 1 : 0,
                 ProSystem.GetDebugMariaCycles(),
                 ProSystem.GetDebug6502Cycles());
             }

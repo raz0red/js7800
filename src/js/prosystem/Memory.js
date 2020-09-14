@@ -88,7 +88,6 @@ var tmp_cart_memory_enabled = false;
 /** Shadow of Cartridge */
 var cartridge_pokey = false;
 var cartridge_pokey450 = false;
-var cartridge_flags = 0;
 var cartridge_xm = false;
 
 var lock = false;
@@ -244,10 +243,8 @@ function memory_Write(address, data) {
     } else {
     switch (address) {
       case WSYNC:
-        if (!(cartridge_flags & 128)) {
-          //memory_ram[WSYNC] = true;
-          memory_ram[WSYNC] = 1;
-        }
+        //memory_ram[WSYNC] = true;
+        memory_ram[WSYNC] = 1;
         break;
         // case INPTCTRL:
         //   if (data == 22 && Cartridge.IsLoaded()) {
@@ -370,8 +367,7 @@ function memory_ClearROM(address, size) {
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
   cartridge_pokey450 = Cartridge.IsPokey450Enabled();
-  cartridge_xm = Cartridge.IsXmEnabled();
-  cartridge_flags = Cartridge.GetFlags();
+  cartridge_xm = Cartridge.IsXmEnabled();  
 }
 
 Events.addListener(

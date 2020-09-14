@@ -43,11 +43,9 @@ lineReader.on('line', function (line) {
           key = 'ty';
         else if (key == 'region') 
           key = 'r';
-        else if (key == 'flags') 
-          key = 'f';
         else if (key == 'swapbuttons')
           key = 'sb';                    
-          else if (key == 'hsc')
+        else if (key == 'hsc')
           key = 'hs';                    
         var value = values[1].replace("'", "\\'");
         value = value.replace('"', '\\"');

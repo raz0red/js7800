@@ -67,10 +67,6 @@ function database_Load(digest) {
       if (region !== undefined) {
         Cartridge.SetRegion(parseInt(region));
       }
-      var flags = entry['f'];
-      if (flags !== undefined) {
-        Cartridge.SetFlags(parseInt(flags));
-      }
       var xm = entry['xm'];
       if (xm !== undefined) {
         Cartridge.SetXm(xm == 't');

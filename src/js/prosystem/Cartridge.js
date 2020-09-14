@@ -77,8 +77,6 @@ var cartridge_pokey450 = false;
 var cartridge_controller = [1, 1];
 //byte cartridge_bank;
 var cartridge_bank = 0;
-//uint cartridge_flags;
-var cartridge_flags = 0;
 //int cartridge_crosshair_x;
 var cartridge_crosshair_x = 0;
 //int cartridge_crosshair_y;
@@ -287,7 +285,6 @@ function cartridge_ReadHeader(header) {
   cartridge_controller[0] = header[55];
   cartridge_controller[1] = header[56];
   cartridge_region = header[57];
-  cartridge_flags = 0;
   cartridge_xm = (header[63] & 1) ? true : false;
   cartridge_hsc_enabled = header[58] & 0x03; // HSC or SaveKey /* 0x01; */
 
@@ -627,7 +624,6 @@ function cartridge_Release() {
     //memset(cartridge_controller, 1, sizeof(cartridge_controller));
     cartridge_controller = [1, 1];
     cartridge_bank = 0;
-    cartridge_flags = 0;
     cartridge_disable_bios = false;
     cartridge_crosshair_x = 0;
     cartridge_crosshair_y = 0;
@@ -717,10 +713,6 @@ function IsLightGunEnabled() {
   return cartridge_controller[0] == CARTRIDGE_CONTROLLER_LIGHTGUN; 
 }
   
-function GetFlags() { 
-  return cartridge_flags;
-}
-
 function GetHblank() { 
   return cartridge_hblank; 
 }
@@ -783,10 +775,6 @@ function GetController2() {
 
 function SetRegion(region) { 
   cartridge_region = region;
-}
-
-function SetFlags(flags) { 
-  cartridge_flags = flags; 
 }
 
 function SetXm(xm) { 
@@ -875,7 +863,6 @@ export {
   IsSwapButtons,
   IsDualAnalog,
   IsLightGunEnabled,
-  GetFlags,
   GetHblank,
   GetLeftSwitch,
   GetRightSwitch,
@@ -892,7 +879,6 @@ export {
   GetController1,
   GetController2,
   SetRegion,
-  SetFlags,
   SetXm,
   SetXmMode,
   GetXmMode,

@@ -58,9 +58,6 @@ var WSYNC = 36;
 var MSTAT = 40;
 var CTRL = 60;
 
-var CARTRIDGE_WSYNC_MASK = 2;
-var CARTRIDGE_CYCLE_STEALING_MASK = 1;
-
 // The number of cycles per scan line
 var CYCLES_PER_SCANLINE = 454;
 // The number of cycles for HBLANK
@@ -84,7 +81,6 @@ var maria_scanline = 1;
 
 /** Shadow of Cartridge */
 var cartridge_pokey = false;
-var cartridge_flags = 0;
 var cartridge_xm = false;
 var cartridge_hblank = 28;
 
@@ -159,10 +155,6 @@ var dbg_wsync_count = 0;
 var dbg_maria_cycles = 0;
 //uint dbg_p6502_cycles = 0;
 var dbg_p6502_cycles = 0;
-//bool dbg_wsync;
-var dbg_wsync = false;
-//bool dbg_cycle_stealing;
-var dbg_cycle_stealing = false;
 
 // ----------------------------------------------------------------------------
 // ExecuteFrame
@@ -175,16 +167,6 @@ var dbg_cycle_stealing = false;
 //void prosystem_ExecuteFrame(const byte* input)
 function prosystem_ExecuteFrame(input) // TODO: input is array
 {
-  // Is WSYNC enabled for the current frame?
-  //bool wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
-  var wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
-  dbg_wsync = wsync;
-
-  // Is Maria cycle stealing enabled for the current frame?
-  //bool cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
-  var cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
-  dbg_cycle_stealing = cycle_stealing;
-
   // Is the lightgun enabled for the current frame?
   var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
@@ -197,13 +179,6 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   if (cartridge_pokey || cartridge_xm) pokey_Frame();
 
   for (maria_scanline = 1; maria_scanline <= prosystem_scanlines; maria_scanline++) {
-    //#if 0      
-    //    if ((int)wii_orient_roll == maria_scanline) {
-    //  memory_ram[INPT2] &= 0x7f;
-    //} else {
-    //  memory_ram[INPT2] |= 0x80;
-    //}
-    //#endif
 
     if (maria_scanline == maria_displayArea.top) {
       memory_ram[MSTAT] = 0;
@@ -239,7 +214,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
         riot_UpdateTimer(cycles >>> 2);
       }
 
-      if (memory_ram[WSYNC] && wsync) {
+      if (memory_ram[WSYNC]) {
         dbg_wsync_count++; // debug
         memory_ram[WSYNC] = 0;
         wsync_scanline = true;
@@ -251,19 +226,17 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     cycles = maria_RenderScanline(maria_scanline);
     Xm.setDmaActive(false);
     
-    if (cycle_stealing) {      
-      var old_cycles = prosystem_cycles;
-      if (cycles >= MARIA_CYCLE_LIMIT) {
-        wsync_scanline = true;
-        prosystem_cycles = CYCLES_PER_SCANLINE;
-      }
-      else        
-        prosystem_cycles += cycles;
-      dbg_maria_cycles += cycles; // debug
+    var old_cycles = prosystem_cycles;
+    if (cycles >= MARIA_CYCLE_LIMIT) {
+      wsync_scanline = true;
+      prosystem_cycles = CYCLES_PER_SCANLINE;
+    }
+    else
+      prosystem_cycles += cycles;
+    dbg_maria_cycles += cycles; // debug
 
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer((prosystem_cycles - old_cycles) >>> 2);
-      }        
+    if (riot_IsTimingEnabled()) {
+      riot_UpdateTimer((prosystem_cycles - old_cycles) >>> 2);
     }
     
     // https://atariage.com/forums/topic/201163-the-truth-about-wsync-and-other-scanline-issues/
@@ -295,7 +268,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
         riot_UpdateTimer(cycles >>> 2);
       }
 
-      if (memory_ram[WSYNC] && wsync) {
+      if (memory_ram[WSYNC]) {
         dbg_wsync_count++; // debug
         memory_ram[WSYNC] = 0;
         wsync_scanline = true;
@@ -403,14 +376,6 @@ function GetDebug6502Cycles() {
   return dbg_p6502_cycles; 
 }
 
-function GetDebugWsync() { 
-  return dbg_wsync; 
-}
-
-function GetDebugCycleStealing() { 
-  return dbg_cycle_stealing; 
-}
-
 function GetMariaScanline() { 
   return maria_scanline; 
 }
@@ -418,7 +383,6 @@ function GetMariaScanline() {
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
   cartridge_xm = Cartridge.IsXmEnabled();
-  cartridge_flags = Cartridge.GetFlags();
   cartridge_hblank = Cartridge.GetHblank();
 }
 
@@ -443,8 +407,6 @@ export {
   GetDebugWsyncCount,
   GetDebugMariaCycles,
   GetDebug6502Cycles,
-  GetDebugWsync,
-  GetDebugCycleStealing,
   GetMariaScanline
 }
 
