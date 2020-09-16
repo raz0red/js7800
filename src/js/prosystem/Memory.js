@@ -213,27 +213,27 @@ function memory_Write(address, data) {
           lock = true; 
           //console.log("LOCK!:" + data); 
         }
-       if ((data&4) && Cartridge.IsLoaded()) {
-          if (!Cartridge.IsStored()) {            
+        if ((data & 4) && Cartridge.IsLoaded()) {
+          if (!Cartridge.IsStored()) {
             Cartridge.Store();
           } else if (tmp_cart_memory_enabled) {
             //console.log("CART STORE, copy from tmp cart");
             tmp_cart_memory_enabled = false;
             var bios_size = Bios.Size();
             var offset = tmp_cart_memory_ram.length - bios_size;
-            for (var i = 0; i < bios_size; i++) {              
+            for (var i = 0; i < bios_size; i++) {
               memory_ram[offset + i] = tmp_cart_memory_ram[offset + i];
               memory_rom[offset + i] = tmp_cart_memory_rom[offset + i];
-            }              
+            }
           }
         }
-        else if (!(data&4) && Bios.IsEnabled()) {
+        else if (!(data & 4) && Bios.IsEnabled()) {
           if (Cartridge.IsStored() && !tmp_cart_memory_enabled) {
             //console.log("BIOS STORE, copy to tmp cart");
             tmp_cart_memory_enabled = true;
             var bios_size = Bios.Size();
             var offset = tmp_cart_memory_ram.length - bios_size;
-            for (var i = 0; i < bios_size; i++) {            
+            for (var i = 0; i < bios_size; i++) {
               tmp_cart_memory_ram[offset + i] = memory_ram[offset + i];
               tmp_cart_memory_rom[offset + i] = memory_rom[offset + i];
             }

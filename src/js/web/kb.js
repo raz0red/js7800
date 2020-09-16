@@ -138,6 +138,8 @@ var defResetKey = resetKey;
 var pauseKey = f4Code;
 var defPauseKey = pauseKey;
 
+var captureEnabled = true;
+
 function setLeftDiffSet(val) {
   leftDiffSet = val;
   Events.fireEvent("onLeftDiffChanged", val);
@@ -201,11 +203,13 @@ function keyEvent(event, down) {
 function init() {
   document.onkeydown =
     function (event) {
+      if (!captureEnabled) return;
       keyEvent(event, true);
     };
 
   document.onkeyup =
     function (event) {
+      if (!captureEnabled) return;
       keyEvent(event, false);
     };
 }
@@ -276,8 +280,17 @@ function getResetKey() {
   return resetKey;
 }
 
+function setCaptureEnabled(val) {
+  captureEnabled = val;
+}
+
+function isCaptureEnabled() {
+  return captureEnabled;
+}
 
 export {
+  setCaptureEnabled,
+  isCaptureEnabled,
   isSelect,
   isReset,
   isPause,

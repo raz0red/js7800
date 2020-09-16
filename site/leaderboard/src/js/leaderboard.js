@@ -39,7 +39,7 @@ function read(url, fSuccess, fFailure) {
   xhr.open('GET', url);
   xhr.onload = function () {
     try {
-      if (xhr.status >= 300 || xhr.stats < 200) {
+      if (xhr.status >= 300 || xhr.status < 200) {
         throw xhr.status + ": " + xhr.statusText;
       } else {
         fSuccess(JSON.parse(xhr.responseText));

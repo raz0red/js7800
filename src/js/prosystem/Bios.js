@@ -23,104 +23,44 @@
 // Bios.cpp
 // ----------------------------------------------------------------------------
 
-//bool bios_enabled = false;
+import * as Memory from "./Memory.js"
+
 var bios_enabled = false;
+var bios = null;
 
-// std::string bios_filename;
-// static byte* bios_data = NULL;
-// static word bios_size = 0;
+// var b = atob(NTSC_BIOS.split(',')[1]);
+// var arr = new Array();
+// for (var i = 0; i < b.length; i++) {
+//   arr.push(b.charCodeAt(i));  
+// }
+// bios = arr;
 
-// ----------------------------------------------------------------------------
-// Load
-// ----------------------------------------------------------------------------
-//bool bios_Load(std:: string filename) {
-function bios_Load(filename) {
-  // if (filename.empty() || filename.length() == 0) {
-  //   logger_LogError("Bios filename is invalid.", BIOS_SOURCE);
-  //   return false;
-  // }
-
-  // bios_Release();
-  // logger_LogInfo("Opening bios file " + filename + ".");
-
-  // bios_size = archive_GetUncompressedFileSize(filename);
-  // if (bios_size == 0) {
-  //   FILE * file = fopen(filename.c_str(), "rb");
-  //   if (file == NULL) {
-  //     #ifndef WII
-  //     logger_LogError("Failed to open the bios file " + filename + " for reading.", BIOS_SOURCE);
-  //     #endif
-  //     return false;
-  //   }
-
-  //   if (fseek(file, 0, SEEK_END)) {
-  //     fclose(file);
-  //     logger_LogError("Failed to find the end of the bios file.", BIOS_SOURCE);
-  //     return false;
-  //   }
-
-  //   bios_size = ftell(file);
-  //   if (fseek(file, 0, SEEK_SET)) {
-  //     fclose(file);
-  //     logger_LogError("Failed to find the size of the bios file.", BIOS_SOURCE);
-  //     return false;
-  //   }
-
-  //   bios_data = new byte[bios_size];
-  //   if (fread(bios_data, 1, bios_size, file) != bios_size && ferror(file)) {
-  //     fclose(file);
-  //     logger_LogError("Failed to read the bios data.", BIOS_SOURCE);
-  //     bios_Release();
-  //     return false;
-  //   }
-
-  //   fclose(file);
-  // }
-  // else {
-  //   bios_data = new byte[bios_size];
-  //   archive_Uncompress(filename, bios_data, bios_size);
-  // }
-
-  // bios_filename = filename;
-  return true;
-}
-
-// ----------------------------------------------------------------------------
-// IsLoaded
-// ----------------------------------------------------------------------------
-//bool bios_IsLoaded() {
-function bios_IsLoaded() {
-  //   return (bios_data != NULL)? true: false;
-  return false;
-}
-
-// ----------------------------------------------------------------------------
-// Release
-// ----------------------------------------------------------------------------
-//void bios_Release() {
-function bios_Release() {
-  // if (bios_data) {
-  //   delete [] bios_data;
-  //   bios_size = 0;
-  //   bios_data = NULL;
-  // }
-}
-
-// ----------------------------------------------------------------------------
-// Store
-// ----------------------------------------------------------------------------
-//void bios_Store() {
 function bios_Store() {
-  // if (bios_data != NULL && bios_enabled) {
-  //   memory_WriteROM(65536 - bios_size, bios_size, bios_data);
-  // }
+  if (bios != null && bios_enabled) {
+    Memory.WriteROM(65536 - bios.length, bios.length, bios, 0);
+  }
+}
+
+function bios_SetBios(b) {
+  bios = b;
+}
+
+function bios_Size() {
+  return bios_enabled ? bios.length : 0;
 }
 
 function IsEnabled() { 
-  return bios_enabled;
+  return bios_enabled;  
+ }
+
+ function SetEnabled(v) {
+   bios_enabled = v;
  }
 
 export {
   bios_Store as Store,
+  bios_Size as Size,
+  bios_SetBios as SetBios,
+  SetEnabled,
   IsEnabled
 }
