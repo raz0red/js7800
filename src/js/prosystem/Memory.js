@@ -60,6 +60,8 @@ var AUDF1 = 24;
 var AUDV0 = 25;
 var AUDV1 = 26;
 var WSYNC = 36;
+var MSTAT = 40;
+var DPPH  = 44;
 var SWCHA = 640;
 var SWCHB = 642;
 var INTIM = 644;
@@ -140,6 +142,14 @@ function _memory_Read(address) {
       cartridge_pokey450 ? 0x4000 + (address - 0x0450) : address);
   }
 
+  // Maria registers.
+  // DPPH: Is a hack to get Legend of Silverpeak to work
+  //       This needs more investigation, likely another issue
+  if ((address >= 0x20 && address <= 0x3F) &&
+    (address != MSTAT && address != DPPH)) {
+    return 0;
+  } 
+
   switch (address) {
     case INTIM:
     case INTIM | 0x2:
@@ -211,33 +221,17 @@ function memory_Write(address, data) {
       if (!lock) {        
         if (data & 1) {
           lock = true; 
-          //console.log("LOCK!:" + data); 
+          console.log("Lock: " + data);
+          memory_ram[0x28] = 0x80; // Required for Bouncing Balls demo
         }
-       if ((data&4) && Cartridge.IsLoaded()) {
+        if ((data & 4) && Cartridge.IsLoaded()) {          
+          Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
           if (!Cartridge.IsStored()) {            
             Cartridge.Store();
-          } else if (tmp_cart_memory_enabled) {
-            //console.log("CART STORE, copy from tmp cart");
-            tmp_cart_memory_enabled = false;
-            var bios_size = Bios.Size();
-            var offset = tmp_cart_memory_ram.length - bios_size;
-            for (var i = 0; i < bios_size; i++) {              
-              memory_ram[offset + i] = tmp_cart_memory_ram[offset + i];
-              memory_rom[offset + i] = tmp_cart_memory_rom[offset + i];
-            }              
           }
         }
-        else if (!(data&4) && Bios.IsEnabled()) {
-          if (Cartridge.IsStored() && !tmp_cart_memory_enabled) {
-            //console.log("BIOS STORE, copy to tmp cart");
-            tmp_cart_memory_enabled = true;
-            var bios_size = Bios.Size();
-            var offset = tmp_cart_memory_ram.length - bios_size;
-            for (var i = 0; i < bios_size; i++) {            
-              tmp_cart_memory_ram[offset + i] = memory_ram[offset + i];
-              tmp_cart_memory_rom[offset + i] = memory_rom[offset + i];
-            }
-          }
+        else if (!(data & 4) && Bios.IsEnabled()) {
+          Cartridge.SaveToTmp(Bios.Size(), memory_ram, memory_rom);
           Bios.Store();
         }
       }
@@ -249,20 +243,13 @@ function memory_Write(address, data) {
           memory_ram[WSYNC] = 1;
         }
         break;
-        // case INPTCTRL:
-        //   if (data == 22 && Cartridge.IsLoaded()) {
-        //     Cartridge.Store();
-        //   }
-        //   else if (data == 2 && Bios.IsEnabled()) {
-        //     Bios.Store();
-        //   }
-        //   break;
       case INPT0:
       case INPT1:
       case INPT2:
       case INPT3:
       case INPT4:
       case INPT5:
+      case MSTAT: // MSTAT is read-only
         break;
       case AUDC0:
         tia_SetRegister(AUDC0, data);

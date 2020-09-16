@@ -719,6 +719,26 @@ input:checked+.dialog-switch-slider:before {
   transform: translateX(1em /*14px*/);  
 }
 
+.dialog-textfield { /* 14px */
+  opacity: .7;
+  font-size: 1em; 
+  color: #fff;
+  width: 14em; /*160px;*/
+  height: 1.8em; /*20px;*/
+  line-height: 1.8em; /*20px;*/
+  background: black;
+  overflow: hidden;
+  border-radius: .4em; /*4px;*/
+  padding: 0 .4em 0 .4em;
+  border: 1px solid #666;
+}
+
+.dialog-textfield:focus, 
+.dialog-textfield:hover {
+  outline: none;
+  opacity: 1;
+}
+
 .dialog-select { /* 14px */
   opacity: .8;
   font-size: 1em; 

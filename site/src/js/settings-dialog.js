@@ -3,6 +3,7 @@ import * as DialogModule from "./dialog.js"
 import { Component } from "../../../src/js/common/ui-common.js";
 import * as Events from "./events.js"
 import * as Storage from "./storage.js"
+import * as Bios from "./bios.js"
 import { AboutTab } from "./about-tab.js"
 
 var TabbedDialog = DialogModule.TabbedDialog;
@@ -11,6 +12,7 @@ var Tab = DialogModule.Tab;
 var Grid = DialogModule.Grid;
 var LabelCell = DialogModule.LabelCell;
 var ToggleSwitch = DialogModule.DialogToggleSwitch;
+var TextField = DialogModule.DialogTextField;
 var Select = DialogModule.DialogSelect;
 var ContentCell = DialogModule.ContentCell;
 var addProps = Util.addProps;
@@ -663,7 +665,6 @@ addProps(gamepadsTab, {
       '<div class="tabcontent__title">Gamepad Compatibility</div>\n' +
       '<p class="center">This page provides the ability to <b class="callout">test compatibility</b> with connected gamepads.</p>\n' +
       '<p class="center">Connect gamepads and test if they are mapped correctly (by pressing buttons, D-pad, etc.).' +
-      // '<br><span style="color:#777; font-size:.93em;">(custom mappings are not currently supported)</span></p>';
       '</p>'
     rootEl.appendChild(desc);
 
@@ -776,11 +777,93 @@ addProps(advancedTab, {
   }
 });
 
+console.log("BIOS")
+
+// BIOS tab
+var biosTab = new Tab("BIOS");
+addProps(biosTab, {
+  ntscBiosSwitch: null,
+  ntscBiosUrl: null,
+  palBiosSwitch: null,
+  palBiosUrl: null,
+  onShow: function () {        
+    this.palBiosUrl.setValue(Bios.getPalUrl());
+    this.ntscBiosUrl.setValue(Bios.getNtscUrl());
+    this.ntscBiosSwitch.setValue(Bios.isNtscEnabled());
+    this.palBiosSwitch.setValue(Bios.isPalEnabled());
+    this.ntscBiosSwitch.onClick();
+    this.palBiosSwitch.onClick();
+  },
+  onOk: function () {    
+    var ntscUrl = this.ntscBiosUrl.getValue().trim();
+    Bios.setNtscUrl(ntscUrl);
+    Bios.setNtscEnabled(this.ntscBiosSwitch.getValue() && ntscUrl.length > 0);
+
+    var palUrl = this.palBiosUrl.getValue().trim();
+    Bios.setPalUrl(palUrl);
+    Bios.setPalEnabled(this.palBiosSwitch.getValue() && palUrl.length > 0);
+  },
+  onDefaults: function () {    
+    this.ntscBiosSwitch.setValue(false);
+    this.ntscBiosSwitch.onClick();
+    this.palBiosSwitch.setValue(false);
+    this.palBiosSwitch.onClick();
+  },
+  createTabContent: function (rootEl) {
+    var desc = document.createElement("div");
+    desc.innerHTML =
+      '<div class="tabcontent__title">Atari 7800 BIOS</div>\n' +
+      '<p class="center">The following settings provide the ability to select optional Atari 7800 BIOS files.</p>\n' +
+      '<p class="center">Any changes will be applied when a subsequent cartridge is loaded.</p>';
+    rootEl.appendChild(desc);
+
+    var grid = new Grid();
+
+    var label = new LabelCell("NTSC BIOS:");
+    grid.addCell(label);      
+    this.ntscBiosSwitch = new ToggleSwitch("NTSC BIOS");
+    grid.addCell(new ContentCell(this.ntscBiosSwitch)); 
+
+    var ntscBiosUrlLabel = new LabelCell("URL:");
+    grid.addCell(ntscBiosUrlLabel);    
+    this.ntscBiosUrl = new TextField();    
+    this.ntscBiosUrl.setWidth(20);
+    var ntscBiosUrlContent = new ContentCell(this.ntscBiosUrl);
+    grid.addCell(ntscBiosUrlContent);
+    
+    this.ntscBiosSwitch.onClick = function() {
+      var v = this.getValue();
+      ntscBiosUrlLabel.setVisible(v);
+      ntscBiosUrlContent.setVisible(v);
+    }        
+
+    grid.addCell(new LabelCell("PAL BIOS:"));
+    this.palBiosSwitch = new ToggleSwitch("PAL BIOS");
+    grid.addCell(new ContentCell(this.palBiosSwitch));    
+
+    var palBiosUrlLabel = new LabelCell("URL:");
+    grid.addCell(palBiosUrlLabel);    
+    this.palBiosUrl = new TextField();
+    this.palBiosUrl.setWidth(20);
+    var palBiosUrlContent = new ContentCell(this.palBiosUrl);
+    grid.addCell(palBiosUrlContent);
+
+    this.palBiosSwitch.onClick = function() {
+      var v = this.getValue();
+      palBiosUrlLabel.setVisible(v);
+      palBiosUrlContent.setVisible(v);
+    }        
+
+    rootEl.appendChild(grid.createElement());    
+  }
+});
+
 var settingsTabSet = new TabSet();
 settingsTabSet.addTab(displayTab);
 settingsTabSet.addTab(keyboardTab, true);
 settingsTabSet.addTab(gamepadsTab);
 settingsTabSet.addTab(hsTab);
+settingsTabSet.addTab(biosTab);
 settingsTabSet.addTab(advancedTab);
 // settingsTabSet.addTab(new AboutTab());
 
@@ -812,4 +895,3 @@ Events.addListener(new Events.Listener("siteInit",
 ));
 
 export { SettingsDialog }
-

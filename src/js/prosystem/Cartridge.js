@@ -120,6 +120,10 @@ var cartridge_size = 0;
 
 var cartridge_stored = false;
 
+var tmp_cart_memory_ram = new Array(65536);
+var tmp_cart_memory_rom = new Array(65536);
+var tmp_cart_memory_enabled = false;
+
 // ----------------------------------------------------------------------------
 // HasHeader
 // ----------------------------------------------------------------------------
@@ -447,6 +451,176 @@ function cartridge_Load(data, size) {
   return true;
 }
 
+function saveToTmp(offset, size, ram, rom) {
+  for (var i = 0; i < size; i++) {
+    tmp_cart_memory_ram[offset + i] = ram[offset + i];
+    tmp_cart_memory_rom[offset + i] = rom[offset + i];
+  }
+}
+
+function restoreFromTmp(offset, size, ram, rom) {
+  for (var i = 0; i < size; i++) {
+    ram[offset + i] = tmp_cart_memory_ram[offset + i];
+    rom[offset + i] = tmp_cart_memory_rom[offset + i];
+  }
+}
+
+function cartridge_SaveToTmp(biosSize, ram, rom) {
+  if (!tmp_cart_memory_enabled) {
+    tmp_cart_memory_enabled = true;
+
+    saveToTmp(65536 - biosSize, biosSize, ram, rom);
+
+    switch (cartridge_type) {
+      case CARTRIDGE_TYPE_NORMAL:
+        //memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer, 0);
+        saveToTmp(65536 - cartridge_size, cartridge_size, ram, rom);
+        break;
+      case CARTRIDGE_TYPE_NORMAL_RAM:
+        // memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer, 0);
+        // memory_ClearROM(16384, 16384);
+        saveToTmp(65536 - cartridge_size, cartridge_size, ram, rom)
+        saveToTmp(16384, 16384, ram, rom);
+        break;
+      case CARTRIDGE_TYPE_SUPERCART: {
+        var offset = cartridge_size - 16384;
+        if (offset < cartridge_size) {
+          //memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+          saveToTmp(49152, 16384, ram, rom);
+        }
+      } break;
+      case CARTRIDGE_TYPE_SUPERCART_LARGE: {
+        //uint offset = cartridge_size - 16384;
+        var offset = cartridge_size - 16384;
+        if (offset < cartridge_size) {
+          // memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+          // memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(0));
+          saveToTmp(49152, 16384, ram, rom);
+          saveToTmp(16384, 16384, ram, rom);
+        }
+      } break;
+      case CARTRIDGE_TYPE_SUPERCART_RAM: {
+        //uint offset = cartridge_size - 16384;
+        var offset = cartridge_size - 16384;
+        if (offset < cartridge_size) {
+          // memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+          // memory_ClearROM(16384, 16384);
+          saveToTmp(49152, 16384, ram, rom);
+          saveToTmp(16384, 16384, ram, rom);
+        }
+      } break;
+      case CARTRIDGE_TYPE_SUPERCART_ROM: {
+        //uint offset = cartridge_size - 16384;
+        var offset = cartridge_size - 16384;
+        if (offset < cartridge_size && cartridge_GetBankOffset(6) < cartridge_size) {
+          // memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+          // memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(6));
+          saveToTmp(49152, 16384, ram, rom);
+          saveToTmp(16384, 16384, ram, rom);
+        }
+      } break;
+      case CARTRIDGE_TYPE_ABSOLUTE:
+        // memory_WriteROM(16384, 16384, cartridge_buffer, 0);
+        // memory_WriteROM(32768, 32768, cartridge_buffer, cartridge_GetBankOffset(2));
+        saveToTmp(16384, 16384, ram, rom);
+        saveToTmp(32768, 32768, ram, rom);
+        break;
+      case CARTRIDGE_TYPE_ACTIVISION:
+        if (122880 < cartridge_size) {
+          // memory_WriteROM(40960, 16384, cartridge_buffer, 0);
+          // memory_WriteROM(16384, 8192, cartridge_buffer, 106496);
+          // memory_WriteROM(24576, 8192, cartridge_buffer, 98304);
+          // memory_WriteROM(32768, 8192, cartridge_buffer, 122880);
+          // memory_WriteROM(57344, 8192, cartridge_buffer, 114688);
+          saveToTmp(40960, 16384, ram, rom);
+          saveToTmp(16384, 8192, ram, rom);
+          saveToTmp(24576, 8192, ram, rom);
+          saveToTmp(32768, 8192, ram, rom);
+          saveToTmp(57344, 8192, ram, rom);
+        }
+        break;
+    }
+  }
+}
+
+function cartridge_RestoreFromTmp(biosSize, ram, rom) {
+  if (tmp_cart_memory_enabled) {
+    tmp_cart_memory_enabled = false;
+
+    restoreFromTmp(65536 - biosSize, biosSize, ram, rom);
+
+    switch (cartridge_type) {
+      case CARTRIDGE_TYPE_NORMAL:
+        //memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer, 0);
+        restoreFromTmp(65536 - cartridge_size, cartridge_size, ram, rom);
+        break;
+      case CARTRIDGE_TYPE_NORMAL_RAM:
+        // memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer, 0);
+        // memory_ClearROM(16384, 16384);
+        restoreFromTmp(65536 - cartridge_size, cartridge_size, ram, rom)
+        restoreFromTmp(16384, 16384, ram, rom);
+        break;
+      case CARTRIDGE_TYPE_SUPERCART: {
+        var offset = cartridge_size - 16384;
+        if (offset < cartridge_size) {
+          //memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+          restoreFromTmp(49152, 16384, ram, rom);
+        }
+      } break;
+      case CARTRIDGE_TYPE_SUPERCART_LARGE: {
+        //uint offset = cartridge_size - 16384;
+        var offset = cartridge_size - 16384;
+        if (offset < cartridge_size) {
+          // memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+          // memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(0));
+          restoreFromTmp(49152, 16384, ram, rom);
+          restoreFromTmp(16384, 16384, ram, rom);
+        }
+      } break;
+      case CARTRIDGE_TYPE_SUPERCART_RAM: {
+        //uint offset = cartridge_size - 16384;
+        var offset = cartridge_size - 16384;
+        if (offset < cartridge_size) {
+          // memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+          // memory_ClearROM(16384, 16384);
+          restoreFromTmp(49152, 16384, ram, rom);
+          restoreFromTmp(16384, 16384, ram, rom);
+        }
+      } break;
+      case CARTRIDGE_TYPE_SUPERCART_ROM: {
+        //uint offset = cartridge_size - 16384;
+        var offset = cartridge_size - 16384;
+        if (offset < cartridge_size && cartridge_GetBankOffset(6) < cartridge_size) {
+          // memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+          // memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(6));
+          restoreFromTmp(49152, 16384, ram, rom);
+          restoreFromTmp(16384, 16384, ram, rom);
+        }
+      } break;
+      case CARTRIDGE_TYPE_ABSOLUTE:
+        // memory_WriteROM(16384, 16384, cartridge_buffer, 0);
+        // memory_WriteROM(32768, 32768, cartridge_buffer, cartridge_GetBankOffset(2));
+        restoreFromTmp(16384, 16384, ram, rom);
+        restoreFromTmp(32768, 32768, ram, rom);
+        break;
+      case CARTRIDGE_TYPE_ACTIVISION:
+        if (122880 < cartridge_size) {
+          // memory_WriteROM(40960, 16384, cartridge_buffer, 0);
+          // memory_WriteROM(16384, 8192, cartridge_buffer, 106496);
+          // memory_WriteROM(24576, 8192, cartridge_buffer, 98304);
+          // memory_WriteROM(32768, 8192, cartridge_buffer, 122880);
+          // memory_WriteROM(57344, 8192, cartridge_buffer, 114688);
+          restoreFromTmp(40960, 16384, ram, rom);
+          restoreFromTmp(16384, 8192, ram, rom);
+          restoreFromTmp(24576, 8192, ram, rom);
+          restoreFromTmp(32768, 8192, ram, rom);
+          restoreFromTmp(57344, 8192, ram, rom);
+        }
+        break;
+    }
+  }
+}
+
 // ----------------------------------------------------------------------------
 // Store
 // ----------------------------------------------------------------------------
@@ -603,6 +777,12 @@ function cartridge_IsLoaded() {
 function cartridge_Release() {
   cartridge_stored = false;
   high_score_cart_loaded = false;
+
+  tmp_cart_memory_enabled = false;
+  for (var i = 0; i < tmp_cart_memory_ram.length; i++) {
+    tmp_cart_memory_ram[i] = 0;
+    tmp_cart_memory_rom[i] = 1;
+  }
 
   //if (cartridge_buffer != NULL) {
   if (cartridge_buffer != null) {
@@ -914,7 +1094,9 @@ export {
   cartridge_Store as Store,
   cartridge_Release as Release,
   cartridge_LoadHighScoreCart as LoadHighScoreCart,
-  cartridge_IsStored as IsStored
+  cartridge_IsStored as IsStored,
+  cartridge_SaveToTmp as SaveToTmp,
+  cartridge_RestoreFromTmp as RestoreFromTmp
 }
 
 // // The memory location of the high score cartridge SRAM

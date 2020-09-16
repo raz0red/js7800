@@ -5,6 +5,7 @@ import * as Util from "./util.js"
 import * as Events from "./events.js"
 import * as Buttons from "./buttons.js"
 import * as Drop from "./drop.js"
+import * as Bios from "./bios.js"
 import * as Storage from "./storage.js"
 import * as HighScore from "./highscore.js"
 import { SettingsDialog } from "./settings-dialog.js"
@@ -77,7 +78,7 @@ function loadFromUrl(url, fromSelect) {
   xhr.responseType = 'blob';
   xhr.onload = function () {
     try {
-      if (xhr.status >= 300 || xhr.stats < 200) {
+      if (xhr.status >= 300 || xhr.status < 200) {
         throw xhr.status + ": " + xhr.statusText;
       } else if (romList.loadListFromFile(xhr.response) || forceList) {
         hideMessage(loadingMessageId, loadMessageTimeout);
@@ -228,6 +229,7 @@ function init(in7800) {
     errorHandler: errorHandler,
     debug: debug,
     HighScore: HighScore,
+    bios: Bios
   });
 
   // Build the dialogs
