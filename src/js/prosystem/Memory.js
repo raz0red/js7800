@@ -211,33 +211,22 @@ function memory_Write(address, data) {
       if (!lock) {        
         if (data & 1) {
           lock = true; 
-          //console.log("LOCK!:" + data); 
+          //console.log("Lock: " + data);
+          // Clear Maria registers (causes issue if not cleared on Legend of Silverpeak)
+          for (var i = 0x20; i < 0x3F; i++) {
+            memory_ram[i] = 0;
+          }
+          // MSTAT (Required for Bouncing Balls demo)
+          memory_ram[0x28] = 0x80;
         }
-        if ((data & 4) && Cartridge.IsLoaded()) {
-          if (!Cartridge.IsStored()) {
+        if ((data & 4) && Cartridge.IsLoaded()) {          
+          Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
+          if (!Cartridge.IsStored()) {            
             Cartridge.Store();
-          } else if (tmp_cart_memory_enabled) {
-            //console.log("CART STORE, copy from tmp cart");
-            tmp_cart_memory_enabled = false;
-            var bios_size = Bios.Size();
-            var offset = tmp_cart_memory_ram.length - bios_size;
-            for (var i = 0; i < bios_size; i++) {
-              memory_ram[offset + i] = tmp_cart_memory_ram[offset + i];
-              memory_rom[offset + i] = tmp_cart_memory_rom[offset + i];
-            }
           }
         }
         else if (!(data & 4) && Bios.IsEnabled()) {
-          if (Cartridge.IsStored() && !tmp_cart_memory_enabled) {
-            //console.log("BIOS STORE, copy to tmp cart");
-            tmp_cart_memory_enabled = true;
-            var bios_size = Bios.Size();
-            var offset = tmp_cart_memory_ram.length - bios_size;
-            for (var i = 0; i < bios_size; i++) {
-              tmp_cart_memory_ram[offset + i] = memory_ram[offset + i];
-              tmp_cart_memory_rom[offset + i] = memory_rom[offset + i];
-            }
-          }
+          Cartridge.SaveToTmp(Bios.Size(), memory_ram, memory_rom);
           Bios.Store();
         }
       }
