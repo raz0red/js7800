@@ -38,6 +38,47 @@ addProps(DialogToggleSwitch.prototype, {
 });
 
 //
+// Dialog Text Field
+//
+
+function DialogTextField(opts) {
+  Component.call(this);
+  this.opts = opts;
+  this.div = null;
+  this.width = null;  
+  this.textField = null;
+}
+DialogTextField.prototype = Object.create(Component.prototype);
+addProps(DialogTextField.prototype, {
+  select: null,
+  getClass: function () {
+     return "dialog-textfield";
+  },
+  setValue: function(val) {
+    this.textField.value = val;
+  },
+  getValue: function() {
+    return this.textField.value;
+  },
+  setWidth: function(width /*in em*/) {    
+    this.width = width;
+    if (this.textField) {
+      this.textField.style.width = this.width + "em";
+    }
+  },
+  onChange: function() {},
+  doCreateElement: function() {
+    var that = this;
+
+    this.textField = document.createElement("INPUT");
+    this.textField.setAttribute("type", "text");
+    if (this.width) this.setWidth(this.width);
+    return this.textField;
+  }
+});
+
+
+//
 // Dialog Select
 //
 
@@ -228,6 +269,8 @@ addProps(Dialog.prototype, {
       pauseButton.onClick();      
     }
 
+    js7800.Keyboard.setCaptureEnabled(false);
+
     // Call on show callback
     this.onShow();
 
@@ -238,6 +281,8 @@ addProps(Dialog.prototype, {
   hide: function () {
     window.removeEventListener("resize", this.windowResizeFunc);
     this.modalEl.style.display = "none";
+
+    js7800.Keyboard.setCaptureEnabled(true);
 
     // Call on hide callback
     this.onHide();
@@ -426,17 +471,26 @@ addProps(Cell.prototype, {
 function LabelCell(label) {
   Cell.call(this);
   this.label = label;
+  this.width = null;
 }
 LabelCell.prototype = Object.create(Cell.prototype);
 addProps(LabelCell.prototype, {
   getClass: function () {
     return "dialog-cell-label";
   },
+  setWidth: function(width /*in em*/) {    
+    this.width = width;    
+    if (this.el) {
+      this.el.style.width = this.width + "em";
+    }
+  },
   doCreateElement: function () {
     var el = Cell.prototype.doCreateElement.call(this);
     if (this.label) {
       el.appendChild(document.createTextNode(this.label))
     }
+    this.el = el;
+    if (this.width) this.setWidth(this.width);
     return el;
   }
 });
@@ -497,6 +551,7 @@ export {
   Dialog,
   DialogButton,
   DialogToggleSwitch,
+  DialogTextField,
   DialogSelect,
   TabbedDialog,
   TabSet,

@@ -39,6 +39,7 @@ var logoDiv = null;
 var starting = false;
 var currentCart = null;
 var highScoreCallback = new HighScoreCallback();
+var loadBiosCallback = null;
 var debug = false;
 var VSYNC_DEFAULT = true;
 var vsync = VSYNC_DEFAULT;
@@ -208,8 +209,17 @@ function startEmu(cart, isRestart) {
     var nextTimestamp = Date.now() + frameTicks;
     setTimeout(function () { sync(f, true) }, frameTicks);
   };
+
   // Reset w/ callback
-  ProSystem.Reset(postResetCallback);
+  var resetF = function() {
+    ProSystem.Reset(postResetCallback);
+  };
+
+  if (loadBiosCallback) {
+    loadBiosCallback((Cartridge.GetRegion() != 1), resetF);
+  } else {
+    resetF();
+  }
 }
 
 function restart() {
@@ -378,6 +388,10 @@ function setHighScoreCallback(cb) {
   Events.fireEvent("highScoreCallbackChanged", highScoreCallback);
 }
 
+function setLoadBiosCallback(cb) {
+  loadBiosCallback = cb;
+}
+
 function isVsyncEnabled() {
   return vsync;
 }
@@ -447,6 +461,7 @@ export {
   restart,
   setErrorHandler,  
   setHighScoreCallback,
+  setLoadBiosCallback,
   HighScoreCallback,
   descriptionDiv,
   isVsyncEnabled,

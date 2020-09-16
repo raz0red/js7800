@@ -115,6 +115,7 @@ function prosystem_Reset(postResetCallback) {
     Maria.Reset();
     Riot.Reset();
     if (Bios.IsEnabled()) {
+      Cartridge.SaveToTmp(Bios.Size(), Memory.ram, Memory.rom);
       Bios.Store();
     }
     else {

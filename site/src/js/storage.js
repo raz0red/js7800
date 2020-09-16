@@ -15,9 +15,14 @@ var FS = "fullscreen";
 var FRAME_SKIP = "frameSkip";
 var VSYNC = "vsync";
 var XM_MODE = "xmMode";
+var BIOS_NTSC_URL = "biosNtscUrl";
+var BIOS_NTSC_ENABLED = "biosNtscEnabled";
+var BIOS_PAL_URL = "biosPalUrl";
+var BIOS_PAL_ENABLED = "biosPalEnabled";
 
 var js7800 = null;
 var kb = null;
+var bios = null;
 var video = null;
 var region = null;
 var main = null;
@@ -123,6 +128,14 @@ function loadPrefs() {
       if (frameSkip !== undefined ) main.setSkipLevel(frameSkip);
       var xmMode = prefs[XM_MODE];
       if (xmMode !== undefined ) Cartridge.SetXmMode(xmMode);
+      var ntscUrl = prefs[BIOS_NTSC_URL];
+      if (ntscUrl !== undefined) bios.setNtscUrl(ntscUrl);
+      var palUrl = prefs[BIOS_PAL_URL];
+      if (palUrl !== undefined) bios.setPalUrl(palUrl);
+      var ntscEnabled = prefs[BIOS_NTSC_ENABLED];
+      if (ntscEnabled !== undefined) bios.setNtscEnabled(ntscEnabled);
+      var palEnabled = prefs[BIOS_PAL_ENABLED];
+      if (palEnabled !== undefined) bios.setPalEnabled(palEnabled);
     }
   } catch (e) {
     Events.fireEvent("showError", "An error occurred loading preferences: " + e);
@@ -151,6 +164,10 @@ function savePrefs() {
     prefs[VSYNC] = main.isVsyncEnabled();
     prefs[FRAME_SKIP] = main.getSkipLevel();
     prefs[XM_MODE] = Cartridge.GetXmMode();
+    prefs[BIOS_NTSC_URL] = bios.getNtscUrl();
+    prefs[BIOS_NTSC_ENABLED] = bios.isNtscEnabled();
+    prefs[BIOS_PAL_URL] = bios.getPalUrl();
+    prefs[BIOS_PAL_ENABLED] = bios.isPalEnabled();
 
     localStorage.setItem("prefs", JSON.stringify(prefs));
   } catch (e) {
@@ -212,13 +229,14 @@ function isLocalStorageEnabled() {
 }
 
 Events.addListener(new Events.Listener("siteInit",
-  function (event) {
+  function (event) {    
     js7800 = event.js7800;
     kb = js7800.Keyboard;
     video = js7800.Video;
     region = js7800.Region;
     Cartridge = js7800.Cartridge;
     HighScore = event.HighScore;
+    bios = event.bios;
     main = js7800.Main;
     checkLocalStorageAvailable();    
   }));
