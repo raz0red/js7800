@@ -60,6 +60,8 @@ var AUDF1 = 24;
 var AUDV0 = 25;
 var AUDV1 = 26;
 var WSYNC = 36;
+var MSTAT = 40;
+var DPPH  = 44;
 var SWCHA = 640;
 var SWCHB = 642;
 var INTIM = 644;
@@ -140,6 +142,14 @@ function _memory_Read(address) {
       cartridge_pokey450 ? 0x4000 + (address - 0x0450) : address);
   }
 
+  // Maria registers.
+  // DPPH: Is a hack to get Legend of Silverpeak to work
+  //       This needs more investigation, likely another issue
+  if ((address >= 0x20 && address <= 0x3F) &&
+    (address != MSTAT && address != DPPH)) {
+    return 0;
+  } 
+
   switch (address) {
     case INTIM:
     case INTIM | 0x2:
@@ -211,13 +221,8 @@ function memory_Write(address, data) {
       if (!lock) {        
         if (data & 1) {
           lock = true; 
-          //console.log("Lock: " + data);
-          // Clear Maria registers (causes issue if not cleared on Legend of Silverpeak)
-          for (var i = 0x20; i < 0x3F; i++) {
-            memory_ram[i] = 0;
-          }
-          // MSTAT (Required for Bouncing Balls demo)
-          memory_ram[0x28] = 0x80;
+          console.log("Lock: " + data);
+          memory_ram[0x28] = 0x80; // Required for Bouncing Balls demo
         }
         if ((data & 4) && Cartridge.IsLoaded()) {          
           Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
@@ -238,20 +243,13 @@ function memory_Write(address, data) {
           memory_ram[WSYNC] = 1;
         }
         break;
-        // case INPTCTRL:
-        //   if (data == 22 && Cartridge.IsLoaded()) {
-        //     Cartridge.Store();
-        //   }
-        //   else if (data == 2 && Bios.IsEnabled()) {
-        //     Bios.Store();
-        //   }
-        //   break;
       case INPT0:
       case INPT1:
       case INPT2:
       case INPT3:
       case INPT4:
       case INPT5:
+      case MSTAT: // MSTAT is read-only
         break;
       case AUDC0:
         tia_SetRegister(AUDC0, data);
