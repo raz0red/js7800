@@ -142,10 +142,7 @@ function _memory_Read(address) {
   }
 
   // Maria registers.
-  // DPPH: Is a hack to get Legend of Silverpeak to work
-  //       This needs more investigation, likely another issue
-  if ((address >= 0x20 && address <= 0x3F) &&
-    (address != MSTAT && address != DPPH)) {
+  if ((address >= 0x20 && address <= 0x3F) && (address != MSTAT)) {
     return 0;
   } 
 
@@ -221,7 +218,7 @@ function memory_Write(address, data) {
         if (data & 1) {
           lock = true; 
           console.log("Lock: " + data);
-          memory_ram[0x28] = 0x80; // Required for Bouncing Balls demo
+          memory_ram[MSTAT] = 0x80; // Required for Bouncing Balls demo
         }
         if ((data & 4) && Cartridge.IsLoaded()) {          
           Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
@@ -306,12 +303,12 @@ function memory_Write(address, data) {
         else if (address >= 320 && address <= 511) {
           memory_ram[address + 8192] = data;
         }
-          else if (address >= 10240 && address <= 12287) {
-            memory_ram[address - 2048] = data;
-          }
-          else if (address >= 8192 && address <= 10239) {
-            memory_ram[address + 2048] = data;
-          }
+        else if (address >= 10240 && address <= 12287) {
+          memory_ram[address - 2048] = data;
+        }
+        else if (address >= 8192 && address <= 10239) {
+          memory_ram[address + 2048] = data;
+        }
         break;
       }
     }

@@ -49,7 +49,7 @@ var MARIA_CYCLE_LIMIT = 428;
 //extern bool lightgun_enabled;
 
 //rect maria_displayArea = {0, 16, 319, 258};
-var maria_displayArea = new Rect(0, 16, 319, 258);
+var maria_displayArea = new Rect(0, 17, 319, 258);
 
 //rect maria_visibleArea = {0, 26, 319, 248};
 var maria_visibleArea = new Rect(0, 26, 319, 248); 
