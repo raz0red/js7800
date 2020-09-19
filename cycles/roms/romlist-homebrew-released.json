@@ -2,6 +2,10 @@
     "folders": [],
     "files": [        
         {
+            "name": "Apple Snaffle",
+            "path": "AppleSnaffle.a78"            
+        },
+        {
             "name": "Armor Attack II",
             "path": "ArmorAttackII.a78"            
         },
