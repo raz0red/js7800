@@ -245,10 +245,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     // - 0-6 cycles pass as the 6502 finishes the currently executing instruction.
     // Interrupt entry takes 7 cycles.
     if (maria_IsNMI()) {
-      cycles = 0;
-      if (!wsync_scanline) {
-        cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
-      }
+      (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
       cycles = (sally_ExecuteNMI() << 2); // Interrupt takes 7 cycles
       prosystem_cycles += cycles;        
       if (riot_IsTimingEnabled()) {
