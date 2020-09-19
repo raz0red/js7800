@@ -247,9 +247,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     if (maria_IsNMI()) {
       cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
       cycles += (sally_ExecuteNMI() << 2); // Interrupt takes 7 cycles
-      if (!wsync_scanline) {
-        prosystem_cycles += cycles;        
-      }
+      prosystem_cycles += cycles;        
       if (riot_IsTimingEnabled()) {
         riot_UpdateTimer(cycles >>> 2);
       }          
