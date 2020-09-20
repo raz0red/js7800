@@ -47,7 +47,7 @@ jobs:
         BASE_BRANCH: master
         BRANCH: gh-pages
         FOLDER: site/deploy
-        CLEAN_EXCLUDE: '["staging", "mobile", "cycles"]'
+        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios"]'
 
     - name: Deploy to GitHub pages (staging)
       uses: JamesIves/github-pages-deploy-action@releases/v3
@@ -68,6 +68,16 @@ jobs:
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: cycles
+
+    - name: Deploy to GitHub pages (bios)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/bios'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: bios
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: bios
 
     - name: Deploy to GitHub pages (mobile)
       uses: JamesIves/github-pages-deploy-action@releases/v3
