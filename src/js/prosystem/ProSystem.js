@@ -223,8 +223,10 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       }
     }    
 
+    prosystem_cycles = cartridge_hblank;
+
     Xm.setDmaActive(true);    
-    cycles = maria_RenderScanline(maria_scanline);
+    cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2
     Xm.setDmaActive(false);
     
     var old_cycles = prosystem_cycles;
@@ -232,8 +234,9 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       wsync_scanline = true;
       prosystem_cycles = CYCLES_PER_SCANLINE;
     }
-    else
+    else {
       prosystem_cycles += cycles;
+    }
     dbg_maria_cycles += cycles; // debug
 
     if (riot_IsTimingEnabled()) {
@@ -245,12 +248,12 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     // - 0-6 cycles pass as the 6502 finishes the currently executing instruction.
     // Interrupt entry takes 7 cycles.
     if (maria_IsNMI()) {
-      (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
-      cycles = (sally_ExecuteNMI() << 2); // Interrupt takes 7 cycles
+      cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
+      cycles += (sally_ExecuteNMI() << 2); // Interrupt takes 7 cycles
       prosystem_cycles += cycles;        
       if (riot_IsTimingEnabled()) {
         riot_UpdateTimer(cycles >>> 2);
-      }          
+      }        
     }
     
     while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
@@ -282,7 +285,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
         riot_UpdateTimer((CYCLES_PER_SCANLINE - prosystem_cycles) >>> 2);
       }
       prosystem_cycles = CYCLES_PER_SCANLINE;
-    }
+    } 
 
     dbg_p6502_cycles += prosystem_cycles; // debug
 
