@@ -223,10 +223,8 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       }
     }    
 
-    prosystem_cycles = cartridge_hblank;
-
     Xm.setDmaActive(true);    
-    cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2
+    cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2;
     Xm.setDmaActive(false);
     
     var old_cycles = prosystem_cycles;
