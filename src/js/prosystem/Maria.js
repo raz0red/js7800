@@ -376,6 +376,11 @@ function maria_StoreLineRAM() {
         if (maria_cycles >= MARIA_CYCLE_LIMIT) 
           break;
 
+        //maria_pp.b.l = memory_ram[basePP.w++];
+        maria_pp.setBL((dr ? ram[basePP.wPlusPlus()] : ramf(basePP.wPlusPlus())));
+        //maria_pp.b.h = memory_ram[CHARBASE] + maria_offset;
+        maria_pp.setBH(ram[CHARBASE] + maria_offset);
+
         if (maria_IsHolyDMA()) {
           if (!dma_hole_known) {
             maria_cycles += 3;
@@ -387,10 +392,7 @@ function maria_StoreLineRAM() {
             maria_cycles += 3; 
           }
         }
-        //maria_pp.b.l = memory_ram[basePP.w++];
-        maria_pp.setBL((dr ? ram[basePP.wPlusPlus()] : ramf(basePP.wPlusPlus())));
-        //maria_pp.b.h = memory_ram[CHARBASE] + maria_offset;
-        maria_pp.setBH(ram[CHARBASE] + maria_offset);
+
         maria_StoreGraphic(); // Maria cycles (Indirect, 1 byte)        
         if (cwidth) {
           maria_StoreGraphic();
