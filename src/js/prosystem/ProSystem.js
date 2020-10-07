@@ -246,13 +246,20 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     // - 0-6 cycles pass as the 6502 finishes the currently executing instruction.
     // Interrupt entry takes 7 cycles.
     if (maria_IsNMI()) {
-      cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
-      //cycles += (sally_ExecuteNMI() << 2);
+      if (!wsync_scanline) {
+        cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
+        prosystem_cycles += cycles;
+        if (riot_IsTimingEnabled()) {
+          riot_UpdateTimer(cycles >>> 2);
+        }
+
+        if (memory_ram[WSYNC]) {
+          dbg_wsync_count++; // debug
+          memory_ram[WSYNC] = 0;
+          wsync_scanline = true;
+        }  
+      }
       sally_ExecuteNMI();
-      prosystem_cycles += cycles;        
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles >>> 2);
-      }        
     }
     
     while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
