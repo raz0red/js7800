@@ -225,7 +225,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     Xm.setDmaActive(true);    
     cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2;
-    if (cycles > MARIA_CYCLE_LIMIT) cycles = MARIA_CYCLE_LIMIT;
+    //if (cycles > MARIA_CYCLE_LIMIT) cycles = MARIA_CYCLE_LIMIT;
 
     Xm.setDmaActive(false);    
     prosystem_cycles += cycles;
