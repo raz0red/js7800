@@ -225,20 +225,14 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     Xm.setDmaActive(true);    
     cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2;
-    Xm.setDmaActive(false);
-    
-    var old_cycles = prosystem_cycles;
-    if (cycles >= MARIA_CYCLE_LIMIT) {
-      wsync_scanline = true;
-      prosystem_cycles = CYCLES_PER_SCANLINE;
-    }
-    else {
-      prosystem_cycles += cycles;
-    }
+    if (cycles > MARIA_CYCLE_LIMIT) cycles = MARIA_CYCLE_LIMIT;
+
+    Xm.setDmaActive(false);    
+    prosystem_cycles += cycles;
     dbg_maria_cycles += cycles; // debug
 
     if (riot_IsTimingEnabled()) {
-      riot_UpdateTimer((prosystem_cycles - old_cycles) >>> 2);
+      riot_UpdateTimer((cycles) >>> 2);
     }
     
     // https://atariage.com/forums/topic/201163-the-truth-about-wsync-and-other-scanline-issues/
@@ -246,12 +240,12 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     // - 0-6 cycles pass as the 6502 finishes the currently executing instruction.
     // Interrupt entry takes 7 cycles.
     if (maria_IsNMI()) {
-      if (!wsync_scanline) {
-        cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
-        prosystem_cycles += cycles;
+      if (!wsync_scanline && (prosystem_cycles < CYCLES_PER_SCANLINE)) {
+        cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction        
         if (riot_IsTimingEnabled()) {
           riot_UpdateTimer(cycles >>> 2);
         }
+        prosystem_cycles += cycles;
 
         if (memory_ram[WSYNC]) {
           dbg_wsync_count++; // debug
