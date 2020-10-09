@@ -114,7 +114,7 @@ var SALLY_IRQ = {
 
 //static const byte SALLY_CYCLES[256] = { ... }
 var SALLY_CYCLES = [
-  7, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 2 /* ANC */, 0, 4, 6, 0, // 0 - 15
+  7, 6, 0, 0, 2, 3, 5, 0, 3, 2, 2, 2 /* ANC */, 0, 4, 6, 0, // 0 - 15
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 16 - 31
   6, 6, 0, 0, 3, 3, 5, 0, 4, 2, 2, 2 /* ANC */, 4, 4, 6, 0, // 32 - 47
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 48 - 63
@@ -122,7 +122,7 @@ var SALLY_CYCLES = [
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 80 - 95
   6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, // 96 - 111
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 112 - 127
-  0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
+  2, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
   2, 6, 0, 0, 4, 4, 4, 4 /* SAX */, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
   2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // 160 - 175
   2, 5, 0, 6 /* LAX */, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
@@ -1308,7 +1308,7 @@ function sally_ExecuteInstruction() {
   half_cycle = false;
 
   //sally_opcode = memory_Read(sally_pc.w++);
-  var opcodeMem = sally_pc.wPlusPlus()
+  var opcodeMem = sally_pc.wPlusPlus();
   sally_opcode = memory_Read(opcodeMem);
   sally_cycles = SALLY_CYCLES[sally_opcode];
 
@@ -2120,7 +2120,10 @@ function sally_ExecuteInstruction() {
     case 0x89:
       // No-op       
       return sally_cycles;
-    case 0xff:
+    case 0x04:
+    case 0x80:      
+      // Double no-op       
+      return sally_cycles;
     case 0xfc:
     case 0xfb:
     case 0xfa:
@@ -2165,7 +2168,6 @@ function sally_ExecuteInstruction() {
     case 0x87:
     case 0x83:
     case 0x82:
-    case 0x80:
     case 0x7f:
     case 0x7c:
     case 0x7b:
@@ -2215,10 +2217,9 @@ function sally_ExecuteInstruction() {
     case 0x0f:
     case 0x0c:
     case 0x07:
-    case 0x04:
     case 0x03:
     case 0x02:
-      //console.log('unmapped opcode: 0x' + opcodeMem.toString(16) + ", 0x" + sally_opcode.toString(16));
+//console.log('unmapped opcode: 0x' + opcodeMem.toString(16) + ", 0x" + sally_opcode.toString(16));
       return sally_cycles;
     /*      
           l_0xff:

@@ -124,7 +124,7 @@ function prosystem_Reset(postResetCallback) {
 
     var postHsLoad = function(isSuccess) {
       Events.fireEvent("onHighScoreCartLoaded", isSuccess);
-      prosystem_cycles = Sally.ExecuteRES() << 4;
+      prosystem_cycles = Sally.ExecuteRES() << 2;
       prosystem_active = true;  
       // Invoke post reset callback
       postResetCallback();
@@ -225,9 +225,12 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     Xm.setDmaActive(true);    
     cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2;
-    //if (cycles > MARIA_CYCLE_LIMIT) cycles = MARIA_CYCLE_LIMIT;
-
+    if (cycles > MARIA_CYCLE_LIMIT) {
+      cycles = MARIA_CYCLE_LIMIT;
+      wsync_scanline = true;
+    }
     Xm.setDmaActive(false);    
+
     prosystem_cycles += cycles;
     dbg_maria_cycles += cycles; // debug
 
