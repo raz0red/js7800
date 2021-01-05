@@ -39,9 +39,9 @@ function StandardMapping(props) {
     isDigitalDown: function (pad) { return this.isPressed(pad, 13); },
     isButton1: function (pad) { return this.isPressed(pad, 0); },
     isButton2: function (pad) { return this.isPressed(pad, 1); },
-    isReset: function (pad) { return this.isPressed(pad, 9) || this.isPressed(pad, 5); },
-    isSelect: function (pad) { return this.isPressed(pad, 8) || this.isPressed(pad, 4); },
-    isPause: function (pad) { return this.isPressed(pad, 6) || this.isPressed(pad, 7); }
+    isReset: function (pad) { return this.isPressed(pad, 9); },
+    isSelect: function (pad) { return this.isPressed(pad, 8); },
+    isPause: function (pad) { return this.isPressed(pad, 4) || this.isPressed(pad, 5); }
   });
 
   if (props) {
