@@ -44,6 +44,12 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 
 ## Change log
 
+### 01/05/21 (0.0.4)
+    - Added global high score support for "Popeye"
+    - Added global high score support for the latest version of "Pac-Man Collection!"
+    - Updated to the latest versions of "Dragon's Cache", "Dragon's Descent", "Popeye",
+      "Spire of the Ancients", "E.X.O", and "Knight Guy: Castle Days" 
+
 ### 09/03/20 (0.0.3)
     - Added support for undocumented ASR and ANC opcodes (fixes graphical glitches with
       "Popeye 7800: Mini-game")
