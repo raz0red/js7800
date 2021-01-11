@@ -2707,6 +2707,17 @@ flags=0
 pokey450=false
 xm=false
 hsc=true
+[d9a110d889c4d42089c61fade25af220]
+title=UniwarS
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=false
+xm=false
+hsc=true
 [ff8d8283553af5d5dbdaddb5781b4896]
 title=Vector Asteroids
 type=0
