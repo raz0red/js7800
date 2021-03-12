@@ -13,6 +13,7 @@ var selectSet = false;
 
 var keyboardData = null;
 var lightGunFirstFire = true;
+var pollInputCallback = null;
 
 function updateInput() {
   var pad = null;
@@ -24,22 +25,32 @@ function updateInput() {
       keyboardData[3] = !isLeftButtonDown();
     }
   } else {
-    Pad.poll();
-    pad = Pad.getMapping(0);
-    updateJoystick(0, keyboardData, pad);
-    updateJoystick(1, keyboardData, pad);
+    if (pollInputCallback) {
+      pollInputCallback(
+        keyboardData, 
+        Cartridge.IsDualAnalog(),
+        Cartridge.IsSwapButtons()
+      );
+    } else {
+      Pad.poll();
+      pad = Pad.getMapping(0);
+      updateJoystick(0, keyboardData, pad);
+      updateJoystick(1, keyboardData, pad);
+    }
   }
 
-  // | 12       | Console      | Reset
-  keyboardData[12] = resetSet || Kb.isReset() || (pad && pad.isReset());
-  // | 13       | Console      | Select
-  keyboardData[13] = selectSet || Kb.isSelect() || (pad && pad.isSelect());
-  // | 14       | Console      | Pause
-  keyboardData[14] = Kb.isPause() || (pad && pad.isPause());
-  // | 15       | Console      | Left Difficulty
-  keyboardData[15] = Kb.isLeftDiffSet();
-  // | 16       | Console      | Right Difficulty
-  keyboardData[16] = Kb.isRightDiffSet();
+  if (!pollInputCallback) {
+    // | 12       | Console      | Reset
+    keyboardData[12] = resetSet || Kb.isReset() || (pad && pad.isReset());
+    // | 13       | Console      | Select
+    keyboardData[13] = selectSet || Kb.isSelect() || (pad && pad.isSelect());
+    // | 14       | Console      | Pause
+    keyboardData[14] = Kb.isPause() || (pad && pad.isPause());
+    // | 15       | Console      | Left Difficulty
+    keyboardData[15] = Kb.isLeftDiffSet();
+    // | 16       | Console      | Right Difficulty
+    keyboardData[16] = Kb.isRightDiffSet();
+  }
 }
 
 function updateJoystick(joyIndex, keyboardData, pad0) {
@@ -109,9 +120,14 @@ function setSelect(val) {
   selectSet = val;
 }
 
+function setPollInputCallback(cb) {
+  pollInputCallback = cb;
+}
+
 export {
   reset as resetKeyboardData,
   updateInput,
   setReset,
-  setSelect
+  setSelect,
+  setPollInputCallback
 }

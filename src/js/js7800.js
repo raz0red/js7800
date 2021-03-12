@@ -40,6 +40,7 @@ var starting = false;
 var currentCart = null;
 var highScoreCallback = new HighScoreCallback();
 var debug = false;
+var noTitle = false;
 var VSYNC_DEFAULT = true;
 var vsync = VSYNC_DEFAULT;
 var SKIP_LEVEL_DEFAULT = 0;
@@ -238,15 +239,17 @@ function startEmulation(cart, isRestart) {
   if (!hideTitleCb) {
     hideTitleCb = new Events.Listener("onEmulationStarted", 
       function() {    
-        Video.stopScreenSnow();
-        if (!logoDiv.classList.contains('js7800__logo--hide')) {
-          logoDiv.classList.add('js7800__logo--hide');
-          logoDiv.classList.remove('js7800__logo--show');
-      
-          // Should not be necessary, but makes sure is not displayed
-          setTimeout(function () {
-            logoDiv.style.display = 'none';
-          }, 1000);
+        if (!noTitle) {
+          Video.stopScreenSnow();
+          if (!logoDiv.classList.contains('js7800__logo--hide')) {
+            logoDiv.classList.add('js7800__logo--hide');
+            logoDiv.classList.remove('js7800__logo--show');
+        
+            // Should not be necessary, but makes sure is not displayed
+            setTimeout(function () {
+              logoDiv.style.display = 'none';
+            }, 1000);
+          }
         }
       }
     );    
@@ -321,6 +324,9 @@ function init(id, props) {
       if (props.debug) {
         debug = props.debug;
       }
+      if (props.noTitle) {
+        noTitle = props.noTitle;
+      }
     }
 
     // Fire init event
@@ -334,12 +340,14 @@ function init(id, props) {
       debug: debug
     });
 
-    // Description
-    descriptionDiv = document.createElement("div");
-    logoDiv.appendChild(descriptionDiv);
+    if (!noTitle) {
+      // Description
+      descriptionDiv = document.createElement("div");
+      logoDiv.appendChild(descriptionDiv);
 
-    Video.startScreenSnow();
-    logoDiv.classList.add('js7800__logo--show');
+      Video.startScreenSnow();
+      logoDiv.classList.add('js7800__logo--show');
+    }
 
     // Restart event listener
     Events.addListener(new Events.Listener("restart", restart));
