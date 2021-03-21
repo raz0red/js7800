@@ -40,6 +40,7 @@ var starting = false;
 var currentCart = null;
 var highScoreCallback = new HighScoreCallback();
 var debug = false;
+var debugCallback = null;
 var noTitle = false;
 var VSYNC_DEFAULT = true;
 var vsync = VSYNC_DEFAULT;
@@ -47,6 +48,10 @@ var SKIP_LEVEL_DEFAULT = 0;
 var skipLevel = SKIP_LEVEL_DEFAULT;
 var fskip = 0;
 var fskipcount = 0;
+
+var nativeCheckCount = 0;
+var gameVsync = vsync;
+var gameIsNative = false;
 
 var errorHandler = function (message) {
   alert(message);
@@ -58,8 +63,12 @@ var keyboardData = new Array(19);
 var initialized = false;
 var forceAdjustTimestamp = false;
 
+function setDebugCallback(cb) {
+  debugCallback = cb;
+}
+
 function sync(callback, afterTimeout) {
-  if (vsync) {
+  if (gameVsync) {
     requestAnimationFrame(callback);
   } else {
     if (!afterTimeout) {
@@ -68,6 +77,44 @@ function sync(callback, afterTimeout) {
       callback();
     }
   }
+}
+
+function checkNativeFps(frequency) {
+  var checkCount = ++nativeCheckCount;
+
+  if (!gameVsync) return;
+
+  console.log("Check native FPS...");
+
+  var fc = 0;
+  var start = Date.now();
+  var end = start;
+
+  var f = function() {    
+    fc++; end = Date.now();
+    if (checkCount != nativeCheckCount) {
+      console.log('Aborting native FPS check...');     
+    } else if (fc === 1200) {
+      var fps = (1000/((end - start)/fc));
+      var round = Math.round(fps/10)*10;
+      var diff = Math.abs(round - fps);
+      var nFaster = fps > frequency;
+
+      console.log('Native FPS: ' + fps + ", " + round);
+      if ((round === frequency) && (diff < 0.5)) {
+        console.log('Native matches frequency.');
+        gameIsNative = true;
+      } else if (round < frequency || (!nFaster && diff >= 0.5)) {
+        console.log('Native frequency too slow, vsync disabled.');
+        gameVsync = false;
+      } else {
+        console.log('Native not close enough to frequency: ' + fps);
+      }
+    } else {
+      requestAnimationFrame(f);
+    }
+  }
+  requestAnimationFrame(f)
 }
 
 function startEmu(cart, isRestart) {
@@ -133,7 +180,7 @@ function startEmu(cart, isRestart) {
     var start = Date.now();
     var fc = 0;
     var frequency = ProSystem.GetFrequency();
-    var debugFrequency = frequency * 10;
+    var debugFrequency = frequency * 5;
     var frameTicks = (1000.0 / frequency) /*| 0*/;
     var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
     var isActive = ProSystem.IsActive;
@@ -146,6 +193,11 @@ function startEmu(cart, isRestart) {
 
     console.log("Frame ticks: " + frameTicks);
     console.log("Frequency: " + frequency);
+
+
+    gameVsync = vsync;
+    gameIsNative = false;
+    checkNativeFps(frequency);    
 
     var f = function () {
       if (isActive()) {
@@ -176,7 +228,7 @@ function startEmu(cart, isRestart) {
           }
           var wait = (nextTimestamp - now);
           avgWait += wait;
-          if (wait > 0) {
+          if (!gameIsNative && wait > 0) {
             setTimeout(function () { sync(f, true); }, wait);
           } else {
             sync(f, false);
@@ -186,17 +238,18 @@ function startEmu(cart, isRestart) {
           if ((fc % debugFrequency) == 0) {
             var elapsed = Date.now() - start;
             if (debug) {
-              console.log("v:%s, vsync: %d, %stimer: %d, wsync: %d, %d, stl: %d, mar: %d, cpu: %d, ext: %d",
-                (1000.0 / (elapsed / fc)).toFixed(2),
-                vsync ? 1 : 0,
-                (vsync ? "" : ("wait: " + ((avgWait / fc) * frequency).toFixed(2) + ", ")),
-                (Riot.GetTimerCount() % 1000),                
-                ProSystem.GetDebugWsync() ? 1 : 0,
-                ProSystem.GetDebugWsyncCount(),
-                ProSystem.GetDebugCycleStealing() ? 1 : 0,
-                ProSystem.GetDebugMariaCycles(),
-                ProSystem.GetDebug6502Cycles(),
-                ProSystem.GetDebugSavedCycles());
+              var dbg = "fps: " + (1000.0 / (elapsed / fc)).toFixed(2) + 
+                ", vsync: " + gameVsync + 
+                ", wait: " + ((avgWait / fc) * frequency).toFixed(2) +
+                ", native: "+ gameIsNative +
+                ", timer: " + (Riot.GetTimerCount() % 1000) +
+                ", wsync: " + (ProSystem.GetDebugWsync() ? 1 : 0) + "," + ProSystem.GetDebugWsyncCount() +
+                ", stl: " + (ProSystem.GetDebugCycleStealing() ? 1 : 0) +
+                ", mar: " + ProSystem.GetDebugMariaCycles() +
+                ", cpu: " + ProSystem.GetDebug6502Cycles() +
+                ", ext: " + ProSystem.GetDebugSavedCycles();                
+              if (debugCallback) debugCallback(dbg);
+              console.log(dbg);
             }
             start = Date.now();
             fc = 0;
@@ -396,6 +449,12 @@ function isVsyncEnabled() {
 
 function setVsyncEnabled(val) {
   vsync = val;
+
+  if (ProSystem.IsActive()) {
+    gameVsync = vsync;
+    gameIsNative = false;
+    checkNativeFps(ProSystem.GetFrequency());
+  }
 }
 
 function getVsyncEnabledDefault() {
@@ -466,5 +525,6 @@ export {
   getVsyncEnabledDefault,
   getSkipLevelDefault,
   getSkipLevel,
-  setSkipLevel
+  setSkipLevel,
+  setDebugCallback
 }
