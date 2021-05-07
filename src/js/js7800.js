@@ -48,6 +48,7 @@ var SKIP_LEVEL_DEFAULT = 0;
 var skipLevel = SKIP_LEVEL_DEFAULT;
 var fskip = 0;
 var fskipcount = 0;
+var allowUnpause = true;
 
 var nativeCheckCount = 0;
 var gameVsync = vsync;
@@ -430,7 +431,7 @@ function handleVisibilityChange() {
     forceAdjustTimestamp = true;
   } else {
     console.log("page visible.");
-    if (!ControlsBar.isPauseButtonDown()) {
+    if (!ControlsBar.isPauseButtonDown() && allowUnpause) {
       ProSystem.Pause(false);
     }
   }
@@ -510,10 +511,20 @@ function setSkipLevel(val) {
   updateFrameSkip();
 }
 
+function pause(p) {
+  ProSystem.Pause(p);
+}
+
+function setAllowUnpause(p) {
+  allowUnpause = p;
+}
+
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 export {
   init,
+  pause,
+  setAllowUnpause,
   startEmulation,
   restart,
   setErrorHandler,  
