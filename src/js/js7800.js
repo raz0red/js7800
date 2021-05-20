@@ -87,15 +87,24 @@ function checkNativeFps(frequency) {
 
   console.log("Check native FPS...");
 
+  var TEST_BEGIN = 300;
+  var TEST_COUNT = 300;
+
   var fc = 0;
-  var start = Date.now();
+  var start = 0
   var end = start;
 
   var f = function() {    
     fc++; end = Date.now();
     if (checkCount != nativeCheckCount) {
       console.log('Aborting native FPS check...');     
-    } else if (fc === 1200) {
+    }
+    else if (start === 0 && fc == TEST_BEGIN) {
+      start = Date.now();
+      fc = 0;
+      console.log('native fps test beginning.')
+      requestAnimationFrame(f);
+    } else if (fc == TEST_COUNT) {      
       var fps = (1000/((end - start)/fc));
       var round = Math.round(fps/10)*10;
       var diff = Math.abs(round - fps);
@@ -105,9 +114,11 @@ function checkNativeFps(frequency) {
       if ((round === frequency) && (diff < 0.5)) {
         console.log('Native matches frequency.');
         gameIsNative = true;
+        forceAdjustTimestamp = true;
       } else if (round < frequency || (!nFaster && diff >= 0.5)) {
         console.log('Native frequency too slow, vsync disabled.');
         gameVsync = false;
+        forceAdjustTimestamp = true;
       } else {
         console.log('Native not close enough to frequency: ' + fps);
       }
