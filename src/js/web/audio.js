@@ -8,6 +8,8 @@ var DEFAULT_SAMPLE_RATE = 48000;
 var audioCtx = null;
 /** The audio node */
 var audioNode = null;
+/** The callback */
+var callback = null;
 
 var mixbuffer = new Array(SOUNDBUFSIZE);
 var mixhead = 0;
@@ -20,6 +22,14 @@ function storeSound(sample, ym, length) {
     if (mixhead == SOUNDBUFSIZE)
       mixhead = 0;
   }
+}
+
+function setCallback(cb) {
+  callback = cb;
+}
+
+function isPlaying() {
+  return audioCtx && audioCtx.state === 'running';
 }
 
 function init() {
@@ -50,8 +60,24 @@ function init() {
       }
     }
     audioNode.connect(audioCtx.destination);
+
+    if (!isPlaying()) {
+      if (callback) callback(false);
+    }
+
+    var running = false;
     var resumeFunc =    
-      function () { if (audioCtx.state !== 'running') audioCtx.resume(); }
+      function () { 
+        if (audioCtx.state !== 'running') {
+          audioCtx.resume()
+            .then(() => {
+              if (!running && audioCtx.state === 'running' && callback) {
+                running = true;
+                callback(true);
+              }
+            })
+        }
+      };
     var docElement = document.documentElement;
     docElement.addEventListener("keydown", resumeFunc);
     docElement.addEventListener("click", resumeFunc);
@@ -63,5 +89,5 @@ function init() {
 
 Events.addListener(new Events.Listener("init", init));
 
-export { }
+export { setCallback }
 
