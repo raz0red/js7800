@@ -61,29 +61,52 @@ function init() {
     }
     audioNode.connect(audioCtx.destination);
 
-    if (!isPlaying()) {
-      if (callback) callback(false);
-    }
-
-    var running = false;
-    var resumeFunc =    
-      function () { 
-        if (audioCtx.state !== 'running') {
-          audioCtx.resume()
-            .then(() => {
-              if (!running && audioCtx.state === 'running' && callback) {
-                running = true;
-                callback(true);
-              }
-            })
-        }
-      };
     var docElement = document.documentElement;
+
+    var audioSucceeded = false;
+
+    const resumeFunc = () => {
+      console.log('### resume func.');
+  
+      const fSuccess = () => {
+        if (audioSucceeded) return;
+        audioSucceeded = true;
+        console.log('### success.');
+        if (callback) callback(true);
+  
+        docElement.removeEventListener("keydown", resumeFunc);
+        docElement.removeEventListener("click", resumeFunc);
+        docElement.removeEventListener("drop", resumeFunc);
+        docElement.removeEventListener("dragdrop", resumeFunc);
+        docElement.removeEventListener("touchend", resumeFunc);
+      };
+  
+      if (audioCtx.state !== 'running') {
+        audioCtx.resume()
+          .then(() => {
+            if (audioCtx.state === 'running') {
+              fSuccess();
+            } else {
+              setTimeout(resumeFunc, 500);
+            }
+          });
+      } else {
+        fSuccess();
+      }
+    }
+    
     docElement.addEventListener("keydown", resumeFunc);
     docElement.addEventListener("click", resumeFunc);
     docElement.addEventListener("drop", resumeFunc);
     docElement.addEventListener("dragdrop", resumeFunc);
-    window.addEventListener("gamepadconnected", resumeFunc);
+    docElement.addEventListener("touchend", resumeFunc);
+
+    //setTimeout(() => {
+      if (!isPlaying()) {
+        if (callback) callback(false);
+        setTimeout(resumeFunc, 500);
+      }
+    //}, 100);
   }
 }
 
