@@ -101,12 +101,12 @@ function init() {
     docElement.addEventListener("dragdrop", resumeFunc);
     docElement.addEventListener("touchend", resumeFunc);
 
-    //setTimeout(() => {
+    setTimeout(() => {
       if (!isPlaying()) {
         if (callback) callback(false);
         setTimeout(resumeFunc, 500);
       }
-    //}, 100);
+    }, 100);
   }
 }
 
