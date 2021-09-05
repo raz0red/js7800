@@ -88,3 +88,13 @@ jobs:
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: mobile
+
+    - name: Deploy to GitHub pages (vulns)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/vulns'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: vulns
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: vulns
