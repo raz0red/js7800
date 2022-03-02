@@ -9,7 +9,7 @@ var NTSC_ATARI_BLIT_TOP_Y = 2;
 var NTSC_ATARI_HEIGHT = 240;
 var PAL_ATARI_BLIT_TOP_Y = 26;
 var PAL_ATARI_HEIGHT = 240;
-var ATARI_CANVAS_HEIGHT = 240;
+var ATARI_CANVAS_HEIGHT = 300;
 
 /** Snow */
 var displaySnow = true;
@@ -79,7 +79,7 @@ function initPalette8() {
   }
 }
 
-function flipImage() {
+function flipImage() {  
   var atariHeight =
     (cartridgeRegion == Region.REGION_PAL ? PAL_ATARI_HEIGHT : NTSC_ATARI_HEIGHT);
   var atariOffsety =
@@ -88,6 +88,19 @@ function flipImage() {
 
   var offsetx = 0;
   var offsety = ((ATARI_CANVAS_HEIGHT - atariHeight) / 2) | 0;
+  offsety = 0;
+
+  // webrcade sizing adjustements
+  if (cartridgeRegion == Region.REGION_PAL) {
+    atariOffsety = 10;
+    atariHeight = 270;
+  } else {
+    atariOffsety = 10;
+    atariHeight = 224;      
+  }  
+  if (canvas.height != atariHeight) {
+    canvas.height = atariHeight;  
+  }
 
   var src = 0, dst = 0, start = 0, x = 0, y = 0;
   var backpixels = imageData;
