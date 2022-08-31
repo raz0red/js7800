@@ -34,7 +34,7 @@ function addRomUrlPrefix(url) {
   var prefix = "";
   if (ta) {
     if (urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
-      prefix = hp + ta + "?y=";
+      prefix = hp + ta /*+ "?y="*/;
     }
   }
   return prefix + url;
