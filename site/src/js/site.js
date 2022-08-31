@@ -57,7 +57,7 @@ function startEmulation(blob, fromSelect) {
 
 var loadingMessageId = null;
 var loadMessageTimeout = 750;
-var onEmulationStartedCb = null; 
+var onEmulationStartedCb = null;
 
 function loadFromUrl(url, fromSelect) {
   var urlLower = url.toLowerCase();
@@ -99,7 +99,7 @@ function loadFromUrl(url, fromSelect) {
 
 function createFullscreenSelect() {
   var cbar = js7800.ControlsBar;
-  
+
   // Create full screen cartridge select
   var fsSelect = document.createElement("div");
   var fsSelectSel = document.createElement("select");
@@ -118,19 +118,19 @@ function createFullscreenSelect() {
 
 function handleRequestParameters() {
     var main = js7800.Main;
-    
+
     // ROM list
     var rlist = getRequestParameter("cartlist");
     if (!rlist) {
       rlist = 'roms/romlist-homebrew.json';
     }
     romList.loadListFromUrl(rlist);
-  
+
     // ROM
-    var rom = getRequestParameter("cart");
+    var rom = getRequestParameterToEnd("cart");
     if (rom) {
       loadFromUrl(rom);
-    }  
+    }
 }
 
 function checkDebugParam() {
@@ -139,7 +139,7 @@ function checkDebugParam() {
   if (debugParam) {
     debugParam = debugParam.toLowerCase();
    return (debugParam === "1" || debugParam == "true");
-  }    
+  }
   return false;
 }
 
@@ -153,7 +153,7 @@ function init(in7800) {
   var fsSelect = createFullscreenSelect();
 
   // Check whether debug has been set
-  debug = checkDebugParam();  
+  debug = checkDebugParam();
 
   // Configure and init js7800 module
   main.setErrorHandler(errorHandler);
@@ -162,49 +162,49 @@ function init(in7800) {
   // Create the description
   var desc = main.descriptionDiv;
   desc.className = "instructs";
-  desc.innerHTML = 
+  desc.innerHTML =
     '<div>Click<img id="ins_settings_img" src="' + cbar.cogsImgSrc + '"></img><span id="ins_settings" class="ilink">Settings</span> to view current keyboard mappings.</div>';
   desc.innerHTML +=
     '<div class="ihelp">Click<img id="ins_help_img" src="' + cbar.infoImgSrc + '"></img><span id="ins_help" class="ilink">Help</span> for detailed usage instructions.</div>';
     desc.innerHTML +=
     '<div class="ihelp">Load a cartridge using the drop-down menu or buttons below (you can also drag and drop a local file or remote file link onto the emulator).</div>';
-  
+
   // js7800 parent element
   var parent = document.getElementById('js7800__fullscreen-container');
 
   Events.addListener(
-    new Events.Listener("onHighScoreCartLoaded", 
-    function(loaded) {  
+    new Events.Listener("onHighScoreCartLoaded",
+    function(loaded) {
       highScoreCartEnabled = loaded;
     }
   ));
 
   // Set the leaderboard button
   var lbBUtton = cbar.leaderboardButton;
-  lbBUtton.onClick = function () { 
+  lbBUtton.onClick = function () {
     var url = "leaderboard";
     if (highScoreCartEnabled) {
       url += "?d=" + HighScore.getDigest();
     }
-    window.open(url, '_blank'/*,'noopener'*/); 
+    window.open(url, '_blank'/*,'noopener'*/);
   }
 
   // Listen for full screen change events
   Events.addListener(
     new Events.Listener("fullscreen",
       function (isFullscreen) {
-        lbBUtton.getElement().style.display = 
+        lbBUtton.getElement().style.display =
           isFullscreen ? "none" : "block";
-        fsSelect.parentElement.style.display = 
-          isFullscreen ? "flex" : "none";          
-      }));  
+        fsSelect.parentElement.style.display =
+          isFullscreen ? "flex" : "none";
+      }));
 
-  // Create the settings dialog  
-  var settingsDialog = new SettingsDialog();  
+  // Create the settings dialog
+  var settingsDialog = new SettingsDialog();
   cbar.settingsButton.onClick = function () { settingsDialog.show(); }
 
-  // Create the help dialog  
-  var helpDialog = new HelpDialog();  
+  // Create the help dialog
+  var helpDialog = new HelpDialog();
   cbar.helpButton.onClick = function () { helpDialog.show(); }
 
   // Description buttons
@@ -242,7 +242,7 @@ function init(in7800) {
   Events.addListener(new Events.Listener("romlistLoaded", function() {
       var id = showMessage("Succesfully loaded cartridge list.");
       hideMessage(id, 1000);
-    }));    
+    }));
 
   // Load preferences
   Storage.loadPrefs();

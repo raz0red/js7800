@@ -29,6 +29,11 @@ function getRequestParameter(name) {
     return decodeURIComponent(name[1]);
 }
 
+function getRequestParameterToEnd(name) {
+  if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=(.*)')).exec(location.search))
+    return decodeURIComponent(name[1]);
+}
+
 function addRomUrlPrefix(url) {
   var urlLower = url.toLowerCase();
   var prefix = "";
@@ -76,6 +81,7 @@ function generateUuid() { // Public Domain/MIT
 export {
   generateUuid,
   getRequestParameter,
+  getRequestParameterToEnd,
   addRomUrlPrefix,
   getUrlPrefix,
   addProps
