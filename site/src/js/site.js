@@ -17,6 +17,7 @@ var showMessage = Message.showMessage;
 var hideMessage = Message.hideMessage;
 var showErrorMessage = Message.showErrorMessage;
 var getRequestParameter = Util.getRequestParameter;
+var getRequestParameterToEnd = Util.getRequestParameterToEnd;
 var highScoreCartEnabled = false;
 var debug = false;
 
