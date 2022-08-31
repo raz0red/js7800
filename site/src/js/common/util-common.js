@@ -64,8 +64,6 @@ function getUrlPrefix() {
   switch (h) {
     case atob('cmF6MHJlZC5naXRodWIuaW8'):
       ta = atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lw"); hp += "s";
-      //ta = atob("Oi8vcHJveHkud2VicmNhZGUud29ya2Vycy5kZXY/"); hp += "s";
-
       break;
     case atob('bG9jYWxob3N0'):
       ta = atob("Oi8vbG9jYWxob3N0");
