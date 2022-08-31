@@ -79,7 +79,34 @@ function loadFromUrl(url, fromSelect) {
   xhr.onload = function () {
     try {
       if (xhr.status >= 300 || xhr.stats < 200) {
-        throw xhr.status + ": " + xhr.statusText;
+        var url2 = Util.addRomUrlPrefix2(url);
+        if (!url2) {
+          throw xhr.status + ": " + xhr.statusText;
+        } else {
+          xhr = new XMLHttpRequest();
+          xhr.open('GET', url2);
+          xhr.responseType = 'blob';
+          xhr.onload = function () {
+            try {
+              if (xhr.status >= 300 || xhr.stats < 200) {
+                throw xhr.status + ": " + xhr.statusText;
+              } else if (romList.loadListFromFile(xhr.response) || forceList) {
+                hideMessage(loadingMessageId, loadMessageTimeout);
+              } else {
+                startEmulation(xhr.response, fromSelect);
+              }
+            } catch (e) {
+              errorHandler(url + " (" + e + ")");
+            }
+          }
+          xhr.onerror = function () {
+            errorHandler(
+              'An error occurred during the load attempt.<br>(see console log for details)',
+              false
+            )
+          };
+          xhr.send();
+        }
       } else if (romList.loadListFromFile(xhr.response) || forceList) {
         hideMessage(loadingMessageId, loadMessageTimeout);
       } else {

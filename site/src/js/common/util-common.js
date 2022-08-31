@@ -45,6 +45,17 @@ function addRomUrlPrefix(url) {
   return prefix + url;
 }
 
+function addRomUrlPrefix2(url) {
+  var urlLower = url.toLowerCase();
+  var prefix = "";
+  if (ta) {
+    if (urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
+      prefix = hp + atob("Oi8vcHJveHkud2VicmNhZGUud29ya2Vycy5kZXY/");
+    }
+  }
+  return prefix + url;
+}
+
 function getUrlPrefix() {
   return hp + ta;
 }
@@ -83,6 +94,7 @@ export {
   getRequestParameter,
   getRequestParameterToEnd,
   addRomUrlPrefix,
+  addRomUrlPrefix2,
   getUrlPrefix,
   addProps
 }
