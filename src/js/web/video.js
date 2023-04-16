@@ -79,7 +79,7 @@ function initPalette8() {
   }
 }
 
-function flipImage() {  
+function flipImage() {
   var atariHeight =
     (cartridgeRegion == Region.REGION_PAL ? PAL_ATARI_HEIGHT : NTSC_ATARI_HEIGHT);
   var atariOffsety =
@@ -96,10 +96,10 @@ function flipImage() {
     atariHeight = 270;
   } else {
     atariOffsety = 10;
-    atariHeight = 224;      
-  }  
+    atariHeight = 224;
+  }
   if (canvas.height != atariHeight) {
-    canvas.height = atariHeight;  
+    canvas.height = atariHeight;
   }
 
   var src = 0, dst = 0, start = 0, x = 0, y = 0;
@@ -134,9 +134,9 @@ function init(event) {
     context = canvas.getContext('2d');
     image = context.getImageData(0, 0, ATARI_WIDTH, ATARI_CANVAS_HEIGHT);
     imageData = image.data;
-  }  
+  }
   clearCanvas();
-  resizeScreen();  
+  resizeScreen();
 
   // Set initial filter value
   filterStyle = getComputedStyle(canvas)['image-rendering'];
@@ -147,7 +147,7 @@ Events.addListener(new Events.Listener("init",
   function (event) { init(event) }));
 
 function clearCanvas() {
-  // set alpha to opaque 
+  // set alpha to opaque
   for (var i = 3; i < imageData.length; i += 4) {
     imageData[i - 3] = 0;
     imageData[i - 2] = 0;
@@ -183,11 +183,15 @@ function startSnow() {
 
 function resizeCanvas() {
 
+// WRC
+console.log("### ignoring resize canvas.");
+return;
+
   if (canvas) {
     var fullScreen = document.fullscreenElement;
     if (fullScreen) {
-      var height = window.innerHeight - controlsDiv.offsetHeight;      
-      var width = window.innerWidth;      
+      var height = window.innerHeight - controlsDiv.offsetHeight;
+      var width = window.innerWidth;
 
       // Resize the inner container
       innerContainer.style.height = height + "px";
@@ -198,15 +202,15 @@ function resizeCanvas() {
         newWidth = width;
         newHeight = newWidth * WxH_AR;
       }
-      
+
       var multHeight = 0;
       var imult = ((newHeight / ATARI_CANVAS_HEIGHT) | 0);
       if (fullscreenMode == 1 /* integer height scaling */) {
         multHeight = imult;
-      }       
+      }
       if (imult < 2) {
         multHeight = 2;
-      } 
+      }
       if (multHeight > 0) {
         newHeight = ATARI_CANVAS_HEIGHT * multHeight;
         newWidth = newHeight * HxW_AR;
@@ -226,7 +230,7 @@ function resizeCanvas() {
     }
 
     if (debug) {
-      console.log("Canvas size: " + 
+      console.log("Canvas size: " +
         canvas.style.width + " by " + canvas.style.height);
     }
 
@@ -239,21 +243,21 @@ window.addEventListener("resize", function () {
   setTimeout(resizeCanvas, 1000);
 });
 
-function getCanvas() { 
-  return canvas; 
+function getCanvas() {
+  return canvas;
 }
 
-function stopScreenSnow() { 
-  displaySnow = false; 
+function stopScreenSnow() {
+  displaySnow = false;
 }
 
 function setFilterEnabled(val) {
   filterEnabled = val;
-  canvas.style.imageRendering = (val ? 'initial' :  filterStyle);  
+  canvas.style.imageRendering = (val ? 'initial' :  filterStyle);
 }
 
 function isFilterEnabled() {
-  return filterEnabled;  
+  return filterEnabled;
 }
 
 function getFilterEnabledDefault() {
@@ -314,7 +318,7 @@ function fullScreen() {
     fsContainer.requestFullscreen();
     resizeCanvas();
     setTimeout(resizeCanvas, 1000);
-  }  
+  }
 }
 
 function isFullscreen() {
