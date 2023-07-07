@@ -101,7 +101,7 @@ function xm_Read(address) {
     //console.log("Read from Pokey1: %d %d", address, b);
     return b;
   } else if (xm_ym_enabled && (address >= 0x0460 && address <= 0x0461)) {
-    b = address & 1 ? YM.getStatus() : 0xFF;
+    b = address & 1 ? YM.getStatus() : 0; // 0xFF? Breaks some demos... hmm...
 
     // TODO: Do proper timing for YM (Hack for YM auto-detection)
     // banksets changes
