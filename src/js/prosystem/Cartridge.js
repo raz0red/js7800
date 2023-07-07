@@ -126,6 +126,8 @@ var cartridge_buffer = null; // Will be an Array()
 //static uint cartridge_size = 0;
 var cartridge_size = 0;
 
+var cartridge_stored = false;
+
 // ----------------------------------------------------------------------------
 // HasHeader
 // ----------------------------------------------------------------------------
@@ -527,6 +529,7 @@ function cartridge_Load(data, size) {
 //void cartridge_Store() {
 function cartridge_Store() {
   // banksets changes
+  cartridge_stored = true;    
   var size = cartridge_size;
   if (cartridge_banksets) size = size >> 1;
 
@@ -546,6 +549,10 @@ function cartridge_Store() {
       if (offset < size) {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+
+        // Default to bank 0
+        // banksets changes
+        cartridge_StoreBank(0);        
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_LARGE: {
@@ -556,6 +563,10 @@ function cartridge_Store() {
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
         //memory_WriteROM(16384, 16384, cartridge_buffer + cartridge_GetBankOffset(0));
         memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(0));
+
+        // Default to bank 0
+        // banksets changes
+        cartridge_StoreBank(0);        
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_RAM: {
@@ -565,6 +576,10 @@ function cartridge_Store() {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
         memory_ClearROM(16384, 16384);        
+
+        // Default to bank 0
+        // banksets changes
+        cartridge_StoreBank(0);        
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_ROM: {
@@ -575,6 +590,10 @@ function cartridge_Store() {
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
         //memory_WriteROM(16384, 16384, cartridge_buffer + cartridge_GetBankOffset(6));
         memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(6));
+
+        // Default to bank 0
+        // banksets changes
+        cartridge_StoreBank(0);
       }
     } break;
     case CARTRIDGE_TYPE_ABSOLUTE:
@@ -681,6 +700,7 @@ function cartridge_IsLoaded() {
 // ----------------------------------------------------------------------------
 //void cartridge_Release() {
 function cartridge_Release() {
+  cartridge_stored = false;
   high_score_cart_loaded = false;
 
   //if (cartridge_buffer != NULL) {
@@ -950,6 +970,10 @@ function GetXmModeDefault() {
   return XM_MODE_DEFAULT;
 }
 
+function cartridge_IsStored() {
+  return cartridge_stored;
+}
+
 function SetBanksetsBegin(begin) {
   cartridge_banksets_begin = begin;
 }
@@ -1035,6 +1059,7 @@ export {
   cartridge_Store as Store,
   cartridge_Release as Release,
   cartridge_LoadHighScoreCart as LoadHighScoreCart,
+  cartridge_IsStored as IsStored,
   CARTRIDGE_TYPE_NORMAL,
   CARTRIDGE_TYPE_NORMAL_RAM,
   CARTRIDGE_TYPE_SUPERCART,

@@ -209,6 +209,7 @@ function xm_Write(address, data) {
 
     xm_mem_enabled = xm_48kram_enabled || xm_bank0_enabled || xm_bank1_enabled;
 
+    /*
     console.log("xm_pokey_enabled: %d, xm_ym_enabled: %d, " +
       "xm_mem_enabled: %d, 48k ram: %d, bank0: %d, bank1: %d, ramwedisabled: %d",      
       xm_pokey_enabled ? 1 : 0,      
@@ -219,6 +220,7 @@ function xm_Write(address, data) {
       xm_bank1_enabled ? 1 : 0,
       xm_ramwe_disabled ? 1 : 0
     );
+    */
   }
 }
 

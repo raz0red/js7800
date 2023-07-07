@@ -161,7 +161,7 @@ function _memory_Read(address) {
   // banksets changes
   if ((address >= 0x20 && address <= 0x3F) && (address != MSTAT)) {
     return 0;
-  } 
+  }
 
   switch (address) {
     case INTIM:
@@ -276,16 +276,16 @@ function memory_Write(address, data) {
           console.log("Lock: " + data);
           memory_ram[MSTAT] = 0x80; // Required for Bouncing Balls demo
         }
-        // if ((data & 4) && Cartridge.IsLoaded()) {          
-        //   Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
-        //   if (!Cartridge.IsStored()) {            
-        //     Cartridge.Store();
-        //   }
-        // }
-        // else if (!(data & 4) && Bios.IsEnabled()) {
-        //   Cartridge.SaveToTmp(Bios.Size(), memory_ram, memory_rom);
-        //   Bios.Store();
-        // }
+        if ((data & 4) && Cartridge.IsLoaded()) {          
+          // Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
+          if (!Cartridge.IsStored()) {            
+            Cartridge.Store();
+          }
+        }
+        else if (!(data & 4) && Bios.IsEnabled()) {
+          // Cartridge.SaveToTmp(Bios.Size(), memory_ram, memory_rom);
+          Bios.Store();
+        }
       }
     } else {
       switch (address) {
@@ -293,14 +293,6 @@ function memory_Write(address, data) {
           if (!(cartridge_flags & 128)) {
             //memory_ram[WSYNC] = true;
             memory_ram[WSYNC] = 1;
-          }
-          break;
-        case INPTCTRL:
-          if (data == 22 && Cartridge.IsLoaded()) {
-            Cartridge.Store();
-          }
-          else if (data == 2 && Bios.IsEnabled()) {
-            Bios.Store();
           }
           break;
         case INPT0:
@@ -487,7 +479,3 @@ export {
   memory_ram as ram,
   memory_rom as rom
 }
-
-
-
-// TODO: CHECK ALL MEMORY LOCATIONS (at end, make sure not off by one!!!!)
