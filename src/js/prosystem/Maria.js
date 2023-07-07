@@ -82,6 +82,8 @@ var maria_wmode = 0;
 
 // Whether to access RAM directly
 var dr = false;
+// banksets changes
+var banksets = false;
 
 // ----------------------------------------------------------------------------
 // StoreCell
@@ -109,18 +111,31 @@ function maria_StoreCell1(data) {
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte high, byte low) {  
 function maria_StoreCell2(high, low) {
-  if (maria_horizontal < MARIA_LINERAM_SIZE) {
-    if (low || high) {
-      maria_lineRAM[maria_horizontal] = maria_palette & 16 | high | low;
-    }
-    else {
-      //byte kmode = memory_ram[CTRL] & 4;
-      var kmode = ram[CTRL] & 4;
-      if (kmode) {
-        maria_lineRAM[maria_horizontal] = 0;
-      }
-    }
+  // banksets changes
+  var kmode = ram[CTRL] & 4;
+  var c = (maria_palette & 0x10) | high | low; 
+  if (((c & 3) || kmode) && (maria_horizontal < MARIA_LINERAM_SIZE)) {
+    maria_lineRAM[maria_horizontal] = c;
   }
+
+
+  // var rmode = ram[CTRL] & 3;
+  // if (maria_horizontal < MARIA_LINERAM_SIZE) {
+  //   if (low || high) {
+  //     let v = maria_palette & 16 | high | low;
+  //     if (rmode === 0 && !(v & 3)) console.log("## C&3 occurring!")
+      
+  //     if (rmode !==0 || v & 3)
+  //       maria_lineRAM[maria_horizontal] = v;
+  //   }
+  //   else {
+  //     //byte kmode = memory_ram[CTRL] & 4;
+  //     var kmode = ram[CTRL] & 4;
+  //     if (kmode) {
+  //       maria_lineRAM[maria_horizontal] = 0;
+  //     }
+  //   }
+  // }
   //maria_horizontal++;
   maria_horizontal = (maria_horizontal + 1) & 0xFF;
 }
@@ -395,6 +410,9 @@ function maria_Reset() {
 // ----------------------------------------------------------------------------
 //uint maria_RenderScanline() {
 function maria_RenderScanline(maria_scanline) {
+  // banksets changes
+  if (banksets) ramf = Memory.ReadMaria;
+
   maria_cycles = 0;
 
   //
@@ -438,7 +456,12 @@ function maria_RenderScanline(maria_scanline) {
       //if (memory_ram[maria_dpp.w] & 128) {
       if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
         maria_cycles += 20; // Maria cycles (NMI)  /*29, 16, 20*/
+
+        // banksets changes
+        if (banksets) ramf = Memory.Read;
         sally_ExecuteNMI();
+        // banksets changes
+        if (banksets) ramf = Memory.ReadMaria;
       }
     }
     else if (maria_scanline >= maria_visibleArea.top && maria_scanline <= maria_visibleArea.bottom) {
@@ -465,7 +488,11 @@ function maria_RenderScanline(maria_scanline) {
         //if (memory_ram[maria_dpp.w] & 128) {
         if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
           maria_cycles += 20; // Maria cycles (NMI) /*29, 16, 20*/
+          // banksets changes
+          if (banksets) ramf = Memory.Read;
           sally_ExecuteNMI();
+          // banksets changes
+          if (banksets) ramf = Memory.ReadMaria;
         }
       }
       else {
@@ -473,6 +500,10 @@ function maria_RenderScanline(maria_scanline) {
       }
     }
   }
+
+  // banksets changes
+  if (banksets) ramf = Memory.Read;
+
   return maria_cycles;
 }
 
@@ -494,8 +525,11 @@ function SetSurface(surface) {
 
 Events.addListener(
   new Events.Listener("onCartridgeLoaded", function(cart) {
-    dr = !cart.IsXmEnabled();
+    // banksets changes
+    dr = !cart.IsXmEnabled() && !cart.IsBanksets();
     console.log("Maria RAM Direct: " + dr);
+    // banksets changes
+    banksets = cart.IsBanksets();
   }));  
 
 export {

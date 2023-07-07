@@ -153,7 +153,7 @@ function RomList(selects) {
       xhr.open('GET', Util.addRomUrlPrefix(url));
       xhr.onload = function () {
         try {
-          if (xhr.status >= 300 || xhr.stats < 200) {
+          if (xhr.status >= 300 || xhr.status < 200) {
             throw xhr.status + ": " + xhr.statusText;
           } else {
             var result = JSON.parse(xhr.responseText);

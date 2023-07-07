@@ -81,7 +81,18 @@ function xm_Reset() {
   cntrl5 = 0;
   ym_addr = 0;
   YM.reset();
+
+  // banksets changes
+  auto_detect_start = 0;
+  auto_detect_return = 2;
+  auto_detect_count = -1;
 }
+
+// TODO: Do proper timing for YM (Hack for YM auto-detection)
+// banksets changes
+var auto_detect_start = 0;
+var auto_detect_return = 2;
+var auto_detect_count = -1;
 
 //byte xm_Read(word address) {
 function xm_Read(address) {
@@ -90,8 +101,27 @@ function xm_Read(address) {
     //console.log("Read from Pokey1: %d %d", address, b);
     return b;
   } else if (xm_ym_enabled && (address >= 0x0460 && address <= 0x0461)) {
-    b = address & 1 ? YM.getStatus() : 0;
-    //console.log("Read from YM: %d %d", address, b);
+    b = address & 1 ? YM.getStatus() : 0xFF;
+
+    // TODO: Do proper timing for YM (Hack for YM auto-detection)
+    // banksets changes
+    if (auto_detect_count != -1 && address & 1) {
+      if (auto_detect_count > 0) {
+        auto_detect_count--;
+      } else if (auto_detect_count == 0) {        
+        if (auto_detect_return > 0) {
+          b = 2;
+          //console.log("### RETURNING!")
+          auto_detect_count = auto_detect_start;
+          auto_detect_return--;
+          if (auto_detect_return === 0) {
+            auto_detect_count = -1;
+          }
+        }
+      }
+    }
+
+    //console.log("Read from YM: %s %d", "" + address.toString(16), b);
     return b;
   } else if (xm_mem_enabled && (address >= 0x4000 && address < 0x8000)) {
     //console.log("read: " + address);
@@ -124,9 +154,18 @@ function xm_Write(address, data) {
     //console.log("Wrote to Pokey1: %d %d", address, data);
     pokey_SetRegister(0x4000 + (address - 0x0450), data);
   } else if (xm_ym_enabled && (address >= 0x0460 && address <= 0x0461)) {
-    //console.log("Wrote to YM: %d %d", address, data);
+    //console.log("Wrote to YM: %s %d", "" + address.toString(16), data);
     if (address & 1) {
       YM.setReg(ym_addr, data);
+      //console.log("YM Set reg: %s %d", "" + ym_addr.toString(16), data);
+      
+      // TODO: Do proper timing for YM (Hack for YM auto-detection)
+      // banksets changes
+      if (ym_addr === 18 && data === 252) {
+        //console.log("### STARTING!")
+        auto_detect_start = 129;
+        auto_detect_count = auto_detect_start;
+      }
     } else {
       ym_addr = data;
     }
@@ -170,7 +209,6 @@ function xm_Write(address, data) {
 
     xm_mem_enabled = xm_48kram_enabled || xm_bank0_enabled || xm_bank1_enabled;
 
-    /*
     console.log("xm_pokey_enabled: %d, xm_ym_enabled: %d, " +
       "xm_mem_enabled: %d, 48k ram: %d, bank0: %d, bank1: %d, ramwedisabled: %d",      
       xm_pokey_enabled ? 1 : 0,      
@@ -181,7 +219,6 @@ function xm_Write(address, data) {
       xm_bank1_enabled ? 1 : 0,
       xm_ramwe_disabled ? 1 : 0
     );
-    */
   }
 }
 

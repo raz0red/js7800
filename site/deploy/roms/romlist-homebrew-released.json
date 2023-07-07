@@ -3,7 +3,7 @@
     "files": [        
         {
             "name": "1942",
-            "path": "1942j.a78"            
+            "path": "1942.a78"            
         },               
         {
             "name": "Armor Attack II",
@@ -16,7 +16,11 @@
         {
             "name": "Astro Fighter",
             "path": "AstroFighter.a78"            
-        },                
+        },          
+        {
+            "name": "Attack of the PETSCII Robots (Demo)",
+            "path": "petscii7800demo.a78"            
+        },
         {
             "name": "b*nQ",
             "path": "bonq.a78"            
@@ -58,6 +62,10 @@
             "path": "Froggie.a78"            
         },
         {
+            "name": "Keystone Koppers (Demo)",
+            "path": "Keystone Koppers (Demo Dec 22) (20221222).a78"            
+        },
+        {
             "name": "KC Munchkin",
             "path": "KCMunchkin.a78"            
         },
@@ -72,6 +80,14 @@
         {
             "name": "Moon Cresta",
             "path": "MoonCresta.a78"            
+        },
+        {
+            "name": "Pac-Man Collection! (40th Anniversary)",
+            "path": "PMC_XM.A78"            
+        },
+        {
+            "name": "Popeye (Demo)",
+            "path": "Popeye.a78"            
         },
         {
             "name": "Rip-Off",

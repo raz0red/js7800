@@ -1380,6 +1380,9 @@ function setReg(reg, value) {
 
 function mixStereo(buffer, count, offset) {
   Ym2151.mixStereo(buffer, count, offset);
+  // TODO: Do proper timing for YM (Hack for YM auto-detection, 1942)
+  // banksets changes
+  Ym2151.Count(count)
 }
 
 function setSampleRate(rate) {

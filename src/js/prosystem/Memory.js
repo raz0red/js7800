@@ -60,6 +60,10 @@ var AUDF1 = 24;
 var AUDV0 = 25;
 var AUDV1 = 26;
 var WSYNC = 36;
+// banksets changes
+var MSTAT = 40;
+// banksets changes
+var DPPH  = 44;
 var SWCHA = 640;
 var SWCHB = 642;
 var INTIM = 644;
@@ -78,14 +82,29 @@ var memory_ram = new Array(MEMORY_SIZE);
 //byte memory_rom[MEMORY_SIZE] = {0};
 var memory_rom = new Array(MEMORY_SIZE);
 
+// banksets changes
+var maria_memory_ram = new Array(MEMORY_SIZE);
+
 //int hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
 //var hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
 
 /** Shadow of Cartridge */
 var cartridge_pokey = false;
 var cartridge_pokey450 = false;
+
+// banksets changes
+var cartridge_pokey800 = false;
+var cartridge_pokey_write_only = false;
+var cartridge_banksets = false;
+var cartridge_halt_banked_ram = false;
+
 var cartridge_flags = 0;
 var cartridge_xm = false;
+var cartridge_type = 0;
+
+var lock = false;
+
+var maria_read = false;
 
 // ----------------------------------------------------------------------------
 // Reset
@@ -95,6 +114,8 @@ function memory_Reset() {
   var index;
   for (index = 0; index < MEMORY_SIZE; index++) {
     memory_ram[index] = 0;
+    // banksets changes
+    maria_memory_ram[index] = 0;
     memory_rom[index] = 1;
   }
   for (index = 0; index < 16384; index++) {
@@ -103,6 +124,9 @@ function memory_Reset() {
 
   // Debug, reset write count to High Score SRAM
   //hs_sram_write_count = 0;
+
+  // banksets changes
+  lock = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -120,12 +144,24 @@ function _memory_Read(address) {
     return xm_Read(address);
   }
 
-  if (cartridge_pokey && (
-    (!cartridge_pokey450 && (address >= 0x4000 && address <= 0x400f)) ||
-    (cartridge_pokey450 && (address >= 0x0450 && address < 0x0470)))) {
-    return pokey_GetRegister(
-      cartridge_pokey450 ? 0x4000 + (address - 0x0450) : address);
+  // banksets changes (pokey@800)
+  if (!cartridge_pokey_write_only) {
+    if (cartridge_pokey && (
+      (!cartridge_pokey450 && !cartridge_pokey800 && (address >= 0x4000 && address <= 0x400f)) ||
+      (cartridge_pokey800 && (address >= 0x0800 && address < 0x0820)) ||
+      (cartridge_pokey450 && (address >= 0x0450 && address < 0x0470)))) {
+      return pokey_GetRegister(
+        cartridge_pokey800 ? 0x4000 + (address - 0x0800) :
+          cartridge_pokey450 ? 0x4000 + (address - 0x0450) : 
+            address);
+    }
   }
+
+  // Maria registers.
+  // banksets changes
+  if ((address >= 0x20 && address <= 0x3F) && (address != MSTAT)) {
+    return 0;
+  } 
 
   switch (address) {
     case INTIM:
@@ -140,6 +176,28 @@ function _memory_Read(address) {
       return tmp_byte;
       break;
     default:
+      // banksets changes
+      if (maria_read) {
+        if (cartridge_halt_banked_ram && (address >= 16384 && address <= 32767)) {
+          return maria_memory_ram[address]; 
+        }
+        if(cartridge_type === Cartridge.CARTRIDGE_TYPE_NORMAL || cartridge_type === Cartridge.CARTRIDGE_TYPE_NORMAL_RAM) {
+          if (address >= Cartridge.GetBanksetsBegin() && address <= Cartridge.GetBanksetsEnd()) {
+            return maria_memory_ram[address];
+          }
+        } else {
+          if (cartridge_type == Cartridge.CARTRIDGE_TYPE_SUPERCART_ROM && 
+              address >= 16384 && address <= 32767) {
+            return maria_memory_ram[address];      
+          }
+          if (address >= 32768 && address <= 49151) {
+            return maria_memory_ram[address];      
+          }
+          if (address >= 49152 && address <= 65535) {
+            return maria_memory_ram[address];
+          }  
+        }
+      }
       return memory_ram[address];
       break;
   }
@@ -153,6 +211,18 @@ function memory_Read(address) {
   }
   return data;
 }
+
+//byte memory_Read(word address) {
+  // banksets changes
+function memory_ReadMaria(address) {
+  maria_read = true;
+  var data = _memory_Read(address);
+  maria_read = false;
+  if (data < 0) {
+    console.error("Less than zero memory read: %d %d", address, data);
+  }
+  return data;
+}  
 
 // ----------------------------------------------------------------------------
 // Write
@@ -172,15 +242,19 @@ function memory_Write(address, data) {
     return;
   }
 
+  // banksets changes (pokey@800)
   if (cartridge_pokey && (
-    (!cartridge_pokey450 && (address >= 0x4000 && address <= 0x400f)) ||
-    (cartridge_pokey450 && (address >= 0x0450 && address < 0x0470)))) {
-    pokey_SetRegister(
-      (cartridge_pokey450 ? 0x4000 + (address - 0x0450) : address), data);
+      (!cartridge_pokey450 && !cartridge_pokey800 && (address >= 0x4000 && address <= 0x400f)) ||
+      (cartridge_pokey800 && (address >= 0x0800 && address < 0x0820)) ||
+      (cartridge_pokey450 && (address >= 0x0450 && address < 0x0470)))) {
+        pokey_SetRegister(
+          cartridge_pokey800 ? 0x4000 + (address - 0x0800) : 
+            cartridge_pokey450 ? 0x4000 + (address - 0x0450) : 
+              address, data);
     return;
   }
 
-  if (!memory_rom[address]) {
+  if (!memory_rom[address] || (cartridge_halt_banked_ram && (address >= 49152 && address <= 65535))) {
 
     // Track writes to high score SRAM
     if (highScoreCartEnabled && ((address >= 0x1000) && (address <= 0x17FF))) {
@@ -190,87 +264,127 @@ function memory_Write(address, data) {
       }
     }
 
-    switch (address) {
-      case WSYNC:
-        if (!(cartridge_flags & 128)) {
-          //memory_ram[WSYNC] = true;
-          memory_ram[WSYNC] = 1;
+    // INPTCTRL
+    // banksets changes
+    // Diagnosed by RevEng
+    // Multiple addresses are used to set INPTCTRL
+    // Lock Mode needs to be set
+    if (address >= 0 && address <= 0xf) {      
+      if (!lock) {        
+        if (data & 1) {
+          lock = true; 
+          console.log("Lock: " + data);
+          memory_ram[MSTAT] = 0x80; // Required for Bouncing Balls demo
         }
-        break;
-      case INPTCTRL:
-        if (data == 22 && Cartridge.IsLoaded()) {
-          Cartridge.Store();
-        }
-        else if (data == 2 && Bios.IsEnabled()) {
-          Bios.Store();
-        }
-        break;
-      case INPT0:
-      case INPT1:
-      case INPT2:
-      case INPT3:
-      case INPT4:
-      case INPT5:
-        break;
-      case AUDC0:
-        tia_SetRegister(AUDC0, data);
-        break;
-      case AUDC1:
-        tia_SetRegister(AUDC1, data);
-        break;
-      case AUDF0:
-        tia_SetRegister(AUDF0, data);
-        break;
-      case AUDF1:
-        tia_SetRegister(AUDF1, data);
-        break;
-      case AUDV0:
-        tia_SetRegister(AUDV0, data);
-        break;
-      case AUDV1:
-        tia_SetRegister(AUDV1, data);
-        break;
+        // if ((data & 4) && Cartridge.IsLoaded()) {          
+        //   Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
+        //   if (!Cartridge.IsStored()) {            
+        //     Cartridge.Store();
+        //   }
+        // }
+        // else if (!(data & 4) && Bios.IsEnabled()) {
+        //   Cartridge.SaveToTmp(Bios.Size(), memory_ram, memory_rom);
+        //   Bios.Store();
+        // }
+      }
+    } else {
+      switch (address) {
+        case WSYNC:
+          if (!(cartridge_flags & 128)) {
+            //memory_ram[WSYNC] = true;
+            memory_ram[WSYNC] = 1;
+          }
+          break;
+        case INPTCTRL:
+          if (data == 22 && Cartridge.IsLoaded()) {
+            Cartridge.Store();
+          }
+          else if (data == 2 && Bios.IsEnabled()) {
+            Bios.Store();
+          }
+          break;
+        case INPT0:
+        case INPT1:
+        case INPT2:
+        case INPT3:
+        case INPT4:
+        case INPT5:
+        case MSTAT: // MSTAT is read-only
+          break;
+        case AUDC0:
+          tia_SetRegister(AUDC0, data);
+          break;
+        case AUDC1:
+          tia_SetRegister(AUDC1, data);
+          break;
+        case AUDF0:
+          tia_SetRegister(AUDF0, data);
+          break;
+        case AUDF1:
+          tia_SetRegister(AUDF1, data);
+          break;
+        case AUDV0:
+          tia_SetRegister(AUDV0, data);
+          break;
+        case AUDV1:
+          tia_SetRegister(AUDV1, data);
+          break;
 
-      case SWCHB:
-        /*gdement:  Writing here actually writes to DRB inside the RIOT chip.
-      This value only indirectly affects output of SWCHB.*/
-        riot_SetDRB(data);
-        break;
+        case SWCHB:
+          /*gdement:  Writing here actually writes to DRB inside the RIOT chip.
+        This value only indirectly affects output of SWCHB.*/
+          riot_SetDRB(data);
+          break;
 
-      case SWCHA:
-        riot_SetDRA(data);
-        break;
-      case TIM1T:
-      case TIM1T | 0x8:
-        riot_SetTimer(TIM1T, data);
-        break;
-      case TIM8T:
-      case TIM8T | 0x8:
-        riot_SetTimer(TIM8T, data);
-        break;
-      case TIM64T:
-      case TIM64T | 0x8:
-        riot_SetTimer(TIM64T, data);
-        break;
-      case T1024T:
-      case T1024T | 0x8:
-        riot_SetTimer(T1024T, data);
-        break;
-      default:
-        memory_ram[address] = data;
-        if (address >= 8256 && address <= 8447) {
-          memory_ram[address - 8192] = data;
-        }
-        else if (address >= 8512 && address <= 8702) {
-          memory_ram[address - 8192] = data;
-        }
-        else if (address >= 64 && address <= 255) {
-          memory_ram[address + 8192] = data;
-        }
-        else if (address >= 320 && address <= 511) {
-          memory_ram[address + 8192] = data;
-        }
-        break;
+        case SWCHA:
+          riot_SetDRA(data);
+          break;
+        case TIM1T:
+        case TIM1T | 0x8:
+          riot_SetTimer(TIM1T, data);
+          break;
+        case TIM8T:
+        case TIM8T | 0x8:
+          riot_SetTimer(TIM8T, data);
+          break;
+        case TIM64T:
+        case TIM64T | 0x8:
+          riot_SetTimer(TIM64T, data);
+          break;
+        case T1024T:
+        case T1024T | 0x8:
+          riot_SetTimer(T1024T, data);
+          break;
+        default:
+          // banksets changes
+          if (cartridge_halt_banked_ram && (address >= 49152 && address <= 65535)) {
+            //console.log(16384 + (address - 49152) + ", " + data);
+            maria_memory_ram[16384 + (address - 49152)] = data;
+          } else {
+            memory_ram[address] = data;
+            if (address >= 8256 && address <= 8447) {
+              memory_ram[address - 8192] = data;
+            }
+            else if (address >= 8512 && address <= 8703) {  // banksets changes (8703)
+              memory_ram[address - 8192] = data;
+            }
+            else if (address >= 64 && address <= 255) {
+              memory_ram[address + 8192] = data;
+            }
+            else if (address >= 320 && address <= 511) {
+              memory_ram[address + 8192] = data;
+            }
+            // banksets changes
+            else if (address >= 10240 && address <= 12287) {
+              memory_ram[address - 2048] = data;
+            }
+            // banksets changes
+            else if (address >= 8192 && address <= 10239) {
+              memory_ram[address + 2048] = data;
+            }
+          } 
+          break;
+      }
     }
   }
   else {
@@ -283,6 +397,24 @@ function memory_Write(address, data) {
 // ----------------------------------------------------------------------------
 //memory_WriteROM = function(word address, uint size, const byte* data) {
 function memory_WriteROM(address, size, data, offset) {
+  var write_to_maria = false;
+  var maria_offset = 0;
+
+  // banksets changes
+  if (cartridge_banksets) {    
+    var type = Cartridge.GetType();
+    if(type === Cartridge.CARTRIDGE_TYPE_NORMAL || type === Cartridge.CARTRIDGE_TYPE_NORMAL_RAM) {
+      maria_offset = size;
+      Cartridge.SetBanksetsBegin(address);
+      Cartridge.SetBanksetsEnd(address + size - 1);  
+      write_to_maria = true;  
+    } else if (address === 32768 || address === 49152 ||
+        (type === Cartridge.CARTRIDGE_TYPE_SUPERCART_ROM && address === 16384)) {
+      maria_offset = 128 * 1024;
+      write_to_maria = true;  
+    }
+  }
+  
   //if((address + size) <= MEMORY_SIZE && data != NULL) {
   if ((address + size) <= MEMORY_SIZE && data != null) {
     //for(uint index = 0; index < size; index++) {
@@ -290,6 +422,10 @@ function memory_WriteROM(address, size, data, offset) {
       //memory_ram[address + index] = data[index];
       memory_ram[address + index] = data[index + offset];
       memory_rom[address + index] = 1;
+      if (write_to_maria) {
+        // banksets changes
+        maria_memory_ram[address + index] = data[index + offset + maria_offset]
+      }
     }
   }
 }
@@ -304,6 +440,10 @@ function memory_ClearROM(address, size) {
     for (var index = 0; index < size; index++) {
       memory_ram[address + index] = 0;
       memory_rom[address + index] = 0;
+      // banksets changes
+      if (cartridge_halt_banked_ram && address === 16384) {
+        maria_memory_ram[address + index] = 0;
+      }
     }
   }
 }
@@ -311,8 +451,13 @@ function memory_ClearROM(address, size) {
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
   cartridge_pokey450 = Cartridge.IsPokey450Enabled();
+  cartridge_pokey800 = Cartridge.IsPokey800Enabled();
   cartridge_xm = Cartridge.IsXmEnabled();
   cartridge_flags = Cartridge.GetFlags();
+  cartridge_pokey_write_only = Cartridge.IsPokeyWriteOnly();
+  cartridge_banksets = Cartridge.IsBanksets();
+  cartridge_halt_banked_ram = Cartridge.IsHaltBankedRam();
+  cartridge_type = Cartridge.GetType();
 }
 
 Events.addListener(
@@ -337,8 +482,12 @@ export {
   memory_WriteROM as WriteROM,
   memory_Write as Write,
   memory_Read as Read,
+  memory_ReadMaria as ReadMaria,
   memory_Reset as Reset,
   memory_ram as ram,
   memory_rom as rom
 }
 
+
+
+// TODO: CHECK ALL MEMORY LOCATIONS (at end, make sure not off by one!!!!)

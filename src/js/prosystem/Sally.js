@@ -369,6 +369,25 @@ function sally_ADC() {
       ah = (ah + 1) & 0xFFFF;
     }
 
+    // Set Z flag properly in decimal mode
+    // Diagnosed by RevEng
+    // The 6502 Z flag doesn't seem to understand decimal mode, so it gets set 
+    // as if you had added things without decimal mode enabled, 
+    // where $55+$AB=$00. So A7800 and visual 6502 both set Z, 
+    // but unfortunately z is clear in JS7800.
+    //
+    // banksets changes
+    var ztemp = new Pair();
+    ztemp.setW(sally_a + data + (sally_p & SALLY_FLAG.C));
+    if (!ztemp.getBL()) {
+      sally_p |= SALLY_FLAG.Z;
+    }
+    else {
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
+    }
+
+    /*
     if (!(sally_a + data + (sally_p & SALLY_FLAG.C))) {
       sally_p |= SALLY_FLAG.Z;
     }
@@ -376,6 +395,7 @@ function sally_ADC() {
       //sally_p &= ~SALLY_FLAG.Z;
       sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
     }
+    */
 
     if ((ah & 8) != 0) {
       sally_p |= SALLY_FLAG.N;
@@ -862,6 +882,10 @@ function sally_PHA() {
 // PHP
 // ----------------------------------------------------------------------------
 function sally_PHP() {
+  // Diagnosed by RevEng
+  // Software instructions BRK & PHP will push the B flag as being 1 
+  // banksets changes 
+  sally_p |= SALLY_FLAG.B;
   sally_Push(sally_p);
 }
 
@@ -1001,6 +1025,16 @@ function sally_SBC() {
   var data = memory_Read(sally_address.getW());
 
   if (sally_p & SALLY_FLAG.D) {
+    // Set Z flag properly in decimal mode
+    // Diagnosed by RevEng
+    // The 6502 Z flag doesn't seem to understand decimal mode, so it gets set 
+    // as if you had added things without decimal mode enabled, 
+    // where $55+$AB=$00. So A7800 and visual 6502 both set Z, 
+    // but unfortunately z is clear in JS7800.
+    // banksets changes
+    var ztemp = new Pair();
+    ztemp.setW(sally_a - data - !(sally_p & SALLY_FLAG.C));
+
     //word al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
     var al = ((sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C)) & 0xFFFF;
     //word ah = (sally_a >> 4) - (data >> 4);
@@ -1043,6 +1077,17 @@ function sally_SBC() {
 
     //sally_Flags(temp.b.l);
     sally_Flags(temp.getBL());
+
+    // Z flag
+    // banksets changes
+    if (!ztemp.getBL()) {
+      sally_p |= SALLY_FLAG.Z;
+    }
+    else {
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
+    }
+
     //sally_a = (ah << 4) | (al & 15);
     sally_a = ((ah << 4) | (al & 15)) & 0xFF;
   }
@@ -2057,6 +2102,41 @@ function sally_ExecuteInstruction() {
         sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
       }    
       return sally_cycles;
+    // LAX
+    // banksets changes
+    case 0xb3:      
+      sally_IndirectY();
+      sally_LDA();
+      sally_TAX();
+      return sally_cycles;
+    // SAX
+    // banksets changes
+    case 0x97:
+      sally_ZeroPageY();
+      sally_PHP();
+      sally_PHA();
+      sally_stx();
+      sally_AND();
+      sally_STA();
+      sally_PLA();
+      sally_PLP();      
+      return sally_cycles;
+    // UNP
+    // banksets changes
+    case 0x64:   
+    // ???
+    // banksets changes
+    case 0x89:
+      // No-op       
+      return sally_cycles;
+    // UNP
+    // banksets changes
+    case 0x04:
+    // UNP
+    // banksets changes
+    case 0x80:      
+      // Double no-op       
+      return sally_cycles;
     case 0xff:
     case 0xfc:
     case 0xfb:
@@ -2086,7 +2166,7 @@ function sally_ExecuteInstruction() {
     case 0xbf:
     case 0xbb:
     case 0xb7:
-    case 0xb3:
+    /*case 0xb3:*/
     case 0xb2:
     case 0xaf:
     case 0xab:
@@ -2096,16 +2176,16 @@ function sally_ExecuteInstruction() {
     case 0x9e:
     case 0x9c:
     case 0x9b:
-    case 0x97:
+    /*case 0x97:*/
     case 0x93:
     case 0x92:
     case 0x8f:
     case 0x8b:
-    case 0x89:
+    /*case 0x89:*/
     case 0x87:
     case 0x83:
     case 0x82:
-    case 0x80:
+    /*case 0x80:*/
     case 0x7f:
     case 0x7c:
     case 0x7b:
@@ -2117,7 +2197,7 @@ function sally_ExecuteInstruction() {
     case 0x6f:
     case 0x6b:
     case 0x67:
-    case 0x64:
+    /*case 0x64:*/
     case 0x63:
     case 0x62:
     case 0x5f:
@@ -2156,7 +2236,7 @@ function sally_ExecuteInstruction() {
     case 0x0f:
     case 0x0c:
     case 0x07:
-    case 0x04:
+    /*case 0x04:*/
     case 0x03:
     case 0x02:
       return sally_cycles;
