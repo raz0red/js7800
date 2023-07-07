@@ -1,0 +1,57 @@
+{
+    "folders": [],
+    "files": [
+        {
+            "name": "7800 Utility Cart",
+            "path": "7800UtilityCart.a78"            
+        },
+        {
+            "name": "Bankset Test (2x32K)",
+            "path": "Bankset Test - 2x32K.a78"            
+        },
+        {
+            "name": "Bankset Test (2x32K, pokey@4000)",
+            "path": "Bankset Test - 2x32K Pokey4000.a78"            
+        },
+        {
+            "name": "Bankset Test (2x32K, RAM, pokey@800)",
+            "path": "Bankset Test - 2x32K RAM Pokey800.a78"            
+        },
+        {
+            "name": "Bankset Test (2x48K)",
+            "path": "Bankset Test - 2x48K.a78"            
+        },
+        {
+            "name": "Bankset Test (2x48K, pokey@4000)",
+            "path": "Bankset Test - 2x48K Pokey4000.a78"            
+        },
+        {
+            "name": "Bankset Test (2x52K)",
+            "path": "Bankset Test - 2x52K.a78"            
+        },
+        {
+            "name": "Bankset Test (2x52K, pokey@4000)",
+            "path": "Bankset Test - 2x52K Pokey4000.a78"            
+        },
+        {
+            "name": "Bankset Test (2x128k)",
+            "path": "Bankset Test - 2x128K.a78"            
+        },
+        {
+            "name": "Bankset Test (2x128k, RAM)",
+            "path": "Bankset Test - 2x128K RAM.a78"            
+        },
+        {
+            "name": "Bankset Test (2x128k, RAM, pokey@800)",
+            "path": "Bankset Test - 2x128K RAM Pokey800.a78"            
+        },
+        {
+            "name": "Color Selector Demo",
+            "path": "ColorSelectorDemo.a78"            
+        },
+        {
+            "name": "XM Memory Test",
+            "path": "XmMemTest.a78"            
+        }        
+    ]
+}
