@@ -653,7 +653,7 @@ function pokey_Process(length) {
         }
       }
 
-      if (pokey_output[nextEvent]) {
+      if (pokey_output[nextEvent] ^ pokey_filter[nextEvent]) {
         pokey_outVol[nextEvent] = pokey_audc[nextEvent] & POKEY_VOLUME_MASK;
       }
       else {
