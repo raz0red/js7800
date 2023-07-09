@@ -269,6 +269,9 @@ function pokey_Reset() {
   random_scanline_counter = 0;
   prev_random_scanline_counter = 0;
 
+  // RevEng filter fix
+  pokey_filter = new Array(1, 1, 0, 0);
+
   pokey_Clear(true);
 }
 
