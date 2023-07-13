@@ -2881,3 +2881,15 @@ flags=0
 pokey450=false
 xm=true
 hsc=true
+[a662862f20362fc5eb5c651065cbd51c]
+title=Attack of the Petscii Robots
+type=3
+pokey=true
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=false
+xm=true
+hsc=false
+dualanalog=true
