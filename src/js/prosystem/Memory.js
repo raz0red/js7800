@@ -290,10 +290,8 @@ function memory_Write(address, data) {
     } else {
       switch (address) {
         case WSYNC:
-          if (!(cartridge_flags & 128)) {
             //memory_ram[WSYNC] = true;
             memory_ram[WSYNC] = 1;
-          }
           break;
         case INPT0:
         case INPT1:

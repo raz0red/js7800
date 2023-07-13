@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2005 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -39,8 +39,8 @@ var HS_SRAM_SIZE = 2048;
 
 var highScoreCallback = null;
 
-var HBLANK_DEFAULT = 34;
-var REGION_NTSC = null; 
+var HBLANK_DEFAULT = 28;
+var REGION_NTSC = null;
 var CARTRIDGE_TYPE_NORMAL = 0;
 var CARTRIDGE_TYPE_SUPERCART = 1;
 var CARTRIDGE_TYPE_SUPERCART_LARGE = 2;
@@ -90,7 +90,7 @@ var cartridge_xm = false;
 //bool cartridge_disable_bios = false;
 var cartridge_disable_bios = false;
 //uint cartridge_hblank = 34;
-var cartridge_hblank = 34;
+var cartridge_hblank = 28;
 //byte cartridge_left_switch = 1;
 var cartridge_left_switch = 1;
 //byte cartridge_right_switch = 0;
@@ -198,7 +198,7 @@ function cartridge_WriteBank(address, bank) {
 
   /*
   console.log("Bank switch: %d, %d, max:%d",
-    address, cartridge_GetBank(bank), ((cartridge_size / 16384)>>0));      
+    address, cartridge_GetBank(bank), ((cartridge_size / 16384)>>0));
   */
 
   //uint offset = cartridge_GetBankOffset(bank);
@@ -211,7 +211,7 @@ function cartridge_WriteBank(address, bank) {
 }
 
 //static void cartridge_SetTypeBySize(uint size) {
-function cartridge_SetTypeBySize(size) { 
+function cartridge_SetTypeBySize(size) {
   // banksets changes
   if (cartridge_banksets) size = size >> 1;
 
@@ -310,7 +310,7 @@ function cartridge_ReadHeader(header) {
   cartridge_hsc_enabled = header[58] & 0x03; // HSC or SaveKey /* 0x01; */
   // banksets changes
   cartridge_banksets = header[53] & 0x20 ? true : false;
-  if (cartridge_banksets && 
+  if (cartridge_banksets &&
         (cartridge_size === (2 * 48 * 1024) || cartridge_size === (2 * 52 * 1024))) {
     cartridge_pokey_write_only = true;
   }
@@ -342,14 +342,14 @@ function cartridge_ReadHeader(header) {
       var old_type = cartridge_type;
       cartridge_type = CARTRIDGE_TYPE_SUPERCART;
       console.log("Update: (0x01) bit1: %d, %d", old_type, cartridge_type);
-    } else if (cartridge_size <= 0x10000 && ((ct1 & 0x04) == 0x04)) { // Size < 64k && BIT2 (Normal RAM: ?) ram at $4000 ) 
+    } else if (cartridge_size <= 0x10000 && ((ct1 & 0x04) == 0x04)) { // Size < 64k && BIT2 (Normal RAM: ?) ram at $4000 )
       //int old_type = cartridge_type;
       var old_type = cartridge_type;
       cartridge_type = CARTRIDGE_TYPE_NORMAL_RAM;
       console.log("Update: (0x04) bit2: %d, %d", old_type, cartridge_type);
     } else {
       // Attempt to determine the cartridge type based on its size
-      cartridge_SetTypeBySize(cartridge_size);      
+      cartridge_SetTypeBySize(cartridge_size);
     }
   //}       // banksets changes
 
@@ -359,7 +359,7 @@ function cartridge_ReadHeader(header) {
       if (cartridge_type === CARTRIDGE_TYPE_NORMAL && cartridge_halt_banked_ram) {
         var old_type = cartridge_type;
         cartridge_type = CARTRIDGE_TYPE_NORMAL_RAM;
-        console.log("Normal cart with halt based ram, switching type: %d, %d", old_type, cartridge_type);    
+        console.log("Normal cart with halt based ram, switching type: %d, %d", old_type, cartridge_type);
       }
     } else {
       var old_type = cartridge_type;
@@ -368,10 +368,10 @@ function cartridge_ReadHeader(header) {
       } else if ((ct1 & 0x10) == 0x10) {
         cartridge_type = CARTRIDGE_TYPE_SUPERCART_ROM;
       } else {
-        cartridge_type = CARTRIDGE_TYPE_SUPERCART;        
+        cartridge_type = CARTRIDGE_TYPE_SUPERCART;
       }
       if (old_type !== cartridge_type) {
-        console.log("Bank switched banksets, switching type: %d, %d", old_type, cartridge_type);    
+        console.log("Bank switched banksets, switching type: %d, %d", old_type, cartridge_type);
       }
     }
   }
@@ -483,7 +483,7 @@ function cartridge_Load(data, size) {
     offset = 128;
 
     // Several cartridge headers do not have the proper size. So attempt to use the size
-    // of the file. 
+    // of the file.
     if (cartridge_size != size) {
       console.log("!!! CARTRIDGE SIZE IN HEADER DOES NOT MATCH !!! : %d %d",
         cartridge_size, size);
@@ -516,9 +516,17 @@ function cartridge_Load(data, size) {
     hashstr += String.fromCharCode(cartridge_buffer[index]);
   }
 
-  //cartridge_digest = hash_Compute(cartridge_buffer, cartridge_size); 
+  //cartridge_digest = hash_Compute(cartridge_buffer, cartridge_size);
   cartridge_digest = md5(hashstr);
   console.log("cartridge_digest: %s", cartridge_digest);
+
+  if (cartridge_digest === "91041aadd1700a7a4076f4005f2c362f") {
+    console.log("Patching diagnostic cartridge...");
+    var DIAG_PATCH_66EC = [0xDF, 0xE6];
+    for (let i = 0; i < DIAG_PATCH_66EC.length; i++) {
+      cartridge_buffer[0x66ec - offset + i] = DIAG_PATCH_66EC[i];
+    }
+  }
 
   return true;
 }
@@ -529,7 +537,7 @@ function cartridge_Load(data, size) {
 //void cartridge_Store() {
 function cartridge_Store() {
   // banksets changes
-  cartridge_stored = true;    
+  cartridge_stored = true;
   var size = cartridge_size;
   if (cartridge_banksets) size = size >> 1;
 
@@ -552,7 +560,7 @@ function cartridge_Store() {
 
         // Default to bank 0
         // banksets changes
-        cartridge_StoreBank(0);        
+        cartridge_StoreBank(0);
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_LARGE: {
@@ -566,7 +574,7 @@ function cartridge_Store() {
 
         // Default to bank 0
         // banksets changes
-        cartridge_StoreBank(0);        
+        cartridge_StoreBank(0);
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_RAM: {
@@ -575,11 +583,11 @@ function cartridge_Store() {
       if (offset < size) {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
-        memory_ClearROM(16384, 16384);        
+        memory_ClearROM(16384, 16384);
 
         // Default to bank 0
         // banksets changes
-        cartridge_StoreBank(0);        
+        cartridge_StoreBank(0);
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_ROM: {
@@ -749,7 +757,7 @@ function cartridge_Release() {
 function cartridge_LoadHighScoreCart(callback) {
   if (!cartridge_hsc_enabled || (cartridge_region != REGION_NTSC)) {
     // Only load the cart if it is enabled and the region is NTSC
-    console.log(cartridge_hsc_enabled ? 
+    console.log(cartridge_hsc_enabled ?
       "Not loading high score cartridge, PAL region." :
       "High score cartridge is disabled (via db and cart header)."
     );
@@ -782,8 +790,8 @@ function cartridge_LoadHighScoreCart(callback) {
       }
       for (var i = 0; i < high_score_buffer.length; i++) {
         memory_Write(0x3000 + i, high_score_buffer.charCodeAt(i));
-      }      
-      high_score_cart_loaded = true;  
+      }
+      high_score_cart_loaded = true;
     }
     console.log("High score cart loaded: " + high_score_cart_loaded);
 
@@ -794,159 +802,159 @@ function cartridge_LoadHighScoreCart(callback) {
   highScoreCallback.loadSram(postLoadCallback);
 }
 
-function GetRegion() { 
-  return cartridge_region; 
+function GetRegion() {
+  return cartridge_region;
 }
 
-function IsPokeyEnabled() { 
-  return cartridge_pokey; 
+function IsPokeyEnabled() {
+  return cartridge_pokey;
 }
 
-function IsPokey450Enabled() { 
-  return cartridge_pokey450; 
+function IsPokey450Enabled() {
+  return cartridge_pokey450;
 }
 
-function IsPokey800Enabled() { 
-  return cartridge_pokey800; 
+function IsPokey800Enabled() {
+  return cartridge_pokey800;
 }
 
 function IsPokeyWriteOnly() {
   return cartridge_pokey_write_only;
 }
 
-function IsXmEnabled() { 
+function IsXmEnabled() {
   return xm_mode == 2 ? cartridge_xm : xm_mode;
 }
 
-function IsBanksets() { 
+function IsBanksets() {
   return cartridge_banksets;
 }
 
-function IsHaltBankedRam() { 
+function IsHaltBankedRam() {
   return cartridge_halt_banked_ram;
 }
 
-function IsSwapButtons() { 
-  return cartridge_swap_buttons; 
+function IsSwapButtons() {
+  return cartridge_swap_buttons;
 }
 
-function IsDualAnalog() { 
-  return cartridge_dualanalog; 
+function IsDualAnalog() {
+  return cartridge_dualanalog;
 }
 
-function IsLightGunEnabled() { 
-  return cartridge_controller[0] == CARTRIDGE_CONTROLLER_LIGHTGUN; 
+function IsLightGunEnabled() {
+  return cartridge_controller[0] == CARTRIDGE_CONTROLLER_LIGHTGUN;
 }
-  
-function GetFlags() { 
+
+function GetFlags() {
   return cartridge_flags;
 }
 
-function GetHblank() { 
-  return cartridge_hblank; 
+function GetHblank() {
+  return cartridge_hblank;
 }
 
-function GetLeftSwitch() { 
-  return cartridge_left_switch; 
+function GetLeftSwitch() {
+  return cartridge_left_switch;
 }
 
-function GetRightSwitch() { 
-  return cartridge_right_switch; 
+function GetRightSwitch() {
+  return cartridge_right_switch;
 }
 
-function GetDigest() { 
-  return cartridge_digest; 
+function GetDigest() {
+  return cartridge_digest;
 }
 
-function SetTitle(title) { 
+function SetTitle(title) {
   cartridge_title = title;
 }
 
-function GetTitle() { 
-  return cartridge_title; 
+function GetTitle() {
+  return cartridge_title;
 }
 
-function GetSize() { 
-  return cartridge_size; 
+function GetSize() {
+  return cartridge_size;
 }
 
-function GetType() { 
-  return cartridge_type; 
+function GetType() {
+  return cartridge_type;
 }
 
-function SetType(type) { 
+function SetType(type) {
   cartridge_type = type;
 }
 
-function SetPokey(pokey) { 
+function SetPokey(pokey) {
   cartridge_pokey = pokey;
 }
 
-function SetPokey450(pokey) { 
+function SetPokey450(pokey) {
   cartridge_pokey450 = pokey;
 }
 
-function SetController1(c1) { 
+function SetController1(c1) {
   cartridge_controller[0] = c1;
 }
 
-function SetController2(c2) { 
+function SetController2(c2) {
   cartridge_controller[1] = c2;
 }
 
-function GetController1() { 
-  return cartridge_controller[0]; 
+function GetController1() {
+  return cartridge_controller[0];
 }
 
-function GetController2() { 
-  return cartridge_controller[1]; 
+function GetController2() {
+  return cartridge_controller[1];
 }
 
-function SetRegion(region) { 
+function SetRegion(region) {
   cartridge_region = region;
 }
 
-function SetFlags(flags) { 
-  cartridge_flags = flags; 
+function SetFlags(flags) {
+  cartridge_flags = flags;
 }
 
-function SetXm(xm) { 
+function SetXm(xm) {
   cartridge_xm = xm;
 }
 
-function SetHblank(hblank) { 
+function SetHblank(hblank) {
   cartridge_hblank = hblank;
 }
 
-function SetCrossX(crossx) { 
+function SetCrossX(crossx) {
   cartridge_crosshair_x = crossx;
 }
 
-function SetCrossY(crossy) { 
+function SetCrossY(crossy) {
   cartridge_crosshair_y = crossy;
 }
 
-function GetCrossX() { 
-  return cartridge_crosshair_x; 
+function GetCrossX() {
+  return cartridge_crosshair_x;
 }
 
-function GetCrossY() { 
-  return cartridge_crosshair_y; 
+function GetCrossY() {
+  return cartridge_crosshair_y;
 }
 
-function SetDualAnalog(dualAnalog) { 
+function SetDualAnalog(dualAnalog) {
   cartridge_dualanalog = dualAnalog;
 }
 
-function SetLeftSwitch(val) { 
+function SetLeftSwitch(val) {
   cartridge_left_switch = val;
 }
 
-function SetRightSwitch(val) { 
-  cartridge_right_switch = val; 
+function SetRightSwitch(val) {
+  cartridge_right_switch = val;
 }
 
-function SetSwapButtons(val) { 
+function SetSwapButtons(val) {
   cartridge_swap_buttons = val;
 }
 

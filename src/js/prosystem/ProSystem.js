@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2003, 2004 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -46,8 +46,11 @@ var riot_IsTimingEnabled = Riot.IsTimingEnabled;
 var riot_UpdateTimer = Riot.UpdateTimer;
 var maria_displayArea = Maria.displayArea;
 var maria_RenderScanline = Maria.RenderScanline;
+var maria_IsNMI = Maria.IsNMI;
+var MARIA_CYCLE_LIMIT = Maria.MARIA_CYCLE_LIMIT;
 var memory_ram = Memory.ram;
 var sally_ExecuteInstruction = Sally.ExecuteInstruction;
+var sally_ExecuteNMI = Sally.ExecuteNMI;
 var isLightGunEnabled = Cartridge.IsLightGunEnabled;
 
 var INPT4 = 12;
@@ -83,7 +86,7 @@ var maria_scanline = 1;
 var cartridge_pokey = false;
 var cartridge_flags = 0;
 var cartridge_xm = false;
-var cartridge_hblank = 34;
+var cartridge_hblank = 28;
 
 // Set the scanlines for Pokey
 Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
@@ -108,8 +111,8 @@ function prosystem_Reset(postResetCallback) {
     Sally.Reset(); // WII
     Region.Reset();
     Tia.Clear();
-    Pokey.Reset();    
-    Xm.Reset();    
+    Pokey.Reset();
+    Xm.Reset();
 
     Memory.Reset();
     Maria.Clear();
@@ -124,8 +127,8 @@ function prosystem_Reset(postResetCallback) {
 
     var postHsLoad = function(isSuccess) {
       Events.fireEvent("onHighScoreCartLoaded", isSuccess);
-      prosystem_cycles = Sally.ExecuteRES();
-      prosystem_active = true;  
+      prosystem_cycles = Sally.ExecuteRES() << 2;
+      prosystem_active = true;
       // Invoke post reset callback
       postResetCallback();
     }
@@ -177,6 +180,7 @@ var dbg_cycle_stealing = false;
 //void prosystem_ExecuteFrame(const byte* input)
 function prosystem_ExecuteFrame(input) // TODO: input is array
 {
+	/*
   // Is WSYNC enabled for the current frame?
   //bool wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
   var wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
@@ -186,9 +190,9 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   //bool cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
   var cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
   dbg_cycle_stealing = cycle_stealing;
+  */
 
   // Is the lightgun enabled for the current frame?
-  //bool lightgun =
   var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
   riot_SetInput(input);
@@ -197,12 +201,12 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   dbg_saved_cycles = 0; // debug
   dbg_wsync_count = 0;  // debug
   dbg_maria_cycles = 0; // debug
-  dbg_p6502_cycles = 0; // debug    
+  dbg_p6502_cycles = 0; // debug
 
   if (cartridge_pokey || cartridge_xm) pokey_Frame();
 
   for (maria_scanline = 1; maria_scanline <= prosystem_scanlines; maria_scanline++) {
-    //#if 0      
+    //#if 0
     //    if ((int)wii_orient_roll == maria_scanline) {
     //  memory_ram[INPT2] &= 0x7f;
     //} else {
@@ -224,40 +228,28 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     //uint cycles = 0;
     var cycles = 0;
 
-    if (!cycle_stealing || (memory_ram[CTRL] & 96) != 64) {
-      // Exact cycle counts when Maria is disabled        
+    // Reset ProSystem cycles for current frame
       (prosystem_cycles %= CYCLES_PER_SCANLINE) | 0;
-      prosystem_extra_cycles = 0;
-    }
-    else {
-      prosystem_extra_cycles = ((prosystem_cycles % CYCLES_PER_SCANLINE) | 0);
-      dbg_saved_cycles += prosystem_extra_cycles;
-
-      // Some fudge for Maria cycles. Unfortunately Maria cycle counting
-      // isn't exact (This adds some extra cycles).
-      prosystem_cycles = 0;
-    }
 
     // If lightgun is enabled, check to see if it should be fired
     if (lightgun) prosystem_FireLightGun();
 
     while (prosystem_cycles < cartridge_hblank) {
-      cycles = sally_ExecuteInstruction();
-      prosystem_cycles += (cycles << 2);
-      if (Sally.half_cycle) prosystem_cycles += 2;
-
-      dbg_p6502_cycles += (cycles << 2); // debug
-
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles);
-      }
-
-      // If lightgun is enabled, check to see if it should be fired
+      cycles = (sally_ExecuteInstruction() << 2);
+      prosystem_cycles += cycles;
       if (lightgun) prosystem_FireLightGun();
 
-      if (memory_ram[WSYNC] && wsync) {
+      if (Sally.half_cycle)  {
+        prosystem_cycles += 2;
+        if (lightgun) prosystem_FireLightGun();
+      }
+
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer(cycles >>> 2);
+      }
+
+      if (memory_ram[WSYNC]) {
         dbg_wsync_count++; // debug
-        //memory_ram[WSYNC] = false;
         memory_ram[WSYNC] = 0;
         wsync_scanline = true;
         break;
@@ -265,35 +257,57 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     }
 
     Xm.setDmaActive(true);
-    cycles = maria_RenderScanline(maria_scanline);
+    cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2;
+    if (cycles > MARIA_CYCLE_LIMIT) {
+      // cycles = MARIA_CYCLE_LIMIT; // TODO: This causes flicker is Scramble (is it necessary?)
+      wsync_scanline = true;
+    }
     Xm.setDmaActive(false);
 
-    if (cycle_stealing) {
       prosystem_cycles += cycles;
       dbg_maria_cycles += cycles; // debug
 
       if (riot_IsTimingEnabled()) {
+      riot_UpdateTimer((cycles) >>> 2);
+    }
+
+    // https://atariage.com/forums/topic/201163-the-truth-about-wsync-and-other-scanline-issues/
+    // - The 6502 requires two cycles to acknowledge the NMI.
+    // - 0-6 cycles pass as the 6502 finishes the currently executing instruction.
+    // Interrupt entry takes 7 cycles.
+    if (maria_IsNMI()) {
+      if (!wsync_scanline && (prosystem_cycles < CYCLES_PER_SCANLINE)) {
+        cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
+        if (riot_IsTimingEnabled()) {
         riot_UpdateTimer(cycles >>> 2);
       }
+        prosystem_cycles += cycles;
+
+        if (memory_ram[WSYNC]) {
+          dbg_wsync_count++; // debug
+          memory_ram[WSYNC] = 0;
+          wsync_scanline = true;
+        }
+      }
+      sally_ExecuteNMI();
     }
 
     while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
-      cycles = sally_ExecuteInstruction();
-      prosystem_cycles += (cycles << 2);
-      if (Sally.half_cycle) prosystem_cycles += 2;
-
-      dbg_p6502_cycles += (cycles << 2); // debug
-
-      // If lightgun is enabled, check to see if it should be fired
+      cycles = (sally_ExecuteInstruction() << 2);
+      prosystem_cycles += cycles;
       if (lightgun) prosystem_FireLightGun();
 
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles);
+      if (Sally.half_cycle) {
+         prosystem_cycles += 2;
+      if (lightgun) prosystem_FireLightGun();
       }
 
-      if (memory_ram[WSYNC] && wsync) {
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer(cycles >>> 2);
+      }
+
+      if (memory_ram[WSYNC]) {
         dbg_wsync_count++; // debug
-        //memory_ram[WSYNC] = false;
         memory_ram[WSYNC] = 0;
         wsync_scanline = true;
         break;
@@ -309,7 +323,8 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       prosystem_cycles = CYCLES_PER_SCANLINE;
     }
 
-    // If lightgun is enabled, check to see if it should be fired
+    dbg_p6502_cycles += prosystem_cycles; // debug
+
     if (lightgun) prosystem_FireLightGun();
 
     Tia_Process(2);
@@ -353,16 +368,16 @@ function prosystem_Close() {
   Pokey.Clear(true);
 }
 
-function IsActive() { 
-  return prosystem_active; 
+function IsActive() {
+  return prosystem_active;
 }
 
-function IsPaused() { 
-  return prosystem_paused; 
+function IsPaused() {
+  return prosystem_paused;
 }
 
-function GetFrequency() { 
-  return prosystem_frequency; 
+function GetFrequency() {
+  return prosystem_frequency;
 }
 
 function SetFrequency(freq) {
@@ -370,12 +385,12 @@ function SetFrequency(freq) {
   Sound.SetFrequency(freq);
 }
 
-function GetFrame() { 
-  return prosystem_frame; 
+function GetFrame() {
+  return prosystem_frame;
 }
 
-function GetScanlines() { 
-  return prosystem_scanlines; 
+function GetScanlines() {
+  return prosystem_scanlines;
 }
 
 function SetScanlines(lines) {
@@ -383,47 +398,47 @@ function SetScanlines(lines) {
   Sound.SetScanlines(lines);
 }
 
-function GetCycles() { 
-  return prosystem_cycles; 
+function GetCycles() {
+  return prosystem_cycles;
 }
 
-function GetExtraCycles() { 
-  return prosystem_extra_cycles; 
+function GetExtraCycles() {
+  return prosystem_extra_cycles;
 }
 
-function GetDebugSavedCycles() { 
-  return dbg_saved_cycles; 
+function GetDebugSavedCycles() {
+  return dbg_saved_cycles;
 }
 
-function GetDebugWsyncCount() { 
-  return dbg_wsync_count; 
+function GetDebugWsyncCount() {
+  return dbg_wsync_count;
 }
 
-function GetDebugMariaCycles() { 
-  return dbg_maria_cycles; 
+function GetDebugMariaCycles() {
+  return dbg_maria_cycles;
 }
 
-function GetDebug6502Cycles() { 
-  return dbg_p6502_cycles; 
+function GetDebug6502Cycles() {
+  return dbg_p6502_cycles;
 }
 
-function GetDebugWsync() { 
-  return dbg_wsync; 
+function GetDebugWsync() {
+  return dbg_wsync;
 }
 
-function GetDebugCycleStealing() { 
-  return dbg_cycle_stealing; 
+function GetDebugCycleStealing() {
+  return dbg_cycle_stealing;
 }
 
-function GetMariaScanline() { 
-  return maria_scanline; 
+function GetMariaScanline() {
+  return maria_scanline;
 }
 
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
   cartridge_xm = Cartridge.IsXmEnabled();
-  cartridge_flags = Cartridge.GetFlags();
-  cartridge_hblank = Cartridge.GetHblank();
+  // cartridge_flags = Cartridge.GetFlags();
+  // cartridge_hblank = Cartridge.GetHblank();
 }
 
 Events.addListener(
@@ -437,7 +452,7 @@ export {
   CYCLES_PER_SCANLINE,
   HBLANK_CYCLES,
   IsActive,
-  IsPaused,  
+  IsPaused,
   GetFrequency,
   SetFrequency,
   GetFrame,

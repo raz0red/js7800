@@ -114,7 +114,7 @@ var SALLY_IRQ = {
 
 //static const byte SALLY_CYCLES[256] = { ... }
 var SALLY_CYCLES = [
-  7, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 2 /* ANC */, 0, 4, 6, 0, // 0 - 15
+  7, 6, 0, 0, 2, 3, 5, 0, 3, 2, 2, 2 /* ANC */, 0, 4, 6, 0, // 0 - 15
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 16 - 31
   6, 6, 0, 0, 3, 3, 5, 0, 4, 2, 2, 2 /* ANC */, 4, 4, 6, 0, // 32 - 47
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 48 - 63
@@ -122,10 +122,10 @@ var SALLY_CYCLES = [
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 80 - 95
   6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, // 96 - 111
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 112 - 127
-  0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
-  2, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
+  2, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
+  2, 6, 0, 0, 4, 4, 4, 4 /* SAX */, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
   2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // 160 - 175
-  2, 5, 0, 0, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
+  2, 5, 0, 6 /* LAX */, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 192 - 207
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 208 - 223
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 222 - 239
@@ -882,6 +882,10 @@ function sally_PHA() {
 // PHP
 // ----------------------------------------------------------------------------
 function sally_PHP() {
+  //var tmp = sally_p;
+  //tmp |= SALLY_FLAG.B;
+  //sally_Push(tmp);
+
   // Diagnosed by RevEng
   // Software instructions BRK & PHP will push the B flag as being 1 
   // banksets changes 
@@ -1308,7 +1312,7 @@ function sally_ExecuteInstruction() {
   half_cycle = false;
 
   //sally_opcode = memory_Read(sally_pc.w++);
-  var opcodeMem = sally_pc.wPlusPlus()
+  var opcodeMem = sally_pc.wPlusPlus();
   sally_opcode = memory_Read(opcodeMem);
   sally_cycles = SALLY_CYCLES[sally_opcode];
 
@@ -2082,15 +2086,14 @@ function sally_ExecuteInstruction() {
       sally_AbsoluteX();
       sally_INC();
       return sally_cycles;
-    case 0x4b: /* ALR (ASR) */     
+    case 0x4b: // ALR (ASR) 
       //console.log("ALR (ASR)");
       sally_Immediate();
       sally_AND();
       sally_LSRA();
       return sally_cycles;
-    case 0x0b: /* ANC */  
-    case 0x2b: /* ANC */      
-      /*console.log("ANC");*/
+    case 0x0b: // ANC   
+    case 0x2b: // ANC 
       sally_Immediate();
       sally_AND();
       var temp = sally_p;
@@ -2137,7 +2140,6 @@ function sally_ExecuteInstruction() {
     case 0x80:      
       // Double no-op       
       return sally_cycles;
-    case 0xff:
     case 0xfc:
     case 0xfb:
     case 0xfa:
@@ -2239,6 +2241,7 @@ function sally_ExecuteInstruction() {
     /*case 0x04:*/
     case 0x03:
     case 0x02:
+//console.log('unmapped opcode: 0x' + opcodeMem.toString(16) + ", 0x" + sally_opcode.toString(16));
       return sally_cycles;
     /*      
           l_0xff:
@@ -2360,6 +2363,7 @@ function sally_ExecuteRES() {
   sally_pc.setBL(memory_ram[SALLY_RES.L]);
   //sally_pc.b.h = memory_ram[SALLY_RES.H];
   sally_pc.setBH(memory_ram[SALLY_RES.H]);
+  //console.log("Execute RES: " + (memory_ram[SALLY_RES.L] | memory_ram[SALLY_RES.H] << 8))
   return 6;
 }
 
@@ -2379,6 +2383,7 @@ function sally_ExecuteNMI() {
   sally_pc.setBL(memory_ram[SALLY_NMI.L]);
   //sally_pc.b.h = memory_ram[SALLY_NMI.H];
   sally_pc.setBH(memory_ram[SALLY_NMI.H]);
+  //console.log("Execute NMI: " + (memory_ram[SALLY_NMI.L] | memory_ram[SALLY_NMI.H] << 8))  
   return 7;
 }
 
@@ -2399,6 +2404,7 @@ function sally_ExecuteIRQ() {
     sally_pc.setBL(memory_ram[SALLY_IRQ.L]);
     //sally_pc.b.h = memory_ram[SALLY_IRQ.H];
     sally_pc.setBH(memory_ram[SALLY_IRQ.H]);
+    //console.log("Execute IRQ: " + (memory_ram[SALLY_IRQ.L] | memory_ram[SALLY_IRQ.H] << 8))      
   }
   return 7;
 }
