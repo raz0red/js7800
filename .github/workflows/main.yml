@@ -84,7 +84,7 @@ jobs:
       if: github.event_name == 'push' && github.ref == 'refs/heads/banksets_cycleS'
       with:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BASE_BRANCH: banksets
+        BASE_BRANCH: banksets_cycleS
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: banksets_cycles
