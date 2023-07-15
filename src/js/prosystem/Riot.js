@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2005 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -35,7 +35,7 @@ var INPT2       = 10;
 var INPT3       = 11;
 var INPT4       = 12;
 var INPT5       = 13;
-var SWCHA       = 640;  
+var SWCHA       = 640;
 var CTLSWA      = 641;
 var SWCHB       = 642;
 var CTLSWB      = 643;
@@ -82,13 +82,13 @@ function riot_Reset() {
   riot_elapsed = false;
   riot_currentTime = 0;
 
-  riot_timer_count = 0; // debug    
+  riot_timer_count = 0; // debug
 }
 
 // ----------------------------------------------------------------------------
 // SetInput
 // +----------+--------------+-------------------------------------------------
-// | Offset   | Controller   | Control                                                   
+// | Offset   | Controller   | Control
 // +----------+--------------+-------------------------------------------------
 // | 00       | Joystick 1   | Right
 // | 01       | Joystick 1   | Left
@@ -256,7 +256,7 @@ function riot_SetDRA(data) {
 function riot_SetDRB(data) {
   riot_drb = data;
 
-  // Make changes to joystick buttons immediately. This was added to make 
+  // Make changes to joystick buttons immediately. This was added to make
   // The high score cart work properly with Asteroids
   //memory_ram[SWCHB] &= (~0x14);
   memory_ram[SWCHB] = (memory_ram[SWCHB] & (~0x14)) & 0xFF;
@@ -274,7 +274,7 @@ function riot_SetTimer(timer, intervals) {
   switch (timer) {
     case T1024T:
       riot_clocks = 1024;
-      riot_timing = true;        
+      riot_timing = true;
       break;
     case TIM1T:
       riot_clocks = 1;
@@ -327,17 +327,58 @@ function riot_UpdateTimer(cycles) {
   }
 }
 
-function IsTimingEnabled() { 
-  return riot_timing; 
+function IsTimingEnabled() {
+  return riot_timing;
 }
 
-function GetTimerCount() { 
-  return riot_timer_count; 
+function GetTimerCount() {
+  return riot_timer_count;
 }
 
 function init() {
   memory_ram = Memory.ram;
   memory_Write = Memory.Write;
+}
+
+
+function GetDRA() {
+  return riot_dra;
+}
+
+function GetDRB() {
+  return riot_drb;
+}
+
+function GetTiming() {
+  return riot_timing;
+}
+
+function SetTiming(t) {
+  riot_timing = t;
+}
+
+function GetTimer() {
+  return riot_timer;
+}
+
+function SetTimerValue(t) {
+  riot_timer = t;
+}
+
+function GetIntervals() {
+  return riot_intervals;
+}
+
+function SetIntervalsValue(i) {
+  riot_intervals = i;
+}
+
+function GetClocks() {
+  return riot_clocks;
+}
+
+function SetClocks(c) {
+  riot_clocks = c;
 }
 
 Events.addListener(new Events.Listener("init", init));
@@ -349,7 +390,17 @@ export {
   riot_SetInput as SetInput,
   riot_Reset as Reset,
   riot_SetTimer as SetTimer,
+  GetDRA,
+  GetDRB,
+  GetTiming,
+  SetTiming,
+  GetTimer,
+  GetIntervals,
+  GetClocks,
+  SetClocks,
   IsTimingEnabled,
-  GetTimerCount
+  GetTimerCount,
+  SetTimerValue,
+  SetIntervalsValue
 }
 

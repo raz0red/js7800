@@ -822,6 +822,10 @@ function IsPokeyWriteOnly() {
   return cartridge_pokey_write_only;
 }
 
+function GetCartridgeXM() {
+  return cartridge_xm;
+}
+
 function IsXmEnabled() {
   return xm_mode == 2 ? cartridge_xm : xm_mode;
 }
@@ -998,6 +1002,10 @@ function GetBanksetsEnd() {
   return cartridge_banksets_end;
 }
 
+function GetCartridgeBank() {
+  return cartridge_bank;
+}
+
 function init(e) {
   REGION_NTSC = e.Region.REGION_NTSC;
 
@@ -1013,6 +1021,7 @@ Events.addListener(new Events.Listener("highScoreCallbackChanged",
   function (hsCallback) { highScoreCallback = hsCallback }));
 
 export {
+  GetCartridgeXM,
   GetRegion,
   IsBanksets,
   IsHaltBankedRam,
@@ -1061,6 +1070,7 @@ export {
   SetSwapButtons,
   SetHighScoreCartEnabled,
   IsHighScoreCartEnabled,
+  GetCartridgeBank,
   cartridge_Load as Load,
   cartridge_IsLoaded as IsLoaded,
   cartridge_Write as Write,
@@ -1068,6 +1078,7 @@ export {
   cartridge_Release as Release,
   cartridge_LoadHighScoreCart as LoadHighScoreCart,
   cartridge_IsStored as IsStored,
+  cartridge_StoreBank as StoreBank,
   CARTRIDGE_TYPE_NORMAL,
   CARTRIDGE_TYPE_NORMAL_RAM,
   CARTRIDGE_TYPE_SUPERCART,

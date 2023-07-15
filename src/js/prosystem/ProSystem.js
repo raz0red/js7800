@@ -36,6 +36,7 @@ import * as Sally from "./Sally.js"
 import * as Tia from "./Tia.js"
 import * as Bios from "./Bios.js"
 import * as Events from "../events.js"
+import * as XM from "./ExpansionModule.js"
 
 var Tia_Process = Tia.Process;
 var pokey_Frame = Pokey.Frame;
@@ -103,7 +104,11 @@ Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
 // Reset
 // ----------------------------------------------------------------------------
 //void prosystem_Reset() {
+
+let lastPostResetCallback = null;
+
 function prosystem_Reset(postResetCallback) {
+  lastPostResetCallback = postResetCallback;
   if (Cartridge.IsLoaded()) {
     maria_scanline = 1;
     prosystem_paused = false;
@@ -125,15 +130,17 @@ function prosystem_Reset(postResetCallback) {
       Cartridge.Store();
     }
 
-    var postHsLoad = function(isSuccess) {
-      Events.fireEvent("onHighScoreCartLoaded", isSuccess);
-      prosystem_cycles = Sally.ExecuteRES() << 2;
-      prosystem_active = true;
-      // Invoke post reset callback
-      postResetCallback();
+    if (postResetCallback) {
+      var postHsLoad = function(isSuccess) {
+        Events.fireEvent("onHighScoreCartLoaded", isSuccess);
+        prosystem_cycles = Sally.ExecuteRES() << 2;
+        prosystem_active = true;
+        // Invoke post reset callback
+        postResetCallback();
+      }
+      // Load high score cart w/ callback
+      Cartridge.LoadHighScoreCart(postHsLoad);
     }
-    // Load high score cart w/ callback
-    Cartridge.LoadHighScoreCart(postHsLoad);
   }
 }
 
@@ -239,7 +246,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       prosystem_cycles += cycles;
       if (lightgun) prosystem_FireLightGun();
 
-      if (Sally.half_cycle)  {
+      if (Sally.GetHalfCycle())  {
         prosystem_cycles += 2;
         if (lightgun) prosystem_FireLightGun();
       }
@@ -297,7 +304,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       prosystem_cycles += cycles;
       if (lightgun) prosystem_FireLightGun();
 
-      if (Sally.half_cycle) {
+      if (Sally.GetHalfCycle()) {
          prosystem_cycles += 2;
       if (lightgun) prosystem_FireLightGun();
       }
@@ -466,266 +473,226 @@ export {
   GetDebug6502Cycles,
   GetDebugWsync,
   GetDebugCycleStealing,
-  GetMariaScanline
+  GetMariaScanline,
+  ProSystemSave,
+  ProSystemLoad
 }
 
-// byte * loc_buffer = 0;
+const PRO_SYSTEM_STATE_HEADER="PRO-SYSTEM STATE";
 
-// // ----------------------------------------------------------------------------
-// // Save
-// // ----------------------------------------------------------------------------
-// bool prosystem_Save(std:: string filename, bool compress)
-// {
+// ----------------------------------------------------------------------------
+// Save
+// ----------------------------------------------------------------------------
+function ProSystemSave()
+{
+  const loc_buffer = new Array(40 * 1024 + XM.XM_RAM_SIZE + 4);
 
-//   if (filename.empty() || filename.length() == 0) {
-//     logger_LogError("Filename is invalid.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  console.log("Saving game state.");
 
-//   if (!loc_buffer) loc_buffer = (byte *)malloc((33000 + XM_RAM_SIZE + 4) * sizeof(byte));
+  let size = 0;
 
-//   logger_LogInfo("Saving game state to file " + filename + ".");
+  let index;
+  for (index = 0; index < 16; index++) {
+    loc_buffer[size + index] = PRO_SYSTEM_STATE_HEADER.charCodeAt(index);
+  }
+  size += 16;
 
-//   uint size = 0;
+  loc_buffer[size++] = 1;
+  for (index = 0; index < 4; index++) {
+    loc_buffer[size + index] = 0;
+  }
+  size += 4;
 
-//   uint index;
-//   for (index = 0; index < 16; index++) {
-//     loc_buffer[size + index] = PRO_SYSTEM_STATE_HEADER[index];
-//   }
-//   size += 16;
+  for (index = 0; index < 32; index++) {
+    loc_buffer[size + index] = Cartridge.GetDigest().charCodeAt(index);
+  }
+  size += 32;
 
-//   loc_buffer[size++] = 1;
-//   for (index = 0; index < 4; index++) {
-//     loc_buffer[size + index] = 0;
-//   }
-//   size += 4;
+  loc_buffer[size++] = Sally.GetSallyA();
+  loc_buffer[size++] = Sally.GetSallyX();
+  loc_buffer[size++] = Sally.GetSallyY();
+  loc_buffer[size++] = Sally.GetSallyP();
+  loc_buffer[size++] = Sally.GetSallyS();
+  loc_buffer[size++] = Sally.GetSallyPC().getBL();
+  loc_buffer[size++] = Sally.GetSallyPC().getBH();
+  loc_buffer[size++] = Cartridge.GetCartridgeBank();
 
-//   for (index = 0; index < 32; index++) {
-//     loc_buffer[size + index] = cartridge_digest[index];
-//   }
-//   size += 32;
+  for (index = 0; index < 16384; index++) {
+    loc_buffer[size + index] = Memory.ram[index];
+  }
+  size += 16384;
 
-//   loc_buffer[size++] = sally_a;
-//   loc_buffer[size++] = sally_x;
-//   loc_buffer[size++] = sally_y;
-//   loc_buffer[size++] = sally_p;
-//   loc_buffer[size++] = sally_s;
-//   loc_buffer[size++] = sally_pc.b.l;
-//   loc_buffer[size++] = sally_pc.b.h;
-//   loc_buffer[size++] = cartridge_bank;
+  if (Cartridge.GetType() == Cartridge.CARTRIDGE_TYPE_SUPERCART_RAM) {
+    for (index = 0; index < 16384; index++) {
+      loc_buffer[size + index] = Memory.ram[16384 + index];
+    }
+    size += 16384;
+  }
 
-//   for (index = 0; index < 16384; index++) {
-//     loc_buffer[size + index] = memory_ram[index];
-//   }
-//   size += 16384;
+  if (Cartridge.IsHaltBankedRam()) {
+    for (index = 0; index < 16384; index++) {
+      loc_buffer[size + index] = Memory.mariaRam[16384 + index];
+    }
+    size += 16384;
+  }
 
-//   if (cartridge_type == CARTRIDGE_TYPE_SUPERCART_RAM) {
-//     for (index = 0; index < 16384; index++) {
-//       loc_buffer[size + index] = memory_ram[16384 + index];
-//     }
-//     size += 16384;
-//   }
+  // RIOT state
+  loc_buffer[size++] = Riot.GetDRA(); //riot_dra;
+  loc_buffer[size++] = Riot.GetDRB(); //riot_drb;
+  loc_buffer[size++] = Riot.GetTiming() ? 1 : 0; //Riot.timing;
+  loc_buffer[size++] = (0xff & (Riot.GetTimer() >>> 8));
+  loc_buffer[size++] = (0xff & Riot.GetTimer());
+  loc_buffer[size++] = Riot.GetIntervals(); //riot_intervals;
+  loc_buffer[size++] = (0xff & (Riot.GetClocks() >>> 8));
+  loc_buffer[size++] = (0xff & Riot.GetClocks());
 
-//   // RIOT state
-//   loc_buffer[size++] = riot_dra;
-//   loc_buffer[size++] = riot_drb;
-//   loc_buffer[size++] = Riot.timing;
-//   loc_buffer[size++] = (0xff & (riot_timer >>> 8));
-//   loc_buffer[size++] = (0xff & riot_timer);
-//   loc_buffer[size++] = riot_intervals;
-//   loc_buffer[size++] = (0xff & (riot_clocks >>> 8));
-//   loc_buffer[size++] = (0xff & riot_clocks);
+  // XM (if applicable)
+  if (Cartridge.GetCartridgeXM() /*cartridge_xm*/) {
+    loc_buffer[size++] = Xm.IsMemEnabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.IsPokeyEnabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.IsYmEnabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.Is48kRamEnabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.IsBank0Enabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.IsBank1Enabled() ? 1 : 0;
+    loc_buffer[size++] = Xm.IsRamWeDisabled() ? 1 : 0;
+    loc_buffer[size++] = Xm.IsDmaActive() ? 1 : 0;
+    loc_buffer[size++] = Xm.GetCntrl1();
+    loc_buffer[size++] = Xm.GetCntrl2();
+    loc_buffer[size++] = Xm.GetCntrl3();
+    loc_buffer[size++] = Xm.GetCntrl4();
+    loc_buffer[size++] = Xm.GetCntrl5();
+    loc_buffer[size++] = Xm.GetYmAddr();
 
-//   // XM (if applicable)
-//   if (cartridge_xm) {
-//     loc_buffer[size++] = xm_reg;
-//     loc_buffer[size++] = xm_bank;
-//     loc_buffer[size++] = xm_pokey_enabled;
-//     loc_buffer[size++] = xm_mem_enabled;
+    for (index = 0; index < Xm.XM_RAM_SIZE; index++) {
+      loc_buffer[size + index] = Xm.xm_ram[index];
+    }
+    size += Xm.XM_RAM_SIZE;
+  }
 
-//     #if 0
-// net_print_string(NULL, 0, "Wrote XM: xm_reg: %d, xm_bank: %d, xm_pokey_enabled: %d, xm_mem_enabled: %d\n",
-//       xm_reg, xm_bank, xm_pokey_enabled, xm_mem_enabled);
-//     #endif
+  loc_buffer.length = size;
+  return loc_buffer;
+}
 
-//     for (index = 0; index < XM_RAM_SIZE; index++) {
-//       loc_buffer[size + index] = xm_ram[index];
-//     }
-//     size += XM_RAM_SIZE;
-//   }
+// ----------------------------------------------------------------------------
+// Load
+// ----------------------------------------------------------------------------
+function ProSystemLoad(loc_buffer) {
+  const size = loc_buffer.length;
 
-//   FILE * file = fopen(filename.c_str(), "wb");
-//   if (file == NULL) {
-//     logger_LogError("Failed to open the file " + filename + " for writing.",
-//       PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  console.log("Loading game state.");
 
-//   if (fwrite(loc_buffer, 1, size, file) != size) {
-//     fclose(file);
-//     logger_LogError(
-//       "Failed to write the save state data to the file " + filename + ".",
-//       PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  let cbrSize = 0;
+  if (Cartridge.IsHaltBankedRam()) {
+    cbrSize = 16384
+  }
 
-//   fflush(file);
-//   fclose(file);
+  if (size != (16453 + cbrSize) &&
+    size != (32837 + cbrSize) &&
+    size != (16453 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&  /* XM without supercart ram */
+    size != (32837 + 14 + Xm.XM_RAM_SIZE + cbrSize))    /* XM with supercart ram */ {
+    console.log("Save buffer has an invalid size.");
+    return false;
+  }
 
-//   return true;
-// }
+  var offset = 0;
+  for (let index = 0; index < 16; index++) {
+    if (String.fromCharCode(loc_buffer[offset + index]) != PRO_SYSTEM_STATE_HEADER[index]) {
+      console.log("Buffer is not a valid ProSystem save state.");
+      return false;
+    }
+  }
 
-// // ----------------------------------------------------------------------------
-// // Load
-// // ----------------------------------------------------------------------------
-// bool prosystem_Load(const std:: string filename) {
+  offset += 16;
+  const version = loc_buffer[offset++];
 
-//   if(filename.empty() || filename.length() == 0) {
-//   logger_LogError("Filename is invalid.", PRO_SYSTEM_SOURCE);
-//   return false;
-// }
+  const date = 0;
+  for (let index = 0; index < 4; index++) {
+  }
+  offset += 4;
 
-// if (!loc_buffer) loc_buffer = (byte *)malloc((33000 + XM_RAM_SIZE + 4) * sizeof(byte));
+  prosystem_Reset(null);
 
-// logger_LogInfo("Loading game state from file " + filename + ".");
+  let digest = ""
+  for (let index = 0; index < 32; index++) {
+    digest += String.fromCharCode(loc_buffer[offset + index]);
+  }
+  offset += 32;
+  if (Cartridge.GetDigest() != digest) {
+    console.log("Load state digest [" + digest + "] does not match loaded cartridge digest [" + cartridge_digest + "].");
+    return false;
+  }
 
-// uint size = archive_GetUncompressedFileSize(filename);
-// if (size == 0) {
-//   FILE * file = fopen(filename.c_str(), "rb");
-//   if (file == NULL) {
-//     logger_LogError("Failed to open the file " + filename + " for reading.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  // sally_a = loc_buffer[offset++];
+  Sally.SetSallyA(loc_buffer[offset++]);
+  // sally_x = loc_buffer[offset++];
+  Sally.SetSallyX(loc_buffer[offset++]);
+  // sally_y = loc_buffer[offset++];
+  Sally.SetSallyY(loc_buffer[offset++]);
+  // sally_p = loc_buffer[offset++];
+  Sally.SetSallyP(loc_buffer[offset++]);
+  // sally_s = loc_buffer[offset++];
+  Sally.SetSallyS(loc_buffer[offset++]);
+  // sally_pc.b.l = loc_buffer[offset++];
+  Sally.GetSallyPC().setBL(loc_buffer[offset++]);
+  // sally_pc.b.h = loc_buffer[offset++];
+  Sally.GetSallyPC().setBH(loc_buffer[offset++]);
 
-//   if (fseek(file, 0, SEEK_END)) {
-//     fclose(file);
-//     logger_LogError("Failed to find the end of the file.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  // cartridge_StoreBank(loc_buffer[offset++]);
+  Cartridge.StoreBank(loc_buffer[offset++]);
 
-//   size = ftell(file);
-//   if (fseek(file, 0, SEEK_SET)) {
-//     fclose(file);
-//     logger_LogError("Failed to find the size of the file.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  for (let index = 0; index < 16384; index++) {
+    Memory.ram[index] = loc_buffer[offset + index];
+  }
+  offset += 16384;
 
-//   if (size != 16445 && size != 32829 &&     /* no RIOT */
-//     size != 16453 && size != 32837 &&     /* with RIOT */
-//     size != (16453 + 4 + XM_RAM_SIZE) &&  /* XM without supercart ram */
-//     size != (32837 + 4 + XM_RAM_SIZE))    /* XM with supercart ram */ {
-//     fclose(file);
-//     logger_LogError("Save state file has an invalid size.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  if (Cartridge.GetType() == Cartridge.CARTRIDGE_TYPE_SUPERCART_RAM) {
+    for (let index = 0; index < 16384; index++) {
+      Memory.ram[16384 + index] = loc_buffer[offset + index];
+    }
+    offset += 16384;
+  }
 
-//   if (fread(loc_buffer, 1, size, file) != size && ferror(file)) {
-//     fclose(file);
-//     logger_LogError("Failed to read the file data.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
-//   fclose(file);
-// }
-// else {
-//   logger_LogError("Save state file has an invalid size.", PRO_SYSTEM_SOURCE);
-//   return false;
-// }
+  if (Cartridge.IsHaltBankedRam()) {
+    for (let index = 0; index < 16384; index++) {
+      Memory.mariaRam[16384 + index] = loc_buffer[offset + index];
+    }
+    offset += 16384;
+  }
 
-// uint offset = 0;
-// uint index;
-// for (index = 0; index < 16; index++) {
-//   if (loc_buffer[offset + index] != PRO_SYSTEM_STATE_HEADER[index]) {
-//     logger_LogError("File is not a valid ProSystem save state.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
-// }
-// offset += 16;
-// byte version = loc_buffer[offset++];
+  // RIOT state
+  Riot.SetDRA(loc_buffer[offset++]);
+  Riot.SetDRB(loc_buffer[offset++]);
+  Riot.SetTiming(loc_buffer[offset++] === 1 ? true : false);
+  let h = loc_buffer[offset++];
+  let l = loc_buffer[offset++];
+  Riot.SetTimerValue(((h << 8) & 0xFF) | (l & 0xFF));
+  Riot.SetIntervalsValue(loc_buffer[offset++]);
+  h = loc_buffer[offset++];
+  l = loc_buffer[offset++];
+  Riot.SetClocks(((h << 8) & 0xFF) | (l & 0xFF));
 
-// uint date = 0;
-// for (index = 0; index < 4; index++) {
-// }
-// offset += 4;
+  if (Cartridge.GetCartridgeXM() /*cartridge_xm*/) {
+    Xm.SetMemEnabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetPokeyEnabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetYmEnabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.Set48kRamEnabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetBank0Enabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetBank1Enabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetRamWeDisabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.setDmaActive(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetCntrl1(loc_buffer[offset++]);
+    Xm.SetCntrl2(loc_buffer[offset++]);
+    Xm.SetCntrl3(loc_buffer[offset++]);
+    Xm.SetCntrl4(loc_buffer[offset++]);
+    Xm.SetCntrl5(loc_buffer[offset++]);
+    Xm.SetYmAddr(loc_buffer[offset++]);
 
-// prosystem_Reset();
+    for (let index = 0; index < Xm.XM_RAM_SIZE; index++) {
+      Xm.xm_ram[index] = loc_buffer[offset++];
+    }
+  }
 
-// char digest[33] = { 0};
-// for (index = 0; index < 32; index++) {
-//   digest[index] = loc_buffer[offset + index];
-// }
-// offset += 32;
-// if (cartridge_digest != std:: string(digest)) {
-//   logger_LogError("Load state digest [" + std:: string(digest) + "] does not match loaded cartridge digest [" + cartridge_digest + "].", PRO_SYSTEM_SOURCE);
-//   return false;
-// }
+  console.log(loc_buffer.length + ", " + offset);
 
-// sally_a = loc_buffer[offset++];
-// sally_x = loc_buffer[offset++];
-// sally_y = loc_buffer[offset++];
-// sally_p = loc_buffer[offset++];
-// sally_s = loc_buffer[offset++];
-// sally_pc.b.l = loc_buffer[offset++];
-// sally_pc.b.h = loc_buffer[offset++];
-
-// cartridge_StoreBank(loc_buffer[offset++]);
-
-// for (index = 0; index < 16384; index++) {
-//   memory_ram[index] = loc_buffer[offset + index];
-// }
-// offset += 16384;
-
-// if (cartridge_type == CARTRIDGE_TYPE_SUPERCART_RAM) {
-//   if (size != 32829 && /* no RIOT */
-//     size != 32837 && /* with RIOT */
-//     size != (32837 + 4 + XM_RAM_SIZE)) /* XM */ {
-//     logger_LogError("Save state file has an invalid size.",
-//       PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
-//   for (index = 0; index < 16384; index++) {
-//     memory_ram[16384 + index] = loc_buffer[offset + index];
-//   }
-//   offset += 16384;
-// }
-
-// if (size == 16453 || /* no supercart ram */
-//   size == 32837 || /* supercart ram */
-//   size == (16453 + 4 + XM_RAM_SIZE) || /* xm, no supercart ram */
-//   size == (32837 + 4 + XM_RAM_SIZE)) /* xm, supercart ram */ {
-//   // RIOT state
-//   riot_dra = loc_buffer[offset++];
-//   riot_drb = loc_buffer[offset++];
-//   Riot.timing = loc_buffer[offset++];
-//   riot_timer = (loc_buffer[offset++] << 8);
-//   riot_timer |= loc_buffer[offset++];
-//   riot_intervals = loc_buffer[offset++];
-//   riot_clocks = (loc_buffer[offset++] << 8);
-//   riot_clocks |= loc_buffer[offset++];
-// }
-
-// // XM (if applicable)
-// if (cartridge_xm) {
-//   if ((size != (16453 + 4 + XM_RAM_SIZE)) &&
-//     (size != (32837 + 4 + XM_RAM_SIZE))) {
-//     logger_LogError("Save state file has an invalid size.",
-//       PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
-//   xm_reg = loc_buffer[offset++];
-//   xm_bank = loc_buffer[offset++];
-//   xm_pokey_enabled = loc_buffer[offset++];
-//   xm_mem_enabled = loc_buffer[offset++];
-
-//   #if 0
-// net_print_string(NULL, 0, "Read XM: xm_reg: %d, xm_bank: %d, xm_pokey_enabled: %d, xm_mem_enabled: %d\n",
-//     xm_reg, xm_bank, xm_pokey_enabled, xm_mem_enabled);
-//   #endif
-
-//   for (index = 0; index < XM_RAM_SIZE; index++) {
-//     xm_ram[index] = loc_buffer[offset++];
-//   }
-// }
-
-// return true;
-// }
-
+  return true;
+}

@@ -99,7 +99,7 @@ function startEmu(cart, isRestart) {
   console.log("  Controller 2: %d", Cartridge.GetController2());
   console.log("  Region: %s", Cartridge.GetRegion() == 1 ? "PAL" : "NTSC");
   console.log("  Flags: %d", Cartridge.GetFlags());
-  console.log("  XM: %s, mode: %s", 
+  console.log("  XM: %s, mode: %s",
     Cartridge.IsXmEnabled() ? "true" : "false",
     (Cartridge.GetXmMode() == 2 ? "Automatic" : (Cartridge.GetXmMode() ? "Enabled" : "Disabled"))
   );
@@ -136,7 +136,7 @@ function startEmu(cart, isRestart) {
     var frameTicks = (1000.0 / frequency) /*| 0*/;
     var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
     var isActive = ProSystem.IsActive;
-    var isPaused = ProSystem.IsPaused;    
+    var isPaused = ProSystem.IsPaused;
     var fs = 0;
     var avgWait = 0;
 
@@ -157,7 +157,7 @@ function startEmu(cart, isRestart) {
           if ((fskip == 0) || (fs >= fskip)) {
             flipImage();
           }
-          if (++fs >= fskipcount) {            
+          if (++fs >= fskipcount) {
             fs = 0;
           }
 
@@ -189,7 +189,7 @@ function startEmu(cart, isRestart) {
                 (1000.0 / (elapsed / fc)).toFixed(2),
                 vsync ? 1 : 0,
                 (vsync ? "" : ("wait: " + ((avgWait / fc) * frequency).toFixed(2) + ", ")),
-                (Riot.GetTimerCount() % 1000),                
+                (Riot.GetTimerCount() % 1000),
                 ProSystem.GetDebugWsync() ? 1 : 0,
                 ProSystem.GetDebugWsyncCount(),
                 ProSystem.GetDebugCycleStealing() ? 1 : 0,
@@ -236,20 +236,20 @@ function startEmulation(cart, isRestart) {
   }
 
   if (!hideTitleCb) {
-    hideTitleCb = new Events.Listener("onEmulationStarted", 
-      function() {    
+    hideTitleCb = new Events.Listener("onEmulationStarted",
+      function() {
         Video.stopScreenSnow();
         if (!logoDiv.classList.contains('js7800__logo--hide')) {
           logoDiv.classList.add('js7800__logo--hide');
           logoDiv.classList.remove('js7800__logo--show');
-      
+
           // Should not be necessary, but makes sure is not displayed
           setTimeout(function () {
             logoDiv.style.display = 'none';
           }, 1000);
         }
       }
-    );    
+    );
     Events.addListener(hideTitleCb);
   }
 
@@ -351,7 +351,7 @@ function setErrorHandler(handler) {
 }
 
 var hidden, visibilityChange;
-if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
   hidden = "hidden";
   visibilityChange = "visibilitychange";
 } else if (typeof document.msHidden !== "undefined") {
@@ -443,13 +443,23 @@ function setSkipLevel(val) {
   updateFrameSkip();
 }
 
+function saveState() {
+  return ProSystem.ProSystemSave();
+}
+
+function loadState(buffer) {
+  return ProSystem.ProSystemLoad(buffer);
+}
+
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 export {
   init,
   startEmulation,
+  saveState,
+  loadState,
   restart,
-  setErrorHandler,  
+  setErrorHandler,
   setHighScoreCallback,
   HighScoreCallback,
   descriptionDiv,

@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2005 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -136,11 +136,11 @@ function _memory_Read(address) {
   //byte tmp_byte;
   var tmp_byte;
 
-  if (cartridge_xm && 
+  if (cartridge_xm &&
       ((address >= 0x0470 && address < 0x0480) ||
         (xm_IsPokeyEnabled() && (address >= 0x0450 && address < 0x0470)) ||
-        (xm_IsMemEnabled() && (address >= 0x4000 && address < 0x8000)) || 
-        (xm_IsYmEnabled() && (address >= 0x0460 && address <= 0x0461)))) {      
+        (xm_IsMemEnabled() && (address >= 0x4000 && address < 0x8000)) ||
+        (xm_IsYmEnabled() && (address >= 0x0460 && address <= 0x0461)))) {
     return xm_Read(address);
   }
 
@@ -152,7 +152,7 @@ function _memory_Read(address) {
       (cartridge_pokey450 && (address >= 0x0450 && address < 0x0470)))) {
       return pokey_GetRegister(
         cartridge_pokey800 ? 0x4000 + (address - 0x0800) :
-          cartridge_pokey450 ? 0x4000 + (address - 0x0450) : 
+          cartridge_pokey450 ? 0x4000 + (address - 0x0450) :
             address);
     }
   }
@@ -179,23 +179,23 @@ function _memory_Read(address) {
       // banksets changes
       if (maria_read) {
         if (cartridge_halt_banked_ram && (address >= 16384 && address <= 32767)) {
-          return maria_memory_ram[address]; 
+          return maria_memory_ram[address];
         }
         if(cartridge_type === Cartridge.CARTRIDGE_TYPE_NORMAL || cartridge_type === Cartridge.CARTRIDGE_TYPE_NORMAL_RAM) {
           if (address >= Cartridge.GetBanksetsBegin() && address <= Cartridge.GetBanksetsEnd()) {
             return maria_memory_ram[address];
           }
         } else {
-          if (cartridge_type == Cartridge.CARTRIDGE_TYPE_SUPERCART_ROM && 
+          if (cartridge_type == Cartridge.CARTRIDGE_TYPE_SUPERCART_ROM &&
               address >= 16384 && address <= 32767) {
-            return maria_memory_ram[address];      
+            return maria_memory_ram[address];
           }
           if (address >= 32768 && address <= 49151) {
-            return maria_memory_ram[address];      
+            return maria_memory_ram[address];
           }
           if (address >= 49152 && address <= 65535) {
             return maria_memory_ram[address];
-          }  
+          }
         }
       }
       return memory_ram[address];
@@ -222,7 +222,7 @@ function memory_ReadMaria(address) {
     console.error("Less than zero memory read: %d %d", address, data);
   }
   return data;
-}  
+}
 
 // ----------------------------------------------------------------------------
 // Write
@@ -248,8 +248,8 @@ function memory_Write(address, data) {
       (cartridge_pokey800 && (address >= 0x0800 && address < 0x0820)) ||
       (cartridge_pokey450 && (address >= 0x0450 && address < 0x0470)))) {
         pokey_SetRegister(
-          cartridge_pokey800 ? 0x4000 + (address - 0x0800) : 
-            cartridge_pokey450 ? 0x4000 + (address - 0x0450) : 
+          cartridge_pokey800 ? 0x4000 + (address - 0x0800) :
+            cartridge_pokey450 ? 0x4000 + (address - 0x0450) :
               address, data);
     return;
   }
@@ -269,16 +269,16 @@ function memory_Write(address, data) {
     // Diagnosed by RevEng
     // Multiple addresses are used to set INPTCTRL
     // Lock Mode needs to be set
-    if (address >= 0 && address <= 0xf) {      
-      if (!lock) {        
+    if (address >= 0 && address <= 0xf) {
+      if (!lock) {
         if (data & 1) {
-          lock = true; 
+          lock = true;
           console.log("Lock: " + data);
           memory_ram[MSTAT] = 0x80; // Required for Bouncing Balls demo
         }
-        if ((data & 4) && Cartridge.IsLoaded()) {          
+        if ((data & 4) && Cartridge.IsLoaded()) {
           // Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
-          if (!Cartridge.IsStored()) {            
+          if (!Cartridge.IsStored()) {
             Cartridge.Store();
           }
         }
@@ -372,7 +372,7 @@ function memory_Write(address, data) {
             else if (address >= 8192 && address <= 10239) {
               memory_ram[address + 2048] = data;
             }
-          } 
+          }
           break;
       }
     }
@@ -391,20 +391,20 @@ function memory_WriteROM(address, size, data, offset) {
   var maria_offset = 0;
 
   // banksets changes
-  if (cartridge_banksets) {    
+  if (cartridge_banksets) {
     var type = Cartridge.GetType();
     if(type === Cartridge.CARTRIDGE_TYPE_NORMAL || type === Cartridge.CARTRIDGE_TYPE_NORMAL_RAM) {
       maria_offset = size;
       Cartridge.SetBanksetsBegin(address);
-      Cartridge.SetBanksetsEnd(address + size - 1);  
-      write_to_maria = true;  
+      Cartridge.SetBanksetsEnd(address + size - 1);
+      write_to_maria = true;
     } else if (address === 32768 || address === 49152 ||
         (type === Cartridge.CARTRIDGE_TYPE_SUPERCART_ROM && address === 16384)) {
       maria_offset = 128 * 1024;
-      write_to_maria = true;  
+      write_to_maria = true;
     }
   }
-  
+
   //if((address + size) <= MEMORY_SIZE && data != NULL) {
   if ((address + size) <= MEMORY_SIZE && data != null) {
     //for(uint index = 0; index < size; index++) {
@@ -454,15 +454,15 @@ Events.addListener(
   new Events.Listener("onCartridgeLoaded", OnCartridgeLoaded));
 
 Events.addListener(
-  new Events.Listener("onHighScoreCartLoaded", 
-  function(loaded) {  
+  new Events.Listener("onHighScoreCartLoaded",
+  function(loaded) {
     highScoreCartEnabled = loaded;
   }
 ));
 
 Events.addListener(
   new Events.Listener("highScoreCallbackChanged",
-  function (hsCallback) { 
+  function (hsCallback) {
     highScoreCallback = hsCallback;
   }
 ));
@@ -475,5 +475,6 @@ export {
   memory_ReadMaria as ReadMaria,
   memory_Reset as Reset,
   memory_ram as ram,
-  memory_rom as rom
+  memory_rom as rom,
+  maria_memory_ram as mariaRam,
 }
