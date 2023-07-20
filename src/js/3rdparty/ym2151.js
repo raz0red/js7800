@@ -1372,9 +1372,19 @@ console.log("YM Init: " + result);
 
 function reset() {
   Ym2151.Reset();
+  for (let i = 0; i < registers.length; i++) {
+    registers[i] = 0;
+  }
+}
+
+let registers = new Array(256);
+
+function getRegisters() {
+  return registers;
 }
 
 function setReg(reg, value) {
+  registers[reg] = value;
   Ym2151.SetReg(reg, value);
 }
 
@@ -1394,4 +1404,4 @@ function getStatus() {
   return Ym2151.GetStatus();
 }
 
-export { reset, setReg, mixStereo, setSampleRate, getStatus }
+export { reset, setReg, mixStereo, setSampleRate, getStatus, getRegisters }

@@ -218,6 +218,10 @@ function pokey_Reset() {
   pot_scanline = 0;
   pokey_soundCntr = 0;
 
+  for (let i = 0; i < 32; i++) {
+    registers[i] = 0;
+  }
+
   //for (int index = 0; index < POKEY_POLY17_SIZE; index++) {
   for (var index = 0; index < POKEY_POLY17_SIZE; index++) {
     //pokey_poly17[index] = rand() & 1;
@@ -351,13 +355,16 @@ function pokey_GetRegister(address) {
   return data;
 }
 
+const registers = Array(32);
+
 // ----------------------------------------------------------------------------
 // SetRegister
 // ----------------------------------------------------------------------------
 //void pokey_SetRegister(word address, byte value) {
 function pokey_SetRegister(address, value) {
   if ((pokey_debug_count--) > 0)
-    console.log("pokey_setRegister: %d %d", address, value);
+    console.log("pokey_setRegister: %d %d", address - 0x4000, value);
+  registers[address - 0x4000] = value;
 
   //byte channelMask;
   var channelMask = 0;
@@ -717,5 +724,6 @@ export {
   pokey_Frame as Frame,
   pokey_Scanline as Scanline,
   pokey_buffer as buffer,
-  SetCyclesPerScanline
+  SetCyclesPerScanline,
+  registers
 }

@@ -37,6 +37,7 @@ import * as Tia from "./Tia.js"
 import * as Bios from "./Bios.js"
 import * as Events from "../events.js"
 import * as XM from "./ExpansionModule.js"
+import * as YM from "../3rdparty/ym2151.js"
 
 var Tia_Process = Tia.Process;
 var pokey_Frame = Pokey.Frame;
@@ -569,6 +570,18 @@ function ProSystemSave()
     size += Xm.XM_RAM_SIZE;
   }
 
+  // Pokey
+  let registers = Pokey.registers;
+  for (let i = 0; i < registers.length; i++) {
+    loc_buffer[size++] = registers[i];
+  }
+
+  // YM2151
+  registers = YM.getRegisters();
+  for (let i = 0; i < registers.length; i++) {
+    loc_buffer[size++] = registers[i];
+  }
+
   loc_buffer.length = size;
   return loc_buffer;
 }
@@ -586,10 +599,10 @@ function ProSystemLoad(loc_buffer) {
     cbrSize = 16384
   }
 
-  if (size != (16453 + cbrSize) &&
-    size != (32837 + cbrSize) &&
-    size != (16453 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&  /* XM without supercart ram */
-    size != (32837 + 14 + Xm.XM_RAM_SIZE + cbrSize))    /* XM with supercart ram */ {
+  if (size != (256 + 32 + 16453 + cbrSize) &&
+    size != (256 + 32 + 32837 + cbrSize) &&
+    size != (256 + 32 + 16453 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&  /* XM without supercart ram */
+    size != (256 + 32 + 32837 + 14 + Xm.XM_RAM_SIZE + cbrSize))    /* XM with supercart ram */ {
     console.log("Save buffer has an invalid size.");
     return false;
   }
@@ -690,6 +703,18 @@ function ProSystemLoad(loc_buffer) {
     for (let index = 0; index < Xm.XM_RAM_SIZE; index++) {
       Xm.xm_ram[index] = loc_buffer[offset++];
     }
+  }
+
+  // Pokey
+  for (let i = 0; i < 32; i++) {
+    const v = loc_buffer[offset++];
+    Pokey.SetRegister(0x4000 + i, v);
+  }
+
+  // YM-2151
+  for (let i = 0; i < 256; i++) {
+    const v = loc_buffer[offset++];
+    YM.setReg(i, v);
   }
 
   console.log(loc_buffer.length + ", " + offset);
