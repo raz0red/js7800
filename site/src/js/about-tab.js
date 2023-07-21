@@ -16,7 +16,7 @@ function AboutTab() {
   this.played = false;
 
   var that = this;
-  this.fClick = function(e) { 
+  this.fClick = function(e) {
     that.showv();
     e.preventDefault();
   }
@@ -25,7 +25,7 @@ function AboutTab() {
 AboutTab.prototype = Object.create(Tab.prototype);
 addProps(AboutTab.prototype, {
   hidev: function() {
-    this.iframe.setAttribute('src', '');  
+    this.iframe.setAttribute('src', '');
     this.logoEl.style.display = 'inline-block';
     this.vEl.style.display = 'none';
     this.top.style.opacity = "0";
@@ -40,32 +40,32 @@ addProps(AboutTab.prototype, {
     this.iframe.setAttribute('src', atob(digest));
     this.top.style.cursor = 'auto';
     this.top.style.opacity = ".4";
-    this.top.removeEventListener("click", this.fClick);       
-    var that = this;    
-    this.timerId = setTimeout(function () {       
+    this.top.removeEventListener("click", this.fClick);
+    var that = this;
+    this.timerId = setTimeout(function () {
       that.top.style.display = 'none';
       that.logoEl.style.display = 'none';
-      that.vEl.style.display = 'inline-block';        
-    }, 10 * 1000);    
+      that.vEl.style.display = 'inline-block';
+    }, 10 * 1000);
   },
+
+  // autoplay=1&autopause=0&loop=true&background=false&muted=1
   onShow: function () {
-    this.hidev();    
+    this.hidev();
     this.played = false;
     this.top.style.cursor = 'pointer';
-    this.top.addEventListener("click", this.fClick);        
-    digest = "aHR0cHM6Ly9wbGF5ZXIudmltZW8uY29tL3ZpZGVvLzQxMTg" +
-      "5MTQ1Nz9hdXRvcGxheT0xJmFwaT0xJmJhY2tncm91bmQ9dH" +
-      "J1ZSZtdXRlPTAmbG9vcD10cnVl";  
+    this.top.addEventListener("click", this.fClick);
+    digest = "aHR0cHM6Ly9wbGF5ZXIudmltZW8uY29tL3ZpZGVvLzQxMTg5MTQ1Nz9hdXRvcGxheT0xJmF1dG9wYXVzZT0wJmxvb3A9dHJ1ZSZiYWNrZ3JvdW5kPWZhbHNlJm11dGVkPTE=";
   },
-  onHide: function () {    
-    this.top.removeEventListener("click", this.fClick);    
+  onHide: function () {
+    this.top.removeEventListener("click", this.fClick);
     this.hidev();
   },
   onTabHide: function() {
     if (this.played) {
-      this.onHide();    
+      this.onHide();
     }
-  },  
+  },
   createTabContent: function (rootEl) {
     var title = document.createElement('div');
     title.className = 'tabcontent__title';
@@ -78,7 +78,7 @@ addProps(AboutTab.prototype, {
 
     var header = document.createElement('div');
     about.appendChild(header);
-    
+
     header.innerHTML =
       '<p class=\"center\">\n' +
         '<span class=\"about-label\">by raz0red</span><a href=\"https://github.com/raz0red/js7800\" target=\"_blank\"><img\n' +
@@ -110,18 +110,18 @@ addProps(AboutTab.prototype, {
     var iframe = document.createElement('iframe');
     this.iframe = iframe;
     iframe.setAttribute('width', '100%');
-    iframe.setAttribute('height', '100%');      
+    iframe.setAttribute('height', '100%');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allow', 'autoplay');
-    this.vEl.appendChild(iframe);    
+    this.vEl.appendChild(iframe);
 
     var footer = document.createElement('div');
     about.appendChild(footer);
     footer.innerHTML =
       '<p class=\"center\">\n' +
-        'Atari 7800 controller illustration was created by Mark Davis (<a href="https://vectogram.us/" target=\"_blank\">Vect-O-Gram</a>)<br>\n' + 
-        'MD5 support was developed by Joseph Myers (<a href="http://www.myersdaily.org/joseph/javascript/md5-text.html" target=\"_blank\">MD5.js</a>)<br>\n' +      
-        'Zip support was developed by Gildas Lormeau (<a href="http://gildas-lormeau.github.io/zip.js" target=\"_blank\">Zip.js</a>)<br>\n' +      
+        'Atari 7800 controller illustration was created by Mark Davis (<a href="https://vectogram.us/" target=\"_blank\">Vect-O-Gram</a>)<br>\n' +
+        'MD5 support was developed by Joseph Myers (<a href="http://www.myersdaily.org/joseph/javascript/md5-text.html" target=\"_blank\">MD5.js</a>)<br>\n' +
+        'Zip support was developed by Gildas Lormeau (<a href="http://gildas-lormeau.github.io/zip.js" target=\"_blank\">Zip.js</a>)<br>\n' +
         'YM2151 support was ported from <a href="http://retropc.net/cisc/sound/" target=\"_blank\">FM Sound Generator</a> by <a href="http://www2.tokai.or.jp/mrnkmzu/" target=\"_blank\">Kuma</a>\n' +
       '</p>';
   }

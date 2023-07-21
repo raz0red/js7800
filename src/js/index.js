@@ -11,10 +11,12 @@ import * as Video from "./web/video.js"
 import * as Region from "./prosystem/Region.js"
 import * as Input from "./web/input.js"
 import * as Audio from "./web/audio.js"
+import * as ProSystem from "./prosystem/Region.js"
 import { md5 } from "./3rdparty/md5.js"
 
-export { 
+export {
     js7800 as Main,
+
     Cartridge,
     ControlsBar,
     Util,
@@ -27,5 +29,6 @@ export {
     Region,
     Input,
     Audio,
+    ProSystem,
     md5
 }

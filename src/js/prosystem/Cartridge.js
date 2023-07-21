@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2005 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -39,8 +39,8 @@ var HS_SRAM_SIZE = 2048;
 
 var highScoreCallback = null;
 
-var HBLANK_DEFAULT = 34;
-var REGION_NTSC = null; 
+var HBLANK_DEFAULT = 28;
+var REGION_NTSC = null;
 var CARTRIDGE_TYPE_NORMAL = 0;
 var CARTRIDGE_TYPE_SUPERCART = 1;
 var CARTRIDGE_TYPE_SUPERCART_LARGE = 2;
@@ -90,7 +90,7 @@ var cartridge_xm = false;
 //bool cartridge_disable_bios = false;
 var cartridge_disable_bios = false;
 //uint cartridge_hblank = 34;
-var cartridge_hblank = 34;
+var cartridge_hblank = 28;
 //byte cartridge_left_switch = 1;
 var cartridge_left_switch = 1;
 //byte cartridge_right_switch = 0;
@@ -99,6 +99,14 @@ var cartridge_right_switch = 0;
 var cartridge_swap_buttons = false;
 //bool cartridge_hsc_enabled = false;
 var cartridge_hsc_enabled = false;
+
+// banksets changes
+var cartridge_banksets = false;
+var cartridge_banksets_begin = 0;
+var cartridge_banksets_end = 0;
+var cartridge_halt_banked_ram = false;
+var cartridge_pokey_write_only = false;
+var cartridge_pokey800 = false;
 
 // 0: Disabled, 1: Enabled, 2: Automatic
 var XM_MODE_DEFAULT = 2;
@@ -117,6 +125,8 @@ var high_score_cart_loaded = false;
 var cartridge_buffer = null; // Will be an Array()
 //static uint cartridge_size = 0;
 var cartridge_size = 0;
+
+var cartridge_stored = false;
 
 // ----------------------------------------------------------------------------
 // HasHeader
@@ -182,15 +192,18 @@ function cartridge_GetBankOffset(bank) {
 // ----------------------------------------------------------------------------
 //static void cartridge_WriteBank(word address, byte bank) {
 function cartridge_WriteBank(address, bank) {
+  // banksets changes
+  var size = cartridge_size;
+  if (cartridge_banksets) size = size >> 1;
 
   /*
   console.log("Bank switch: %d, %d, max:%d",
-    address, cartridge_GetBank(bank), ((cartridge_size / 16384)>>0));      
+    address, cartridge_GetBank(bank), ((cartridge_size / 16384)>>0));
   */
 
   //uint offset = cartridge_GetBankOffset(bank);
   var offset = cartridge_GetBankOffset(bank);
-  if (offset < cartridge_size) {
+  if (offset < size) {
     //memory_WriteROM(address, 16384, cartridge_buffer + offset);
     memory_WriteROM(address, 16384, cartridge_buffer, offset); // JS: Just pass the offset
     cartridge_bank = bank;
@@ -199,6 +212,9 @@ function cartridge_WriteBank(address, bank) {
 
 //static void cartridge_SetTypeBySize(uint size) {
 function cartridge_SetTypeBySize(size) {
+  // banksets changes
+  if (cartridge_banksets) size = size >> 1;
+
   if (size <= 0x10000) {
     //int old_type = cartridge_type;
     var old_type = cartridge_type;
@@ -279,20 +295,33 @@ function cartridge_ReadHeader(header) {
 
   cartridge_pokey = (header[54] & 1) ? true : false;
   cartridge_pokey450 = (header[54] & 0x40) ? true : false;
-  if (cartridge_pokey450) {
+  // banksets changes
+  cartridge_pokey800 = (header[53] & 0x80) ? true : false;
+  if (cartridge_pokey450 || cartridge_pokey800) {
     cartridge_pokey = true;
   }
+
   cartridge_controller[0] = header[55];
   cartridge_controller[1] = header[56];
   cartridge_region = header[57];
   cartridge_flags = 0;
-  cartridge_xm = (header[63] & 1) ? true : false;
+  // banksets changes (check for 0x08, ym2151)
+  cartridge_xm = (header[63] & 1) || ((header[53] & 0x08) == 0x08) ? true : false;
   cartridge_hsc_enabled = header[58] & 0x03; // HSC or SaveKey /* 0x01; */
+  // banksets changes
+  cartridge_banksets = header[53] & 0x20 ? true : false;
+  if (cartridge_banksets &&
+        (cartridge_size === (2 * 48 * 1024) || cartridge_size === (2 * 52 * 1024))) {
+    cartridge_pokey_write_only = true;
+  }
+  cartridge_halt_banked_ram = header[53] & 0x40 ? true : false;
 
   // Wii: Updates to header interpretation
   //byte ct1 = header[54];
   var ct1 = header[54];
-  if (header[53] == 0) {
+  // banksets changes
+  var ct2 = header[53];
+  //if (header[53] == 0) {       // banksets changes
     if ((ct1 & 0x0a) == 0x0a) { // BIT1 and BIT3 (Supercart Large: 2) rom at $4000
       //int old_type = cartridge_type;
       var old_type = cartridge_type;
@@ -313,7 +342,7 @@ function cartridge_ReadHeader(header) {
       var old_type = cartridge_type;
       cartridge_type = CARTRIDGE_TYPE_SUPERCART;
       console.log("Update: (0x01) bit1: %d, %d", old_type, cartridge_type);
-    } else if (cartridge_size <= 0x10000 && ((ct1 & 0x04) == 0x04)) { // Size < 64k && BIT2 (Normal RAM: ?) ram at $4000 ) 
+    } else if (cartridge_size <= 0x10000 && ((ct1 & 0x04) == 0x04)) { // Size < 64k && BIT2 (Normal RAM: ?) ram at $4000 )
       //int old_type = cartridge_type;
       var old_type = cartridge_type;
       cartridge_type = CARTRIDGE_TYPE_NORMAL_RAM;
@@ -321,6 +350,29 @@ function cartridge_ReadHeader(header) {
     } else {
       // Attempt to determine the cartridge type based on its size
       cartridge_SetTypeBySize(cartridge_size);
+    }
+  //}       // banksets changes
+
+  // banksets changes
+  if (cartridge_banksets) {
+    if (cartridge_type === CARTRIDGE_TYPE_NORMAL || cartridge_type === CARTRIDGE_TYPE_NORMAL_RAM) {
+      if (cartridge_type === CARTRIDGE_TYPE_NORMAL && cartridge_halt_banked_ram) {
+        var old_type = cartridge_type;
+        cartridge_type = CARTRIDGE_TYPE_NORMAL_RAM;
+        console.log("Normal cart with halt based ram, switching type: %d, %d", old_type, cartridge_type);
+      }
+    } else {
+      var old_type = cartridge_type;
+      if (cartridge_halt_banked_ram) {
+        cartridge_type = CARTRIDGE_TYPE_SUPERCART_RAM;
+      } else if ((ct1 & 0x10) == 0x10) {
+        cartridge_type = CARTRIDGE_TYPE_SUPERCART_ROM;
+      } else {
+        cartridge_type = CARTRIDGE_TYPE_SUPERCART;
+      }
+      if (old_type !== cartridge_type) {
+        console.log("Bank switched banksets, switching type: %d, %d", old_type, cartridge_type);
+      }
     }
   }
 
@@ -349,9 +401,39 @@ function cartridge_ReadHeader(header) {
   if (ct1 & 0x80) {
     console.log("  bit7: mirror ram at $4000");
   }
+  // banksets changes
+  if (ct2 & 0x01) {
+    console.log("  bit8: activision banking");
+  }
+  if (ct2 & 0x02) {
+    console.log("  bit9: absolute banking");
+  }
+  if (ct2 & 0x04) {
+    console.log("  bit10: pokey at $440");
+  }
+  if (ct2 & 0x08) {
+    console.log("  bit11: ym2151 at $460/$461");
+  }
+  if (ct2 & 0x10) {
+    console.log("  bit12: souper");
+  }
+  if (ct2 & 0x20) {
+    console.log("  bit13: banksets");
+  }
+  if (ct2 & 0x40) {
+    console.log("  bit14: halt banked ram");
+  }
+  if (ct2 & 0x80) {
+    console.log("  bit15: pokey@800");
+  }
+
   console.log("  xm: %s", (cartridge_xm ? "1" : "0"));
+  console.log("  banksets: %s", (cartridge_banksets ? "1" : "0"));
   console.log("  pokey: %s", (cartridge_pokey ? "1" : "0"));
   console.log("  pokey450: %s", (cartridge_pokey450 ? "1" : "0"));
+  console.log("  pokey800: %s", (cartridge_pokey800 ? "1" : "0"));
+  console.log("  pokey write only: %s", cartridge_pokey_write_only ? "1" : "0");
+  console.log("  halt banked ram: %s", cartridge_halt_banked_ram ? "1" : "0");
   console.log("  tv type: %s", cartridge_region ? "PAL" : "NTSC");
   console.log("  Save device: [%d]%s%s", header[58],
     ((header[58] & 0x02) ? " SaveKey/AtariVox" : ""),
@@ -401,7 +483,7 @@ function cartridge_Load(data, size) {
     offset = 128;
 
     // Several cartridge headers do not have the proper size. So attempt to use the size
-    // of the file. 
+    // of the file.
     if (cartridge_size != size) {
       console.log("!!! CARTRIDGE SIZE IN HEADER DOES NOT MATCH !!! : %d %d",
         cartridge_size, size);
@@ -434,9 +516,17 @@ function cartridge_Load(data, size) {
     hashstr += String.fromCharCode(cartridge_buffer[index]);
   }
 
-  //cartridge_digest = hash_Compute(cartridge_buffer, cartridge_size); 
+  //cartridge_digest = hash_Compute(cartridge_buffer, cartridge_size);
   cartridge_digest = md5(hashstr);
   console.log("cartridge_digest: %s", cartridge_digest);
+
+  if (cartridge_digest === "91041aadd1700a7a4076f4005f2c362f") {
+    console.log("Patching diagnostic cartridge...");
+    var DIAG_PATCH_66EC = [0xDF, 0xE6];
+    for (let i = 0; i < DIAG_PATCH_66EC.length; i++) {
+      cartridge_buffer[0x66ec - offset + i] = DIAG_PATCH_66EC[i];
+    }
+  }
 
   return true;
 }
@@ -446,51 +536,72 @@ function cartridge_Load(data, size) {
 // ----------------------------------------------------------------------------
 //void cartridge_Store() {
 function cartridge_Store() {
+  // banksets changes
+  cartridge_stored = true;
+  var size = cartridge_size;
+  if (cartridge_banksets) size = size >> 1;
+
   switch (cartridge_type) {
     case CARTRIDGE_TYPE_NORMAL:
       //memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer,);
-      memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer, 0);
+      memory_WriteROM((65536 - size), size, cartridge_buffer, 0);
       break;
     case CARTRIDGE_TYPE_NORMAL_RAM:
       //memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer);
-      memory_WriteROM(65536 - cartridge_size, cartridge_size, cartridge_buffer, 0);
+      memory_WriteROM(65536 - size, size, cartridge_buffer, 0);
       memory_ClearROM(16384, 16384);
       break;
     case CARTRIDGE_TYPE_SUPERCART: {
-      //uint offset = cartridge_size - 16384;
-      var offset = cartridge_size - 16384;
-      if (offset < cartridge_size) {
+      //uint offset = size - 16384;
+      var offset = size - 16384;
+      if (offset < size) {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
+
+        // Default to bank 0
+        // banksets changes
+        cartridge_StoreBank(0);
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_LARGE: {
-      //uint offset = cartridge_size - 16384;
-      var offset = cartridge_size - 16384;
-      if (offset < cartridge_size) {
+      //uint offset = size - 16384;
+      var offset = size - 16384;
+      if (offset < size) {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
         //memory_WriteROM(16384, 16384, cartridge_buffer + cartridge_GetBankOffset(0));
         memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(0));
+
+        // Default to bank 0
+        // banksets changes
+        cartridge_StoreBank(0);
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_RAM: {
-      //uint offset = cartridge_size - 16384;
-      var offset = cartridge_size - 16384;
-      if (offset < cartridge_size) {
+      //uint offset = size - 16384;
+      var offset = size - 16384;
+      if (offset < size) {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
         memory_ClearROM(16384, 16384);
+
+        // Default to bank 0
+        // banksets changes
+        cartridge_StoreBank(0);
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_ROM: {
-      //uint offset = cartridge_size - 16384;
-      var offset = cartridge_size - 16384;
-      if (offset < cartridge_size && cartridge_GetBankOffset(6) < cartridge_size) {
+      //uint offset = size - 16384;
+      var offset = size - 16384;
+      if (offset < size && cartridge_GetBankOffset(6) < size) {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
         //memory_WriteROM(16384, 16384, cartridge_buffer + cartridge_GetBankOffset(6));
         memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(6));
+
+        // Default to bank 0
+        // banksets changes
+        cartridge_StoreBank(0);
       }
     } break;
     case CARTRIDGE_TYPE_ABSOLUTE:
@@ -500,7 +611,7 @@ function cartridge_Store() {
       memory_WriteROM(32768, 32768, cartridge_buffer, cartridge_GetBankOffset(2));
       break;
     case CARTRIDGE_TYPE_ACTIVISION:
-      if (122880 < cartridge_size) {
+      if (122880 < size) {
         //memory_WriteROM(40960, 16384, cartridge_buffer);
         memory_WriteROM(40960, 16384, cartridge_buffer, 0);
         //memory_WriteROM(16384, 8192, cartridge_buffer + 106496);
@@ -521,20 +632,24 @@ function cartridge_Store() {
 // ----------------------------------------------------------------------------
 //void cartridge_Write(word address, byte data) {
 function cartridge_Write(address, data) {
+  // banksets changes
+  var size = cartridge_size;
+  if (cartridge_banksets) size = size >> 1;
+
   //console.log("Cartridge write: %d, %d", address, data);
   switch (cartridge_type) {
     case CARTRIDGE_TYPE_SUPERCART:
     case CARTRIDGE_TYPE_SUPERCART_RAM:
     case CARTRIDGE_TYPE_SUPERCART_ROM: {
-      //uint maxbank = cartridge_size / 16384;
-      var maxbank = cartridge_size / 16384;
+      //uint maxbank = size / 16384;
+      var maxbank = size / 16384;
       if (address >= 32768 && address < 49152 && cartridge_GetBank(data) < maxbank /*9*/) {
         cartridge_StoreBank(data);
       }
     } break;
     case CARTRIDGE_TYPE_SUPERCART_LARGE: {
-      //uint maxbank = cartridge_size / 16384;
-      var maxbank = cartridge_size / 16384;
+      //uint maxbank = size / 16384;
+      var maxbank = size / 16384;
       if (address >= 32768 && address < 49152 && cartridge_GetBank(data) < maxbank /*9*/) {
         cartridge_StoreBank(data + 1);
       }
@@ -593,6 +708,7 @@ function cartridge_IsLoaded() {
 // ----------------------------------------------------------------------------
 //void cartridge_Release() {
 function cartridge_Release() {
+  cartridge_stored = false;
   high_score_cart_loaded = false;
 
   //if (cartridge_buffer != NULL) {
@@ -613,6 +729,8 @@ function cartridge_Release() {
     cartridge_region = 0;
     cartridge_pokey = 0;
     cartridge_pokey450 = 0;
+      // banksets changes
+    cartridge_pokey800 = 0;
     cartridge_xm = false;
     // Default to joysticks
     //memset(cartridge_controller, 1, sizeof(cartridge_controller));
@@ -629,13 +747,17 @@ function cartridge_Release() {
     cartridge_right_switch = 0;
     cartridge_swap_buttons = false;
     cartridge_hsc_enabled = false;
+    // banksets changes
+    cartridge_banksets = false;
+    cartridge_pokey_write_only = false;
+    cartridge_halt_banked_ram = false;
   }
 }
 
 function cartridge_LoadHighScoreCart(callback) {
   if (!cartridge_hsc_enabled || (cartridge_region != REGION_NTSC)) {
     // Only load the cart if it is enabled and the region is NTSC
-    console.log(cartridge_hsc_enabled ? 
+    console.log(cartridge_hsc_enabled ?
       "Not loading high score cartridge, PAL region." :
       "High score cartridge is disabled (via db and cart header)."
     );
@@ -668,8 +790,8 @@ function cartridge_LoadHighScoreCart(callback) {
       }
       for (var i = 0; i < high_score_buffer.length; i++) {
         memory_Write(0x3000 + i, high_score_buffer.charCodeAt(i));
-      }      
-      high_score_cart_loaded = true;  
+      }
+      high_score_cart_loaded = true;
     }
     console.log("High score cart loaded: " + high_score_cart_loaded);
 
@@ -680,143 +802,163 @@ function cartridge_LoadHighScoreCart(callback) {
   highScoreCallback.loadSram(postLoadCallback);
 }
 
-function GetRegion() { 
-  return cartridge_region; 
+function GetRegion() {
+  return cartridge_region;
 }
 
-function IsPokeyEnabled() { 
-  return cartridge_pokey; 
+function IsPokeyEnabled() {
+  return cartridge_pokey;
 }
 
-function IsPokey450Enabled() { 
-  return cartridge_pokey450; 
+function IsPokey450Enabled() {
+  return cartridge_pokey450;
 }
 
-function IsXmEnabled() { 
-return xm_mode == 2 ? cartridge_xm : xm_mode;
+function IsPokey800Enabled() {
+  return cartridge_pokey800;
 }
 
-function IsSwapButtons() { 
-  return cartridge_swap_buttons; 
+function IsPokeyWriteOnly() {
+  return cartridge_pokey_write_only;
 }
 
-function IsDualAnalog() { 
-  return cartridge_dualanalog; 
+function GetCartridgeXM() {
+  return cartridge_xm;
 }
 
-function IsLightGunEnabled() { 
-  return cartridge_controller[0] == CARTRIDGE_CONTROLLER_LIGHTGUN; 
+function IsXmEnabled() {
+  return xm_mode == 2 ? cartridge_xm : xm_mode;
 }
-  
-function GetFlags() { 
+
+function IsBanksets() {
+  return cartridge_banksets;
+}
+
+function IsHaltBankedRam() {
+  return cartridge_halt_banked_ram;
+}
+
+function IsSwapButtons() {
+  return cartridge_swap_buttons;
+}
+
+function IsDualAnalog() {
+  return cartridge_dualanalog;
+}
+
+function IsLightGunEnabled() {
+  return cartridge_controller[0] == CARTRIDGE_CONTROLLER_LIGHTGUN;
+}
+
+function GetFlags() {
   return cartridge_flags;
 }
 
-function GetHblank() { 
-  return cartridge_hblank; 
+function GetHblank() {
+  return cartridge_hblank;
 }
 
-function GetLeftSwitch() { 
-  return cartridge_left_switch; 
+function GetLeftSwitch() {
+  return cartridge_left_switch;
 }
 
-function GetRightSwitch() { 
-  return cartridge_right_switch; 
+function GetRightSwitch() {
+  return cartridge_right_switch;
 }
 
-function GetDigest() { 
-  return cartridge_digest; 
+function GetDigest() {
+  return cartridge_digest;
 }
 
-function SetTitle(title) { 
+function SetTitle(title) {
   cartridge_title = title;
 }
 
-function GetTitle() { 
-  return cartridge_title; 
+function GetTitle() {
+  return cartridge_title;
 }
 
-function GetSize() { 
-  return cartridge_size; 
+function GetSize() {
+  return cartridge_size;
 }
 
-function GetType() { 
-  return cartridge_type; 
+function GetType() {
+  return cartridge_type;
 }
 
-function SetType(type) { 
+function SetType(type) {
   cartridge_type = type;
 }
 
-function SetPokey(pokey) { 
+function SetPokey(pokey) {
   cartridge_pokey = pokey;
 }
 
-function SetPokey450(pokey) { 
+function SetPokey450(pokey) {
   cartridge_pokey450 = pokey;
 }
 
-function SetController1(c1) { 
+function SetController1(c1) {
   cartridge_controller[0] = c1;
 }
 
-function SetController2(c2) { 
+function SetController2(c2) {
   cartridge_controller[1] = c2;
 }
 
-function GetController1() { 
-  return cartridge_controller[0]; 
+function GetController1() {
+  return cartridge_controller[0];
 }
 
-function GetController2() { 
-  return cartridge_controller[1]; 
+function GetController2() {
+  return cartridge_controller[1];
 }
 
-function SetRegion(region) { 
+function SetRegion(region) {
   cartridge_region = region;
 }
 
-function SetFlags(flags) { 
-  cartridge_flags = flags; 
+function SetFlags(flags) {
+  cartridge_flags = flags;
 }
 
-function SetXm(xm) { 
+function SetXm(xm) {
   cartridge_xm = xm;
 }
 
-function SetHblank(hblank) { 
+function SetHblank(hblank) {
   cartridge_hblank = hblank;
 }
 
-function SetCrossX(crossx) { 
+function SetCrossX(crossx) {
   cartridge_crosshair_x = crossx;
 }
 
-function SetCrossY(crossy) { 
+function SetCrossY(crossy) {
   cartridge_crosshair_y = crossy;
 }
 
-function GetCrossX() { 
-  return cartridge_crosshair_x; 
+function GetCrossX() {
+  return cartridge_crosshair_x;
 }
 
-function GetCrossY() { 
-  return cartridge_crosshair_y; 
+function GetCrossY() {
+  return cartridge_crosshair_y;
 }
 
-function SetDualAnalog(dualAnalog) { 
+function SetDualAnalog(dualAnalog) {
   cartridge_dualanalog = dualAnalog;
 }
 
-function SetLeftSwitch(val) { 
+function SetLeftSwitch(val) {
   cartridge_left_switch = val;
 }
 
-function SetRightSwitch(val) { 
-  cartridge_right_switch = val; 
+function SetRightSwitch(val) {
+  cartridge_right_switch = val;
 }
 
-function SetSwapButtons(val) { 
+function SetSwapButtons(val) {
   cartridge_swap_buttons = val;
 }
 
@@ -840,6 +982,30 @@ function GetXmModeDefault() {
   return XM_MODE_DEFAULT;
 }
 
+function cartridge_IsStored() {
+  return cartridge_stored;
+}
+
+function SetBanksetsBegin(begin) {
+  cartridge_banksets_begin = begin;
+}
+
+function GetBanksetsBegin() {
+  return cartridge_banksets_begin;
+}
+
+function SetBanksetsEnd(end) {
+  cartridge_banksets_end = end;
+}
+
+function GetBanksetsEnd() {
+  return cartridge_banksets_end;
+}
+
+function GetCartridgeBank() {
+  return cartridge_bank;
+}
+
 function init(e) {
   REGION_NTSC = e.Region.REGION_NTSC;
 
@@ -855,9 +1021,14 @@ Events.addListener(new Events.Listener("highScoreCallbackChanged",
   function (hsCallback) { highScoreCallback = hsCallback }));
 
 export {
+  GetCartridgeXM,
   GetRegion,
+  IsBanksets,
+  IsHaltBankedRam,
   IsPokeyEnabled,
   IsPokey450Enabled,
+  IsPokey800Enabled,
+  IsPokeyWriteOnly,
   IsXmEnabled,
   IsSwapButtons,
   IsDualAnalog,
@@ -874,6 +1045,10 @@ export {
   SetType,
   SetPokey,
   SetPokey450,
+  SetBanksetsBegin,
+  GetBanksetsBegin,
+  SetBanksetsEnd,
+  GetBanksetsEnd,
   SetController1,
   SetController2,
   GetController1,
@@ -895,12 +1070,21 @@ export {
   SetSwapButtons,
   SetHighScoreCartEnabled,
   IsHighScoreCartEnabled,
+  GetCartridgeBank,
   cartridge_Load as Load,
   cartridge_IsLoaded as IsLoaded,
   cartridge_Write as Write,
   cartridge_Store as Store,
   cartridge_Release as Release,
-  cartridge_LoadHighScoreCart as LoadHighScoreCart
+  cartridge_LoadHighScoreCart as LoadHighScoreCart,
+  cartridge_IsStored as IsStored,
+  cartridge_StoreBank as StoreBank,
+  CARTRIDGE_TYPE_NORMAL,
+  CARTRIDGE_TYPE_NORMAL_RAM,
+  CARTRIDGE_TYPE_SUPERCART,
+  CARTRIDGE_TYPE_SUPERCART_RAM,
+  CARTRIDGE_TYPE_SUPERCART_ROM,
+  CARTRIDGE_TYPE_SUPERCART_LARGE,
 }
 
 // // The memory location of the high score cartridge SRAM

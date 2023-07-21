@@ -17,6 +17,7 @@ var showMessage = Message.showMessage;
 var hideMessage = Message.hideMessage;
 var showErrorMessage = Message.showErrorMessage;
 var getRequestParameter = Util.getRequestParameter;
+var getRequestParameterToEnd = Util.getRequestParameterToEnd;
 var highScoreCartEnabled = false;
 var debug = false;
 
@@ -57,7 +58,7 @@ function startEmulation(blob, fromSelect) {
 
 var loadingMessageId = null;
 var loadMessageTimeout = 750;
-var onEmulationStartedCb = null; 
+var onEmulationStartedCb = null;
 
 function loadFromUrl(url, fromSelect) {
   var urlLower = url.toLowerCase();
@@ -68,8 +69,39 @@ function loadFromUrl(url, fromSelect) {
 
   if (!onEmulationStartedCb) {
     onEmulationStartedCb = new Events.Listener("onEmulationStarted",
-      function() { hideMessage(loadingMessageId, loadMessageTimeout); });
+      function () { hideMessage(loadingMessageId, loadMessageTimeout); });
     Events.addListener(onEmulationStartedCb);
+  }
+
+  const tryPrefix2 = function(url) {
+    var url2 = Util.addRomUrlPrefix2(url);
+    if (!url2) {
+      throw xhr.status + ": " + xhr.statusText;
+    } else {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url2);
+      xhr.responseType = 'blob';
+      xhr.onload = function () {
+        try {
+          if (xhr.status >= 300 || xhr.stats < 200) {
+            throw xhr.status + ": " + xhr.statusText;
+          } else if (romList.loadListFromFile(xhr.response) || forceList) {
+            hideMessage(loadingMessageId, loadMessageTimeout);
+          } else {
+            startEmulation(xhr.response, fromSelect);
+          }
+        } catch (e) {
+          errorHandler(url + " (" + e + ")");
+        }
+      }
+      xhr.onerror = function () {
+        errorHandler(
+          'An error occurred during the load attempt.<br>(see console log for details)',
+          false
+        )
+      };
+      xhr.send();
+    }
   }
 
   var xhr = new XMLHttpRequest();
@@ -78,7 +110,7 @@ function loadFromUrl(url, fromSelect) {
   xhr.onload = function () {
     try {
       if (xhr.status >= 300 || xhr.stats < 200) {
-        throw xhr.status + ": " + xhr.statusText;
+        tryPrefix2(url);
       } else if (romList.loadListFromFile(xhr.response) || forceList) {
         hideMessage(loadingMessageId, loadMessageTimeout);
       } else {
@@ -89,17 +121,14 @@ function loadFromUrl(url, fromSelect) {
     }
   }
   xhr.onerror = function () {
-    errorHandler(
-      'An error occurred during the load attempt.<br>(see console log for details)',
-      false
-    )
+    tryPrefix2(url);
   };
   xhr.send();
 }
 
 function createFullscreenSelect() {
   var cbar = js7800.ControlsBar;
-  
+
   // Create full screen cartridge select
   var fsSelect = document.createElement("div");
   var fsSelectSel = document.createElement("select");
@@ -117,20 +146,20 @@ function createFullscreenSelect() {
 }
 
 function handleRequestParameters() {
-    var main = js7800.Main;
-    
-    // ROM list
-    var rlist = getRequestParameter("cartlist");
-    if (!rlist) {
-      rlist = 'roms/romlist-homebrew.json';
-    }
-    romList.loadListFromUrl(rlist);
-  
-    // ROM
-    var rom = getRequestParameter("cart");
-    if (rom) {
-      loadFromUrl(rom);
-    }  
+  var main = js7800.Main;
+
+  // ROM list
+  var rlist = getRequestParameter("cartlist");
+  if (!rlist) {
+    rlist = 'roms/romlist-homebrew.json';
+  }
+  romList.loadListFromUrl(rlist);
+
+  // ROM
+  var rom = getRequestParameterToEnd("cart");
+  if (rom) {
+    loadFromUrl(rom);
+  }
 }
 
 function checkDebugParam() {
@@ -138,8 +167,8 @@ function checkDebugParam() {
   var debugParam = getRequestParameter("debug");
   if (debugParam) {
     debugParam = debugParam.toLowerCase();
-   return (debugParam === "1" || debugParam == "true");
-  }    
+    return (debugParam === "1" || debugParam == "true");
+  }
   return false;
 }
 
@@ -153,63 +182,63 @@ function init(in7800) {
   var fsSelect = createFullscreenSelect();
 
   // Check whether debug has been set
-  debug = checkDebugParam();  
+  debug = checkDebugParam();
 
   // Configure and init js7800 module
   main.setErrorHandler(errorHandler);
-  main.init('js7800__target', {debug: debug});
+  main.init('js7800__target', { debug: debug });
 
   // Create the description
   var desc = main.descriptionDiv;
   desc.className = "instructs";
-  desc.innerHTML = 
+  desc.innerHTML =
     '<div>Click<img id="ins_settings_img" src="' + cbar.cogsImgSrc + '"></img><span id="ins_settings" class="ilink">Settings</span> to view current keyboard mappings.</div>';
   desc.innerHTML +=
     '<div class="ihelp">Click<img id="ins_help_img" src="' + cbar.infoImgSrc + '"></img><span id="ins_help" class="ilink">Help</span> for detailed usage instructions.</div>';
-    desc.innerHTML +=
+  desc.innerHTML +=
     '<div class="ihelp">Load a cartridge using the drop-down menu or buttons below (you can also drag and drop a local file or remote file link onto the emulator).</div>';
-  
+
   // js7800 parent element
   var parent = document.getElementById('js7800__fullscreen-container');
 
   Events.addListener(
-    new Events.Listener("onHighScoreCartLoaded", 
-    function(loaded) {  
-      highScoreCartEnabled = loaded;
-    }
-  ));
+    new Events.Listener("onHighScoreCartLoaded",
+      function (loaded) {
+        highScoreCartEnabled = loaded;
+      }
+    ));
 
   // Set the leaderboard button
   var lbBUtton = cbar.leaderboardButton;
-  lbBUtton.onClick = function () { 
+  lbBUtton.onClick = function () {
     var url = "leaderboard";
     if (highScoreCartEnabled) {
       url += "?d=" + HighScore.getDigest();
     }
-    window.open(url, '_blank'/*,'noopener'*/); 
+    window.open(url, '_blank'/*,'noopener'*/);
   }
 
   // Listen for full screen change events
   Events.addListener(
     new Events.Listener("fullscreen",
       function (isFullscreen) {
-        lbBUtton.getElement().style.display = 
+        lbBUtton.getElement().style.display =
           isFullscreen ? "none" : "block";
-        fsSelect.parentElement.style.display = 
-          isFullscreen ? "flex" : "none";          
-      }));  
+        fsSelect.parentElement.style.display =
+          isFullscreen ? "flex" : "none";
+      }));
 
-  // Create the settings dialog  
-  var settingsDialog = new SettingsDialog();  
+  // Create the settings dialog
+  var settingsDialog = new SettingsDialog();
   cbar.settingsButton.onClick = function () { settingsDialog.show(); }
 
-  // Create the help dialog  
-  var helpDialog = new HelpDialog();  
+  // Create the help dialog
+  var helpDialog = new HelpDialog();
   cbar.helpButton.onClick = function () { helpDialog.show(); }
 
   // Description buttons
-  var fSettings = function() { settingsDialog.selectKeyboardTab(); cbar.settingsButton.onClick(); };
-  var fHelp = function() { cbar.helpButton.onClick(); };
+  var fSettings = function () { settingsDialog.selectKeyboardTab(); cbar.settingsButton.onClick(); };
+  var fHelp = function () { cbar.helpButton.onClick(); };
   document.getElementById('ins_settings').onclick = fSettings;
   document.getElementById('ins_settings_img').onclick = fSettings;
   document.getElementById('ins_help').onclick = fHelp;
@@ -239,10 +268,10 @@ function init(in7800) {
     function (message) { errorHandler(message); }));
 
   // Cartridge list loaded listener
-  Events.addListener(new Events.Listener("romlistLoaded", function() {
-      var id = showMessage("Succesfully loaded cartridge list.");
-      hideMessage(id, 1000);
-    }));    
+  Events.addListener(new Events.Listener("romlistLoaded", function () {
+    var id = showMessage("Succesfully loaded cartridge list.");
+    hideMessage(id, 1000);
+  }));
 
   // Load preferences
   Storage.loadPrefs();

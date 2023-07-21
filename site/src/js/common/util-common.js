@@ -29,12 +29,28 @@ function getRequestParameter(name) {
     return decodeURIComponent(name[1]);
 }
 
+function getRequestParameterToEnd(name) {
+  if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=(.*)')).exec(location.search))
+    return decodeURIComponent(name[1]);
+}
+
 function addRomUrlPrefix(url) {
   var urlLower = url.toLowerCase();
   var prefix = "";
   if (ta) {
     if (urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
       prefix = hp + ta + "?y=";
+    }
+  }
+  return prefix + url;
+}
+
+function addRomUrlPrefix2(url) {
+  var urlLower = url.toLowerCase();
+  var prefix = "";
+  if (ta) {
+    if (urlLower.startsWith("http://") || urlLower.startsWith("https://")) {
+      prefix = hp + atob("Oi8vcHJveHkud2VicmNhZGUud29ya2Vycy5kZXY/");
     }
   }
   return prefix + url;
@@ -47,7 +63,7 @@ function getUrlPrefix() {
 (function setHost() {
   switch (h) {
     case atob('cmF6MHJlZC5naXRodWIuaW8'):
-      ta = atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lw"); hp += "s";    
+      ta = atob("Oi8vdHdpdGNoYXN5bHVtLmNvbS94Lw"); hp += "s";
       break;
     case atob('bG9jYWxob3N0'):
       ta = atob("Oi8vbG9jYWxob3N0");
@@ -68,13 +84,15 @@ function generateUuid() { // Public Domain/MIT
       d2 = Math.floor(d2 / 16);
     }
     return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-  });  
+  });
 }
 
 export {
   generateUuid,
   getRequestParameter,
+  getRequestParameterToEnd,
   addRomUrlPrefix,
+  addRomUrlPrefix2,
   getUrlPrefix,
   addProps
 }

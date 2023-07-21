@@ -418,7 +418,7 @@ controller2=1
 region=1
 flags=0
 [06204dadc975be5e5e37e7cc66f984cf]
-title=Gato                  
+title=Gato
 type=0
 pokey=false
 controller1=1
@@ -426,7 +426,7 @@ controller2=1
 region=0
 flags=0
 [fd9e78e201b6baafddfd3e1fbfe6ba31]
-title=Hat Trick                       
+title=Hat Trick
 type=0
 pokey=false
 controller1=1
@@ -434,7 +434,7 @@ controller2=1
 region=0
 flags=0
 [0baec96787ce17f390e204de1a136e59]
-title=Hat Trick                       
+title=Hat Trick
 type=0
 pokey=false
 controller1=1
@@ -490,7 +490,7 @@ controller2=1
 region=1
 flags=0
 [f18b3b897a25ab3885b43b4bd141b396]
-title=Joust                           
+title=Joust
 type=0
 pokey=false
 controller1=1
@@ -499,7 +499,7 @@ region=0
 flags=0
 hsc=true
 [f2dae0264a4b4a73762b9d7177e989f6]
-title=Joust                           
+title=Joust
 type=0
 pokey=false
 controller1=1
@@ -507,7 +507,7 @@ controller2=1
 region=1
 flags=0
 [c3a5a8692a423d43d9d28dd5b7d109d9]
-title=Karateka                        
+title=Karateka
 type=0
 pokey=false
 controller1=1
@@ -515,7 +515,7 @@ controller2=1
 region=0
 flags=0
 [5e0a1e832bbcea6facb832fde23a440a]
-title=Karateka                        
+title=Karateka
 type=4
 pokey=false
 controller1=1
@@ -523,7 +523,7 @@ controller2=1
 region=1
 flags=0
 [17b3b764d33eae9b5260f01df7bb9d2f]
-title=Klax       
+title=Klax
 type=4
 pokey=false
 controller1=1
@@ -657,7 +657,7 @@ controller2=1
 region=1
 flags=0
 [fc0ea52a9fac557251b65ee680d951e5]
-title=Ms. Pac-Man                     
+title=Ms. Pac-Man
 type=0
 pokey=false
 controller1=1
@@ -666,7 +666,7 @@ region=0
 flags=0
 hsc=true
 [56469e8c5ff8983c6cb8dadc64eb0363]
-title=Ms. Pac-Man                     
+title=Ms. Pac-Man
 type=0
 pokey=false
 controller1=1
@@ -762,7 +762,7 @@ controller2=1
 region=0
 flags=0
 [584582bb09ee8122e7fc09dc7d1ed813]
-title=Pole Position II                
+title=Pole Position II
 type=0
 pokey=false
 controller1=1
@@ -770,7 +770,7 @@ controller2=1
 region=0
 flags=0
 [865457e0e0f48253b08f77b9e18f93b2]
-title=Pole Position II                
+title=Pole Position II
 type=0
 pokey=false
 controller1=1
@@ -826,7 +826,7 @@ controller2=1
 region=0
 flags=0
 [66ecaafe1b82ae68ffc96267aaf7a4d7]
-title=Robotron                        
+title=Robotron
 type=0
 pokey=false
 controller1=1
@@ -1286,7 +1286,7 @@ controller2=1
 region=0
 flags=0
 [67ee0011090a6ada38f3eef8a3020fb4]
-title=Apple Snaffle V1.25F            
+title=Apple Snaffle V1.25F
 type=1
 pokey=true
 controller1=1
@@ -1329,6 +1329,15 @@ controller2=1
 region=0
 flags=0
 hsc=true
+[55ffe535897c368be7a80d582f6a68cb]
+title=Astro Blaster
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+hsc=true
 [a51e5df28a0fe8c52e9d28fb5f8e44a6]
 title=Astro Fighter
 type=0
@@ -1338,8 +1347,17 @@ controller2=1
 region=0
 flags=0
 hsc=true
+[b4be9c25ea078608310f0ddc409e7cc1]
+title=Astro Fighter
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+hsc=true
 [78b1061d651ef806becac1dd3fda29a0]
-title=Beef Drop                       
+title=Beef Drop
 type=0
 pokey=true
 controller1=1
@@ -1356,7 +1374,7 @@ controller2=1
 region=0
 flags=0
 [9fa7743a016c9b7015ee1d386326f88e]
-title=b*nQ                            
+title=b*nQ
 type=0
 pokey=false
 controller1=1
@@ -1373,6 +1391,15 @@ controller2=1
 region=1
 flags=0
 [2d2fe4da9f1bae102fa8ca2d8830a626]
+title=Crazy Otto (NTSC)
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+hsc=true
+[100551363027dc5f093d049a5fd00933]
 title=Crazy Otto (NTSC)
 type=0
 pokey=false
@@ -1545,7 +1572,7 @@ controller2=1
 region=0
 flags=0
 [61809684eefd6cbb2963574ffb0a3fab]
-title=Humantron 2084                  
+title=Humantron 2084
 type=0
 pokey=false
 controller1=1
@@ -1594,6 +1621,15 @@ controller2=1
 region=0
 flags=0
 [e54edc299e72d22d0ba05d16f3393e8c]
+title=Jr. Pac-Man (NTSC)
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+hsc=true
+[bde3abe40d302d8c4c65c9690c05dbc4]
 title=Jr. Pac-Man (NTSC)
 type=0
 pokey=false
@@ -1662,6 +1698,15 @@ flags=0
 pokey450=true
 hsc=false
 [9ff38ea62004201d870caa8bd9463525]
+title=Moon Cresta (NTSC)
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+hsc=true
+[3a15fe7bead3d9b90f3fb13d63e1ee42]
 title=Moon Cresta (NTSC)
 type=0
 pokey=false
@@ -2061,6 +2106,17 @@ flags=1
 pokey450=true
 xm=true
 hsc=true
+[39dc7f6f39f9b3e341a5ffea76e71fb1]
+title=Pac-Man 40th Anniversary
+type=1
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=1
+pokey450=false
+xm=true
+hsc=true
 [8cb66c6ed5b379181b1420d8e4758834]
 title=Pactron 1984 (Hack)
 type=0
@@ -2212,6 +2268,16 @@ region=0
 flags=0
 xm=false
 hsc=true
+[803743fe18600f292456539906464421]
+title=Rip-Off (NTSC)
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+xm=false
+hsc=true
 [106b409c6f4c219b1a3b3d099ead3b2b]
 title=Rip-Off (PAL)
 type=0
@@ -2256,6 +2322,16 @@ controller2=1
 region=0
 flags=0
 [a3a85e507d6f718972b1464ce1aaf8a4]
+title=Scramble
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+xm=false
+hsc=true
+[31b20a4710e691300bb4aa62cf02284c]
 title=Scramble
 type=0
 pokey=false
@@ -2350,6 +2426,15 @@ controller2=1
 region=0
 flags=0
 hsc=true
+[783d09ad9542b0bb28aa4cc6ffcf8aa6]
+title=Space Invaders (NTSC)
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+hsc=true
 [0f4bd5800359a62a5874b93dc92a47f1]
 title=Spire of the Ancients
 type=2
@@ -2420,6 +2505,17 @@ flags=0
 pokey450=false
 xm=false
 hsc=true
+[88b9de0eba37ba516590fa8b860155f0]
+title=Super Pac-Man (NTSC)
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=false
+xm=false
+hsc=true
 [61aa4a074ad08c524fbee88d15e369ea]
 title=Super Pac-Man (PAL)
 type=0
@@ -2432,7 +2528,7 @@ pokey450=false
 xm=false
 hsc=false
 [3632fcc732a33591b91f0eea2c01e599]
-title=Tank Command-Color Sprite Title 
+title=Tank Command-Color Sprite Title
 type=4
 pokey=false
 controller1=1
@@ -2641,6 +2737,17 @@ flags=0
 pokey450=false
 xm=false
 hsc=true
+[eea04359df6770d66b0d97c2cea1932f]
+title=Armor Attack II
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=false
+xm=false
+hsc=true
 [7cdfbe37634e7dcd4dc67db7edbcd3ba]
 title=Baby Pac-Man
 type=0
@@ -2729,6 +2836,17 @@ flags=0
 pokey450=false
 xm=false
 hsc=true
+[f982c7dbf74c9c049cf7f875a46ed818]
+title=UniwarS
+type=0
+pokey=false
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=false
+xm=false
+hsc=true
 [ff8d8283553af5d5dbdaddb5781b4896]
 title=Vector Asteroids
 type=0
@@ -2752,3 +2870,26 @@ pokey450=false
 xm=true
 hsc=false
 leftswitch=0
+[0c097bc8c786af182935081ac5cd631f]
+title=Galaxian
+type=0
+pokey=true
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=false
+xm=true
+hsc=true
+[a662862f20362fc5eb5c651065cbd51c]
+title=Attack of the Petscii Robots
+type=3
+pokey=true
+controller1=1
+controller2=1
+region=0
+flags=0
+pokey450=false
+xm=true
+hsc=false
+dualanalog=true

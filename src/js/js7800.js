@@ -94,17 +94,17 @@ function checkNativeFps(frequency) {
   var start = 0
   var end = start;
 
-  var f = function() {    
+  var f = function() {
     fc++; end = Date.now();
     if (checkCount != nativeCheckCount) {
-      console.log('Aborting native FPS check...');     
+      console.log('Aborting native FPS check...');
     }
     else if (start === 0 && fc == TEST_BEGIN) {
       start = Date.now();
       fc = 0;
       console.log('native fps test beginning.')
       requestAnimationFrame(f);
-    } else if (fc == TEST_COUNT) {      
+    } else if (fc == TEST_COUNT) {
       var fps = (1000/((end - start)/fc));
       var round = Math.round(fps/10)*10;
       var diff = Math.abs(round - fps);
@@ -159,7 +159,7 @@ function startEmu(cart, isRestart) {
   console.log("  Controller 2: %d", Cartridge.GetController2());
   console.log("  Region: %s", Cartridge.GetRegion() == 1 ? "PAL" : "NTSC");
   console.log("  Flags: %d", Cartridge.GetFlags());
-  console.log("  XM: %s, mode: %s", 
+  console.log("  XM: %s, mode: %s",
     Cartridge.IsXmEnabled() ? "true" : "false",
     (Cartridge.GetXmMode() == 2 ? "Automatic" : (Cartridge.GetXmMode() ? "Enabled" : "Disabled"))
   );
@@ -196,7 +196,7 @@ function startEmu(cart, isRestart) {
     var frameTicks = (1000.0 / frequency) /*| 0*/;
     var adjustTolerance = (frameTicks * frequency * 2); // 2 secs
     var isActive = ProSystem.IsActive;
-    var isPaused = ProSystem.IsPaused;    
+    var isPaused = ProSystem.IsPaused;
     var fs = 0;
     var avgWait = 0;
 
@@ -209,7 +209,7 @@ function startEmu(cart, isRestart) {
 
     gameVsync = vsync;
     gameIsNative = false;
-    checkNativeFps(frequency);    
+    checkNativeFps(frequency);
 
     var f = function () {
       if (isActive()) {
@@ -222,7 +222,7 @@ function startEmu(cart, isRestart) {
           if ((fskip == 0) || (fs >= fskip)) {
             flipImage();
           }
-          if (++fs >= fskipcount) {            
+          if (++fs >= fskipcount) {
             fs = 0;
           }
 
@@ -250,16 +250,14 @@ function startEmu(cart, isRestart) {
           if ((fc % debugFrequency) == 0) {
             var elapsed = Date.now() - start;
             if (debug) {
-              var dbg = "fps: " + (1000.0 / (elapsed / fc)).toFixed(2) + 
-                ", vsync: " + gameVsync + 
+              var dbg = "fps: " + (1000.0 / (elapsed / fc)).toFixed(2) +
+                ", vsync: " + gameVsync +
                 ", wait: " + ((avgWait / fc) * frequency).toFixed(2) +
                 ", native: "+ gameIsNative +
                 ", timer: " + (Riot.GetTimerCount() % 1000) +
                 ", wsync: " + (ProSystem.GetDebugWsync() ? 1 : 0) + "," + ProSystem.GetDebugWsyncCount() +
-                ", stl: " + (ProSystem.GetDebugCycleStealing() ? 1 : 0) +
                 ", mar: " + ProSystem.GetDebugMariaCycles() +
-                ", cpu: " + ProSystem.GetDebug6502Cycles() +
-                ", ext: " + ProSystem.GetDebugSavedCycles();                
+                ", cpu: " + ProSystem.GetDebug6502Cycles()
               if (debugCallback) debugCallback(dbg);
               console.log(dbg);
             }
@@ -302,14 +300,14 @@ function startEmulation(cart, isRestart) {
   }
 
   if (!hideTitleCb) {
-    hideTitleCb = new Events.Listener("onEmulationStarted", 
-      function() {    
+    hideTitleCb = new Events.Listener("onEmulationStarted",
+      function() {
         if (!noTitle) {
           Video.stopScreenSnow();
           if (!logoDiv.classList.contains('js7800__logo--hide')) {
             logoDiv.classList.add('js7800__logo--hide');
             logoDiv.classList.remove('js7800__logo--show');
-        
+
             // Should not be necessary, but makes sure is not displayed
             setTimeout(function () {
               logoDiv.style.display = 'none';
@@ -317,7 +315,7 @@ function startEmulation(cart, isRestart) {
           }
         }
       }
-    );    
+    );
     Events.addListener(hideTitleCb);
   }
 
@@ -424,7 +422,7 @@ function setErrorHandler(handler) {
 }
 
 var hidden, visibilityChange;
-if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
   hidden = "hidden";
   visibilityChange = "visibilitychange";
 } else if (typeof document.msHidden !== "undefined") {
@@ -530,6 +528,14 @@ function setAllowUnpause(p) {
   allowUnpause = p;
 }
 
+function saveState() {
+  return ProSystem.ProSystemSave();
+}
+
+function loadState(buffer) {
+  return ProSystem.ProSystemLoad(buffer);
+}
+
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 export {
@@ -537,8 +543,10 @@ export {
   pause,
   setAllowUnpause,
   startEmulation,
+  saveState,
+  loadState,
   restart,
-  setErrorHandler,  
+  setErrorHandler,
   setHighScoreCallback,
   HighScoreCallback,
   descriptionDiv,
