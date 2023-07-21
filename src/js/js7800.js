@@ -129,7 +129,7 @@ function checkNativeFps(frequency) {
   requestAnimationFrame(f)
 }
 
-function startEmu(cart, isRestart) {
+function startEmu(cart, isRestart, cb) {
   currentCart = cart;
 
   var leftSwitch = 0;
@@ -141,12 +141,15 @@ function startEmu(cart, isRestart) {
 
   Cartridge.Load(cart, cart.length);
   var digest = Cartridge.GetDigest();
+
   Database.Load(digest);
 
   if (isRestart) {
     Cartridge.SetLeftSwitch(leftSwitch);
     Cartridge.SetRightSwitch(rightSwitch);
   }
+
+  if (cb) cb(digest)
 
   console.log("Final values:");
   console.log("  Title: %s", Cartridge.GetTitle());
@@ -287,7 +290,7 @@ function restart() {
 }
 
 var hideTitleCb = null;
-function startEmulation(cart, isRestart) {
+function startEmulation(cart, isRestart, cb) {
   if (starting) {
     return;
   }
@@ -320,7 +323,7 @@ function startEmulation(cart, isRestart) {
   }
 
   setTimeout(function () {
-    startEmu(cart, isRestart);
+    startEmu(cart, isRestart, cb);
   }, 200);
 }
 
