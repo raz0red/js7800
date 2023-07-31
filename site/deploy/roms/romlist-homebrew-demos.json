@@ -6,9 +6,17 @@
             "path": "3DTestDemo1.a78"
         },
         {
+            "name": "Bad Apple Demo (PAL)",
+            "path": "Bad Apple Demo (PAL) (20221213) (D477F043).a78"
+        },
+        {
             "name": "Demo X",
             "path": "DemoX.a78"
-        },        
+        },            
+        {
+            "name": "IE78 (PAL)",
+            "path": "1E78.a78"            
+        },
         {
             "name": "Merry Christmas 2012",
             "path": "MerryChristmas2012.a78"            

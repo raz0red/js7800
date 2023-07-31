@@ -24,10 +24,10 @@ XCTRL Bit Description
 ** This bit controls both POKEY chip select signals.
 
 
-The mapping is totally non compatible with pretty much everything. 
-There is a bank select latch located at $0470 and the POKEY is located at $0450 
-(There's also a chip select output ($0460) on the PLD which alows you to simply piggy back a second POKEY). 
-Since the PLD is reconfigurable I could map the POKEY (or the RAM for that matter) to pretty much anything 
+The mapping is totally non compatible with pretty much everything.
+There is a bank select latch located at $0470 and the POKEY is located at $0450
+(There's also a chip select output ($0460) on the PLD which alows you to simply piggy back a second POKEY).
+Since the PLD is reconfigurable I could map the POKEY (or the RAM for that matter) to pretty much anything
 if you wanted to. However since the PLD is soldered under the POKEY this needs to be configured before delivery.
 */
 
@@ -48,7 +48,7 @@ var xm_bank = 0;
 //bool xm_pokey_enabled = false;
 var xm_pokey_enabled = false;
 //bool xm_mem_enabled = false;
-var xm_mem_enabled = false; 
+var xm_mem_enabled = false;
 
 //void xm_Reset() {
 function xm_Reset() {
@@ -110,12 +110,12 @@ function xm_Write(address, data) {
   }
 }
 
-function IsPokeyEnabled() { 
-  return xm_pokey_enabled; 
+function IsPokeyEnabled() {
+  return xm_pokey_enabled;
 }
 
-function IsMemEnabled() { 
-  return xm_mem_enabled; 
+function IsMemEnabled() {
+  return xm_mem_enabled;
 }
 
 export {
@@ -123,5 +123,6 @@ export {
   xm_Read as Read,
   xm_Reset as Reset,
   IsPokeyEnabled,
-  IsMemEnabled
+  IsMemEnabled,
+  XM_RAM_SIZE
 }

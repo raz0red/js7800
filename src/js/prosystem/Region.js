@@ -66,12 +66,14 @@ var region_type = REGION_AUTO;
 //static const rect REGION_DISPLAY_AREA_NTSC = {0, 16, 319, 258};
 var REGION_DISPLAY_AREA_NTSC = new Rect(0, 16, 319, 258);
 //static const rect REGION_VISIBLE_AREA_NTSC = {0, 26, 319, 250};
-var REGION_VISIBLE_AREA_NTSC = new Rect(0, 26, 319, 250);
+var REGION_VISIBLE_AREA_NTSC = new Rect(0, 27, 319, 250);
 
 //static const byte REGION_FREQUENCY_NTSC = 60;
 var REGION_FREQUENCY_NTSC = 60;
 //static const word REGION_SCANLINES_NTSC = 262;
-var REGION_SCANLINES_NTSC = 262;
+// Diagnosed by RevEng, scanlines off by 1
+var REGION_SCANLINES_NTSC = 263;
+//var REGION_SCANLINES_NTSC = 262;
 
 //static const rect REGION_DISPLAY_AREA_PAL = {0, 16, 319, 308};
 var REGION_DISPLAY_AREA_PAL = new Rect(0, 16, 319, 308);
@@ -80,7 +82,9 @@ var REGION_VISIBLE_AREA_PAL = new Rect(0, 26, 319, 297);
 //static const byte REGION_FREQUENCY_PAL = 50;
 var REGION_FREQUENCY_PAL = 50;
 //static const word REGION_SCANLINES_PAL = 312;
-var REGION_SCANLINES_PAL = 312;
+// Diagnosed by RevEng, scanlines off by 1
+var REGION_SCANLINES_PAL = 313;
+//var REGION_SCANLINES_PAL = 312;
 
 // ----------------------------------------------------------------------------
 // PALETTE NTSC

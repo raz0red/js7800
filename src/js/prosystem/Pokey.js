@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2005 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -21,20 +21,20 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 // ----------------------------------------------------------------------------
 // PokeySound is Copyright(c) 1997 by Ron Fries
-//                                                                           
-// This library is free software; you can redistribute it and/or modify it   
-// under the terms of version 2 of the GNU Library General Public License    
-// as published by the Free Software Foundation.                             
-//                                                                           
-// This library is distributed in the hope that it will be useful, but       
-// WITHOUT ANY WARRANTY; without even the implied warranty of                
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library 
-// General Public License for more details.                                  
-// To obtain a copy of the GNU Library General Public License, write to the  
-// Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.   
-//                                                                           
-// Any permitted reproduction of these routines, in whole or in part, must   
-// bear this legend.                                                         
+//
+// This library is free software; you can redistribute it and/or modify it
+// under the terms of version 2 of the GNU Library General Public License
+// as published by the Free Software Foundation.
+//
+// This library is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library
+// General Public License for more details.
+// To obtain a copy of the GNU Library General Public License, write to the
+// Free Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
+// Any permitted reproduction of these routines, in whole or in part, must
+// bear this legend.
 // ----------------------------------------------------------------------------
 // Pokey.cpp
 // ----------------------------------------------------------------------------
@@ -175,6 +175,9 @@ var random_scanline_counter = 0;
 //static ullong prev_random_scanline_counter;
 var prev_random_scanline_counter = 0;
 
+// RevEng filter fix
+var pokey_filter = new Array(1, 1, 0, 0);
+
 //static void rand_init(byte *rng, int size, int left, int right, int add)
 function rand_init(rng, size, left, right, add) {
   //int mask = (1 << size) - 1;
@@ -214,6 +217,10 @@ function pokey_Reset() {
 
   pot_scanline = 0;
   pokey_soundCntr = 0;
+
+  for (let i = 0; i < 32; i++) {
+    registers[i] = 0;
+  }
 
   //for (int index = 0; index < POKEY_POLY17_SIZE; index++) {
   for (var index = 0; index < POKEY_POLY17_SIZE; index++) {
@@ -266,6 +273,9 @@ function pokey_Reset() {
   random_scanline_counter = 0;
   prev_random_scanline_counter = 0;
 
+  // RevEng filter fix
+  pokey_filter = new Array(1, 1, 0, 0);
+
   pokey_Clear(true);
 }
 
@@ -314,9 +324,7 @@ function pokey_GetRegister(address) {
     case POKEY_RANDOM:
       //ullong curr_scanline_counter =
       var curr_scanline_counter =
-        (random_scanline_counter +
-          ProSystem.GetCycles() +
-          ProSystem.GetExtraCycles());
+        (random_scanline_counter + ProSystem.GetCycles());
 
       if (SKCTL & SK_RESET) {
         //ullong adjust = ((curr_scanline_counter - prev_random_scanline_counter) >> 2);
@@ -347,13 +355,16 @@ function pokey_GetRegister(address) {
   return data;
 }
 
+const registers = Array(32);
+
 // ----------------------------------------------------------------------------
 // SetRegister
 // ----------------------------------------------------------------------------
 //void pokey_SetRegister(word address, byte value) {
 function pokey_SetRegister(address, value) {
   if ((pokey_debug_count--) > 0)
-    console.log("pokey_setRegister: %d %d", address, value);
+    console.log("pokey_setRegister: %d %d", address - 0x4000, value);
+  registers[address - 0x4000] = value;
 
   //byte channelMask;
   var channelMask = 0;
@@ -516,10 +527,11 @@ function pokey_SetRegister(address, value) {
   for (var channel = POKEY_CHANNEL1; channel <= POKEY_CHANNEL4; channel++) {
     if (channelMask & (1 << channel)) {
       if ((pokey_audc[channel] & POKEY_VOLUME_ONLY) ||
-        ((pokey_audc[channel] & POKEY_VOLUME_MASK) == 0) ||
+        // RevEng filter fix
+        //((pokey_audc[channel] & POKEY_VOLUME_MASK) == 0) ||
         (pokey_divideMax[channel] < (pokey_sampleMax >>> 8))) {
         //#if 1 // WII
-        pokey_outVol[channel] = 1;
+        //pokey_outVol[channel] = 1;
         //#else
         //pokey_outVol[channel] = pokey_audc[channel] & POKEY_VOLUME_MASK;
         //#endif
@@ -589,9 +601,34 @@ function pokey_Process(length) {
       if (pokey_divideCount[channel] <= eventMin) {
         eventMin = pokey_divideCount[channel];
         nextEvent = channel;
+        // RevEng filter fix
+        if(channel == POKEY_CHANNEL3) {
+          if (pokey_audctl & POKEY_CH1_FILTER) {
+            pokey_filter[POKEY_CHANNEL1]^=1;
+            // update channel 1 volume now...
+            if (pokey_output[POKEY_CHANNEL1] ^ pokey_filter[POKEY_CHANNEL1])
+                pokey_outVol[POKEY_CHANNEL1] = pokey_audc[POKEY_CHANNEL1] & POKEY_VOLUME_MASK;
+            else
+                pokey_outVol[POKEY_CHANNEL1] = 0;
+          }
+          else
+            pokey_filter[POKEY_CHANNEL1]=1;
+        }
+
+        if(channel == POKEY_CHANNEL4) {
+          if (pokey_audctl & POKEY_CH2_FILTER) {
+            pokey_filter[POKEY_CHANNEL2]^=1;
+            // update channel 2 volume now...
+            if (pokey_output[POKEY_CHANNEL2] ^ pokey_filter[POKEY_CHANNEL2])
+                pokey_outVol[POKEY_CHANNEL2] = pokey_audc[POKEY_CHANNEL2] & POKEY_VOLUME_MASK;
+            else
+                pokey_outVol[POKEY_CHANNEL2] = 0;
+          }
+          else
+            pokey_filter[POKEY_CHANNEL2]=1;
+        }
       }
     }
-
     for (channel = POKEY_CHANNEL1; channel <= POKEY_CHANNEL4; channel++) {
       pokey_divideCount[channel] -= eventMin;
     }
@@ -611,7 +648,7 @@ function pokey_Process(length) {
 
       if ((pokey_audc[nextEvent] & POKEY_NOTPOLY5) || pokey_poly05[pokey_poly05Cntr]) {
         if (pokey_audc[nextEvent] & POKEY_PURE) {
-          pokey_output[nextEvent] = !pokey_output[nextEvent];
+          pokey_output[nextEvent] = pokey_output[nextEvent] ? 0 : 1;
         }
         else if (pokey_audc[nextEvent] & POKEY_POLY4) {
           pokey_output[nextEvent] = pokey_poly04[pokey_poly04Cntr];
@@ -621,7 +658,7 @@ function pokey_Process(length) {
         }
       }
 
-      if (pokey_output[nextEvent]) {
+      if (pokey_output[nextEvent] ^ pokey_filter[nextEvent]) {
         pokey_outVol[nextEvent] = pokey_audc[nextEvent] & POKEY_VOLUME_MASK;
       }
       else {
@@ -631,7 +668,7 @@ function pokey_Process(length) {
     else {
       //#ifdef BIG_ENDIAN
       //  * (pokey_sampleCount + 1) += pokey_sampleMax;
-      //#else 
+      //#else
       //* pokey_sampleCount += pokey_sampleMax;
       //#endif
       pokey_sampleCount_0 += pokey_sampleMax;
@@ -640,7 +677,7 @@ function pokey_Process(length) {
       currentValue = 0;
 
       for (channel = POKEY_CHANNEL1; channel <= POKEY_CHANNEL4; channel++) {
-        currentValue += pokey_outVol[channel];
+          currentValue += pokey_outVol[channel];
       }
 
       currentValue = (currentValue << 2) + 8;
@@ -673,8 +710,8 @@ function pokey_Clear(flush) {
   }
 }
 
-function SetCyclesPerScanline(cycles) { 
-  CYCLES_PER_SCANLINE = cycles; 
+function SetCyclesPerScanline(cycles) {
+  CYCLES_PER_SCANLINE = cycles;
 }
 
 export {
@@ -685,7 +722,8 @@ export {
   pokey_GetRegister as GetRegister,
   pokey_setSampleRate as SetSampleRate,
   pokey_Frame as Frame,
-  pokey_Scanline as Scanline,  
+  pokey_Scanline as Scanline,
   pokey_buffer as buffer,
-  SetCyclesPerScanline
+  SetCyclesPerScanline,
+  registers
 }

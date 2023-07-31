@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2005 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -34,7 +34,7 @@ var database_enabled = true;
 // ----------------------------------------------------------------------------
 // Load
 // ----------------------------------------------------------------------------
-//bool database_Load(std::string digest) {    
+//bool database_Load(std::string digest) {
 function database_Load(digest) {
   cart_in_db = false;
   if (database_enabled) {
@@ -49,7 +49,7 @@ function database_Load(digest) {
       }
       var type = entry['ty'];
       if (type !== undefined) {
-        Cartridge.SetType(parseInt(type));          
+        Cartridge.SetType(parseInt(type));
       }
       var pokey = entry['p'];
       if (pokey !== undefined) {
@@ -67,18 +67,22 @@ function database_Load(digest) {
       if (region !== undefined) {
         Cartridge.SetRegion(parseInt(region));
       }
+      /*
       var flags = entry['f'];
       if (flags !== undefined) {
         Cartridge.SetFlags(parseInt(flags));
       }
+      */
       var xm = entry['xm'];
       if (xm !== undefined) {
         Cartridge.SetXm(xm == 't');
       }
+      /*
       var hblank = entry['hblank'];
       if (hblank !== undefined) {
         Cartridge.SetHblank(parseInt(hblank));
       }
+      */
       var crossx = entry['crossx'];
       if (crossx !== undefined) {
         Cartridge.SetCrossX(parseInt(crossx));
@@ -96,14 +100,14 @@ function database_Load(digest) {
         var enabled = pokey450 == 't';
         Cartridge.SetPokey450(enabled);
         if (enabled) {
-          Cartridge.SetPokey(true);            
+          Cartridge.SetPokey(true);
         }
       }
       var leftswitch = entry['leftswitch'];
       if (leftswitch !== undefined) {
         Cartridge.SetLeftSwitch(parseInt(leftswitch));
       }
-      var rightswitch = entry['rightswitch'];        
+      var rightswitch = entry['rightswitch'];
       if (rightswitch !== undefined) {
         Cartridge.SetRightSwitch(parseInt(rightswitch));
       }
@@ -115,7 +119,7 @@ function database_Load(digest) {
       if (highscorecart !== undefined ) {
         Cartridge.SetHighScoreCartEnabled(highscorecart == 't');
       }
-    }      
+    }
     return cart_in_db;
   }
 }

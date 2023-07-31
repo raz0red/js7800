@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2005 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -54,9 +54,9 @@ var sally_address = new Pair();
 //static uint sally_cycles;
 var sally_cycles = 0;
 
-// Whether the last operation resulted in a half cycle. (needs to be taken 
+// Whether the last operation resulted in a half cycle. (needs to be taken
 // into consideration by ProSystem when cycle counting). This can occur when
-// a TIA or RIOT are accessed (drops to 1.19Mhz when the TIA or RIOT chips 
+// a TIA or RIOT are accessed (drops to 1.19Mhz when the TIA or RIOT chips
 // are accessed)
 //bool half_cycle = false;
 var half_cycle = false; // Global
@@ -106,7 +106,7 @@ var SALLY_NMI = {
   L: 65530
 };
 
-//static const Vector SALLY_IRQ = {65535, 65534}; 
+//static const Vector SALLY_IRQ = {65535, 65534};
 var SALLY_IRQ = {
   H: 65535,
   L: 65534
@@ -114,7 +114,7 @@ var SALLY_IRQ = {
 
 //static const byte SALLY_CYCLES[256] = { ... }
 var SALLY_CYCLES = [
-  7, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 2 /* ANC */, 0, 4, 6, 0, // 0 - 15
+  7, 6, 0, 0, 2, 3, 5, 0, 3, 2, 2, 2 /* ANC */, 0, 4, 6, 0, // 0 - 15
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 16 - 31
   6, 6, 0, 0, 3, 3, 5, 0, 4, 2, 2, 2 /* ANC */, 4, 4, 6, 0, // 32 - 47
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 48 - 63
@@ -122,10 +122,10 @@ var SALLY_CYCLES = [
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 80 - 95
   6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, // 96 - 111
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 112 - 127
-  0, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
-  2, 6, 0, 0, 4, 4, 4, 0, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
+  2, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
+  2, 6, 0, 0, 4, 4, 4, 4 /* SAX */, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
   2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // 160 - 175
-  2, 5, 0, 0, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
+  2, 5, 0, 6 /* LAX */, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 192 - 207
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 208 - 223
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 222 - 239
@@ -133,13 +133,13 @@ var SALLY_CYCLES = [
 ];
 
 /*
-  * Checks to see if the High Score ROM has been accessed via known entry 
+  * Checks to see if the High Score ROM has been accessed via known entry
   * points. This is necessary due to the fact that some ROMs (Xenophobe, etc.)
-  * overwrite SRAM of the high score cart. In such cases, they don't ever 
+  * overwrite SRAM of the high score cart. In such cases, they don't ever
   * access the high score cartridge. By setting a flag, we know when to persist
   * changes to SRAM
   */
-/*  
+/*
 function sally_checkHighScoreSet() {
   //if( sally_pc.w == 0x3fcf || sally_pc.w == 0x3ffd )
   if (sally_pc.getW() == 0x3fcf || sally_pc.getW() == 0x3ffd) {
@@ -161,7 +161,7 @@ function sally_Push(data) {
 // Pop
 // ----------------------------------------------------------------------------
 function sally_Pop() {
-  //sally_s++;  
+  //sally_s++;
   sally_s = (sally_s + 1) & 0xFF;
   return memory_Read((sally_s + 256) & 0xFFFF);
 }
@@ -369,6 +369,25 @@ function sally_ADC() {
       ah = (ah + 1) & 0xFFFF;
     }
 
+    // Set Z flag properly in decimal mode
+    // Diagnosed by RevEng
+    // The 6502 Z flag doesn't seem to understand decimal mode, so it gets set
+    // as if you had added things without decimal mode enabled,
+    // where $55+$AB=$00. So A7800 and visual 6502 both set Z,
+    // but unfortunately z is clear in JS7800.
+    //
+    // banksets changes
+    var ztemp = new Pair();
+    ztemp.setW(sally_a + data + (sally_p & SALLY_FLAG.C));
+    if (!ztemp.getBL()) {
+      sally_p |= SALLY_FLAG.Z;
+    }
+    else {
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
+    }
+
+    /*
     if (!(sally_a + data + (sally_p & SALLY_FLAG.C))) {
       sally_p |= SALLY_FLAG.Z;
     }
@@ -376,6 +395,7 @@ function sally_ADC() {
       //sally_p &= ~SALLY_FLAG.Z;
       sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
     }
+    */
 
     if ((ah & 8) != 0) {
       sally_p |= SALLY_FLAG.N;
@@ -862,6 +882,14 @@ function sally_PHA() {
 // PHP
 // ----------------------------------------------------------------------------
 function sally_PHP() {
+  //var tmp = sally_p;
+  //tmp |= SALLY_FLAG.B;
+  //sally_Push(tmp);
+
+  // Diagnosed by RevEng
+  // Software instructions BRK & PHP will push the B flag as being 1
+  // banksets changes
+  sally_p |= SALLY_FLAG.B;
   sally_Push(sally_p);
 }
 
@@ -1001,6 +1029,16 @@ function sally_SBC() {
   var data = memory_Read(sally_address.getW());
 
   if (sally_p & SALLY_FLAG.D) {
+    // Set Z flag properly in decimal mode
+    // Diagnosed by RevEng
+    // The 6502 Z flag doesn't seem to understand decimal mode, so it gets set
+    // as if you had added things without decimal mode enabled,
+    // where $55+$AB=$00. So A7800 and visual 6502 both set Z,
+    // but unfortunately z is clear in JS7800.
+    // banksets changes
+    var ztemp = new Pair();
+    ztemp.setW(sally_a - data - !(sally_p & SALLY_FLAG.C));
+
     //word al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
     var al = ((sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C)) & 0xFFFF;
     //word ah = (sally_a >> 4) - (data >> 4);
@@ -1043,6 +1081,17 @@ function sally_SBC() {
 
     //sally_Flags(temp.b.l);
     sally_Flags(temp.getBL());
+
+    // Z flag
+    // banksets changes
+    if (!ztemp.getBL()) {
+      sally_p |= SALLY_FLAG.Z;
+    }
+    else {
+      //sally_p &= ~SALLY_FLAG.Z;
+      sally_p = (sally_p & ~SALLY_FLAG.Z) & 0xFF;
+    }
+
     //sally_a = (ah << 4) | (al & 15);
     sally_a = ((ah << 4) | (al & 15)) & 0xFF;
   }
@@ -1195,7 +1244,7 @@ var sally_debug_count = 0; //100;
 // ----------------------------------------------------------------------------
 function sally_ExecuteInstruction() {
   /*
-    __label__ 
+    __label__
   l_0x00, l_0x01, l_0x02, l_0x03, l_0x04, l_0x05, l_0x06, l_0x07, l_0x08,
   l_0x09, l_0x0a, l_0x0b, l_0x0c, l_0x0d, l_0x0e, l_0x0f, l_0x10, l_0x11,
   l_0x12, l_0x13, l_0x14, l_0x15, l_0x16, l_0x17, l_0x18, l_0x19, l_0x1a,
@@ -1225,7 +1274,7 @@ function sally_ExecuteInstruction() {
   l_0xea, l_0xeb, l_0xec, l_0xed, l_0xee, l_0xef, l_0xf0, l_0xf1, l_0xf2,
   l_0xf3, l_0xf4, l_0xf5, l_0xf6, l_0xf7, l_0xf8, l_0xf9, l_0xfa, l_0xfb,
   l_0xfc, l_0xfd, l_0xfe, l_0xff;
-  
+
       static const void* const a_jump_table[256] = {
   &&l_0x00, &&l_0x01, &&l_0x02, &&l_0x03, &&l_0x04, &&l_0x05, &&l_0x06, &&l_0x07, &&l_0x08,
   &&l_0x09, &&l_0x0a, &&l_0x0b, &&l_0x0c, &&l_0x0d, &&l_0x0e, &&l_0x0f, &&l_0x10, &&l_0x11,
@@ -1255,7 +1304,7 @@ function sally_ExecuteInstruction() {
   &&l_0xe1, &&l_0xe2, &&l_0xe3, &&l_0xe4, &&l_0xe5, &&l_0xe6, &&l_0xe7, &&l_0xe8, &&l_0xe9,
   &&l_0xea, &&l_0xeb, &&l_0xec, &&l_0xed, &&l_0xee, &&l_0xef, &&l_0xf0, &&l_0xf1, &&l_0xf2,
   &&l_0xf3, &&l_0xf4, &&l_0xf5, &&l_0xf6, &&l_0xf7, &&l_0xf8, &&l_0xf9, &&l_0xfa, &&l_0xfb,
-  &&l_0xfc, &&l_0xfd, &&l_0xfe, &&l_0xff 
+  &&l_0xfc, &&l_0xfd, &&l_0xfe, &&l_0xff
   };
   */
 
@@ -1263,7 +1312,7 @@ function sally_ExecuteInstruction() {
   half_cycle = false;
 
   //sally_opcode = memory_Read(sally_pc.w++);
-  var opcodeMem = sally_pc.wPlusPlus()
+  var opcodeMem = sally_pc.wPlusPlus();
   sally_opcode = memory_Read(opcodeMem);
   sally_cycles = SALLY_CYCLES[sally_opcode];
 
@@ -1275,7 +1324,7 @@ function sally_ExecuteInstruction() {
     console.log("Opcode:%s %d %d %d %d", sally_opcode.toString(16),
       sally_cycles,
       ProSystem.GetCycles(),
-      ProSystem.CYCLES_PER_SCANLINE, 
+      ProSystem.CYCLES_PER_SCANLINE,
       ProSystem.GetMariaScanline());
   }
 
@@ -1294,60 +1343,60 @@ function sally_ExecuteInstruction() {
       sally_ZeroPage();
       sally_ORA();
       return sally_cycles;
-    //l_0x06: 
+    //l_0x06:
     case 0x06:
       sally_ZeroPage();
       sally_ASL();
       return sally_cycles;
-    //l_0x08: 
+    //l_0x08:
     case 0x08:
       sally_PHP();
       return sally_cycles;
-    //l_0x09: 
+    //l_0x09:
     case 0x09:
       sally_Immediate();
       sally_ORA();
       return sally_cycles;
-    //l_0x0a: 
+    //l_0x0a:
     case 0x0a:
       sally_ASLA();
       return sally_cycles;
-    //l_0x0d: 
+    //l_0x0d:
     case 0x0d:
       sally_Absolute();
       sally_ORA();
       return sally_cycles;
-    //l_0x0e: 
+    //l_0x0e:
     case 0x0e:
       sally_Absolute();
       sally_ASL();
       return sally_cycles;
-    //l_0x10: 
+    //l_0x10:
     case 0x10:
       sally_Relative();
       sally_BPL();
       return sally_cycles;
-    //l_0x11: 
+    //l_0x11:
     case 0x11:
       sally_IndirectY();
       sally_ORA();
       sally_Delay(sally_y);
       return sally_cycles;
-    //l_0x15: 
+    //l_0x15:
     case 0x15:
       sally_ZeroPageX();
       sally_ORA();
       return sally_cycles;
-    //l_0x16: 
+    //l_0x16:
     case 0x16:
       sally_ZeroPageX();
       sally_ASL();
       return sally_cycles;
-    //l_0x18: 
+    //l_0x18:
     case 0x18:
       sally_CLC();
       return sally_cycles;
-    //l_0x19: 
+    //l_0x19:
     case 0x19:
       sally_AbsoluteY();
       sally_ORA();
@@ -2037,15 +2086,14 @@ function sally_ExecuteInstruction() {
       sally_AbsoluteX();
       sally_INC();
       return sally_cycles;
-    case 0x4b: /* ALR (ASR) */     
+    case 0x4b: // ALR (ASR)
       //console.log("ALR (ASR)");
       sally_Immediate();
       sally_AND();
       sally_LSRA();
       return sally_cycles;
-    case 0x0b: /* ANC */  
-    case 0x2b: /* ANC */      
-      /*console.log("ANC");*/
+    case 0x0b: // ANC
+    case 0x2b: // ANC
       sally_Immediate();
       sally_AND();
       var temp = sally_p;
@@ -2055,9 +2103,43 @@ function sally_ExecuteInstruction() {
       else {
         //sally_p &= ~SALLY_FLAG.C;
         sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
-      }    
+      }
       return sally_cycles;
-    case 0xff:
+    // LAX
+    // banksets changes
+    case 0xb3:
+      sally_IndirectY();
+      sally_LDA();
+      sally_TAX();
+      return sally_cycles;
+    // SAX
+    // banksets changes
+    case 0x97:
+      sally_ZeroPageY();
+      sally_PHP();
+      sally_PHA();
+      sally_stx();
+      sally_AND();
+      sally_STA();
+      sally_PLA();
+      sally_PLP();
+      return sally_cycles;
+    // UNP
+    // banksets changes
+    case 0x64:
+    // ???
+    // banksets changes
+    case 0x89:
+      // No-op
+      return sally_cycles;
+    // UNP
+    // banksets changes
+    case 0x04:
+    // UNP
+    // banksets changes
+    case 0x80:
+      // Double no-op
+      return sally_cycles;
     case 0xfc:
     case 0xfb:
     case 0xfa:
@@ -2086,7 +2168,7 @@ function sally_ExecuteInstruction() {
     case 0xbf:
     case 0xbb:
     case 0xb7:
-    case 0xb3:
+    /*case 0xb3:*/
     case 0xb2:
     case 0xaf:
     case 0xab:
@@ -2096,16 +2178,16 @@ function sally_ExecuteInstruction() {
     case 0x9e:
     case 0x9c:
     case 0x9b:
-    case 0x97:
+    /*case 0x97:*/
     case 0x93:
     case 0x92:
     case 0x8f:
     case 0x8b:
-    case 0x89:
+    /*case 0x89:*/
     case 0x87:
     case 0x83:
     case 0x82:
-    case 0x80:
+    /*case 0x80:*/
     case 0x7f:
     case 0x7c:
     case 0x7b:
@@ -2117,7 +2199,7 @@ function sally_ExecuteInstruction() {
     case 0x6f:
     case 0x6b:
     case 0x67:
-    case 0x64:
+    /*case 0x64:*/
     case 0x63:
     case 0x62:
     case 0x5f:
@@ -2156,11 +2238,12 @@ function sally_ExecuteInstruction() {
     case 0x0f:
     case 0x0c:
     case 0x07:
-    case 0x04:
+    /*case 0x04:*/
     case 0x03:
     case 0x02:
+//console.log('unmapped opcode: 0x' + opcodeMem.toString(16) + ", 0x" + sally_opcode.toString(16));
       return sally_cycles;
-    /*      
+    /*
           l_0xff:
           l_0xfc:
           l_0xfb:
@@ -2280,6 +2363,7 @@ function sally_ExecuteRES() {
   sally_pc.setBL(memory_ram[SALLY_RES.L]);
   //sally_pc.b.h = memory_ram[SALLY_RES.H];
   sally_pc.setBH(memory_ram[SALLY_RES.H]);
+  //console.log("Execute RES: " + (memory_ram[SALLY_RES.L] | memory_ram[SALLY_RES.H] << 8))
   return 6;
 }
 
@@ -2299,6 +2383,7 @@ function sally_ExecuteNMI() {
   sally_pc.setBL(memory_ram[SALLY_NMI.L]);
   //sally_pc.b.h = memory_ram[SALLY_NMI.H];
   sally_pc.setBH(memory_ram[SALLY_NMI.H]);
+  //console.log("Execute NMI: " + (memory_ram[SALLY_NMI.L] | memory_ram[SALLY_NMI.H] << 8))
   return 7;
 }
 
@@ -2319,8 +2404,57 @@ function sally_ExecuteIRQ() {
     sally_pc.setBL(memory_ram[SALLY_IRQ.L]);
     //sally_pc.b.h = memory_ram[SALLY_IRQ.H];
     sally_pc.setBH(memory_ram[SALLY_IRQ.H]);
+    //console.log("Execute IRQ: " + (memory_ram[SALLY_IRQ.L] | memory_ram[SALLY_IRQ.H] << 8))
   }
   return 7;
+}
+
+function GetSallyA() {
+  return sally_a;
+}
+
+function SetSallyA(a) {
+  sally_a = a;
+}
+
+function GetSallyX() {
+  return sally_x;
+}
+
+function SetSallyX(x) {
+  sally_x = x;
+}
+
+function GetSallyY() {
+  return sally_y;
+}
+
+function SetSallyY(y) {
+  sally_y = y;
+}
+
+function GetSallyP() {
+  return sally_p;
+}
+
+function SetSallyP(p) {
+  sally_p = p;
+}
+
+function GetSallyS() {
+  return sally_s;
+}
+
+function SetSallyS(s) {
+  sally_s = s;
+}
+
+function GetSallyPC() {
+  return sally_pc;
+}
+
+function GetHalfCycle() {
+  return half_cycle;
 }
 
 export {
@@ -2328,5 +2462,16 @@ export {
   sally_ExecuteRES as ExecuteRES,
   sally_ExecuteInstruction as ExecuteInstruction,
   sally_ExecuteNMI as ExecuteNMI,
-  half_cycle
+  GetHalfCycle,
+  GetSallyA,
+  SetSallyA,
+  GetSallyX,
+  SetSallyX,
+  GetSallyY,
+  SetSallyY,
+  GetSallyP,
+  SetSallyP,
+  GetSallyS,
+  SetSallyS,
+  GetSallyPC
 }
