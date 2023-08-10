@@ -45,6 +45,11 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 
 ## Change log
 
+### 08/10/23 (0.0.6)
+    - Updated palettes (contributed by Trebor @ AtariAge)
+    - YM-2151 default volume level adjustment
+    - Cartridge header fix for television type
+
 ### 07/30/23 (0.0.5)
     - Banksets support
     - Maria background color fix (Keystone Koppers)
