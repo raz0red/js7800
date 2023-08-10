@@ -303,7 +303,7 @@ function cartridge_ReadHeader(header) {
 
   cartridge_controller[0] = header[55];
   cartridge_controller[1] = header[56];
-  cartridge_region = header[57];
+  cartridge_region = header[57] & 0x1;
   cartridge_flags = 0;
   // banksets changes (check for 0x08, ym2151)
   cartridge_xm = (header[63] & 1) || ((header[53] & 0x08) == 0x08) ? true : false;

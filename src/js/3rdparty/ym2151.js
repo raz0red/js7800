@@ -1355,7 +1355,7 @@ var FM;
           this.MixSub(s, h)
         }
 
-        t[n++] = ((h[1] + h[3] + h[2] + h[3])/(2*128));
+        t[n++] = ((h[1] + h[3] + h[2] + h[3])/(2*128)) * .33; // RAZ: reduce volume
       }
     };
     i.prototype.Intr = function (t) { };
