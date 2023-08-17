@@ -1,6 +1,6 @@
 {
     "folders": [],
-    "files": [        
+    "files": [
         {
             "name": "3D Test Demo 1 (PAL)",
             "path": "3DTestDemo1.a78"
@@ -10,37 +10,49 @@
             "path": "Bad Apple Demo (PAL) (20221213) (D477F043).a78"
         },
         {
+            "name": "Black Lamp Music Demo",
+            "path": "Black Lamp Music Demo.a78"
+        },
+        {
             "name": "Demo X",
             "path": "DemoX.a78"
-        },            
+        },
         {
             "name": "IE78 (PAL)",
-            "path": "1E78.a78"            
+            "path": "1E78.a78"
         },
         {
             "name": "Merry Christmas 2012",
-            "path": "MerryChristmas2012.a78"            
+            "path": "MerryChristmas2012.a78"
         },
         {
             "name": "Multi-Lock On",
-            "path": "MultiLockOn.a78"            
+            "path": "MultiLockOn.a78"
         },
         {
             "name": "Side-Crawler's Dance (YM)",
-            "path": "SideCrawlersDance.a78"            
+            "path": "SideCrawlersDance.a78"
         },
         {
             "name": "Soft Cell - Tainted Love",
-            "path": "SoftCellTaintedLove.a78"            
+            "path": "SoftCellTaintedLove.a78"
         },
         {
             "name": "Untum Intro (PAL)",
-            "path": "UntumIntro.a78"            
+            "path": "UntumIntro.a78"
+        },
+        {
+            "name": "We Robots",
+            "path": "We Robots.a78"
         },
         {
             "name": "Zanac (YM)",
-            "path": "Zanac.a78"            
-        }                        
+            "path": "Zanac.a78"
+        },
+        {
+            "name": "Zelda GB DX Demo",
+            "path": "Zelda GB DX Demo.a78"
+        }
     ]
 }
 

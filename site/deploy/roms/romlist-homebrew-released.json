@@ -10,6 +10,10 @@
             "path": "ArmorAttackII.a78"
         },
         {
+            "name": "A.R.T.I. (Demo)",
+            "path": "ARTI.a78"
+        },
+        {
             "name": "Astro Blaster",
             "path": "AstroBlaster.a78"
         },
@@ -42,6 +46,10 @@
             "path": "BlocDrop.a78"
         },
         {
+            "name": "Block'Em Sock'Em (Demo)",
+            "path": "BlockemSockem.a78"
+        },
+        {
             "name": "Crazy Brix",
             "path": "CrazyBrix.a78"
         },
@@ -56,6 +64,10 @@
         {
             "name": "Dragon's Descent",
             "path": "DragonsDescent_7_31_2021_VOX.bas.a78"
+        },
+        {
+            "name": "Drelbs",
+            "path": "Drelbs.a78"
         },
         {
             "name": "Dungeon Stalker",
@@ -103,7 +115,7 @@
         },
         {
             "name": "Millie and Molly (Demo)",
-            "path": "millieandmolly.a78"
+            "path": "millieandmolly_demo.78b.a78"
         },
         {
             "name": "Moon Cresta",

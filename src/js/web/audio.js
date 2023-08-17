@@ -2,7 +2,7 @@ import * as Sound from "../prosystem/Sound.js"
 import * as Events from "../events.js"
 
 var SOUNDBUFSIZE = 8192 << 1;
-var DEFAULT_SAMPLE_RATE = 48000;  
+var DEFAULT_SAMPLE_RATE = 31440; // match default rate to NTSC
 
 /** The audio context */
 var audioCtx = null;
@@ -34,13 +34,18 @@ function isPlaying() {
 
 function init() {
   Sound.SetStoreSoundCallback(storeSound);
+  if (audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+    audioCtx.close();
+    audioCtx=null;
+    audioNode=null;
+  }
 
   if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
     console.log('init audio');
     var sampleRate = DEFAULT_SAMPLE_RATE;
     audioCtx = window.AudioContext ?
       new window.AudioContext({ sampleRate: sampleRate }) :
-      new window.webkitAudioContext();      
+      new window.webkitAudioContext();
     if (audioCtx.sampleRate) {
       sampleRate = audioCtx.sampleRate;
     }
@@ -67,20 +72,20 @@ function init() {
 
     const resumeFunc = () => {
       console.log('### resume func.');
-  
+
       const fSuccess = () => {
         if (audioSucceeded) return;
         audioSucceeded = true;
         console.log('### success.');
         if (callback) callback(true);
-  
+
         docElement.removeEventListener("keydown", resumeFunc);
         docElement.removeEventListener("click", resumeFunc);
         docElement.removeEventListener("drop", resumeFunc);
         docElement.removeEventListener("dragdrop", resumeFunc);
         docElement.removeEventListener("touchend", resumeFunc);
       };
-  
+
       if (audioCtx.state !== 'running') {
         audioCtx.resume()
           .then(() => {
@@ -94,7 +99,7 @@ function init() {
         fSuccess();
       }
     }
-    
+
     docElement.addEventListener("keydown", resumeFunc);
     docElement.addEventListener("click", resumeFunc);
     docElement.addEventListener("drop", resumeFunc);
@@ -110,7 +115,15 @@ function init() {
   }
 }
 
+function audio_reinit(rate)
+{
+  DEFAULT_SAMPLE_RATE = rate;
+  init();
+}
+
 Events.addListener(new Events.Listener("init", init));
 
-export { setCallback }
-
+export {
+  setCallback,
+  audio_reinit as reinit
+}

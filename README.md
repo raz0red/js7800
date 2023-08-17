@@ -30,11 +30,12 @@ In order to operate correctly and smoothly (no lags, etc.), JS7800 requires an u
 ## Future consideration
 
 * Mobile support (virtual buttons, proper screen sizing, etc.)
+  * (partially available in [webЯcade](https://www.webrcade.com))
 * Paddle controller support (via mouse)
 * Updating the emulation core to integrate accuracy and compatibility improvements that are part of the incredible [A7800 emulator](http://7800.8bitdev.org/index.php/A7800_Emulator)
-* Save/load state support
+* Save/load state support (available in [webЯcade](https://www.webrcade.com))
 * Network-based multiplayer support
-* Improved cartridge browser with detailed descriptions and screenshots
+* Improved cartridge browser with detailed descriptions and screenshots (available in [webЯcade](https://www.webrcade.com))
 
 ## Documentation
 
@@ -44,17 +45,47 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 
 ## Change log
 
+### 08/16/23 (0.0.8)
+    - TIA fidelity issue fix (contributed by RevEng @ AtariAge)
+
+### 08/13/23 (0.0.7)
+    - Pokey rewrite (contributed by RevEng @ AtariAge)
+    - RIOT interrupt mirror fix (contributed by RevEng @ AtariAge)
+    - Added Drelbs homebrew
+    - Added latest version of Arkanoid homebrew (now works due to RIOT fix)
+    - Added several Pokey-based demos
+
+### 08/10/23 (0.0.6)
+    - Updated palettes (contributed by Trebor @ AtariAge)
+    - YM-2151 default volume level adjustment
+    - Cartridge header fix for television type
+
+### 07/30/23 (0.0.5)
+    - Banksets support
+    - Maria background color fix (Keystone Koppers)
+    - Cartridge headers fix (Fixes several ROMs that required special versions)
+    - Improved cycle accuracy (resolves several game glitches)
+    - YM-2151 homebrew auto-detect support
+    - Pokey filter support (contributed by RevEng @ AtariAge)
+    - Support for 7800 Diagnostic cartridge
+    - Save state support (only accessible via webЯcade)
+    - Added to default game list: IE78 (Demo), Bad Apple (Demo), Bankset Tests,
+      Baby Pac-Man, 7800 Test, Keystone Koppers (Demo), Galaxian, PentaGo!
+    - Updated several games to latest versions
+    - Added high score support for: 1942, Galaxian, Keystone Koppers, PentaGo!,
+      latest versions of games that were already supported.
+
 ### 01/05/21 (0.0.4)
     - Added global high score support for "Popeye"
     - Added global high score support for the latest version of "Pac-Man Collection!"
     - Updated to the latest versions of "Dragon's Cache", "Dragon's Descent", "Popeye",
-      "Spire of the Ancients", "E.X.O", and "Knight Guy: Castle Days" 
+      "Spire of the Ancients", "E.X.O", and "Knight Guy: Castle Days"
 
 ### 09/03/20 (0.0.3)
     - Added support for undocumented ASR and ANC opcodes (fixes graphical glitches with
       "Popeye 7800: Mini-game")
     - Added global high score support for the latest version of "Pac-Man XM"
-    - Added "Popeye 7800: Mini-game" and "Knight Guy: Castle Days" to the default list of 
+    - Added "Popeye 7800: Mini-game" and "Knight Guy: Castle Days" to the default list of
       in-development games
     - Updated to the latest versions of "Dragon's Cache", "Dragon's Descent", "GoSub", and
       "Spire of the Ancients"
@@ -67,7 +98,7 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
     - Ability to disable vertical sync ("Advanced" tab of settings dialog)
     - Zanac and Side-Crawler's Dance Yamaha music demos added to default cartridge list
     - XM memory test added to default cartridge list
-    - By default, high scores for games that are not supported by the Global High Score server 
+    - By default, high scores for games that are not supported by the Global High Score server
       will be stored locally
     - Resolved defect where Global High Scores were not supported when local storage was disabled
 

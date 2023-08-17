@@ -322,6 +322,7 @@ function riot_UpdateTimer(cycles) {
       riot_currentTime = riot_clocks;
       memory_Write(INTIM, 0);
       memory_ram[INTFLG] |= 0x80;
+      memory_ram[INTFLG + 16] |= 0x80;
       riot_elapsed = true;
     }
   }
