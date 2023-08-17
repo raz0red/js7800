@@ -2,7 +2,7 @@ import * as Sound from "../prosystem/Sound.js"
 import * as Events from "../events.js"
 
 var SOUNDBUFSIZE = 8192 << 1;
-var DEFAULT_SAMPLE_RATE = 48000;  
+var DEFAULT_SAMPLE_RATE = 31440; // match default rate to NTSC
 
 /** The audio context */
 var audioCtx = null;
@@ -24,6 +24,11 @@ function storeSound(sample, ym, length) {
 
 function init() {
   Sound.SetStoreSoundCallback(storeSound);
+  if (audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+    audioCtx.close();
+    audioCtx=null;
+    audioNode=null;
+  }
 
   if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
     console.log('init audio');
@@ -61,7 +66,15 @@ function init() {
   }
 }
 
+function audio_reinit(rate)
+{
+  DEFAULT_SAMPLE_RATE = rate;
+  init();
+}
+
 Events.addListener(new Events.Listener("init", init));
 
-export { }
+export { 
+  audio_reinit as reinit
+}
 

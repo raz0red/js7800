@@ -45,6 +45,9 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 
 ## Change log
 
+### 08/16/23 (0.0.8)
+    - TIA fidelity issue fix (contributed by RevEng @ AtariAge)
+
 ### 08/13/23 (0.0.7)
     - Pokey rewrite (contributed by RevEng @ AtariAge)
     - RIOT interrupt mirror fix (contributed by RevEng @ AtariAge)
