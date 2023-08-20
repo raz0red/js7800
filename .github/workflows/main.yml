@@ -47,7 +47,7 @@ jobs:
         BASE_BRANCH: master
         BRANCH: gh-pages
         FOLDER: site/deploy
-        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios", "banksets", "banksets_cycleS", "tia"]'
+        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios", "banksets", "banksets_cycleS", "tia", "revert-ym-volume"]'
 
     - name: Deploy to GitHub pages (staging)
       uses: JamesIves/github-pages-deploy-action@releases/v3
@@ -128,3 +128,13 @@ jobs:
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: vulns
+
+    - name: Deploy to GitHub pages (revert-ym-volume)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/revert-ym-volume'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: revert-ym-volume
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: revert-ym-volume
