@@ -271,7 +271,7 @@ function region_Reset() {
        Palette.Load(PAL_PAL_INDEX[palIdx] /*REGION_PALETTE_PAL*/);  // Added check for default - bberlin
     ProSystem.SetFrequency(REGION_FREQUENCY_PAL);
     ProSystem.SetScanlines(REGION_SCANLINES_PAL);
-    Webaudio.reinit(REGION_FREQUENCY_PAL*REGION_SCANLINES_PAL*2);
+    //Webaudio.reinit(REGION_FREQUENCY_PAL*REGION_SCANLINES_PAL*2);
     //#ifndef WII    
     //tia_size = 624;
     //pokey_size = 624;
@@ -286,7 +286,7 @@ function region_Reset() {
        Palette.Load(NTSC_PAL_INDEX[palIdx] /*REGION_PALETTE_NTSC*/);  // Added check for default - bberlin
     ProSystem.SetFrequency(REGION_FREQUENCY_NTSC);
     ProSystem.SetScanlines(REGION_SCANLINES_NTSC);
-    Webaudio.reinit(REGION_FREQUENCY_NTSC*REGION_SCANLINES_NTSC*2);
+    //Webaudio.reinit(REGION_FREQUENCY_NTSC*REGION_SCANLINES_NTSC*2);
     //#ifndef WII    
     //tia_size = 524;
     //pokey_size = 524;
