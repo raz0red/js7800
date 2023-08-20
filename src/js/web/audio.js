@@ -2,7 +2,7 @@ import * as Sound from "../prosystem/Sound.js"
 import * as Events from "../events.js"
 
 var SOUNDBUFSIZE = 8192 << 1;
-var DEFAULT_SAMPLE_RATE = 31440; // match default rate to NTSC
+var DEFAULT_SAMPLE_RATE = 48000; // match default rate to NTSC
 
 /** The audio context */
 var audioCtx = null;
