@@ -31,7 +31,7 @@
 		d3 1=POKEY enable/disable locked
 		d4 1=HSC enable/disable locked - cannot disable after enable
 		d5 1=PAL HSC enabled, 0=NTSC HSC enabled - cannot disable after enable
- 
+
 	RAM0	$4000    $5FFF     8192 bytes
 	RAM1	$6000    $7FFF     8192 bytes
 */
@@ -81,7 +81,18 @@ function xm_Reset() {
   cntrl5 = 0;
   ym_addr = 0;
   YM.reset();
+
+  // banksets changes
+  auto_detect_start = 0;
+  auto_detect_return = 2;
+  auto_detect_count = -1;
 }
+
+// TODO: Do proper timing for YM (Hack for YM auto-detection)
+// banksets changes
+var auto_detect_start = 0;
+var auto_detect_return = 2;
+var auto_detect_count = -1;
 
 //byte xm_Read(word address) {
 function xm_Read(address) {
@@ -90,8 +101,27 @@ function xm_Read(address) {
     //console.log("Read from Pokey1: %d %d", address, b);
     return b;
   } else if (xm_ym_enabled && (address >= 0x0460 && address <= 0x0461)) {
-    b = address & 1 ? YM.getStatus() : 0;
-    //console.log("Read from YM: %d %d", address, b);
+    b = address & 1 ? YM.getStatus() : 0; // 0xFF? Breaks some demos... hmm...
+
+    // TODO: Do proper timing for YM (Hack for YM auto-detection)
+    // banksets changes
+    if (auto_detect_count != -1 && address & 1) {
+      if (auto_detect_count > 0) {
+        auto_detect_count--;
+      } else if (auto_detect_count == 0) {
+        if (auto_detect_return > 0) {
+          b = 2;
+          //console.log("### RETURNING!")
+          auto_detect_count = auto_detect_start;
+          auto_detect_return--;
+          if (auto_detect_return === 0) {
+            auto_detect_count = -1;
+          }
+        }
+      }
+    }
+
+    //console.log("Read from YM: %s %d", "" + address.toString(16), b);
     return b;
   } else if (xm_mem_enabled && (address >= 0x4000 && address < 0x8000)) {
     //console.log("read: " + address);
@@ -124,9 +154,18 @@ function xm_Write(address, data) {
     //console.log("Wrote to Pokey1: %d %d", address, data);
     pokey_SetRegister(0x4000 + (address - 0x0450), data);
   } else if (xm_ym_enabled && (address >= 0x0460 && address <= 0x0461)) {
-    //console.log("Wrote to YM: %d %d", address, data);
+    //console.log("Wrote to YM: %s %d", "" + address.toString(16), data);
     if (address & 1) {
       YM.setReg(ym_addr, data);
+      //console.log("YM Set reg: %s %d", "" + ym_addr.toString(16), data);
+
+      // TODO: Do proper timing for YM (Hack for YM auto-detection)
+      // banksets changes
+      if (ym_addr === 18 && data === 252) {
+        //console.log("### STARTING!")
+        auto_detect_start = 129;
+        auto_detect_count = auto_detect_start;
+      }
     } else {
       ym_addr = data;
     }
@@ -172,8 +211,8 @@ function xm_Write(address, data) {
 
     /*
     console.log("xm_pokey_enabled: %d, xm_ym_enabled: %d, " +
-      "xm_mem_enabled: %d, 48k ram: %d, bank0: %d, bank1: %d, ramwedisabled: %d",      
-      xm_pokey_enabled ? 1 : 0,      
+      "xm_mem_enabled: %d, 48k ram: %d, bank0: %d, bank1: %d, ramwedisabled: %d",
+      xm_pokey_enabled ? 1 : 0,
       xm_ym_enabled ? 1 : 0,
       xm_mem_enabled ? 1 : 0,
       xm_48kram_enabled ? 1 : 0,
@@ -189,16 +228,112 @@ function IsPokeyEnabled() {
   return xm_pokey_enabled;
 }
 
+function SetPokeyEnabled(v) {
+  xm_pokey_enabled = v;
+}
+
 function IsMemEnabled() {
   return xm_mem_enabled;
+}
+
+function SetMemEnabled(v) {
+  xm_mem_enabled = v;
 }
 
 function IsYmEnabled() {
   return xm_ym_enabled;
 }
 
+function SetYmEnabled(v) {
+  xm_ym_enabled = v;
+}
+
 function setDmaActive(v) {
   dma_active = v;
+}
+
+function Is48kRamEnabled() {
+  return xm_48kram_enabled;
+}
+
+function Set48kRamEnabled(v) {
+  xm_48kram_enabled = v;
+}
+
+function IsBank0Enabled() {
+  return xm_bank0_enabled;
+}
+
+function SetBank0Enabled(v) {
+  xm_bank0_enabled = v;
+}
+
+function IsBank1Enabled() {
+  return xm_bank1_enabled;
+}
+
+function SetBank1Enabled(v) {
+  xm_bank1_enabled = v;
+}
+
+function IsRamWeDisabled() {
+  return xm_ramwe_disabled;
+}
+
+function SetRamWeDisabled(v) {
+  xm_ramwe_disabled = v;
+}
+
+function IsDmaActive() {
+  return dma_active;
+}
+
+function GetCntrl1() {
+  return cntrl1;
+}
+
+function SetCntrl1(v) {
+  cntrl1 = v;
+}
+
+function GetCntrl2() {
+  return cntrl2;
+}
+
+function SetCntrl2(v) {
+  cntrl2 = v;
+}
+
+function GetCntrl3() {
+  return cntrl3;
+}
+
+function SetCntrl3(v) {
+  cntrl3 = v;
+}
+
+function GetCntrl4() {
+  return cntrl4;
+}
+
+function SetCntrl4(v) {
+  cntrl4 = v;
+}
+
+function GetCntrl5() {
+  return cntrl5;
+}
+
+function SetCntrl5(v) {
+  cntrl5 = v;
+}
+
+function GetYmAddr() {
+  return ym_addr;
+}
+
+function SetYmAddr(v) {
+  ym_addr = v;
 }
 
 export {
@@ -208,5 +343,31 @@ export {
   IsPokeyEnabled,
   IsMemEnabled,
   IsYmEnabled,
-  setDmaActive
+  setDmaActive,
+  Is48kRamEnabled,
+  IsBank0Enabled,
+  IsBank1Enabled,
+  IsRamWeDisabled,
+  IsDmaActive,
+  GetCntrl1,
+  GetCntrl2,
+  GetCntrl3,
+  GetCntrl4,
+  GetCntrl5,
+  GetYmAddr,
+  SetPokeyEnabled,
+  SetMemEnabled,
+  SetYmEnabled,
+  Set48kRamEnabled,
+  SetBank0Enabled,
+  SetBank1Enabled,
+  SetRamWeDisabled,
+  SetCntrl1,
+  SetCntrl2,
+  SetCntrl3,
+  SetCntrl4,
+  SetCntrl5,
+  SetYmAddr,
+  XM_RAM_SIZE,
+  xm_ram
 }

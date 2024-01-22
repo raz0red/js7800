@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2003, 2004 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -36,6 +36,8 @@ import * as Sally from "./Sally.js"
 import * as Tia from "./Tia.js"
 import * as Bios from "./Bios.js"
 import * as Events from "../events.js"
+import * as XM from "./ExpansionModule.js"
+import * as YM from "../3rdparty/ym2151.js"
 
 var Tia_Process = Tia.Process;
 var pokey_Frame = Pokey.Frame;
@@ -46,8 +48,11 @@ var riot_IsTimingEnabled = Riot.IsTimingEnabled;
 var riot_UpdateTimer = Riot.UpdateTimer;
 var maria_displayArea = Maria.displayArea;
 var maria_RenderScanline = Maria.RenderScanline;
+var maria_IsNMI = Maria.IsNMI;
+var MARIA_CYCLE_LIMIT = Maria.MARIA_CYCLE_LIMIT;
 var memory_ram = Memory.ram;
 var sally_ExecuteInstruction = Sally.ExecuteInstruction;
+var sally_ExecuteNMI = Sally.ExecuteNMI;
 var isLightGunEnabled = Cartridge.IsLightGunEnabled;
 
 var INPT4 = 12;
@@ -83,7 +88,7 @@ var maria_scanline = 1;
 var cartridge_pokey = false;
 var cartridge_flags = 0;
 var cartridge_xm = false;
-var cartridge_hblank = 34;
+var cartridge_hblank = 28;
 
 // Set the scanlines for Pokey
 Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
@@ -100,7 +105,11 @@ Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
 // Reset
 // ----------------------------------------------------------------------------
 //void prosystem_Reset() {
+
+let lastPostResetCallback = null;
+
 function prosystem_Reset(postResetCallback) {
+  lastPostResetCallback = postResetCallback;
   if (Cartridge.IsLoaded()) {
     maria_scanline = 1;
     prosystem_paused = false;
@@ -108,8 +117,8 @@ function prosystem_Reset(postResetCallback) {
     Sally.Reset(); // WII
     Region.Reset();
     Tia.Clear();
-    Pokey.Reset();    
-    Xm.Reset();    
+    Pokey.Reset();
+    Xm.Reset();
 
     Memory.Reset();
     Maria.Clear();
@@ -122,15 +131,17 @@ function prosystem_Reset(postResetCallback) {
       Cartridge.Store();
     }
 
-    var postHsLoad = function(isSuccess) {
-      Events.fireEvent("onHighScoreCartLoaded", isSuccess);
-      prosystem_cycles = Sally.ExecuteRES();
-      prosystem_active = true;  
-      // Invoke post reset callback
-      postResetCallback();
+    if (postResetCallback) {
+      var postHsLoad = function(isSuccess) {
+        Events.fireEvent("onHighScoreCartLoaded", isSuccess);
+        prosystem_cycles = Sally.ExecuteRES() << 2;
+        prosystem_active = true;
+        // Invoke post reset callback
+        postResetCallback();
+      }
+      // Load high score cart w/ callback
+      Cartridge.LoadHighScoreCart(postHsLoad);
     }
-    // Load high score cart w/ callback
-    Cartridge.LoadHighScoreCart(postHsLoad);
   }
 }
 
@@ -177,6 +188,7 @@ var dbg_cycle_stealing = false;
 //void prosystem_ExecuteFrame(const byte* input)
 function prosystem_ExecuteFrame(input) // TODO: input is array
 {
+	/*
   // Is WSYNC enabled for the current frame?
   //bool wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
   var wsync = !(cartridge_flags & CARTRIDGE_WSYNC_MASK);
@@ -186,9 +198,9 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   //bool cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
   var cycle_stealing = !(cartridge_flags & CARTRIDGE_CYCLE_STEALING_MASK);
   dbg_cycle_stealing = cycle_stealing;
+  */
 
   // Is the lightgun enabled for the current frame?
-  //bool lightgun =
   var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
   riot_SetInput(input);
@@ -197,12 +209,12 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   dbg_saved_cycles = 0; // debug
   dbg_wsync_count = 0;  // debug
   dbg_maria_cycles = 0; // debug
-  dbg_p6502_cycles = 0; // debug    
+  dbg_p6502_cycles = 0; // debug
 
   if (cartridge_pokey || cartridge_xm) pokey_Frame();
 
   for (maria_scanline = 1; maria_scanline <= prosystem_scanlines; maria_scanline++) {
-    //#if 0      
+    //#if 0
     //    if ((int)wii_orient_roll == maria_scanline) {
     //  memory_ram[INPT2] &= 0x7f;
     //} else {
@@ -224,40 +236,28 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     //uint cycles = 0;
     var cycles = 0;
 
-    if (!cycle_stealing || (memory_ram[CTRL] & 96) != 64) {
-      // Exact cycle counts when Maria is disabled        
+    // Reset ProSystem cycles for current frame
       (prosystem_cycles %= CYCLES_PER_SCANLINE) | 0;
-      prosystem_extra_cycles = 0;
-    }
-    else {
-      prosystem_extra_cycles = ((prosystem_cycles % CYCLES_PER_SCANLINE) | 0);
-      dbg_saved_cycles += prosystem_extra_cycles;
-
-      // Some fudge for Maria cycles. Unfortunately Maria cycle counting
-      // isn't exact (This adds some extra cycles).
-      prosystem_cycles = 0;
-    }
 
     // If lightgun is enabled, check to see if it should be fired
     if (lightgun) prosystem_FireLightGun();
 
     while (prosystem_cycles < cartridge_hblank) {
-      cycles = sally_ExecuteInstruction();
-      prosystem_cycles += (cycles << 2);
-      if (Sally.half_cycle) prosystem_cycles += 2;
-
-      dbg_p6502_cycles += (cycles << 2); // debug
-
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles);
-      }
-
-      // If lightgun is enabled, check to see if it should be fired
+      cycles = (sally_ExecuteInstruction() << 2);
+      prosystem_cycles += cycles;
       if (lightgun) prosystem_FireLightGun();
 
-      if (memory_ram[WSYNC] && wsync) {
+      if (Sally.GetHalfCycle())  {
+        prosystem_cycles += 2;
+        if (lightgun) prosystem_FireLightGun();
+      }
+
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer(cycles >>> 2);
+      }
+
+      if (memory_ram[WSYNC]) {
         dbg_wsync_count++; // debug
-        //memory_ram[WSYNC] = false;
         memory_ram[WSYNC] = 0;
         wsync_scanline = true;
         break;
@@ -265,35 +265,57 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     }
 
     Xm.setDmaActive(true);
-    cycles = maria_RenderScanline(maria_scanline);
+    cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2;
+    if (cycles > MARIA_CYCLE_LIMIT) {
+      // cycles = MARIA_CYCLE_LIMIT; // TODO: This causes flicker is Scramble (is it necessary?)
+      wsync_scanline = true;
+    }
     Xm.setDmaActive(false);
 
-    if (cycle_stealing) {
       prosystem_cycles += cycles;
       dbg_maria_cycles += cycles; // debug
 
       if (riot_IsTimingEnabled()) {
+      riot_UpdateTimer((cycles) >>> 2);
+    }
+
+    // https://atariage.com/forums/topic/201163-the-truth-about-wsync-and-other-scanline-issues/
+    // - The 6502 requires two cycles to acknowledge the NMI.
+    // - 0-6 cycles pass as the 6502 finishes the currently executing instruction.
+    // Interrupt entry takes 7 cycles.
+    if (maria_IsNMI()) {
+      if (!wsync_scanline && (prosystem_cycles < CYCLES_PER_SCANLINE)) {
+        cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
+        if (riot_IsTimingEnabled()) {
         riot_UpdateTimer(cycles >>> 2);
       }
+        prosystem_cycles += cycles;
+
+        if (memory_ram[WSYNC]) {
+          dbg_wsync_count++; // debug
+          memory_ram[WSYNC] = 0;
+          wsync_scanline = true;
+        }
+      }
+      sally_ExecuteNMI();
     }
 
     while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
-      cycles = sally_ExecuteInstruction();
-      prosystem_cycles += (cycles << 2);
-      if (Sally.half_cycle) prosystem_cycles += 2;
-
-      dbg_p6502_cycles += (cycles << 2); // debug
-
-      // If lightgun is enabled, check to see if it should be fired
+      cycles = (sally_ExecuteInstruction() << 2);
+      prosystem_cycles += cycles;
       if (lightgun) prosystem_FireLightGun();
 
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles);
+      if (Sally.GetHalfCycle()) {
+         prosystem_cycles += 2;
+      if (lightgun) prosystem_FireLightGun();
       }
 
-      if (memory_ram[WSYNC] && wsync) {
+      if (riot_IsTimingEnabled()) {
+        riot_UpdateTimer(cycles >>> 2);
+      }
+
+      if (memory_ram[WSYNC]) {
         dbg_wsync_count++; // debug
-        //memory_ram[WSYNC] = false;
         memory_ram[WSYNC] = 0;
         wsync_scanline = true;
         break;
@@ -309,7 +331,8 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       prosystem_cycles = CYCLES_PER_SCANLINE;
     }
 
-    // If lightgun is enabled, check to see if it should be fired
+    dbg_p6502_cycles += prosystem_cycles; // debug
+
     if (lightgun) prosystem_FireLightGun();
 
     Tia_Process(2);
@@ -353,16 +376,16 @@ function prosystem_Close() {
   Pokey.Clear(true);
 }
 
-function IsActive() { 
-  return prosystem_active; 
+function IsActive() {
+  return prosystem_active;
 }
 
-function IsPaused() { 
-  return prosystem_paused; 
+function IsPaused() {
+  return prosystem_paused;
 }
 
-function GetFrequency() { 
-  return prosystem_frequency; 
+function GetFrequency() {
+  return prosystem_frequency;
 }
 
 function SetFrequency(freq) {
@@ -370,12 +393,12 @@ function SetFrequency(freq) {
   Sound.SetFrequency(freq);
 }
 
-function GetFrame() { 
-  return prosystem_frame; 
+function GetFrame() {
+  return prosystem_frame;
 }
 
-function GetScanlines() { 
-  return prosystem_scanlines; 
+function GetScanlines() {
+  return prosystem_scanlines;
 }
 
 function SetScanlines(lines) {
@@ -383,47 +406,47 @@ function SetScanlines(lines) {
   Sound.SetScanlines(lines);
 }
 
-function GetCycles() { 
-  return prosystem_cycles; 
+function GetCycles() {
+  return prosystem_cycles;
 }
 
-function GetExtraCycles() { 
-  return prosystem_extra_cycles; 
+function GetExtraCycles() {
+  return prosystem_extra_cycles;
 }
 
-function GetDebugSavedCycles() { 
-  return dbg_saved_cycles; 
+function GetDebugSavedCycles() {
+  return dbg_saved_cycles;
 }
 
-function GetDebugWsyncCount() { 
-  return dbg_wsync_count; 
+function GetDebugWsyncCount() {
+  return dbg_wsync_count;
 }
 
-function GetDebugMariaCycles() { 
-  return dbg_maria_cycles; 
+function GetDebugMariaCycles() {
+  return dbg_maria_cycles;
 }
 
-function GetDebug6502Cycles() { 
-  return dbg_p6502_cycles; 
+function GetDebug6502Cycles() {
+  return dbg_p6502_cycles;
 }
 
-function GetDebugWsync() { 
-  return dbg_wsync; 
+function GetDebugWsync() {
+  return dbg_wsync;
 }
 
-function GetDebugCycleStealing() { 
-  return dbg_cycle_stealing; 
+function GetDebugCycleStealing() {
+  return dbg_cycle_stealing;
 }
 
-function GetMariaScanline() { 
-  return maria_scanline; 
+function GetMariaScanline() {
+  return maria_scanline;
 }
 
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
   cartridge_xm = Cartridge.IsXmEnabled();
-  cartridge_flags = Cartridge.GetFlags();
-  cartridge_hblank = Cartridge.GetHblank();
+  // cartridge_flags = Cartridge.GetFlags();
+  // cartridge_hblank = Cartridge.GetHblank();
 }
 
 Events.addListener(
@@ -437,7 +460,7 @@ export {
   CYCLES_PER_SCANLINE,
   HBLANK_CYCLES,
   IsActive,
-  IsPaused,  
+  IsPaused,
   GetFrequency,
   SetFrequency,
   GetFrame,
@@ -451,266 +474,250 @@ export {
   GetDebug6502Cycles,
   GetDebugWsync,
   GetDebugCycleStealing,
-  GetMariaScanline
+  GetMariaScanline,
+  ProSystemSave,
+  ProSystemLoad
 }
 
-// byte * loc_buffer = 0;
+const PRO_SYSTEM_STATE_HEADER="PRO-SYSTEM STATE";
 
-// // ----------------------------------------------------------------------------
-// // Save
-// // ----------------------------------------------------------------------------
-// bool prosystem_Save(std:: string filename, bool compress)
-// {
+// ----------------------------------------------------------------------------
+// Save
+// ----------------------------------------------------------------------------
+function ProSystemSave()
+{
+  const loc_buffer = new Array(40 * 1024 + XM.XM_RAM_SIZE + 4);
 
-//   if (filename.empty() || filename.length() == 0) {
-//     logger_LogError("Filename is invalid.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  console.log("Saving game state.");
 
-//   if (!loc_buffer) loc_buffer = (byte *)malloc((33000 + XM_RAM_SIZE + 4) * sizeof(byte));
+  let size = 0;
 
-//   logger_LogInfo("Saving game state to file " + filename + ".");
+  let index;
+  for (index = 0; index < 16; index++) {
+    loc_buffer[size + index] = PRO_SYSTEM_STATE_HEADER.charCodeAt(index);
+  }
+  size += 16;
 
-//   uint size = 0;
+  loc_buffer[size++] = 1;
+  for (index = 0; index < 4; index++) {
+    loc_buffer[size + index] = 0;
+  }
+  size += 4;
 
-//   uint index;
-//   for (index = 0; index < 16; index++) {
-//     loc_buffer[size + index] = PRO_SYSTEM_STATE_HEADER[index];
-//   }
-//   size += 16;
+  for (index = 0; index < 32; index++) {
+    loc_buffer[size + index] = Cartridge.GetDigest().charCodeAt(index);
+  }
+  size += 32;
 
-//   loc_buffer[size++] = 1;
-//   for (index = 0; index < 4; index++) {
-//     loc_buffer[size + index] = 0;
-//   }
-//   size += 4;
+  loc_buffer[size++] = Sally.GetSallyA();
+  loc_buffer[size++] = Sally.GetSallyX();
+  loc_buffer[size++] = Sally.GetSallyY();
+  loc_buffer[size++] = Sally.GetSallyP();
+  loc_buffer[size++] = Sally.GetSallyS();
+  loc_buffer[size++] = Sally.GetSallyPC().getBL();
+  loc_buffer[size++] = Sally.GetSallyPC().getBH();
+  loc_buffer[size++] = Cartridge.GetCartridgeBank();
 
-//   for (index = 0; index < 32; index++) {
-//     loc_buffer[size + index] = cartridge_digest[index];
-//   }
-//   size += 32;
+  for (index = 0; index < 16384; index++) {
+    loc_buffer[size + index] = Memory.ram[index];
+  }
+  size += 16384;
 
-//   loc_buffer[size++] = sally_a;
-//   loc_buffer[size++] = sally_x;
-//   loc_buffer[size++] = sally_y;
-//   loc_buffer[size++] = sally_p;
-//   loc_buffer[size++] = sally_s;
-//   loc_buffer[size++] = sally_pc.b.l;
-//   loc_buffer[size++] = sally_pc.b.h;
-//   loc_buffer[size++] = cartridge_bank;
+  if (Cartridge.GetType() == Cartridge.CARTRIDGE_TYPE_SUPERCART_RAM) {
+    for (index = 0; index < 16384; index++) {
+      loc_buffer[size + index] = Memory.ram[16384 + index];
+    }
+    size += 16384;
+  }
 
-//   for (index = 0; index < 16384; index++) {
-//     loc_buffer[size + index] = memory_ram[index];
-//   }
-//   size += 16384;
+  if (Cartridge.IsHaltBankedRam()) {
+    for (index = 0; index < 16384; index++) {
+      loc_buffer[size + index] = Memory.mariaRam[16384 + index];
+    }
+    size += 16384;
+  }
 
-//   if (cartridge_type == CARTRIDGE_TYPE_SUPERCART_RAM) {
-//     for (index = 0; index < 16384; index++) {
-//       loc_buffer[size + index] = memory_ram[16384 + index];
-//     }
-//     size += 16384;
-//   }
+  // RIOT state
+  loc_buffer[size++] = Riot.GetDRA(); //riot_dra;
+  loc_buffer[size++] = Riot.GetDRB(); //riot_drb;
+  loc_buffer[size++] = Riot.GetTiming() ? 1 : 0; //Riot.timing;
+  loc_buffer[size++] = (0xff & (Riot.GetTimer() >>> 8));
+  loc_buffer[size++] = (0xff & Riot.GetTimer());
+  loc_buffer[size++] = Riot.GetIntervals(); //riot_intervals;
+  loc_buffer[size++] = (0xff & (Riot.GetClocks() >>> 8));
+  loc_buffer[size++] = (0xff & Riot.GetClocks());
 
-//   // RIOT state
-//   loc_buffer[size++] = riot_dra;
-//   loc_buffer[size++] = riot_drb;
-//   loc_buffer[size++] = Riot.timing;
-//   loc_buffer[size++] = (0xff & (riot_timer >>> 8));
-//   loc_buffer[size++] = (0xff & riot_timer);
-//   loc_buffer[size++] = riot_intervals;
-//   loc_buffer[size++] = (0xff & (riot_clocks >>> 8));
-//   loc_buffer[size++] = (0xff & riot_clocks);
+  // XM (if applicable)
+  if (Cartridge.GetCartridgeXM() /*cartridge_xm*/) {
+    loc_buffer[size++] = Xm.IsMemEnabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.IsPokeyEnabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.IsYmEnabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.Is48kRamEnabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.IsBank0Enabled() ? 1 : 0;;
+    loc_buffer[size++] = Xm.IsBank1Enabled() ? 1 : 0;
+    loc_buffer[size++] = Xm.IsRamWeDisabled() ? 1 : 0;
+    loc_buffer[size++] = Xm.IsDmaActive() ? 1 : 0;
+    loc_buffer[size++] = Xm.GetCntrl1();
+    loc_buffer[size++] = Xm.GetCntrl2();
+    loc_buffer[size++] = Xm.GetCntrl3();
+    loc_buffer[size++] = Xm.GetCntrl4();
+    loc_buffer[size++] = Xm.GetCntrl5();
+    loc_buffer[size++] = Xm.GetYmAddr();
 
-//   // XM (if applicable)
-//   if (cartridge_xm) {
-//     loc_buffer[size++] = xm_reg;
-//     loc_buffer[size++] = xm_bank;
-//     loc_buffer[size++] = xm_pokey_enabled;
-//     loc_buffer[size++] = xm_mem_enabled;
+    for (index = 0; index < Xm.XM_RAM_SIZE; index++) {
+      loc_buffer[size + index] = Xm.xm_ram[index];
+    }
+    size += Xm.XM_RAM_SIZE;
+  }
 
-//     #if 0
-// net_print_string(NULL, 0, "Wrote XM: xm_reg: %d, xm_bank: %d, xm_pokey_enabled: %d, xm_mem_enabled: %d\n",
-//       xm_reg, xm_bank, xm_pokey_enabled, xm_mem_enabled);
-//     #endif
+  // Pokey
+  let registers = Pokey.registers;
+  for (let i = 0; i < registers.length; i++) {
+    loc_buffer[size++] = registers[i];
+  }
 
-//     for (index = 0; index < XM_RAM_SIZE; index++) {
-//       loc_buffer[size + index] = xm_ram[index];
-//     }
-//     size += XM_RAM_SIZE;
-//   }
+  // YM2151
+  registers = YM.getRegisters();
+  for (let i = 0; i < registers.length; i++) {
+    loc_buffer[size++] = registers[i];
+  }
 
-//   FILE * file = fopen(filename.c_str(), "wb");
-//   if (file == NULL) {
-//     logger_LogError("Failed to open the file " + filename + " for writing.",
-//       PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  loc_buffer.length = size;
+  return loc_buffer;
+}
 
-//   if (fwrite(loc_buffer, 1, size, file) != size) {
-//     fclose(file);
-//     logger_LogError(
-//       "Failed to write the save state data to the file " + filename + ".",
-//       PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+// ----------------------------------------------------------------------------
+// Load
+// ----------------------------------------------------------------------------
+function ProSystemLoad(loc_buffer) {
+  const size = loc_buffer.length;
 
-//   fflush(file);
-//   fclose(file);
+  console.log("Loading game state.");
 
-//   return true;
-// }
+  let cbrSize = 0;
+  if (Cartridge.IsHaltBankedRam()) {
+    cbrSize = 16384
+  }
 
-// // ----------------------------------------------------------------------------
-// // Load
-// // ----------------------------------------------------------------------------
-// bool prosystem_Load(const std:: string filename) {
+  if (size != (256 + 32 + 16453 + cbrSize) &&
+    size != (256 + 32 + 32837 + cbrSize) &&
+    size != (256 + 32 + 16453 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&  /* XM without supercart ram */
+    size != (256 + 32 + 32837 + 14 + Xm.XM_RAM_SIZE + cbrSize))    /* XM with supercart ram */ {
+    console.log("Save buffer has an invalid size.");
+    return false;
+  }
 
-//   if(filename.empty() || filename.length() == 0) {
-//   logger_LogError("Filename is invalid.", PRO_SYSTEM_SOURCE);
-//   return false;
-// }
+  var offset = 0;
+  for (let index = 0; index < 16; index++) {
+    if (String.fromCharCode(loc_buffer[offset + index]) != PRO_SYSTEM_STATE_HEADER[index]) {
+      console.log("Buffer is not a valid ProSystem save state.");
+      return false;
+    }
+  }
 
-// if (!loc_buffer) loc_buffer = (byte *)malloc((33000 + XM_RAM_SIZE + 4) * sizeof(byte));
+  offset += 16;
+  const version = loc_buffer[offset++];
 
-// logger_LogInfo("Loading game state from file " + filename + ".");
+  const date = 0;
+  for (let index = 0; index < 4; index++) {
+  }
+  offset += 4;
 
-// uint size = archive_GetUncompressedFileSize(filename);
-// if (size == 0) {
-//   FILE * file = fopen(filename.c_str(), "rb");
-//   if (file == NULL) {
-//     logger_LogError("Failed to open the file " + filename + " for reading.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  prosystem_Reset(null);
 
-//   if (fseek(file, 0, SEEK_END)) {
-//     fclose(file);
-//     logger_LogError("Failed to find the end of the file.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  let digest = ""
+  for (let index = 0; index < 32; index++) {
+    digest += String.fromCharCode(loc_buffer[offset + index]);
+  }
+  offset += 32;
+  if (Cartridge.GetDigest() != digest) {
+    console.log("Load state digest [" + digest + "] does not match loaded cartridge digest [" + cartridge_digest + "].");
+    return false;
+  }
 
-//   size = ftell(file);
-//   if (fseek(file, 0, SEEK_SET)) {
-//     fclose(file);
-//     logger_LogError("Failed to find the size of the file.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  // sally_a = loc_buffer[offset++];
+  Sally.SetSallyA(loc_buffer[offset++]);
+  // sally_x = loc_buffer[offset++];
+  Sally.SetSallyX(loc_buffer[offset++]);
+  // sally_y = loc_buffer[offset++];
+  Sally.SetSallyY(loc_buffer[offset++]);
+  // sally_p = loc_buffer[offset++];
+  Sally.SetSallyP(loc_buffer[offset++]);
+  // sally_s = loc_buffer[offset++];
+  Sally.SetSallyS(loc_buffer[offset++]);
+  // sally_pc.b.l = loc_buffer[offset++];
+  Sally.GetSallyPC().setBL(loc_buffer[offset++]);
+  // sally_pc.b.h = loc_buffer[offset++];
+  Sally.GetSallyPC().setBH(loc_buffer[offset++]);
 
-//   if (size != 16445 && size != 32829 &&     /* no RIOT */
-//     size != 16453 && size != 32837 &&     /* with RIOT */
-//     size != (16453 + 4 + XM_RAM_SIZE) &&  /* XM without supercart ram */
-//     size != (32837 + 4 + XM_RAM_SIZE))    /* XM with supercart ram */ {
-//     fclose(file);
-//     logger_LogError("Save state file has an invalid size.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
+  // cartridge_StoreBank(loc_buffer[offset++]);
+  Cartridge.StoreBank(loc_buffer[offset++]);
 
-//   if (fread(loc_buffer, 1, size, file) != size && ferror(file)) {
-//     fclose(file);
-//     logger_LogError("Failed to read the file data.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
-//   fclose(file);
-// }
-// else {
-//   logger_LogError("Save state file has an invalid size.", PRO_SYSTEM_SOURCE);
-//   return false;
-// }
+  for (let index = 0; index < 16384; index++) {
+    Memory.ram[index] = loc_buffer[offset + index];
+  }
+  offset += 16384;
 
-// uint offset = 0;
-// uint index;
-// for (index = 0; index < 16; index++) {
-//   if (loc_buffer[offset + index] != PRO_SYSTEM_STATE_HEADER[index]) {
-//     logger_LogError("File is not a valid ProSystem save state.", PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
-// }
-// offset += 16;
-// byte version = loc_buffer[offset++];
+  if (Cartridge.GetType() == Cartridge.CARTRIDGE_TYPE_SUPERCART_RAM) {
+    for (let index = 0; index < 16384; index++) {
+      Memory.ram[16384 + index] = loc_buffer[offset + index];
+    }
+    offset += 16384;
+  }
 
-// uint date = 0;
-// for (index = 0; index < 4; index++) {
-// }
-// offset += 4;
+  if (Cartridge.IsHaltBankedRam()) {
+    for (let index = 0; index < 16384; index++) {
+      Memory.mariaRam[16384 + index] = loc_buffer[offset + index];
+    }
+    offset += 16384;
+  }
 
-// prosystem_Reset();
+  // RIOT state
+  Riot.SetDRA(loc_buffer[offset++]);
+  Riot.SetDRB(loc_buffer[offset++]);
+  Riot.SetTiming(loc_buffer[offset++] === 1 ? true : false);
+  let h = loc_buffer[offset++];
+  let l = loc_buffer[offset++];
+  Riot.SetTimerValue(((h << 8) & 0xFF) | (l & 0xFF));
+  Riot.SetIntervalsValue(loc_buffer[offset++]);
+  h = loc_buffer[offset++];
+  l = loc_buffer[offset++];
+  Riot.SetClocks(((h << 8) & 0xFF) | (l & 0xFF));
 
-// char digest[33] = { 0};
-// for (index = 0; index < 32; index++) {
-//   digest[index] = loc_buffer[offset + index];
-// }
-// offset += 32;
-// if (cartridge_digest != std:: string(digest)) {
-//   logger_LogError("Load state digest [" + std:: string(digest) + "] does not match loaded cartridge digest [" + cartridge_digest + "].", PRO_SYSTEM_SOURCE);
-//   return false;
-// }
+  if (Cartridge.GetCartridgeXM() /*cartridge_xm*/) {
+    Xm.SetMemEnabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetPokeyEnabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetYmEnabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.Set48kRamEnabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetBank0Enabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetBank1Enabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetRamWeDisabled(loc_buffer[offset++] === 1 ? true : false);
+    Xm.setDmaActive(loc_buffer[offset++] === 1 ? true : false);
+    Xm.SetCntrl1(loc_buffer[offset++]);
+    Xm.SetCntrl2(loc_buffer[offset++]);
+    Xm.SetCntrl3(loc_buffer[offset++]);
+    Xm.SetCntrl4(loc_buffer[offset++]);
+    Xm.SetCntrl5(loc_buffer[offset++]);
+    Xm.SetYmAddr(loc_buffer[offset++]);
 
-// sally_a = loc_buffer[offset++];
-// sally_x = loc_buffer[offset++];
-// sally_y = loc_buffer[offset++];
-// sally_p = loc_buffer[offset++];
-// sally_s = loc_buffer[offset++];
-// sally_pc.b.l = loc_buffer[offset++];
-// sally_pc.b.h = loc_buffer[offset++];
+    for (let index = 0; index < Xm.XM_RAM_SIZE; index++) {
+      Xm.xm_ram[index] = loc_buffer[offset++];
+    }
+  }
 
-// cartridge_StoreBank(loc_buffer[offset++]);
+  // Pokey
+  for (let i = 0; i < 32; i++) {
+    const v = loc_buffer[offset++];
+    Pokey.SetRegister(0x4000 + i, v);
+  }
 
-// for (index = 0; index < 16384; index++) {
-//   memory_ram[index] = loc_buffer[offset + index];
-// }
-// offset += 16384;
+  // YM-2151
+  for (let i = 0; i < 256; i++) {
+    const v = loc_buffer[offset++];
+    YM.setReg(i, v);
+  }
 
-// if (cartridge_type == CARTRIDGE_TYPE_SUPERCART_RAM) {
-//   if (size != 32829 && /* no RIOT */
-//     size != 32837 && /* with RIOT */
-//     size != (32837 + 4 + XM_RAM_SIZE)) /* XM */ {
-//     logger_LogError("Save state file has an invalid size.",
-//       PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
-//   for (index = 0; index < 16384; index++) {
-//     memory_ram[16384 + index] = loc_buffer[offset + index];
-//   }
-//   offset += 16384;
-// }
+  console.log(loc_buffer.length + ", " + offset);
 
-// if (size == 16453 || /* no supercart ram */
-//   size == 32837 || /* supercart ram */
-//   size == (16453 + 4 + XM_RAM_SIZE) || /* xm, no supercart ram */
-//   size == (32837 + 4 + XM_RAM_SIZE)) /* xm, supercart ram */ {
-//   // RIOT state
-//   riot_dra = loc_buffer[offset++];
-//   riot_drb = loc_buffer[offset++];
-//   Riot.timing = loc_buffer[offset++];
-//   riot_timer = (loc_buffer[offset++] << 8);
-//   riot_timer |= loc_buffer[offset++];
-//   riot_intervals = loc_buffer[offset++];
-//   riot_clocks = (loc_buffer[offset++] << 8);
-//   riot_clocks |= loc_buffer[offset++];
-// }
-
-// // XM (if applicable)
-// if (cartridge_xm) {
-//   if ((size != (16453 + 4 + XM_RAM_SIZE)) &&
-//     (size != (32837 + 4 + XM_RAM_SIZE))) {
-//     logger_LogError("Save state file has an invalid size.",
-//       PRO_SYSTEM_SOURCE);
-//     return false;
-//   }
-//   xm_reg = loc_buffer[offset++];
-//   xm_bank = loc_buffer[offset++];
-//   xm_pokey_enabled = loc_buffer[offset++];
-//   xm_mem_enabled = loc_buffer[offset++];
-
-//   #if 0
-// net_print_string(NULL, 0, "Read XM: xm_reg: %d, xm_bank: %d, xm_pokey_enabled: %d, xm_mem_enabled: %d\n",
-//     xm_reg, xm_bank, xm_pokey_enabled, xm_mem_enabled);
-//   #endif
-
-//   for (index = 0; index < XM_RAM_SIZE; index++) {
-//     xm_ram[index] = loc_buffer[offset++];
-//   }
-// }
-
-// return true;
-// }
-
+  return true;
+}

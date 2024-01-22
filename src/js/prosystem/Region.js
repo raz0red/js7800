@@ -27,6 +27,7 @@ import * as ProSystem from "./ProSystem.js"
 import * as Cartridge from "./Cartridge.js"
 import * as Maria from "./Maria.js"
 import * as Palette from "./Palette.js"
+import * as Webaudio from "../web/audio.js"
 import { Rect } from "./Rect.js"
 
 import N257_PAL_B from '../../palettes/NTSC/JS7800_NTSC_257_Cool-DK.pal'
@@ -66,12 +67,14 @@ var region_type = REGION_AUTO;
 //static const rect REGION_DISPLAY_AREA_NTSC = {0, 16, 319, 258};
 var REGION_DISPLAY_AREA_NTSC = new Rect(0, 16, 319, 258);
 //static const rect REGION_VISIBLE_AREA_NTSC = {0, 26, 319, 250};
-var REGION_VISIBLE_AREA_NTSC = new Rect(0, 26, 319, 250);
+var REGION_VISIBLE_AREA_NTSC = new Rect(0, 27, 319, 250);
 
 //static const byte REGION_FREQUENCY_NTSC = 60;
 var REGION_FREQUENCY_NTSC = 60;
 //static const word REGION_SCANLINES_NTSC = 262;
-var REGION_SCANLINES_NTSC = 262;
+// Diagnosed by RevEng, scanlines off by 1
+var REGION_SCANLINES_NTSC = 263;
+//var REGION_SCANLINES_NTSC = 262;
 
 //static const rect REGION_DISPLAY_AREA_PAL = {0, 16, 319, 308};
 var REGION_DISPLAY_AREA_PAL = new Rect(0, 16, 319, 308);
@@ -80,7 +83,9 @@ var REGION_VISIBLE_AREA_PAL = new Rect(0, 26, 319, 297);
 //static const byte REGION_FREQUENCY_PAL = 50;
 var REGION_FREQUENCY_PAL = 50;
 //static const word REGION_SCANLINES_PAL = 312;
-var REGION_SCANLINES_PAL = 312;
+// Diagnosed by RevEng, scanlines off by 1
+var REGION_SCANLINES_PAL = 313;
+//var REGION_SCANLINES_PAL = 312;
 
 // ----------------------------------------------------------------------------
 // PALETTE NTSC
@@ -266,6 +271,7 @@ function region_Reset() {
        Palette.Load(PAL_PAL_INDEX[palIdx] /*REGION_PALETTE_PAL*/);  // Added check for default - bberlin
     ProSystem.SetFrequency(REGION_FREQUENCY_PAL);
     ProSystem.SetScanlines(REGION_SCANLINES_PAL);
+    Webaudio.reinit(REGION_FREQUENCY_PAL*REGION_SCANLINES_PAL*2);
     //#ifndef WII    
     //tia_size = 624;
     //pokey_size = 624;
@@ -280,6 +286,7 @@ function region_Reset() {
        Palette.Load(NTSC_PAL_INDEX[palIdx] /*REGION_PALETTE_NTSC*/);  // Added check for default - bberlin
     ProSystem.SetFrequency(REGION_FREQUENCY_NTSC);
     ProSystem.SetScanlines(REGION_SCANLINES_NTSC);
+    Webaudio.reinit(REGION_FREQUENCY_NTSC*REGION_SCANLINES_NTSC*2);
     //#ifndef WII    
     //tia_size = 524;
     //pokey_size = 524;

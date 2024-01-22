@@ -20,13 +20,13 @@ jobs:
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}        
+        node-version: ${{ matrix.node-version }}
 
     - name: Peform build
       run: |
         npm install
         npm run build
-      
+
     - name: Upload dist
       uses: actions/upload-artifact@v1
       with:
@@ -47,7 +47,7 @@ jobs:
         BASE_BRANCH: master
         BRANCH: gh-pages
         FOLDER: site/deploy
-        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios"]'
+        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios", "banksets", "banksets_cycleS", "tia"]'
 
     - name: Deploy to GitHub pages (staging)
       uses: JamesIves/github-pages-deploy-action@releases/v3
@@ -68,6 +68,36 @@ jobs:
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: cycles
+
+    - name: Deploy to GitHub pages (banksets)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/banksets'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: banksets
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: banksets
+
+    - name: Deploy to GitHub pages (banksets + cycles)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/banksets_cycleS'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: banksets_cycleS
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: banksets_cycles
+
+    - name: Deploy to GitHub pages (tia)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/tia'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: tia
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: tia
 
     - name: Deploy to GitHub pages (bios)
       uses: JamesIves/github-pages-deploy-action@releases/v3

@@ -1,8 +1,8 @@
 /*
  * FM Sound Generator with OPN/OPM interface
  * Copyright (C) by cisc 1998, 2003.
- * 
- * English conversion via Google Translate 
+ *
+ * English conversion via Google Translate
  * (see LICENSE-third-party for more details)
  *
  * - The author of this source code (cisc@retropc.net) owns the copyright.
@@ -14,18 +14,18 @@
  * - This source code can be freely modified/embedded as long as the following
  *   restrictions are met:
  *   It can be distributed and used.
- * 
+ *
  *   1. Specify the origin (author, copyright) of this software.
  *   2. Use free software when distributing.
  *   3. When distributing the modified source code, specify the modification
  *      contents.
  *   4. Do not modify this text at all when distributing the source code
  *      Please attach it as it is.
- * 
+ *
  * We would appreciate it if you could contact the author when publishing.
- * 
+ *
  * A part of this source code in commercial software (including shareware), or
- * It is necessary to obtain the author's agreement before incorporating all 
+ * It is necessary to obtain the author's agreement before incorporating all
  * of them.
  */
 var __extends = function (t, e) {
@@ -1344,7 +1344,7 @@ var FM;
       }
       if (this.reg01 & 2) {
         s &= 21845
-      }      
+      }
       var n = e | 0;
       for (a = 0; a < i; a++) {
         h[1] = h[2] = h[3] = 0;
@@ -1355,7 +1355,7 @@ var FM;
           this.MixSub(s, h)
         }
 
-        t[n++] = ((h[1] + h[3] + h[2] + h[3])/(2*128));
+        t[n++] = ((h[1] + h[3] + h[2] + h[3])/(2*128)) * .33; // RAZ: reduce volume
       }
     };
     i.prototype.Intr = function (t) { };
@@ -1372,23 +1372,36 @@ console.log("YM Init: " + result);
 
 function reset() {
   Ym2151.Reset();
+  for (let i = 0; i < registers.length; i++) {
+    registers[i] = 0;
+  }
+}
+
+let registers = new Array(256);
+
+function getRegisters() {
+  return registers;
 }
 
 function setReg(reg, value) {
+  registers[reg] = value;
   Ym2151.SetReg(reg, value);
 }
 
 function mixStereo(buffer, count, offset) {
   Ym2151.mixStereo(buffer, count, offset);
+  // TODO: Do proper timing for YM (Hack for YM auto-detection, 1942)
+  // banksets changes
+  Ym2151.Count(count)
 }
 
 function setSampleRate(rate) {
   console.log("Set YM sample rate: " + rate);
-  Ym2151.SetRate(FREQ, rate);  
+  Ym2151.SetRate(FREQ, rate);
 }
 
 function getStatus() {
   return Ym2151.GetStatus();
 }
 
-export { reset, setReg, mixStereo, setSampleRate, getStatus }
+export { reset, setReg, mixStereo, setSampleRate, getStatus, getRegisters }

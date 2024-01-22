@@ -1,109 +1,173 @@
 {
     "folders": [],
-    "files": [        
+    "files": [
+        {
+            "name": "1942",
+            "path": "1942.a78"
+        },
         {
             "name": "Armor Attack II",
-            "path": "ArmorAttackII.a78"            
+            "path": "ArmorAttackII.a78"
+        },
+        {
+            "name": "A.R.T.I. (Demo)",
+            "path": "ARTI.a78"
         },
         {
             "name": "Astro Blaster",
-            "path": "AstroBlaster.a78"            
-        },        
+            "path": "AstroBlaster.a78"
+        },
         {
             "name": "Astro Fighter",
-            "path": "AstroFighter.a78"            
-        },                
+            "path": "AstroFighter.a78"
+        },
+        {
+            "name": "Attack of the PETSCII Robots (Demo)",
+            "path": "petscii7800demo.a78"
+        },
         {
             "name": "b*nQ",
-            "path": "bonq.a78"            
+            "path": "bonq.a78"
+        },
+        {
+            "name": "Baby Pac-Man",
+            "path": "BabyPacMan.a78"
         },
         {
             "name": "Beef Drop",
-            "path": "BeefDrop.a78"            
+            "path": "BeefDrop.a78"
         },
         {
             "name": "Bentley Bear's Crystal Quest",
-            "path": "BentleyBearsCrystalQuest.a78"            
+            "path": "BentleyBearsCrystalQuest.a78"
         },
         {
             "name": "BlocDrop",
-            "path": "BlocDrop.a78"            
-        },        
+            "path": "BlocDrop.a78"
+        },
+        {
+            "name": "Block'Em Sock'Em (Demo)",
+            "path": "BlockemSockem.a78"
+        },
         {
             "name": "Crazy Brix",
-            "path": "CrazyBrix.a78"            
+            "path": "CrazyBrix.a78"
         },
         {
             "name": "Death Merchant",
-            "path": "DeathMerchant.a78"            
+            "path": "DeathMerchant.a78"
+        },
+        {
+            "name": "Dragon's Cache",
+            "path": "DragonsCache_2_7_2021.bas.a78"
+        },
+        {
+            "name": "Dragon's Descent",
+            "path": "DragonsDescent_7_31_2021_VOX.bas.a78"
+        },
+        {
+            "name": "Drelbs",
+            "path": "Drelbs.a78"
         },
         {
             "name": "Dungeon Stalker",
-            "path": "DungeonStalker.a78"            
+            "path": "DungeonStalker.a78"
+        },
+        {
+            "name": "E.X.O (Demo)",
+            "path": "EXO_Release_Cand_Demo_A.a78"
         },
         {
             "name": "FailSafe",
-            "path": "FailSafe.a78"            
+            "path": "FailSafe.a78"
         },
         {
             "name": "Frenzy (with Berzerk)",
-            "path": "Frenzy.a78"            
+            "path": "Frenzy.a78"
         },
         {
             "name": "Froggie",
-            "path": "Froggie.a78"            
+            "path": "Froggie.a78"
+        },
+        {
+            "name": "Galaxian",
+            "path": "Galaxian.a78"
+        },
+        {
+            "name": "GoSub",
+            "path": "GoSub.a78"
         },
         {
             "name": "KC Munchkin",
-            "path": "KCMunchkin.a78"            
+            "path": "KCMunchkin.a78"
+        },
+        {
+            "name": "Keystone Koppers (Demo)",
+            "path": "Keystone Koppers (Demo Dec 22) (20221222).a78"
+        },
+        {
+            "name": "Knight Guy: Castle Days",
+            "path": "knightguy.a78"
         },
         {
             "name": "Meteor Shower",
-            "path": "MeteorShower.a78"            
+            "path": "MeteorShower.a78"
         },
         {
             "name": "Millie and Molly (Demo)",
-            "path": "millieandmolly.a78"            
+            "path": "millieandmolly_demo.78b.a78"
         },
         {
             "name": "Moon Cresta",
-            "path": "MoonCresta.a78"            
+            "path": "MoonCresta.a78"
+        },
+        {
+            "name": "Pac-Man Collection! (40th Anniversary)",
+            "path": "PMC_XM.A78"
+        },
+        {
+            "name": "PentaGo! (Demo)",
+            "path": "PentaGo (Demo).a78"
+        },
+        {
+            "name": "Popeye (Demo)",
+            "path": "Popeye.a78"
         },
         {
             "name": "Rip-Off",
-            "path": "RipOff.a78"            
+            "path": "RipOff.a78"
         },
         {
             "name": "Scramble",
-            "path": "Scramble.a78"            
+            "path": "Scramble.a78"
         },
         {
             "name": "Serpentine",
-            "path": "Serpentine.a78"            
+            "path": "Serpentine.a78"
         },
         {
             "name": "Space Invaders",
-            "path": "SpaceInvaders.a78"            
+            "path": "SpaceInvaders.a78"
         },
         {
             "name": "Super Circus",
-            "path": "SuperCircus.a78"            
+            "path": "SuperCircus.a78"
         },
         {
             "name": "Super Cobra",
-            "path": "SuperCobra.a78"            
-        },        
+            "path": "SuperCobra.a78"
+        },
         {
             "name": "TiME Salvo",
-            "path": "TiMESalvo.a78"            
+            "path": "TiMESalvo.a78"
         },
         {
             "name": "Tubes",
-            "path": "Tubes.a78"            
-        },                
+            "path": "Tubes.a78"
+        },
         {
             "name": "Worm!",
-            "path": "Worm!.a78"            
-        }                
+            "path": "Worm!.a78"
+        }
     ]
 }

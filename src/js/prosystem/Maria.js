@@ -31,7 +31,6 @@ import { Pair } from "./Pair.js"
 
 var ram = Memory.ram;
 var ramf = Memory.Read;
-var sally_ExecuteNMI = Sally.ExecuteNMI;
 
 var BACKGRND    = 32;
 var DPPH        = 44;
@@ -42,13 +41,15 @@ var CTRL        = 60;
 var MARIA_SURFACE_SIZE = 77440;
 var MARIA_LINERAM_SIZE = 160;
 
+var MARIA_CYCLE_LIMIT = 428;
+
 //extern unsigned char* wii_sdl_get_blit_addr();
 //extern unsigned int wii_lightgun_flash;
 //extern unsigned int wii_lightgun_flash;
 //extern bool lightgun_enabled;
 
 //rect maria_displayArea = {0, 16, 319, 258};
-var maria_displayArea = new Rect(0, 16, 319, 258);
+var maria_displayArea = new Rect(0, 17, 319, 258);
 
 //rect maria_visibleArea = {0, 26, 319, 248};
 var maria_visibleArea = new Rect(0, 26, 319, 248); 
@@ -58,9 +59,12 @@ var maria_visibleArea = new Rect(0, 26, 319, 248);
 var maria_surface = null;
 
 //static byte maria_lineRAM[MARIA_LINERAM_SIZE];
-var maria_lineRAM = new Array(MARIA_LINERAM_SIZE);
+var maria_lineRAM_buffers = [new Array(MARIA_LINERAM_SIZE), new Array(MARIA_LINERAM_SIZE)];
+var maria_lineRAM_index = 0;
+var maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
 //static uint maria_cycles;
 var maria_cycles = 0;
+var color_kill = false;
 //static pair maria_dpp;
 var maria_dpp = new Pair();
 //static pair maria_dp;
@@ -82,6 +86,10 @@ var maria_wmode = 0;
 
 // Whether to access RAM directly
 var dr = false;
+// Whether NMI was triggered
+var nmi = false;
+// banksets changes
+var banksets = false;
 
 // ----------------------------------------------------------------------------
 // StoreCell
@@ -109,18 +117,31 @@ function maria_StoreCell1(data) {
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreCell(byte high, byte low) {  
 function maria_StoreCell2(high, low) {
-  if (maria_horizontal < MARIA_LINERAM_SIZE) {
-    if (low || high) {
-      maria_lineRAM[maria_horizontal] = maria_palette & 16 | high | low;
-    }
-    else {
-      //byte kmode = memory_ram[CTRL] & 4;
-      var kmode = ram[CTRL] & 4;
-      if (kmode) {
-        maria_lineRAM[maria_horizontal] = 0;
-      }
-    }
+  // banksets changes
+  var kmode = ram[CTRL] & 4;
+  var c = (maria_palette & 0x10) | high | low; 
+  if (((c & 3) || kmode) && (maria_horizontal < MARIA_LINERAM_SIZE)) {
+    maria_lineRAM[maria_horizontal] = c;
   }
+
+
+  // var rmode = ram[CTRL] & 3;
+  // if (maria_horizontal < MARIA_LINERAM_SIZE) {
+  //   if (low || high) {
+  //     let v = maria_palette & 16 | high | low;
+  //     if (rmode === 0 && !(v & 3)) console.log("## C&3 occurring!")
+      
+  //     if (rmode !==0 || v & 3)
+  //       maria_lineRAM[maria_horizontal] = v;
+  //   }
+  //   else {
+  //     //byte kmode = memory_ram[CTRL] & 4;
+  //     var kmode = ram[CTRL] & 4;
+  //     if (kmode) {
+  //       maria_lineRAM[maria_horizontal] = 0;
+  //     }
+  //   }
+  // }
   //maria_horizontal++;
   maria_horizontal = (maria_horizontal + 1) & 0xFF;
 }
@@ -205,6 +226,12 @@ function maria_StoreGraphic() {
   maria_pp.wPlusPlus();
 }
 
+function colorKill(buffer, index) {
+  for(var i = 0; i <8; i++) {
+    buffer[index + i] = buffer[index + i] & 0x0f;
+  }
+}
+
 // ----------------------------------------------------------------------------
 // WriteLineRAM
 // ----------------------------------------------------------------------------
@@ -232,6 +259,9 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
       color = maria_GetColor(maria_lineRAM[index + 3]);
       buffer[pixel++] = color;
       buffer[pixel++] = color;
+      if (color_kill) {
+        colorKill(buffer, pixel - 8);
+      }      
     }
   }
   else if (rmode == 2) {
@@ -247,6 +277,9 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 16) | ((maria_lineRAM[index + 2] & 4) >>> 2) | ((maria_lineRAM[index + 2] & 1) << 1));
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 8) >>> 3) | ((maria_lineRAM[index + 3] & 2)));
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 4) >>> 2) | ((maria_lineRAM[index + 3] & 1) << 1));
+      if (color_kill) {
+        colorKill(buffer, pixel - 8);
+      }      
     }
   }
   else if (rmode == 3) {
@@ -262,6 +295,9 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 28) | ((maria_lineRAM[index + 2] & 1) << 1));
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 30));
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 28) | ((maria_lineRAM[index + 3] & 1) << 1));
+      if (color_kill) {
+        colorKill(buffer, pixel - 8);
+      }      
     }
   }
 }
@@ -274,13 +310,15 @@ var basePP = new Pair();
 //static inline void maria_StoreLineRAM() {
 function maria_StoreLineRAM() {
   //for (int index = 0; index < MARIA_LINERAM_SIZE; index++) {
-  for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
-    maria_lineRAM[index] = 0;
-  }
+  // for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
+  //   maria_lineRAM[index] = 0;
+  // }
+
+  maria_cycles += 16; // Maria cycles (DMA Startup)
 
   //byte mode = memory_ram[maria_dp.w + 1];
   var mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
-  while (mode & 0x5f) {
+  while (mode & 0x5f && (maria_cycles < MARIA_CYCLE_LIMIT)) {
     //byte width;
     var width = 0;
     //byte indirect = 0;
@@ -305,7 +343,7 @@ function maria_StoreLineRAM() {
       maria_dp.wPlusEqual(4);
     }
     else {
-      maria_cycles += 12; // Maria cycles (Header 5 byte)
+      maria_cycles += 10; // Maria cycles (Header 5 byte) 
       //maria_palette = (memory_ram[maria_dp.w + 3] & 224) >> 3;
       maria_palette = (((dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3)) & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 4];
@@ -322,12 +360,24 @@ function maria_StoreLineRAM() {
       maria_dp.wPlusEqual(5);
     }
 
+    var dma_hole_known = false;
+
     if (!indirect) {
       //maria_pp.b.h += maria_offset;
       maria_pp.bhPlusEqual(maria_offset);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
-        maria_cycles += 3; // Maria cycles (Direct graphic read)
+        if (maria_cycles >= MARIA_CYCLE_LIMIT) 
+          break;
+
+        if (maria_IsHolyDMA()) {
+          if (!dma_hole_known) {
+            maria_cycles += 3;
+            dma_hole_known = true;
+          }
+        } else {
+          maria_cycles += 3;
+        }
         maria_StoreGraphic();
       }
     }
@@ -339,21 +389,42 @@ function maria_StoreLineRAM() {
       basePP.copy(maria_pp);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
-        maria_cycles += 3; // Maria cycles (Indirect)
+        if (maria_cycles >= MARIA_CYCLE_LIMIT) 
+          break;
+
         //maria_pp.b.l = memory_ram[basePP.w++];
         maria_pp.setBL((dr ? ram[basePP.wPlusPlus()] : ramf(basePP.wPlusPlus())));
         //maria_pp.b.h = memory_ram[CHARBASE] + maria_offset;
         maria_pp.setBH(ram[CHARBASE] + maria_offset);
-        maria_cycles += 3; // Maria cycles (Indirect, 1 byte)
-        maria_StoreGraphic();
+
+        if (maria_IsHolyDMA()) {
+          if (!dma_hole_known) {
+            maria_cycles += 3;
+            dma_hole_known = true;
+          }
+        } else {
+          maria_cycles += 6;
+          if (cwidth) {
+            maria_cycles += 3; 
+          }
+        }
+
+        maria_StoreGraphic(); // Maria cycles (Indirect, 1 byte)        
         if (cwidth) {
-          maria_cycles += 3; // Maria cycles (Indirect, 2 bytes)
           maria_StoreGraphic();
         }
       }
     }
     //mode = memory_ram[maria_dp.w + 1];
     mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
+  }
+
+	// Last Line post-render DMA cycle penalties...
+  if (maria_offset == 0) {
+    maria_cycles += 6; // extra shutdown time
+    if ((dr ? ram[maria_dpp.getW() + 3] : ramf(maria_dpp.getW() + 3)) & 128) {
+      maria_cycles += 17; // interrupt overhead
+    }  
   }
 }
 
@@ -369,6 +440,11 @@ function maria_Reset() {
     maria_surface[index] = 0;
   }
 
+  for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
+    maria_lineRAM_buffers[0][index] = 0;
+    maria_lineRAM_buffers[1][index] = 0;
+  }
+
   //
   // WII
   //
@@ -376,6 +452,7 @@ function maria_Reset() {
   // This appears to be a bug in the ProSystem emulator.
   //
   maria_cycles = 0;
+  color_kill = false;
   //maria_dpp.w = 0;
   maria_dpp.setW(0);
   //maria_dp.w = 0;
@@ -388,6 +465,7 @@ function maria_Reset() {
   maria_h08 = 0;
   maria_h16 = 0;
   maria_wmode = 0;
+  nmi = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -395,7 +473,12 @@ function maria_Reset() {
 // ----------------------------------------------------------------------------
 //uint maria_RenderScanline() {
 function maria_RenderScanline(maria_scanline) {
+  // banksets changes
+  if (banksets) ramf = Memory.ReadMaria;
+
   maria_cycles = 0;
+  color_kill = (ram[CTRL] & 0x80);
+  nmi = false;
 
   //
   // Displays the background color when Maria is disabled (if applicable)
@@ -415,12 +498,8 @@ function maria_RenderScanline(maria_scanline) {
       //* bgstart++ = bgcolor;
       maria_surface[bgstart_idx++] = bgcolor;
     }
-  }
-
-  if ((ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {
-    maria_cycles += 5; // Maria cycles (DMA Startup)
+  } else if ((ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {    
     if (maria_scanline == maria_displayArea.top) {
-      maria_cycles += 10; // Maria cycles (End of VBLANK)
       //maria_dpp.b.l = memory_ram[DPPL];
       maria_dpp.setBL(ram[DPPL]);
       //maria_dpp.b.h = memory_ram[DPPH];
@@ -437,23 +516,35 @@ function maria_RenderScanline(maria_scanline) {
       maria_dp.setBH((dr ? ram[maria_dpp.getW() + 1] : ramf(maria_dpp.getW() + 1)));
       //if (memory_ram[maria_dpp.w] & 128) {
       if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
-        maria_cycles += 20; // Maria cycles (NMI)  /*29, 16, 20*/
-        sally_ExecuteNMI();
+        nmi = true;
       }
     }
-    else if (maria_scanline >= maria_visibleArea.top && maria_scanline <= maria_visibleArea.bottom) {
-      //maria_WriteLineRAM(maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
-      maria_WriteLineRAM(maria_surface, ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
-    }
-    if (maria_scanline != maria_displayArea.bottom) {
+
+    if (maria_scanline >= maria_displayArea.top && maria_scanline != maria_displayArea.bottom) {
+      //maria_cycles += 4;
       //maria_dp.b.l = memory_ram[maria_dpp.w + 2];
       maria_dp.setBL((dr ? ram[maria_dpp.getW() + 2] : ramf(maria_dpp.getW() + 2)));
       //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
       maria_dp.setBH((dr ? ram[maria_dpp.getW() + 1] : ramf(maria_dpp.getW() + 1)));
+      
+      maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
       maria_StoreLineRAM();
-      maria_offset--;
-      if (maria_offset < 0) {
-        maria_cycles += 10; // Maria cycles (Last line of zone) ( /*20*/ 
+    
+      // Swap buffers
+      maria_lineRAM_index = (maria_lineRAM_index == 1 ? 0 : 1);
+      maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
+
+      if (maria_scanline >= maria_visibleArea.top && maria_scanline <= maria_visibleArea.bottom) {
+        //maria_WriteLineRAM(maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
+        maria_WriteLineRAM(maria_surface, ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
+      }
+
+      for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
+        maria_lineRAM[index] = 0;
+      }  
+
+      if (maria_scanline > maria_displayArea.top) {
+        if (maria_offset == 0) {
         //maria_dpp.w += 3;
         maria_dpp.wPlusEqual(3);
         //maria_h08 = memory_ram[maria_dpp.w] & 32;
@@ -464,15 +555,18 @@ function maria_RenderScanline(maria_scanline) {
         maria_offset = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 15;
         //if (memory_ram[maria_dpp.w] & 128) {
         if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
-          maria_cycles += 20; // Maria cycles (NMI) /*29, 16, 20*/
-          sally_ExecuteNMI();
+            nmi = true;
         }
+        } else {
+          maria_offset--;
       }
-      else {
-        maria_cycles += 4; // Maria cycles (Other lines of zone)
       }
     }
   }
+
+  // banksets changes
+  if (banksets) ramf = Memory.Read;
+
   return maria_cycles;
 }
 
@@ -492,10 +586,17 @@ function SetSurface(surface) {
   maria_surface = surface; 
 }
 
+function IsNMI() {
+  return nmi;
+}
+
 Events.addListener(
   new Events.Listener("onCartridgeLoaded", function(cart) {
-    dr = !cart.IsXmEnabled();
+    // banksets changes
+    dr = !cart.IsXmEnabled() && !cart.IsBanksets();
     console.log("Maria RAM Direct: " + dr);
+    // banksets changes
+    banksets = cart.IsBanksets();
   }));  
 
 export {
@@ -504,5 +605,7 @@ export {
   maria_Reset as Reset,
   maria_displayArea as displayArea,
   maria_visibleArea as visibleArea,
-  SetSurface
+  IsNMI,
+  SetSurface,
+  MARIA_CYCLE_LIMIT
 }
