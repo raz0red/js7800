@@ -80,6 +80,8 @@ var prosystem_frame = 0;
 var prosystem_scanlines = 262;
 //uint prosystem_cycles = 0;
 var prosystem_cycles = 0;
+var prosystem_mstat_adjust = 0;
+
 
 /** The current Maria scan line */
 var maria_scanline = 1;
@@ -213,6 +215,13 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
   if (cartridge_pokey || cartridge_xm) pokey_Frame();
 
+
+  /*
+  // Proper fix for Pole Position II (once tested, remove PPII Hack.)
+  var m_scanline = 1;
+  for (m_scanline = 1; m_scanline <= prosystem_scanlines; m_scanline++) {
+      maria_scanline = (m_scanline + 244) % (prosystem_scanlines+1);
+  */
   for (maria_scanline = 1; maria_scanline <= prosystem_scanlines; maria_scanline++) {
     //#if 0
     //    if ((int)wii_orient_roll == maria_scanline) {
@@ -225,7 +234,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     if (maria_scanline == maria_displayArea.top) {
       memory_ram[MSTAT] = 0;
     }
-    else if (maria_scanline == maria_displayArea.bottom) {
+    else if (maria_scanline == (maria_displayArea.bottom - prosystem_mstat_adjust /* PPII Hack */)) {
       memory_ram[MSTAT] = 128;
     }
 
@@ -442,6 +451,10 @@ function GetMariaScanline() {
   return maria_scanline;
 }
 
+function SetMstatAdjust(adjust) {
+  prosystem_mstat_adjust = adjust;
+}
+
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
   cartridge_xm = Cartridge.IsXmEnabled();
@@ -475,6 +488,7 @@ export {
   GetDebugWsync,
   GetDebugCycleStealing,
   GetMariaScanline,
+  SetMstatAdjust,
   ProSystemSave,
   ProSystemLoad
 }

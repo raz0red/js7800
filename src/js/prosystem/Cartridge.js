@@ -26,6 +26,7 @@
 import * as Memory from "./Memory.js"
 import { md5 } from "../3rdparty/md5.js"
 import * as Events from "../events.js"
+import * as ProSystem from "./ProSystem.js"
 
 var memory_WriteROM = null;
 var memory_ClearROM = null;
@@ -49,9 +50,20 @@ var CARTRIDGE_TYPE_SUPERCART_ROM = 4;
 var CARTRIDGE_TYPE_ABSOLUTE = 5;
 var CARTRIDGE_TYPE_ACTIVISION = 6;
 var CARTRIDGE_TYPE_NORMAL_RAM = 7;
+var CARTRIDGE_TYPE_SOUPER  = 8;             /* Used by "Rikki & Vikki" */
 var CARTRIDGE_CONTROLLER_NONE = 0;
 var CARTRIDGE_CONTROLLER_JOYSTICK = 1;
 var CARTRIDGE_CONTROLLER_LIGHTGUN = 2;
+var CARTRIDGE_SOUPER_BANK_SEL = 0x8000;
+var CARTRIDGE_SOUPER_CHR_A_SEL = 0x8001;
+var CARTRIDGE_SOUPER_CHR_B_SEL = 0x8002;
+var CARTRIDGE_SOUPER_MODE_SEL = 0x8003;
+var CARTRIDGE_SOUPER_EXRAM_V_SEL = 0x8004;
+var CARTRIDGE_SOUPER_EXRAM_D_SEL = 0x8005;
+var CARTRIDGE_SOUPER_AUDIO_CMD = 0x8007;
+var CARTRIDGE_SOUPER_MODE_MFT = 0x1;
+var CARTRIDGE_SOUPER_MODE_CHR = 0x2;
+var CARTRIDGE_SOUPER_MODE_EXS = 0x4;
 
 //std::string cartridge_title;
 var cartridge_title = "";
@@ -99,6 +111,7 @@ var cartridge_right_switch = 0;
 var cartridge_swap_buttons = false;
 //bool cartridge_hsc_enabled = false;
 var cartridge_hsc_enabled = false;
+var cartridge_composite = false;
 
 // banksets changes
 var cartridge_banksets = false;
@@ -107,6 +120,12 @@ var cartridge_banksets_end = 0;
 var cartridge_halt_banked_ram = false;
 var cartridge_pokey_write_only = false;
 var cartridge_pokey800 = false;
+
+/* SOUPER-specific stuff, used for "Rikki & Vikki" */
+var cartridge_bupchip = false;
+var cartridge_souper_chr_bank = new Array(2);
+var cartridge_souper_mode = 0;
+var cartridge_souper_ram_page_bank = new Array(2);
 
 // 0: Disabled, 1: Enabled, 2: Automatic
 var XM_MODE_DEFAULT = 2;
@@ -282,16 +301,15 @@ function cartridge_ReadHeader(header) {
     }
   }
   else {
-    if (header[53] == 2 /*1*/) { // Wii: Abs and Act were swapped
-      cartridge_type = CARTRIDGE_TYPE_ABSOLUTE;
-    }
-    else if (header[53] == 1 /*2*/) { // Wii: Abs and Act were swapped
-      cartridge_type = CARTRIDGE_TYPE_ACTIVISION;
-    }
-    else {
-      cartridge_type = CARTRIDGE_TYPE_NORMAL;
-    }
-  }
+    if (header[53] & 0x02) /* raz, updated */
+       cartridge_type = CARTRIDGE_TYPE_ABSOLUTE;
+    else if (header[53] & 0x01) /* raz, updated */
+       cartridge_type = CARTRIDGE_TYPE_ACTIVISION;
+    else if (header[53] == 16)
+       cartridge_type = CARTRIDGE_TYPE_SOUPER;
+    else
+       cartridge_type = CARTRIDGE_TYPE_NORMAL;
+ }
 
   cartridge_pokey = (header[54] & 1) ? true : false;
   cartridge_pokey450 = (header[54] & 0x40) ? true : false;
@@ -304,6 +322,7 @@ function cartridge_ReadHeader(header) {
   cartridge_controller[0] = header[55];
   cartridge_controller[1] = header[56];
   cartridge_region = header[57] & 0x1;
+  cartridge_composite = (header[57] & 0x2) ? 1 : 0;
   cartridge_flags = 0;
   // banksets changes (check for 0x08, ym2151)
   cartridge_xm = (header[63] & 1) || ((header[53] & 0x08) == 0x08) ? true : false;
@@ -315,6 +334,7 @@ function cartridge_ReadHeader(header) {
     cartridge_pokey_write_only = true;
   }
   cartridge_halt_banked_ram = header[53] & 0x40 ? true : false;
+  cartridge_bupchip = false;
 
   // Wii: Updates to header interpretation
   //byte ct1 = header[54];
@@ -322,7 +342,15 @@ function cartridge_ReadHeader(header) {
   // banksets changes
   var ct2 = header[53];
   //if (header[53] == 0) {       // banksets changes
-    if ((ct1 & 0x0a) == 0x0a) { // BIT1 and BIT3 (Supercart Large: 2) rom at $4000
+    if (header[53] & 0x02) { /* raz, updated */
+      cartridge_type = CARTRIDGE_TYPE_ABSOLUTE;
+    }
+    else if (header[53] & 0x01) { /* raz, updated */
+      cartridge_type = CARTRIDGE_TYPE_ACTIVISION;
+    }
+    else if (header[53] & 0x10) { /* raz, updated */
+      cartridge_type = CARTRIDGE_TYPE_SOUPER;
+    } else if ((ct1 & 0x0a) == 0x0a) { // BIT1 and BIT3 (Supercart Large: 2) rom at $4000
       //int old_type = cartridge_type;
       var old_type = cartridge_type;
       cartridge_type = CARTRIDGE_TYPE_SUPERCART_LARGE;
@@ -435,6 +463,7 @@ function cartridge_ReadHeader(header) {
   console.log("  pokey write only: %s", cartridge_pokey_write_only ? "1" : "0");
   console.log("  halt banked ram: %s", cartridge_halt_banked_ram ? "1" : "0");
   console.log("  tv type: %s", cartridge_region ? "PAL" : "NTSC");
+  console.log("  tv composite: %d\n", cartridge_composite);
   console.log("  Save device: [%d]%s%s", header[58],
     ((header[58] & 0x02) ? " SaveKey/AtariVox" : ""),
     ((header[58] & 0x01) ? " HSC" : ""));
@@ -520,11 +549,50 @@ function cartridge_Load(data, size) {
   cartridge_digest = md5(hashstr);
   console.log("cartridge_digest: %s", cartridge_digest);
 
-  if (cartridge_digest === "91041aadd1700a7a4076f4005f2c362f") {
-    console.log("Patching diagnostic cartridge...");
-    var DIAG_PATCH_66EC = [0xDF, 0xE6];
-    for (let i = 0; i < DIAG_PATCH_66EC.length; i++) {
-      cartridge_buffer[0x66ec - offset + i] = DIAG_PATCH_66EC[i];
+   // Diagnostic cartridge
+   if (cartridge_digest === "91041aadd1700a7a4076f4005f2c362f" ||
+       cartridge_digest === "66a90a41b11faa0f6d1e05aefb59ec6f")
+   {
+      console.log("Patching diagnostic cartridge...");
+      var offset = cartridge_size - 0x1914 - 128;
+      cartridge_buffer[offset + 0] = 0xDF; // raz fix
+      cartridge_buffer[offset + 1] = 0xE6; // raz fix
+   }
+
+  var crc16 = Crc16(cartridge_buffer.slice((
+    cartridge_size - (16 * 1024)), 
+    cartridge_size - (16 * 1024) + 1024));
+
+   // PPII Hack.
+   console.log("CRC 16: 0x" + crc16.toString(16));
+   if ((crc16 & 0xFFFF) == 0x9e8a) {
+      console.log("Applying Pole Position II hack...");
+      ProSystem.SetMstatAdjust(3);
+   }
+
+
+  // Swap hi and lo
+  if (cartridge_type == CARTRIDGE_TYPE_ACTIVISION && (
+    // Rampage (AM) (NTSC) (Activision) (1989) (39A316AA).a78
+    (cartridge_digest !== "ac03806cef2558fc795a7d5d8dba7bc0") &&
+    // Double Dragon (AM) (NTSC) (Activision) (1989) (AA265865).a78
+    (cartridge_digest !== "543484c00ba233736bcaba2da20eeea9") &&
+    // Double Dragon (AM) (PAL) (Activision) (1989) (F29ABDB2).a78
+    (cartridge_digest !== "de2ebafcf0e37aaa9d0e9525a7f4dd62")
+  )) {
+    var swap = new Array(8 * 1024);
+    console.log("Swap hi and lo 8k...");
+    for (var i = 0; i < cartridge_size; i += 16 * 1024) {
+      console.log("swap " + i);
+      for (var j = 0; j < 8 * 1024; j++) {
+        swap[j] = cartridge_buffer[i + j];
+      }
+      for (var j = 0; j < 8 * 1024; j++) {
+        cartridge_buffer[i + j] = cartridge_buffer[i + (8 * 1024) + j];
+      }
+      for (var j = 0; j < 8 * 1024; j++) {
+        cartridge_buffer[i + (8 * 1024) + j] = swap[j];
+      }
     }
   }
 
@@ -624,6 +692,11 @@ function cartridge_Store() {
         memory_WriteROM(57344, 8192, cartridge_buffer, 114688);
       }
       break;
+    case CARTRIDGE_TYPE_SOUPER:
+      memory_WriteROM(0xc000, 0x4000, cartridge_buffer, cartridge_GetBankOffset(31));
+      memory_WriteROM(0x8000, 0x4000, cartridge_buffer, cartridge_GetBankOffset(0));
+      memory_ClearROM(0x4000, 0x4000);
+      break;
   }
 }
 
@@ -664,6 +737,37 @@ function cartridge_Write(address, data) {
         cartridge_StoreBank(address & 7);
       }
       break;
+    case CARTRIDGE_TYPE_SOUPER:
+      if (address >= 0x4000 && address < 0x8000)
+      {
+          memory_souper_ram[memory_souper_GetRamAddress(address)] = data;
+          break;
+      }
+      switch (address)
+      {
+      case CARTRIDGE_SOUPER_BANK_SEL:
+          cartridge_StoreBank(data & 31);
+          break;
+      case CARTRIDGE_SOUPER_CHR_A_SEL:
+          cartridge_souper_StoreChrBank(0, data);
+          break;
+      case CARTRIDGE_SOUPER_CHR_B_SEL:
+          cartridge_souper_StoreChrBank(1, data);
+          break;
+      case CARTRIDGE_SOUPER_MODE_SEL:
+          cartridge_souper_SetMode(data);
+          break;
+      case CARTRIDGE_SOUPER_EXRAM_V_SEL:
+          cartridge_souper_SetRamPageBank(0, data);
+          break;
+      case CARTRIDGE_SOUPER_EXRAM_D_SEL:
+          cartridge_souper_SetRamPageBank(1, data);
+          break;
+      case CARTRIDGE_SOUPER_AUDIO_CMD:
+          //bupchip_ProcessAudioCommand(data); // TODO SOUPER
+          break;
+      }
+      break;
   }
 }
 
@@ -691,7 +795,33 @@ function cartridge_StoreBank(bank) {
     case CARTRIDGE_TYPE_ACTIVISION:
       cartridge_WriteBank(40960, bank);
       break;
+    case CARTRIDGE_TYPE_SOUPER:
+      cartridge_WriteBank(32768, bank);
+      break;
   }
+}
+
+// SOUPER
+function cartridge_souper_StoreChrBank(page, bank)
+{
+   if (page < 2)
+      cartridge_souper_chr_bank[page] = bank;
+}
+
+function cartridge_souper_SetMode(data)
+{
+   cartridge_souper_mode = data;
+}
+
+function cartridge_souper_GetMode()
+{
+  return cartridge_souper_mode;
+}
+
+function cartridge_souper_SetRamPageBank(which, data)
+{
+   if (which < 2)
+      cartridge_souper_ram_page_bank[which] = data & 7;
 }
 
 // ----------------------------------------------------------------------------
@@ -802,8 +932,30 @@ function cartridge_LoadHighScoreCart(callback) {
   highScoreCallback.loadSram(postLoadCallback);
 }
 
+function Crc16(data) {
+  var num, uCRC = 0xffff;
+  var x;
+
+  for (num = 0; num < data.length; num++) {
+    uCRC = (data[num]) ^ uCRC;
+    for (x = 0; x < 8; x++) {
+      if (uCRC & 0x0001) {
+        uCRC = uCRC >> 1;
+        uCRC = uCRC ^ 0xA001;
+      } else {
+        uCRC = uCRC >> 1;
+      }
+    }
+  }
+  return uCRC;
+}
+
 function GetRegion() {
   return cartridge_region;
+}
+
+function IsComposite() {
+  return cartridge_composite;
 }
 
 function IsPokeyEnabled() {
@@ -1033,6 +1185,7 @@ export {
   IsSwapButtons,
   IsDualAnalog,
   IsLightGunEnabled,
+  IsComposite,
   GetFlags,
   GetHblank,
   GetLeftSwitch,
@@ -1079,12 +1232,20 @@ export {
   cartridge_LoadHighScoreCart as LoadHighScoreCart,
   cartridge_IsStored as IsStored,
   cartridge_StoreBank as StoreBank,
+  cartridge_souper_GetMode as GetSouperMode,
+  cartridge_buffer as Buffer,
+  cartridge_souper_chr_bank as SouperChrBank,
+  cartridge_souper_ram_page_bank as SouperRamBank,
   CARTRIDGE_TYPE_NORMAL,
   CARTRIDGE_TYPE_NORMAL_RAM,
   CARTRIDGE_TYPE_SUPERCART,
   CARTRIDGE_TYPE_SUPERCART_RAM,
   CARTRIDGE_TYPE_SUPERCART_ROM,
   CARTRIDGE_TYPE_SUPERCART_LARGE,
+  CARTRIDGE_TYPE_SOUPER,
+  CARTRIDGE_SOUPER_MODE_MFT,
+  CARTRIDGE_SOUPER_MODE_CHR,
+  CARTRIDGE_SOUPER_MODE_EXS
 }
 
 // // The memory location of the high score cartridge SRAM

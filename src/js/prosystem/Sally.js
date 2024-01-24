@@ -2135,8 +2135,15 @@ function sally_ExecuteInstruction() {
     // UNP
     // banksets changes
     case 0x04:
-    // UNP
-    // banksets changes
+      // TODO: raz
+      // Fix for Popeye 2.3c
+      // RevEng:
+      // $04 is an illegal opcode "nop", but technically it's "nop zp",
+      // which means the following byte is part of the instruction.
+      // Nothing is done with the byte, but the PC counter will advance past
+      // it.
+      sally_pc.wPlusPlus();
+      break;
     case 0x80:
       // Double no-op
       return sally_cycles;

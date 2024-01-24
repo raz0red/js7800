@@ -128,7 +128,7 @@ function xm_Read(address) {
     if (!xm_ramwe_disabled) {
       var offset = address - 0x4000;
       if (xm_48kram_enabled) {
-        return m_ram[offset];
+        return xm_ram[offset];
       } else {
         if (xm_bank0_enabled && (offset < 0x2000)) {
           if (dma_active) {
@@ -173,7 +173,7 @@ function xm_Write(address, data) {
     var offset = address - 0x4000;
     if (xm_48kram_enabled) {
       //console.log("write byte1:" + data);
-      m_ram[offset] = data;
+      xm_ram[offset] = data;
     } else {
       if (xm_bank0_enabled && (offset < 0x2000)) {
         //console.log("write byte2:" + offset + ", " + data);

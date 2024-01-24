@@ -75,6 +75,7 @@ var T1024T = 663;
 
 //#define MEMORY_SIZE 65536 (from header)
 var MEMORY_SIZE = 65536;
+var MEMORY_SOUPER_EXRAM_SIZE = 32768;
 
 //byte memory_ram[MEMORY_SIZE] = {0};
 var memory_ram = new Array(MEMORY_SIZE);
@@ -84,6 +85,9 @@ var memory_rom = new Array(MEMORY_SIZE);
 
 // banksets changes
 var maria_memory_ram = new Array(MEMORY_SIZE);
+
+var memory_souper_ram = new Array(MEMORY_SOUPER_EXRAM_SIZE);
+
 
 //int hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
 //var hs_sram_write_count = 0; // Debug, number of writes to High Score SRAM
@@ -176,6 +180,10 @@ function _memory_Read(address) {
       return tmp_byte;
       break;
     default:
+
+      if (Cartridge.GetType() === Cartridge.CARTRIDGE_TYPE_SOUPER && address >= 0x4000 && address < 0x8000)
+        return memory_souper_ram[memory_souper_GetRamAddress(address)];
+
       // banksets changes
       if (maria_read) {
         if (cartridge_halt_banked_ram && (address >= 16384 && address <= 32767)) {
@@ -346,6 +354,12 @@ function memory_Write(address, data) {
           riot_SetTimer(T1024T, data);
           break;
         default:
+          if (Cartridge.GetType() == Cartridge.CARTRIDGE_TYPE_SOUPER && address >= 0x4000 && address < 0x8000)
+          {
+            memory_souper_ram[memory_souper_GetRamAddress(address)] = data;
+            break;
+          }
+
           // banksets changes
           if (cartridge_halt_banked_ram && (address >= 49152 && address <= 65535)) {
             //console.log(16384 + (address - 49152) + ", " + data);
@@ -436,6 +450,19 @@ function memory_ClearROM(address, size) {
       }
     }
   }
+}
+
+function memory_souper_GetRamAddress(address)
+{
+  var page = (address - 0x4000) >> 12;
+  if ((Cartridge.GetSouperMode() & Cartridge.CARTRIDGE_SOUPER_MODE_EXS) != 0)
+  {
+    if (address >= 0x6000 && address < 0x7000)
+      page = Cartridge.SouperRamBank[0];
+    else if (address >= 0x7000 && address < 0x8000)
+      page = Cartridge.SouperRamBank[1];
+  }
+  return (address & 0x0fff) | (page << 12);
 }
 
 function OnCartridgeLoaded() {
