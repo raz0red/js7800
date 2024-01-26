@@ -1,0 +1,299 @@
+/* ----------------------------------------------------------------------------
+ *   ___  ___  ___  ___       ___  ____  ___  _  _
+ *  /__/ /__/ /  / /__  /__/ /__    /   /_   / |/ /
+ * /    / \  /__/ ___/ ___/ ___/   /   /__  /    /  emulator
+ *
+ * ----------------------------------------------------------------------------
+ * Copyright 2005 Greg Stanton
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ * ----------------------------------------------------------------------------
+ * BupChip.c
+ * ----------------------------------------------------------------------------
+ */
+#include "BupChip.h"
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+
+#define BUPCHIP_FLAGS_PLAYING   1
+#define BUPCHIP_FLAGS_PAUSED   2
+
+struct BupchipFileContents
+{
+   uint8_t *data;
+   size_t size;
+};
+
+typedef struct BupchipFileContents BupchipFileContents;
+
+uint8_t *bupchip_sample_data;
+uint8_t *bupchip_instrument_data;
+BupchipFileContents bupchip_songs[32];
+uint8_t bupchip_song_count;
+
+uint8_t bupchip_flags;
+uint8_t bupchip_volume;
+uint8_t bupchip_current_song;
+
+short bupchip_buffer[CORETONE_BUFFER_LEN * 4];
+
+static void bupchip_ReplaceChar(char *string, char character, char replacement)
+{
+   while(1)
+   {
+      if (!(string = strchr(string, character)))
+         return;
+      *string = replacement;
+      string++;
+   }
+}
+
+int bupchip_InitFromCDF(const char** cdf, size_t* cdfSize, const char *workingDir)
+{
+#ifdef SOUPER
+   size_t fileIndex;
+   char *line;
+   BupchipFileContents fileData[34];
+   size_t songIndex       = 0;
+   uint32_t fileDataCount = 0;
+
+   while(fileDataCount < sizeof(fileData) / sizeof(fileData[0]) &&
+      (line = cartridge_GetNextNonemptyLine(cdf, cdfSize)) != NULL)
+   {
+#ifndef _WIN32
+      /* CDF files always use Windows paths.
+         Convert to Unix-style if necessary. */
+      bupchip_ReplaceChar(line, '\\', '/');
+#endif
+
+      if(!cartridge_ReadFile(&fileData[fileDataCount].data, &fileData[fileDataCount].size, line, workingDir))
+      {
+         free(line);
+         goto err;
+      }
+      free(line);
+      fileDataCount++;
+   }
+
+   if(fileDataCount < 2)
+      goto err;
+
+   bupchip_sample_data     = fileData[0].data;
+   bupchip_instrument_data = fileData[1].data;
+   if(ct_init(bupchip_sample_data, bupchip_instrument_data) != 0)
+      goto err;
+   for(songIndex = 0; songIndex < fileDataCount - 2; songIndex++)
+      bupchip_songs[songIndex] = fileData[songIndex + 2];
+   bupchip_song_count = (uint8_t)(fileDataCount - 2);
+   return 1;
+
+err:
+   for(fileIndex = 0; fileIndex < fileDataCount; fileIndex++)
+   {
+      free(fileData[fileIndex].data);
+      fileData[fileIndex].data = NULL;
+   }
+   bupchip_song_count      = 0;
+   bupchip_instrument_data = NULL;
+   bupchip_sample_data     = NULL;
+#endif
+   return 0;
+}
+
+void bupchip_Stop(void)
+{
+   bupchip_flags &= ~BUPCHIP_FLAGS_PLAYING;
+   ct_stopMusic();
+}
+
+void bupchip_Play(unsigned char song)
+{
+   if(song >= bupchip_song_count)
+   {
+      bupchip_Stop();
+      return;
+   }
+   bupchip_flags |= BUPCHIP_FLAGS_PLAYING;
+   bupchip_current_song = song;
+   ct_playMusic(bupchip_songs[bupchip_current_song].data);
+}
+
+void bupchip_Pause(void)
+{
+   bupchip_flags |= BUPCHIP_FLAGS_PAUSED;
+   ct_pause();
+}
+
+void bupchip_Resume(void)
+{
+   bupchip_flags &= ~BUPCHIP_FLAGS_PAUSED;
+   ct_resume();
+}
+
+void bupchip_SetVolume(uint8_t volume)
+{
+   int attenuation;
+   bupchip_volume = volume & 0x1f;
+   /* This matches BupSystem. */
+   attenuation = volume << 2;
+   if((volume & 1) != 0)
+      attenuation += 0x3;
+   ct_attenMusic(attenuation);
+}
+
+void bupchip_ProcessAudioCommand(unsigned char data)
+{
+   switch(data & 0xc0)
+   {
+   case 0:
+      switch(data)
+      {
+      case 0:
+         bupchip_flags  = 0;
+         bupchip_volume = 0x1f;
+         ct_stopAll();
+         ct_resume();
+         ct_attenMusic(127);
+	 break;
+      case 2:
+         bupchip_Resume();
+	 break;
+      case 3:
+         bupchip_Pause();
+	 break;
+      }
+      break;
+   case 0x40:
+      bupchip_Stop();
+      break;
+   case 0x80:
+      bupchip_Play(data & 0x1f);
+      break;
+   case 0xc0:
+      bupchip_SetVolume(data);
+      break;
+   }
+}
+
+void bupchip_Process(unsigned tick)
+{
+   ct_update(&bupchip_buffer[tick * CORETONE_BUFFER_LEN]);
+}
+
+void bupchip_Release(void)
+{
+   int i;
+   for(i = 0; i < bupchip_song_count; i++)
+   {
+      free(bupchip_songs[i].data);
+      bupchip_songs[i].data = NULL;
+   }
+   free(bupchip_instrument_data);
+   bupchip_instrument_data = NULL;
+   free(bupchip_sample_data);
+   bupchip_sample_data     = NULL;
+}
+
+void bupchip_StateLoaded(void)
+{
+   ct_stopAll();
+   if((bupchip_flags & BUPCHIP_FLAGS_PLAYING) == 0)
+      return;
+   ct_playMusic(bupchip_songs[bupchip_current_song].data);
+   if((bupchip_flags & BUPCHIP_FLAGS_PAUSED) != 0)
+      ct_pause();
+   else
+      ct_resume();
+   bupchip_SetVolume(bupchip_volume);
+}
+
+#define MUSIC_SIZE 512 * 1024
+uint8_t bupchip_music[MUSIC_SIZE] = {0};
+
+uint8_t* bupchip_GetMusicBuffer() {
+   return bupchip_music;
+}
+
+short* bupchip_GetBupChipBuffer() {
+   return bupchip_buffer;
+}
+
+void bupchip_SetMusicBufferValue(int index, unsigned char value) {
+   bupchip_music[index] = value;
+}
+
+int bupchip_GetMusicSize() {
+   return MUSIC_SIZE;
+}
+
+uint8_t bupchip_GetFlags() {
+   return bupchip_flags;
+}
+
+void bupchip_SetFlags(uint8_t flags) {
+   bupchip_flags = flags;
+}
+
+uint8_t bupchip_GetVolumeValue() {
+   return bupchip_volume;
+}
+
+void bupchip_SetVolumeValue(uint8_t volume) {
+   bupchip_volume = volume;
+}
+
+uint8_t bupchip_GetCurrentSong() {
+   return bupchip_current_song;
+}
+
+void bupchip_SetCurrentSong(uint8_t song) {
+   bupchip_current_song = song;
+}
+
+int bupchip_Unpack() {
+  BupchipFileContents fileData[34];
+   size_t songIndex       = 0;
+   uint32_t fileDataCount = 0;
+   uint8_t *data = bupchip_music;
+   int length = MUSIC_SIZE;
+
+   int sizes[] =
+       {
+           121119, 3177, 787,  3681, 1429, 3733,  3549, 4821, 4964,
+           660,    1146, 7260, 5216, 4849, 4527,  5467, 2809, 1620,
+           4030,   1280, 542,  660,  655,  819,   1831, 2536, 2722,
+           885,    1678, 490,  484,  1529, 15487, 293,
+       };
+
+   int offset = 0;
+   for (int i = 0; i < sizeof(sizes) / sizeof(int); i++ ) {
+      int sz = sizes[i];
+      fileData[fileDataCount].data = &data[offset];
+      printf("unpack file: %d\n", data[offset]);
+      fileData[fileDataCount++].size = sz;
+      offset += sz;
+   }
+
+   bupchip_sample_data     = fileData[0].data;
+   bupchip_instrument_data = fileData[1].data;
+   printf("ct_init: %d\n", ct_init(bupchip_sample_data, bupchip_instrument_data));
+   for(songIndex = 0; songIndex < fileDataCount - 2; songIndex++)
+      bupchip_songs[songIndex] = fileData[songIndex + 2];
+   bupchip_song_count = (uint8_t)(fileDataCount - 2);
+
+   return 1;
+}

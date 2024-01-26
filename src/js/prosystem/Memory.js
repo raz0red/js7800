@@ -504,4 +504,5 @@ export {
   memory_ram as ram,
   memory_rom as rom,
   maria_memory_ram as mariaRam,
+  memory_souper_ram as SouperRam
 }

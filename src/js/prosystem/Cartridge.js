@@ -596,6 +596,16 @@ function cartridge_Load(data, size) {
     }
   }
 
+  if (cartridge_type === CARTRIDGE_TYPE_SOUPER && cartridge_size === 1024 * 1024) {
+    cartridge_bupchip = true;
+    let musicSize = window.Module._bupchip_GetMusicSize();
+    let bupchipMusicBuffer = new Uint8Array(Module.HEAPU8.buffer, window.Module._bupchip_GetMusicBuffer(), musicSize);
+    for (let i = 0; i < musicSize; i++) {
+      bupchipMusicBuffer[i] = cartridge_buffer[(512 * 1024) + i];
+    }
+    window.Module._bupchip_Unpack();
+  }
+
   return true;
 }
 
@@ -764,7 +774,7 @@ function cartridge_Write(address, data) {
           cartridge_souper_SetRamPageBank(1, data);
           break;
       case CARTRIDGE_SOUPER_AUDIO_CMD:
-          //bupchip_ProcessAudioCommand(data); // TODO SOUPER
+          window.Module._bupchip_ProcessAudioCommand(data); 
           break;
       }
       break;
@@ -998,6 +1008,10 @@ function IsDualAnalog() {
   return cartridge_dualanalog;
 }
 
+function IsBupChip() {
+  return cartridge_bupchip;
+}
+
 function IsLightGunEnabled() {
   return cartridge_controller[0] == CARTRIDGE_CONTROLLER_LIGHTGUN;
 }
@@ -1186,6 +1200,7 @@ export {
   IsDualAnalog,
   IsLightGunEnabled,
   IsComposite,
+  IsBupChip,
   GetFlags,
   GetHblank,
   GetLeftSwitch,
@@ -1233,6 +1248,7 @@ export {
   cartridge_IsStored as IsStored,
   cartridge_StoreBank as StoreBank,
   cartridge_souper_GetMode as GetSouperMode,
+  cartridge_souper_SetMode as SetSouperMode,
   cartridge_buffer as Buffer,
   cartridge_souper_chr_bank as SouperChrBank,
   cartridge_souper_ram_page_bank as SouperRamBank,

@@ -1,0 +1,4 @@
+*.o
+bupboop.js
+bupboop.wasm
+rom
