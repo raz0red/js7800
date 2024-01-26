@@ -49,6 +49,7 @@ var prosystem_sampleRate = 0;
 
 /** Shadow of Cartridge */  
 var cartridge_pokey = false;
+var cartridge_bupchip = false;
 
 // /* LUDO: */
 // typedef unsigned short WORD;
@@ -154,11 +155,27 @@ function sound_Store() {
   var prosystem_frame = prosystem_GetFrame();
 
   var length = sound_GetSampleLength(
-    prosystem_sampleRate, prosystem_frame, prosystem_frequency); 
-
+    prosystem_sampleRate, prosystem_frame, prosystem_frequency);   
+    
   sound_Resample(tia_buffer, (pokey ? pokey_buffer : null), sample, length);
-  tia_Clear();
-  pokey_Clear();
+
+  if (cartridge_bupchip) {
+    let bupBuffer = new Int16Array(Module.HEAP16.buffer, window.Module._bupchip_GetBupChipBuffer(), length << 1);
+    for (let i = 0; i < length; i++) {
+      const curr = (sample[i] / 255);
+      let n = (bupBuffer[i * 2]);
+      if (n !== undefined) {
+        sample[i] = ((n / 32768) + (bupBuffer[i * 2 + 1] / 32768)) / 2;
+      }  else {
+        sample[i] = 0;
+      }      
+      sample[i] = ((curr * .4) + (sample[i] * .6));
+      sample[i] *= 255;
+    }
+  }
+
+   tia_Clear();
+   pokey_Clear();
 
   if (ym) {
     YM.mixStereo(ymBuffer, length, 0);
@@ -252,6 +269,9 @@ function SetScanlines(lines) {
 }
 
 function SetSampleRate(rate) { 
+  if (cartridge_bupchip) {
+    rate = 31440;
+  }
   console.log("Set sample rate: %d", rate);
   Pokey.SetSampleRate(rate);
   YM.setSampleRate(rate);
@@ -264,6 +284,7 @@ function SetStoreSoundCallback(callback) {
 
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
+  cartridge_bupchip = Cartridge.IsBupChip();
 }
 
 function init() {
