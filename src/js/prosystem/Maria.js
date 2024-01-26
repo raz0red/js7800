@@ -92,10 +92,11 @@ var nmi = false;
 // banksets changes
 var banksets = false;
 var maria_read = false;
+var souper = false;
 
 function ramf(address)
 {
-   if (Cart.GetType() == Cart.CARTRIDGE_TYPE_SOUPER) 
+   if (souper) 
    {   var page, chrOffset;
       if ((Cart.GetSouperMode() & Cart.CARTRIDGE_SOUPER_MODE_MFT) == 0 || address < 0x8000 || 
           ((Cart.GetSouperMode() & Cart.CARTRIDGE_SOUPER_MODE_CHR) == 0 && address < 0xc000)) 
@@ -653,6 +654,7 @@ Events.addListener(
     console.log("Maria RAM Direct: " + dr);
     // banksets changes
     banksets = cart.IsBanksets();
+    souper = cart.GetType() == Cart.CARTRIDGE_TYPE_SOUPER;
   }));  
 
 export {
