@@ -45,6 +45,14 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 
 ## Change log
 
+### 01/25/24 (0.0.9)
+    - Souper support
+    - Activision OM ROM layout support
+    - Pole Position II track selection fix (by RevEng @ AtariAge)
+    - Tower Toppler and Jinks composite smoothing (by RevEng @ AtariAge)
+    - Updated palettes (contributed by Trebor @ AtariAge)
+    - Updated Popeye (JS7800 Demo 2.41) (contributed by darryl1970 @ AtariAge)
+
 ### 08/16/23 (0.0.8)
     - TIA fidelity issue fix (contributed by RevEng @ AtariAge)
 

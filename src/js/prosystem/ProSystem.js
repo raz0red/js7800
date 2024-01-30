@@ -80,6 +80,8 @@ var prosystem_frame = 0;
 var prosystem_scanlines = 262;
 //uint prosystem_cycles = 0;
 var prosystem_cycles = 0;
+var prosystem_mstat_adjust = 0;
+
 
 /** The current Maria scan line */
 var maria_scanline = 1;
@@ -200,10 +202,16 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   dbg_cycle_stealing = cycle_stealing;
   */
 
+  var scanlinesPerBupchipTick = 0;
+  var bupchipTickScanlines = 0;
+  var currentBupchipTick   = 0;
+
   // Is the lightgun enabled for the current frame?
   var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
   riot_SetInput(input);
+
+  scanlinesPerBupchipTick = ((prosystem_scanlines - 1) / 4) | 0;
 
   prosystem_extra_cycles = 0;
   dbg_saved_cycles = 0; // debug
@@ -213,6 +221,13 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
   if (cartridge_pokey || cartridge_xm) pokey_Frame();
 
+
+  /*
+  // Proper fix for Pole Position II (once tested, remove PPII Hack.)
+  var m_scanline = 1;
+  for (m_scanline = 1; m_scanline <= prosystem_scanlines; m_scanline++) {
+      maria_scanline = (m_scanline + 244) % (prosystem_scanlines+1);
+  */
   for (maria_scanline = 1; maria_scanline <= prosystem_scanlines; maria_scanline++) {
     //#if 0
     //    if ((int)wii_orient_roll == maria_scanline) {
@@ -225,7 +240,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     if (maria_scanline == maria_displayArea.top) {
       memory_ram[MSTAT] = 0;
     }
-    else if (maria_scanline == maria_displayArea.bottom) {
+    else if (maria_scanline == (maria_displayArea.bottom - prosystem_mstat_adjust /* PPII Hack */)) {
       memory_ram[MSTAT] = 128;
     }
 
@@ -340,6 +355,17 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       pokey_Process(2);
     }
 
+    if (Cartridge.IsBupChip())
+    {
+       bupchipTickScanlines++;
+       if (bupchipTickScanlines == scanlinesPerBupchipTick)
+       {
+          bupchipTickScanlines = 0;
+          window.Module._bupchip_Process(currentBupchipTick);
+          currentBupchipTick++;
+       }
+    }
+
     if (cartridge_pokey || cartridge_xm) pokey_Scanline();
   }
 
@@ -442,6 +468,10 @@ function GetMariaScanline() {
   return maria_scanline;
 }
 
+function SetMstatAdjust(adjust) {
+  prosystem_mstat_adjust = adjust;
+}
+
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
   cartridge_xm = Cartridge.IsXmEnabled();
@@ -475,6 +505,7 @@ export {
   GetDebugWsync,
   GetDebugCycleStealing,
   GetMariaScanline,
+  SetMstatAdjust,
   ProSystemSave,
   ProSystemLoad
 }
@@ -486,7 +517,7 @@ const PRO_SYSTEM_STATE_HEADER="PRO-SYSTEM STATE";
 // ----------------------------------------------------------------------------
 function ProSystemSave()
 {
-  const loc_buffer = new Array(40 * 1024 + XM.XM_RAM_SIZE + 4);
+  const loc_buffer = new Array(40 * 1024 + XM.XM_RAM_SIZE + 4);  
 
   console.log("Saving game state.");
 
@@ -582,6 +613,20 @@ function ProSystemSave()
     loc_buffer[size++] = registers[i];
   }
 
+  if (Cartridge.GetType() == Cartridge.CARTRIDGE_TYPE_SOUPER) {
+    loc_buffer[size++] = Cartridge.SouperChrBank[0];
+    loc_buffer[size++] = Cartridge.SouperChrBank[1];
+    loc_buffer[size++] = Cartridge.GetSouperMode();
+    loc_buffer[size++] = Cartridge.SouperRamBank[0];
+    loc_buffer[size++] = Cartridge.SouperRamBank[1];
+    for(index = 0; index < Memory.SouperRam.length; index++) {
+      loc_buffer[size++] = Memory.SouperRam[index];
+    }
+    loc_buffer[size++] = window.Module._bupchip_GetFlags();
+    loc_buffer[size++] = window.Module._bupchip_GetVolumeValue();
+    loc_buffer[size++] = window.Module._bupchip_GetCurrentSong();
+  }
+
   loc_buffer.length = size;
   return loc_buffer;
 }
@@ -602,7 +647,8 @@ function ProSystemLoad(loc_buffer) {
   if (size != (256 + 32 + 16453 + cbrSize) &&
     size != (256 + 32 + 32837 + cbrSize) &&
     size != (256 + 32 + 16453 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&  /* XM without supercart ram */
-    size != (256 + 32 + 32837 + 14 + Xm.XM_RAM_SIZE + cbrSize))    /* XM with supercart ram */ {
+    size != (256 + 32 + 32837 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&    /* XM with supercart ram */ 
+    size != 49517 /* Souper */) {
     console.log("Save buffer has an invalid size.");
     return false;
   }
@@ -715,6 +761,21 @@ function ProSystemLoad(loc_buffer) {
   for (let i = 0; i < 256; i++) {
     const v = loc_buffer[offset++];
     YM.setReg(i, v);
+  }
+
+  if (Cartridge.GetType() == Cartridge.CARTRIDGE_TYPE_SOUPER) {
+    Cartridge.SouperChrBank[0] = loc_buffer[offset++];
+    Cartridge.SouperChrBank[1] = loc_buffer[offset++];    
+    Cartridge.SetSouperMode(loc_buffer[offset++]);
+    Cartridge.SouperRamBank[0] = loc_buffer[offset++];
+    Cartridge.SouperRamBank[1] = loc_buffer[offset++];
+    for(let idx = 0; idx < Memory.SouperRam.length; idx++) {
+      Memory.SouperRam[idx] = loc_buffer[offset++];      
+    }
+    window.Module._bupchip_SetFlags(loc_buffer[offset++]);
+    window.Module._bupchip_SetVolumeValue(loc_buffer[offset++]);
+    window.Module._bupchip_SetCurrentSong(loc_buffer[offset++]);
+    window.Module._bupchip_StateLoaded();
   }
 
   console.log(loc_buffer.length + ", " + offset);

@@ -28,9 +28,10 @@ import * as Sally from "./Sally.js"
 import * as Events from "../events.js"
 import { Rect } from "./Rect.js"
 import { Pair } from "./Pair.js"
+import * as Cart from "./Cartridge.js"
 
 var ram = Memory.ram;
-var ramf = Memory.Read;
+//var ramf = Memory.Read;
 
 var BACKGRND    = 32;
 var DPPH        = 44;
@@ -90,6 +91,36 @@ var dr = false;
 var nmi = false;
 // banksets changes
 var banksets = false;
+var maria_read = false;
+var souper = false;
+
+function ramf(address)
+{
+   if (souper) 
+   {   var page, chrOffset;
+      if ((Cart.GetSouperMode() & Cart.CARTRIDGE_SOUPER_MODE_MFT) == 0 || address < 0x8000 || 
+          ((Cart.GetSouperMode() & Cart.CARTRIDGE_SOUPER_MODE_CHR) == 0 && address < 0xc000)) 
+      {
+         return Memory.Read(address);
+      }
+      if (address >= 0xc000) /* EXRAM */
+         return Memory.Read(address - 0x8000);
+      if (address < 0xa000) /* Fixed ROM */
+         return Memory.Read(address + 0x4000);
+      page = Cart.SouperChrBank[(address & 0x80) != 0 ? 1 : 0];
+      chrOffset = (((page & 0xfe) << 4) | (page & 1)) << 7;
+      var addr = (address & 0x0f7f) | chrOffset;
+      if(addr >= Cart.GetSize())
+        return 0;
+      return Cart.Buffer[addr];
+   }
+
+   if (maria_read)
+      return Memory.ReadMaria(address);
+   else
+      return Memory.Read(address);
+}
+
 
 // ----------------------------------------------------------------------------
 // StoreCell
@@ -300,6 +331,30 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
       }      
     }
   }
+
+  // Apply "composite" smoothing filter...
+  if (Cart.IsComposite() && ((rmode == 2) || (rmode == 3))) {
+    var lum1 = 0;
+    var lum2 = 0;
+    var lum3 = 0;
+    lum3 = buffer[offset + 1] & 0x0f;
+    for (var pixel = offset + 2;
+      pixel < (MARIA_LINERAM_SIZE * 2 + offset - 1); pixel += 1) {
+      lum1 = lum2;
+      lum2 = lum3;
+      lum3 = buffer[pixel] & 0x0f;
+      // a proper composite artifact would shift chroma for even-position
+      // bright pixels differently from odd-position bright pixels. We
+      // don't do that (1) for performance reasons, (2) because it doesn't
+      // actually enhance Tower Toppler, and (3) there's very wide variance
+      // in how the shift works, depending on the TV.
+      if ((lum1 == 0) && (lum2 > 5) && (lum3 == 0)) {
+        buffer[pixel - 1] =
+          (buffer[pixel - 1] & 0xF0) | ((lum2 >> 1) + 1);
+        buffer[pixel - 2] = buffer[pixel - 1];
+      }
+    }
+  }
 }
 
 var basePP = new Pair();
@@ -466,6 +521,7 @@ function maria_Reset() {
   maria_h16 = 0;
   maria_wmode = 0;
   nmi = false;
+  maria_read = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -474,7 +530,8 @@ function maria_Reset() {
 //uint maria_RenderScanline() {
 function maria_RenderScanline(maria_scanline) {
   // banksets changes
-  if (banksets) ramf = Memory.ReadMaria;
+  if (banksets) maria_read = true;
+
 
   maria_cycles = 0;
   color_kill = (ram[CTRL] & 0x80);
@@ -565,7 +622,7 @@ function maria_RenderScanline(maria_scanline) {
   }
 
   // banksets changes
-  if (banksets) ramf = Memory.Read;
+  if (banksets) maria_read = false;
 
   return maria_cycles;
 }
@@ -592,11 +649,12 @@ function IsNMI() {
 
 Events.addListener(
   new Events.Listener("onCartridgeLoaded", function(cart) {
-    // banksets changes
-    dr = !cart.IsXmEnabled() && !cart.IsBanksets();
+    // banksets changes  
+    dr = !cart.IsXmEnabled() && !cart.IsBanksets() && cart.GetType() !== cart.CARTRIDGE_TYPE_SOUPER;
     console.log("Maria RAM Direct: " + dr);
     // banksets changes
     banksets = cart.IsBanksets();
+    souper = cart.GetType() == Cart.CARTRIDGE_TYPE_SOUPER;
   }));  
 
 export {
