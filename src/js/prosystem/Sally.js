@@ -124,7 +124,7 @@ var SALLY_CYCLES = [
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 112 - 127
   2, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
   2, 6, 0, 0, 4, 4, 4, 4 /* SAX */, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
-  2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 0, // 160 - 175
+  2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 4 /* LAX abs */, // 160 - 175
   2, 5, 0, 6 /* LAX */, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 192 - 207
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 208 - 223
@@ -2147,6 +2147,11 @@ function sally_ExecuteInstruction() {
     case 0x80:
       // Double no-op
       return sally_cycles;
+    case 0xaf: // LAX abs
+      sally_Absolute();
+      sally_LDA();
+      sally_TAX();
+      return sally_cycles;
     case 0xfc:
     case 0xfb:
     case 0xfa:
@@ -2177,7 +2182,6 @@ function sally_ExecuteInstruction() {
     case 0xb7:
     /*case 0xb3:*/
     case 0xb2:
-    case 0xaf:
     case 0xab:
     case 0xa7:
     case 0xa3:
