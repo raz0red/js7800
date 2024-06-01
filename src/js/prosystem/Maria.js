@@ -5,7 +5,7 @@
 //
 // ----------------------------------------------------------------------------
 // Copyright 2005 Greg Stanton
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -53,7 +53,7 @@ var MARIA_CYCLE_LIMIT = 428;
 var maria_displayArea = new Rect(0, 17, 319, 258);
 
 //rect maria_visibleArea = {0, 26, 319, 248};
-var maria_visibleArea = new Rect(0, 26, 319, 248); 
+var maria_visibleArea = new Rect(0, 26, 319, 248);
 //word  maria_scanline = 1;
 
 //byte* maria_surface = 0; // TODO JS
@@ -96,10 +96,10 @@ var souper = false;
 
 function ramf(address)
 {
-   if (souper) 
+   if (souper)
    {   var page, chrOffset;
-      if ((Cart.GetSouperMode() & Cart.CARTRIDGE_SOUPER_MODE_MFT) == 0 || address < 0x8000 || 
-          ((Cart.GetSouperMode() & Cart.CARTRIDGE_SOUPER_MODE_CHR) == 0 && address < 0xc000)) 
+      if ((Cart.GetSouperMode() & Cart.CARTRIDGE_SOUPER_MODE_MFT) == 0 || address < 0x8000 ||
+          ((Cart.GetSouperMode() & Cart.CARTRIDGE_SOUPER_MODE_CHR) == 0 && address < 0xc000))
       {
          return Memory.Read(address);
       }
@@ -135,7 +135,9 @@ function maria_StoreCell1(data) {
       //byte kmode = memory_ram[CTRL] & 4;
       var kmode = ram[CTRL] & 4;
       if (kmode) {
-        maria_lineRAM[maria_horizontal] = 0;
+        // Fix for 320D (playsoft)
+        maria_lineRAM[maria_horizontal] = maria_palette;
+        // maria_lineRAM[maria_horizontal] = 0;
       }
     }
   }
@@ -146,11 +148,11 @@ function maria_StoreCell1(data) {
 // ----------------------------------------------------------------------------
 // StoreCell
 // ----------------------------------------------------------------------------
-//static inline void maria_StoreCell(byte high, byte low) {  
+//static inline void maria_StoreCell(byte high, byte low) {
 function maria_StoreCell2(high, low) {
   // banksets changes
   var kmode = ram[CTRL] & 4;
-  var c = (maria_palette & 0x10) | high | low; 
+  var c = (maria_palette & 0x10) | high | low;
   if (((c & 3) || kmode) && (maria_horizontal < MARIA_LINERAM_SIZE)) {
     maria_lineRAM[maria_horizontal] = c;
   }
@@ -161,7 +163,7 @@ function maria_StoreCell2(high, low) {
   //   if (low || high) {
   //     let v = maria_palette & 16 | high | low;
   //     if (rmode === 0 && !(v & 3)) console.log("## C&3 occurring!")
-      
+
   //     if (rmode !==0 || v & 3)
   //       maria_lineRAM[maria_horizontal] = v;
   //   }
@@ -201,7 +203,7 @@ function maria_IsHolyDMA() {
 // ----------------------------------------------------------------------------
 //extern byte atari_pal8[256];
 
-//static inline byte maria_GetColor(byte data) {  
+//static inline byte maria_GetColor(byte data) {
 function maria_GetColor(data) {
   data &= 0xFF;
   if (data & 3) {
@@ -226,7 +228,7 @@ function maria_StoreGraphic() {
       // #if 0 // Wii: disabled due to rendering in Kangaroo mode
       //       maria_StoreCell(0, 0);
       //       maria_StoreCell(0, 0);
-      // #endif      
+      // #endif
       //maria_horizontal += 2;
       maria_horizontal = (maria_horizontal + 2) & 0xFF;
     }
@@ -242,7 +244,7 @@ function maria_StoreGraphic() {
       //       maria_StoreCell(0);
       //       maria_StoreCell(0);
       //       maria_StoreCell(0);
-      // #endif      
+      // #endif
       //maria_horizontal += 4;
       maria_horizontal = (maria_horizontal + 4) & 0xFF;
     }
@@ -273,7 +275,7 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
   var pixel = offset;
   if (rmode == 0) {
     // 160A/B
-    //int pixel = 0;    
+    //int pixel = 0;
     //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
     for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
       //word color;
@@ -292,7 +294,7 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
       buffer[pixel++] = color;
       if (color_kill) {
         colorKill(buffer, pixel - 8);
-      }      
+      }
     }
   }
   else if (rmode == 2) {
@@ -310,7 +312,7 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 4) >>> 2) | ((maria_lineRAM[index + 3] & 1) << 1));
       if (color_kill) {
         colorKill(buffer, pixel - 8);
-      }      
+      }
     }
   }
   else if (rmode == 3) {
@@ -328,7 +330,7 @@ function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
       buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 28) | ((maria_lineRAM[index + 3] & 1) << 1));
       if (color_kill) {
         colorKill(buffer, pixel - 8);
-      }      
+      }
     }
   }
 
@@ -398,7 +400,7 @@ function maria_StoreLineRAM() {
       maria_dp.wPlusEqual(4);
     }
     else {
-      maria_cycles += 10; // Maria cycles (Header 5 byte) 
+      maria_cycles += 10; // Maria cycles (Header 5 byte)
       //maria_palette = (memory_ram[maria_dp.w + 3] & 224) >> 3;
       maria_palette = (((dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3)) & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 4];
@@ -422,7 +424,7 @@ function maria_StoreLineRAM() {
       maria_pp.bhPlusEqual(maria_offset);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
-        if (maria_cycles >= MARIA_CYCLE_LIMIT) 
+        if (maria_cycles >= MARIA_CYCLE_LIMIT)
           break;
 
         if (maria_IsHolyDMA()) {
@@ -444,7 +446,7 @@ function maria_StoreLineRAM() {
       basePP.copy(maria_pp);
       //for (int index = 0; index < width; index++) {
       for (var index = 0; index < width; index++) {
-        if (maria_cycles >= MARIA_CYCLE_LIMIT) 
+        if (maria_cycles >= MARIA_CYCLE_LIMIT)
           break;
 
         //maria_pp.b.l = memory_ram[basePP.w++];
@@ -460,11 +462,11 @@ function maria_StoreLineRAM() {
         } else {
           maria_cycles += 6;
           if (cwidth) {
-            maria_cycles += 3; 
+            maria_cycles += 3;
           }
         }
 
-        maria_StoreGraphic(); // Maria cycles (Indirect, 1 byte)        
+        maria_StoreGraphic(); // Maria cycles (Indirect, 1 byte)
         if (cwidth) {
           maria_StoreGraphic();
         }
@@ -479,7 +481,7 @@ function maria_StoreLineRAM() {
     maria_cycles += 6; // extra shutdown time
     if ((dr ? ram[maria_dpp.getW() + 3] : ramf(maria_dpp.getW() + 3)) & 128) {
       maria_cycles += 17; // interrupt overhead
-    }  
+    }
   }
 }
 
@@ -503,7 +505,7 @@ function maria_Reset() {
   //
   // WII
   //
-  // These values need to be reset to allow switching between carts. 
+  // These values need to be reset to allow switching between carts.
   // This appears to be a bug in the ProSystem emulator.
   //
   maria_cycles = 0;
@@ -555,7 +557,7 @@ function maria_RenderScanline(maria_scanline) {
       //* bgstart++ = bgcolor;
       maria_surface[bgstart_idx++] = bgcolor;
     }
-  } else if ((ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {    
+  } else if ((ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {
     if (maria_scanline == maria_displayArea.top) {
       //maria_dpp.b.l = memory_ram[DPPL];
       maria_dpp.setBL(ram[DPPL]);
@@ -583,10 +585,10 @@ function maria_RenderScanline(maria_scanline) {
       maria_dp.setBL((dr ? ram[maria_dpp.getW() + 2] : ramf(maria_dpp.getW() + 2)));
       //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
       maria_dp.setBH((dr ? ram[maria_dpp.getW() + 1] : ramf(maria_dpp.getW() + 1)));
-      
+
       maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
       maria_StoreLineRAM();
-    
+
       // Swap buffers
       maria_lineRAM_index = (maria_lineRAM_index == 1 ? 0 : 1);
       maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
@@ -598,7 +600,7 @@ function maria_RenderScanline(maria_scanline) {
 
       for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
         maria_lineRAM[index] = 0;
-      }  
+      }
 
       if (maria_scanline > maria_displayArea.top) {
         if (maria_offset == 0) {
@@ -639,8 +641,8 @@ function maria_Clear() {
   }
 }
 
-function SetSurface(surface) { 
-  maria_surface = surface; 
+function SetSurface(surface) {
+  maria_surface = surface;
 }
 
 function IsNMI() {
@@ -649,13 +651,13 @@ function IsNMI() {
 
 Events.addListener(
   new Events.Listener("onCartridgeLoaded", function(cart) {
-    // banksets changes  
+    // banksets changes
     dr = !cart.IsXmEnabled() && !cart.IsBanksets() && cart.GetType() !== cart.CARTRIDGE_TYPE_SOUPER;
     console.log("Maria RAM Direct: " + dr);
     // banksets changes
     banksets = cart.IsBanksets();
     souper = cart.GetType() == Cart.CARTRIDGE_TYPE_SOUPER;
-  }));  
+  }));
 
 export {
   maria_Clear as Clear,
