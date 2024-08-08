@@ -1039,21 +1039,22 @@ function sally_SBC() {
     var ztemp = new Pair();
     ztemp.setW(sally_a - data - !(sally_p & SALLY_FLAG.C));
 
+    // BCD Fix?: Proper alignment w/ A7800 and hardware based on KGCD issue.
     //word al = (sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C);
-    var al = ((sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C)) & 0xFFFF;
+    var al = ((sally_a & 15) - (data & 15) - !(sally_p & SALLY_FLAG.C)) /*& 0xFFFF*/;
     //word ah = (sally_a >> 4) - (data >> 4);
-    var ah = ((sally_a >>> 4) - (data >>> 4)) & 0xFFFF;
+    var ah = ((sally_a >>> 4) - (data >>> 4)) /*& 0xFFFF*/;
 
-    if (al > 9) {
+    if (al < 0) {
       //al -= 6;
-      al = (al - 6) & 0xFFFF;
+      al = (al - 6) /*& 0xFFFF*/;
       //ah--;
-      ah = (ah - 1) & 0xFFFF;
+      ah = (ah - 1) /*& 0xFFFF*/;
     }
 
-    if (ah > 9) {
+    if (ah < 0) {
       //ah -= 6;
-      ah = (ah - 6) & 0xFFFF;
+      ah = (ah - 6) /*& 0xFFFF*/;
     }
 
     //pair temp;
