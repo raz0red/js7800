@@ -113,6 +113,9 @@ var cartridge_swap_buttons = false;
 var cartridge_hsc_enabled = false;
 var cartridge_composite = false;
 
+var cartridge_paddle_p0 = false;
+var cartridge_paddle_p1 = true;
+
 // banksets changes
 var cartridge_banksets = false;
 var cartridge_banksets_begin = 0;
@@ -560,7 +563,7 @@ function cartridge_Load(data, size) {
    }
 
   var crc16 = Crc16(cartridge_buffer.slice((
-    cartridge_size - (16 * 1024)), 
+    cartridge_size - (16 * 1024)),
     cartridge_size - (16 * 1024) + 1024));
 
    // PPII Hack.
@@ -774,7 +777,7 @@ function cartridge_Write(address, data) {
           cartridge_souper_SetRamPageBank(1, data);
           break;
       case CARTRIDGE_SOUPER_AUDIO_CMD:
-          window.Module._bupchip_ProcessAudioCommand(data); 
+          window.Module._bupchip_ProcessAudioCommand(data);
           break;
       }
       break;
@@ -966,6 +969,14 @@ function GetRegion() {
 
 function IsComposite() {
   return cartridge_composite;
+}
+
+function IsPaddleP0() {
+  return cartridge_paddle_p0;
+}
+
+function IsPaddleP1() {
+  return cartridge_paddle_p1;
 }
 
 function IsPokeyEnabled() {
@@ -1201,6 +1212,8 @@ export {
   IsLightGunEnabled,
   IsComposite,
   IsBupChip,
+  IsPaddleP0,
+  IsPaddleP1,
   GetFlags,
   GetHblank,
   GetLeftSwitch,

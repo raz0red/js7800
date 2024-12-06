@@ -81,6 +81,7 @@ var prosystem_scanlines = 262;
 //uint prosystem_cycles = 0;
 var prosystem_cycles = 0;
 var prosystem_mstat_adjust = 0;
+var total_cycles = 0;
 
 
 /** The current Maria scan line */
@@ -137,6 +138,7 @@ function prosystem_Reset(postResetCallback) {
       var postHsLoad = function(isSuccess) {
         Events.fireEvent("onHighScoreCartLoaded", isSuccess);
         prosystem_cycles = Sally.ExecuteRES() << 2;
+        total_cycles += prosystem_cycles;
         prosystem_active = true;
         // Invoke post reset callback
         postResetCallback();
@@ -260,10 +262,12 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     while (prosystem_cycles < cartridge_hblank) {
       cycles = (sally_ExecuteInstruction() << 2);
       prosystem_cycles += cycles;
+      total_cycles += cycles;
       if (lightgun) prosystem_FireLightGun();
 
       if (Sally.GetHalfCycle())  {
         prosystem_cycles += 2;
+        total_cycles += cycles;
         if (lightgun) prosystem_FireLightGun();
       }
 
@@ -288,6 +292,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     Xm.setDmaActive(false);
 
       prosystem_cycles += cycles;
+      total_cycles += cycles;
       dbg_maria_cycles += cycles; // debug
 
       if (riot_IsTimingEnabled()) {
@@ -305,6 +310,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
         riot_UpdateTimer(cycles >>> 2);
       }
         prosystem_cycles += cycles;
+        total_cycles += cycles;
 
         if (memory_ram[WSYNC]) {
           dbg_wsync_count++; // debug
@@ -318,11 +324,13 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
     while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
       cycles = (sally_ExecuteInstruction() << 2);
       prosystem_cycles += cycles;
+      total_cycles += cycles;
       if (lightgun) prosystem_FireLightGun();
 
       if (Sally.GetHalfCycle()) {
-         prosystem_cycles += 2;
-      if (lightgun) prosystem_FireLightGun();
+        prosystem_cycles += 2;
+        total_cycles += 2;
+        if (lightgun) prosystem_FireLightGun();
       }
 
       if (riot_IsTimingEnabled()) {
@@ -344,6 +352,9 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
         riot_UpdateTimer((CYCLES_PER_SCANLINE - prosystem_cycles) >>> 2);
       }
       prosystem_cycles = CYCLES_PER_SCANLINE;
+      if (CYCLES_PER_SCANLINE > prosystem_cycles) {
+        total_cycles += CYCLES_PER_SCANLINE - prosystem_cycles;
+      }
     }
 
     dbg_p6502_cycles += prosystem_cycles; // debug
@@ -436,6 +447,14 @@ function GetCycles() {
   return prosystem_cycles;
 }
 
+function GetTotalCycles() {
+  return total_cycles;
+}
+
+function SetTotalCycles(cycles) {
+  total_cycles = 0;
+}
+
 function GetExtraCycles() {
   return prosystem_extra_cycles;
 }
@@ -497,6 +516,8 @@ export {
   GetScanlines,
   SetScanlines,
   GetCycles,
+  GetTotalCycles,
+  SetTotalCycles,
   GetExtraCycles,
   GetDebugSavedCycles,
   GetDebugWsyncCount,
@@ -517,7 +538,7 @@ const PRO_SYSTEM_STATE_HEADER="PRO-SYSTEM STATE";
 // ----------------------------------------------------------------------------
 function ProSystemSave()
 {
-  const loc_buffer = new Array(40 * 1024 + XM.XM_RAM_SIZE + 4);  
+  const loc_buffer = new Array(40 * 1024 + XM.XM_RAM_SIZE + 4);
 
   console.log("Saving game state.");
 
@@ -647,7 +668,7 @@ function ProSystemLoad(loc_buffer) {
   if (size != (256 + 32 + 16453 + cbrSize) &&
     size != (256 + 32 + 32837 + cbrSize) &&
     size != (256 + 32 + 16453 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&  /* XM without supercart ram */
-    size != (256 + 32 + 32837 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&    /* XM with supercart ram */ 
+    size != (256 + 32 + 32837 + 14 + Xm.XM_RAM_SIZE + cbrSize) &&    /* XM with supercart ram */
     size != 49517 /* Souper */) {
     console.log("Save buffer has an invalid size.");
     return false;
@@ -765,12 +786,12 @@ function ProSystemLoad(loc_buffer) {
 
   if (Cartridge.GetType() == Cartridge.CARTRIDGE_TYPE_SOUPER) {
     Cartridge.SouperChrBank[0] = loc_buffer[offset++];
-    Cartridge.SouperChrBank[1] = loc_buffer[offset++];    
+    Cartridge.SouperChrBank[1] = loc_buffer[offset++];
     Cartridge.SetSouperMode(loc_buffer[offset++]);
     Cartridge.SouperRamBank[0] = loc_buffer[offset++];
     Cartridge.SouperRamBank[1] = loc_buffer[offset++];
     for(let idx = 0; idx < Memory.SouperRam.length; idx++) {
-      Memory.SouperRam[idx] = loc_buffer[offset++];      
+      Memory.SouperRam[idx] = loc_buffer[offset++];
     }
     window.Module._bupchip_SetFlags(loc_buffer[offset++]);
     window.Module._bupchip_SetVolumeValue(loc_buffer[offset++]);

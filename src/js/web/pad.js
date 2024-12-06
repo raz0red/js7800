@@ -11,6 +11,12 @@ function StandardMapping(props) {
       }
       return false;
     },
+    getAnalog: function(pad, axesIndex) {
+      var axes = pad.axes;
+      if (axes.length > axesIndex) {
+        return axes[axesIndex];
+      }
+    },
     isPressed: function (pad, buttonIndex) {
       if (pad && pad.buttons) {
         var buttons = pad.buttons;
@@ -41,7 +47,7 @@ function StandardMapping(props) {
     isButton2: function (pad) { return this.isPressed(pad, 1); },
     isReset: function (pad) { return this.isPressed(pad, 9); },
     isSelect: function (pad) { return this.isPressed(pad, 8); },
-    isPause: function (pad) { return this.isPressed(pad, 4) || this.isPressed(pad, 5); }
+    isPause: function (pad) { return this.isPressed(pad, 4) || this.isPressed(pad, 5); },
   });
 
   if (props) {
@@ -51,8 +57,8 @@ function StandardMapping(props) {
 
 var stdMapping = new StandardMapping();
 var iosMapping = new StandardMapping({
-  isAnalogLeft: function (pad, stickIndex) { 
-    return this.isAnalogDir(pad, stickIndex ? 2 : 0, false); 
+  isAnalogLeft: function (pad, stickIndex) {
+    return this.isAnalogDir(pad, stickIndex ? 2 : 0, false);
   },
   isAnalogRight: function (pad, stickIndex) {
     return this.isAnalogDir(pad, stickIndex ? 2 : 0, true);
@@ -69,7 +75,8 @@ var iosMapping = new StandardMapping({
   isDigitalDown: function (pad) { return this.isAnalogDir(pad, 5, false); },
   isReset: function (pad) { return this.isPressed(pad, 5); },
   isSelect: function (pad) {  return this.isPressed(pad, 4); },
-  isPause: function (pad) { return false; }  
+  isPause: function (pad) { return false; },
+  getAnalog: function () { return 0; }
 });
 
 function PadMapping(padIn, mappingIn) {
@@ -78,28 +85,28 @@ function PadMapping(padIn, mappingIn) {
 
   function isLeft(stickIndex) {
     if (!pad) return false;
-    return mapping.isDigitalLeft(pad) || 
+    return mapping.isDigitalLeft(pad) ||
       ((stickIndex !== undefined) &&
         mapping.isAnalogLeft(pad, stickIndex));
   }
 
   function isRight(stickIndex) {
     if (!pad) return false;
-    return mapping.isDigitalRight(pad) || 
+    return mapping.isDigitalRight(pad) ||
       ((stickIndex !== undefined) &&
         mapping.isAnalogRight(pad, stickIndex));
   }
 
   function isUp(stickIndex) {
     if (!pad) return false;
-    return mapping.isDigitalUp(pad) || 
+    return mapping.isDigitalUp(pad) ||
       ((stickIndex !== undefined) &&
         mapping.isAnalogUp(pad, stickIndex));
   }
 
-  function isDown(stickIndex) {    
+  function isDown(stickIndex) {
     if (!pad) return false;
-    return mapping.isDigitalDown(pad) || 
+    return mapping.isDigitalDown(pad) ||
       ((stickIndex !== undefined) &&
         mapping.isAnalogDown(pad, stickIndex));
   }
@@ -108,7 +115,7 @@ function PadMapping(padIn, mappingIn) {
     if (!pad || (stickIndex === undefined)) return false;
     return mapping.isAnalogLeft(pad, stickIndex);
   }
-    
+
   function isAnalogRight(stickIndex) {
     if (!pad || (stickIndex === undefined)) return false;
     return mapping.isAnalogRight(pad, stickIndex);
@@ -122,7 +129,7 @@ function PadMapping(padIn, mappingIn) {
   function isAnalogDown(stickIndex) {
     if (!pad || (stickIndex === undefined)) return false;
     return mapping.isAnalogDown(pad, stickIndex);
-  }  
+  }
 
   function isButton1() {
     if (!pad) return false;
@@ -132,7 +139,7 @@ function PadMapping(padIn, mappingIn) {
   function isButton2() {
     if (!pad) return false;
     return mapping.isButton2(pad);
-  } 
+  }
 
   function isReset() {
     if (!pad) return false;
@@ -147,6 +154,11 @@ function PadMapping(padIn, mappingIn) {
   function isPause() {
     if (!pad) return false;
     return mapping.isPause(pad);
+  }
+
+  function getAnalog(analogIndex) {
+    if (!pad) return 0;
+    return mapping.getAnalog(pad, analogIndex);
   }
 
   return {
@@ -165,7 +177,8 @@ function PadMapping(padIn, mappingIn) {
     isButton2: isButton2,
     isReset: isReset,
     isSelect: isSelect,
-    isPause: isPause
+    isPause: isPause,
+    getAnalog: getAnalog,
   }
 };
 
@@ -188,8 +201,8 @@ function poll() {
       var standard = (pad.mapping && (pad.mapping == "standard"));
       if (!standard && Util.isIosDevice) {
         pads[padIdx].setMapping(iosMapping);
-      } 
-      
+      }
+
       padIdx++;
     }
   }
@@ -199,7 +212,7 @@ function poll() {
 }
 
 function getMapping(index) {
-  return pads[index];  
+  return pads[index];
 }
 
 export {

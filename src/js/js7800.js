@@ -52,7 +52,7 @@ var errorHandler = function (message) {
 }
 
 /** The keyboard data */
-var keyboardData = new Array(19);
+var keyboardData = new Array(30);
 
 var initialized = false;
 var forceAdjustTimestamp = false;

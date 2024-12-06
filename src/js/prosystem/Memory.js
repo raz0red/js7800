@@ -30,6 +30,7 @@ import * as Riot from "./Riot.js"
 import * as Tia from "./Tia.js"
 import * as Bios from "./Bios.js"
 import * as Events from "../events.js"
+import * as ProSystem from "./ProSystem.js"
 
 var pokey_SetRegister = Pokey.SetRegister;
 var pokey_GetRegister = Pokey.GetRegister;
@@ -106,9 +107,14 @@ var cartridge_flags = 0;
 var cartridge_xm = false;
 var cartridge_type = 0;
 
+var cartridge_paddle_p0 = false;
+var cartridge_paddle_p1 = false;
+
 var lock = false;
 
 var maria_read = false;
+
+var keyboardData = null;
 
 // ----------------------------------------------------------------------------
 // Reset
@@ -168,6 +174,26 @@ function _memory_Read(address) {
   }
 
   switch (address) {
+    case INPT0:
+      if (cartridge_paddle_p0) {
+        var elapsed = (ProSystem.GetTotalCycles()/(97 << 2)) | 0;
+        return (elapsed > keyboardData[20] ? 0x80 : 0x00);
+      }
+    case INPT1:
+      if (cartridge_paddle_p0) {
+        var elapsed = (ProSystem.GetTotalCycles()/(97 << 2)) | 0;
+        return (elapsed > keyboardData[22] ? 0x80 : 0x00);
+      }
+    case INPT2:
+      if (cartridge_paddle_p1) {
+        var elapsed = (ProSystem.GetTotalCycles()/(97 << 2)) | 0;
+        return (elapsed > keyboardData[24] ? 0x80 : 0x00);
+      }
+    case INPT3:
+      if (cartridge_paddle_p1) {
+        var elapsed = (ProSystem.GetTotalCycles()/(97 << 2)) | 0;
+        return (elapsed > keyboardData[26] ? 0x80 : 0x00);
+      }
     case INTIM:
     case INTIM | 0x2:
       memory_ram[INTFLG] &= 0x7f;
@@ -232,6 +258,8 @@ function memory_ReadMaria(address) {
   return data;
 }
 
+let paddle_is_grounded=0;
+
 // ----------------------------------------------------------------------------
 // Write
 // ----------------------------------------------------------------------------
@@ -278,6 +306,17 @@ function memory_Write(address, data) {
     // Multiple addresses are used to set INPTCTRL
     // Lock Mode needs to be set
     if (address >= 0 && address <= 0xf) {
+      if (cartridge_paddle_p0 || cartridge_paddle_p1) {
+        if (address === 1) {
+          if(data & 0x80) {
+            paddle_is_grounded=1;
+          } else if (paddle_is_grounded) {
+            paddle_is_grounded=0;
+            ProSystem.SetTotalCycles(0);
+          }
+        }
+      }
+
       if (!lock) {
         if (data & 1) {
           lock = true;
@@ -475,10 +514,15 @@ function OnCartridgeLoaded() {
   cartridge_banksets = Cartridge.IsBanksets();
   cartridge_halt_banked_ram = Cartridge.IsHaltBankedRam();
   cartridge_type = Cartridge.GetType();
+  cartridge_paddle_p0 = Cartridge.IsPaddleP0();
+  cartridge_paddle_p1 = Cartridge.IsPaddleP1();
 }
 
 Events.addListener(
   new Events.Listener("onCartridgeLoaded", OnCartridgeLoaded));
+
+Events.addListener(new Events.Listener("init",
+  function (event) { keyboardData = event.keyboardData; }));
 
 Events.addListener(
   new Events.Listener("onHighScoreCartLoaded",

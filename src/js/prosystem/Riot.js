@@ -69,6 +69,10 @@ var riot_currentTime = 0;
 //unsigned int riot_timer_count = 0;
 var riot_timer_count = 0;
 
+var isPaddleP0 = false;
+var isPaddleP1 = false;
+var keyboardData = null;
+
 //void riot_Reset(void) {
 function riot_Reset() {
   riot_SetDRA(0);
@@ -182,11 +186,46 @@ function riot_SetInput(input) { // TODO JS: Input will be array
   see:  http://www.atariage.com/forums/index.php?showtopic=127162
   also see 7800 schematic and RIOT datasheet  */
 
+
+  if (isPaddleP0) {
+    if (keyboardData[21])
+    {
+      memory_ram[SWCHA] &= 0x7f;
+    }
+    else {
+      memory_ram[SWCHA] |= 0x80;
+    }
+    if (keyboardData[23])
+    {
+      memory_ram[SWCHA] &= 0xbf;
+    }
+    else {
+      memory_ram[SWCHA] |= 0x40;
+    }
+  }
+
+  if (isPaddleP1) {
+    if (keyboardData[25])
+    {
+      memory_ram[SWCHA] &= 0xf7;
+    }
+    else {
+      memory_ram[SWCHA] |= 0x08;
+    }
+    if (keyboardData[27])
+    {
+      memory_ram[SWCHA] &= 0xfb;
+    }
+    else {
+      memory_ram[SWCHA] |= 0x04;
+    }
+  }
+
   if (memory_ram[SWCHB] & 0x04)	//first player in 1 button mode
   {
     memory_ram[INPT0] &= 0x7f;		//new style buttons are always off in this mode
     memory_ram[INPT1] &= 0x7f;
-    if (input[0x04] || input[0x05])	//in this mode, either button triggers only the legacy button signal
+    if (!isPaddleP0 && (input[0x04] || input[0x05]))	//in this mode, either button triggers only the legacy button signal
     {
       memory_ram[INPT4] &= 0x7f;	//this button signal activates by turning off the high bit
     }
@@ -197,14 +236,14 @@ function riot_SetInput(input) { // TODO JS: Input will be array
   else			//first player in 2 button mode
   {
     memory_ram[INPT4] |= 0x80;		//2600 button is always off in this mode
-    if (input[0x04])					//left button (button 1)
+    if (!isPaddleP0 && input[0x04])					//left button (button 1)
     {
       memory_ram[INPT1] |= 0x80;	//these buttons activate by turning on the high bit.
     }
     else {
       memory_ram[INPT1] &= 0x7f;
     }
-    if (input[0x05])					//right button (button 2)
+    if (!isPaddleP0 && input[0x05])					//right button (button 2)
     {
       memory_ram[INPT0] |= 0x80;
     }
@@ -217,7 +256,7 @@ function riot_SetInput(input) { // TODO JS: Input will be array
   if (memory_ram[SWCHB] & 0x10) {
     memory_ram[INPT2] &= 0x7f;
     memory_ram[INPT3] &= 0x7f;
-    if (input[0x0a] || input[0x0b]) {
+    if (!isPaddleP1 && (input[0x0a] || input[0x0b])) {
       memory_ram[INPT5] &= 0x7f;
     }
     else {
@@ -226,13 +265,13 @@ function riot_SetInput(input) { // TODO JS: Input will be array
   }
   else {
     memory_ram[INPT5] |= 0x80;
-    if (input[0x0a]) {
+    if (!isPaddleP1 && input[0x0a]) {
       memory_ram[INPT3] |= 0x80;
     }
     else {
       memory_ram[INPT3] &= 0x7f;
     }
-    if (input[0x0b]) {
+    if (!isPaddleP1 && input[0x0b]) {
       memory_ram[INPT2] |= 0x80;
     }
     else {
@@ -336,9 +375,10 @@ function GetTimerCount() {
   return riot_timer_count;
 }
 
-function init() {
+function init(event) {
   memory_ram = Memory.ram;
   memory_Write = Memory.Write;
+  keyboardData = event.keyboardData;
 }
 
 
@@ -383,6 +423,13 @@ function SetClocks(c) {
 }
 
 Events.addListener(new Events.Listener("init", init));
+
+Events.addListener(
+  new Events.Listener("onCartridgeLoaded", (cart) => {
+    isPaddleP0 = cart.IsPaddleP0();
+    isPaddleP1 = cart.IsPaddleP1();
+  }
+));
 
 export {
   riot_UpdateTimer as UpdateTimer,
