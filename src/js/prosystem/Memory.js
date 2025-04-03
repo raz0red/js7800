@@ -179,21 +179,25 @@ function _memory_Read(address) {
         var elapsed = (ProSystem.GetTotalCycles()/(97 << 2)) | 0;
         return (elapsed > keyboardData[20] ? 0x80 : 0x00);
       }
+      break;
     case INPT1:
       if (cartridge_paddle_p0) {
         var elapsed = (ProSystem.GetTotalCycles()/(97 << 2)) | 0;
         return (elapsed > keyboardData[22] ? 0x80 : 0x00);
       }
+      break;
     case INPT2:
       if (cartridge_paddle_p1) {
         var elapsed = (ProSystem.GetTotalCycles()/(97 << 2)) | 0;
         return (elapsed > keyboardData[24] ? 0x80 : 0x00);
       }
+      break;
     case INPT3:
       if (cartridge_paddle_p1) {
         var elapsed = (ProSystem.GetTotalCycles()/(97 << 2)) | 0;
         return (elapsed > keyboardData[26] ? 0x80 : 0x00);
       }
+      break;
     case INTIM:
     case INTIM | 0x2:
       memory_ram[INTFLG] &= 0x7f;
@@ -259,6 +263,7 @@ function memory_ReadMaria(address) {
 }
 
 let paddle_is_grounded=0;
+let paddle_flip_count = 0;
 
 // ----------------------------------------------------------------------------
 // Write
@@ -306,16 +311,22 @@ function memory_Write(address, data) {
     // Multiple addresses are used to set INPTCTRL
     // Lock Mode needs to be set
     if (address >= 0 && address <= 0xf) {
-      if (cartridge_paddle_p0 || cartridge_paddle_p1) {
+      //if (cartridge_paddle_p0 || cartridge_paddle_p1) {
         if (address === 1) {
           if(data & 0x80) {
             paddle_is_grounded=1;
           } else if (paddle_is_grounded) {
             paddle_is_grounded=0;
+            if (paddle_flip_count < 50) {
+              paddle_flip_count++;
+              if (paddle_flip_count === 50) {
+                alert('paddles!');
+              }
+            }
             ProSystem.SetTotalCycles(0);
           }
         }
-      }
+      //}
 
       if (!lock) {
         if (data & 1) {

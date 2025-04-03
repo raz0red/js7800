@@ -267,7 +267,7 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
       if (Sally.GetHalfCycle())  {
         prosystem_cycles += 2;
-        total_cycles += cycles;
+        total_cycles += 2;
         if (lightgun) prosystem_FireLightGun();
       }
 

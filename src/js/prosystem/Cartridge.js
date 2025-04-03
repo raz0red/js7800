@@ -114,7 +114,7 @@ var cartridge_hsc_enabled = false;
 var cartridge_composite = false;
 
 var cartridge_paddle_p0 = false;
-var cartridge_paddle_p1 = true;
+var cartridge_paddle_p1 = false;
 
 // banksets changes
 var cartridge_banksets = false;

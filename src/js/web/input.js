@@ -57,11 +57,11 @@ function updateJoystick(joyIndex, keyboardData, pad0) {
     // keyboardData[22] = 256 - (((p.getAnalog(2) * 128) + 128) | 0);
     // keyboardData[23] = p.isButton1();
   } else if (joyIndex === 1 && isPaddleP1) {
-    const p = Pad.getMapping(0);
-    keyboardData[24] = 256 - (((p.getAnalog(0) * 128) + 128) | 0);
-    keyboardData[25] = p.isButton1();
-    keyboardData[26] = 256 - (((p.getAnalog(2) * 128) + 128) | 0);
-    keyboardData[27] = p.isButton2();
+    // const p = Pad.getMapping(0);
+    // keyboardData[24] = 256 - (((p.getAnalog(0) * 128) + 128) | 0);
+    // keyboardData[25] = p.isButton1();
+    // keyboardData[26] = 256 - (((p.getAnalog(2) * 128) + 128) | 0);
+    // keyboardData[27] = p.isButton2();
   } else {
     // | 00 06     | Joystick 1 2 | Right
     keyboardData[0 + offset] =
