@@ -21,6 +21,7 @@ import logoImageSrc from '../images/Atari_7800_Logo.png'
 function HighScoreCallback() {}
 HighScoreCallback.prototype = {
   getRom: function () { return null; },
+  getPalRom: function () { return null; },
   write: function (address, data) { },
   loadSram: function (postLoadCallback) { postLoadCallback(null); }
 };

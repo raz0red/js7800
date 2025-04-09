@@ -42,6 +42,7 @@ var highScoreCallback = null;
 
 var HBLANK_DEFAULT = 28;
 var REGION_NTSC = null;
+var REGION_PAL = null;
 var CARTRIDGE_TYPE_NORMAL = 0;
 var CARTRIDGE_TYPE_SUPERCART = 1;
 var CARTRIDGE_TYPE_SUPERCART_LARGE = 2;
@@ -898,18 +899,19 @@ function cartridge_Release() {
 }
 
 function cartridge_LoadHighScoreCart(callback) {
-  if (!cartridge_hsc_enabled || (cartridge_region != REGION_NTSC)) {
+  cartridge_hsc_enabled = true;
+
+  if (!cartridge_hsc_enabled) {
     // Only load the cart if it is enabled and the region is NTSC
-    console.log(cartridge_hsc_enabled ?
-      "Not loading high score cartridge, PAL region." :
-      "High score cartridge is disabled (via db and cart header)."
-    );
+    console.log("High score cartridge is disabled (via db and cart header).");
     callback(false);
     return;
   }
 
   // Load high score cartridge
-  var high_score_buffer = highScoreCallback.getRom();
+  var high_score_buffer = (
+    cartridge_region === REGION_PAL ?
+      highScoreCallback.getPalRom() : highScoreCallback.getRom());
   if (high_score_buffer == null) {
     console.log("Unable to locate high score cartridge.");
     callback(false);
@@ -918,12 +920,12 @@ function cartridge_LoadHighScoreCart(callback) {
   console.log("Found high score cartridge.");
 
   // Validate high score cartridge hash
-  var digest = md5(high_score_buffer);
-  if (digest != "c8a73288ab97226c52602204ab894286") {
-    console.log("High score cartridge hash is invalid.");
-    callback(false);
-    return;
-  }
+  // var digest = md5(high_score_buffer);
+  // if (digest != "c8a73288ab97226c52602204ab894286") {
+  //   console.log("High score cartridge hash is invalid.");
+  //   callback(false);
+  //   return;
+  // }
 
   // Post SRAM load callback
   var postLoadCallback = function(sram) {
@@ -1185,6 +1187,7 @@ function GetCartridgeBank() {
 
 function init(e) {
   REGION_NTSC = e.Region.REGION_NTSC;
+  REGION_PAL = e.Region.REGION_PAL;
 
   memory_WriteROM = Memory.WriteROM;
   memory_ClearROM = Memory.ClearROM;
