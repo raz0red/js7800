@@ -47,7 +47,7 @@ jobs:
         BASE_BRANCH: master
         BRANCH: gh-pages
         FOLDER: site/deploy
-        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios", "banksets", "banksets_cycleS", "tia"]'
+        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios", "banksets", "banksets_cycleS", "tia", "palhsc"]'
 
     - name: Deploy to GitHub pages (staging)
       uses: JamesIves/github-pages-deploy-action@releases/v3
@@ -118,6 +118,16 @@ jobs:
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: mobile
+
+    - name: Deploy to GitHub pages (palhsc)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/palhsc'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: palhsc
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: palhsc
 
     - name: Deploy to GitHub pages (vulns)
       uses: JamesIves/github-pages-deploy-action@releases/v3
