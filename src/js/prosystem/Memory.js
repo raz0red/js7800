@@ -198,6 +198,9 @@ function _memory_Read(address) {
         return (elapsed > keyboardData[26] ? 0x80 : 0x00);
       }
       break;
+  }
+
+  switch (address) {
     case INTIM:
     case INTIM | 0x2:
       memory_ram[INTFLG] &= 0x7f;
@@ -320,7 +323,8 @@ function memory_Write(address, data) {
             if (paddle_flip_count < 50) {
               paddle_flip_count++;
               if (paddle_flip_count === 50) {
-                alert('paddles!');
+                //alert('paddles!');
+                console.log('paddles');
               }
             }
             ProSystem.SetTotalCycles(0);

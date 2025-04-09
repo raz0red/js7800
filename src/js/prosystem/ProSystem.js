@@ -452,7 +452,7 @@ function GetTotalCycles() {
 }
 
 function SetTotalCycles(cycles) {
-  total_cycles = 0;
+  total_cycles = cycles;
 }
 
 function GetExtraCycles() {
