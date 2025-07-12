@@ -126,7 +126,7 @@ var SALLY_CYCLES = [
   2, 6, 0, 0, 4, 4, 4, 4 /* SAX */, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
   2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 4 /* LAX abs */, // 160 - 175
   2, 5, 0, 6 /* LAX */, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
-  2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 192 - 207
+  2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 2 /* SBX */, 4, 4, 6, 0, // 192 - 207
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 208 - 223
   2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 222 - 239
   2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 240 - 255
@@ -1128,6 +1128,31 @@ function sally_SBC() {
 }
 
 // ----------------------------------------------------------------------------
+// SBX (AXS)
+// ----------------------------------------------------------------------------
+function sally_SBX() {
+  // Read immediate operand
+  var data = memory_Read(sally_pc.wPlusPlus());
+
+  // Calculate (A & X)
+  var temp = sally_a & sally_x;
+
+  // Subtract imm and store in X
+  var result = (temp - data) & 0xFF;
+  sally_x = result;
+
+  // Set Carry if (A & X) >= imm
+  if (temp >= data) {
+    sally_p |= SALLY_FLAG.C;
+  } else {
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
+  }
+
+  // Set Zero and Negative flags
+  sally_Flags(result);
+}
+
+// ----------------------------------------------------------------------------
 // SEC
 // ----------------------------------------------------------------------------
 function sally_SEC() {
@@ -1330,6 +1355,10 @@ function sally_ExecuteInstruction() {
   }
 
   switch (sally_opcode) {
+    case 0xCB:
+      /* SBX illegal opcode, via reveng */
+      sally_SBX();
+      return sally_cycles;
     //l_0x00:
     case 0x00:
       sally_BRK();
