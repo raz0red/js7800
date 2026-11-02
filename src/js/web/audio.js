@@ -3,6 +3,12 @@ import * as Events from "../events.js"
 
 var SOUNDBUFSIZE = 8192 << 1;
 var DEFAULT_SAMPLE_RATE = 31440; // match default rate to NTSC
+// The emulator is paced by its own timer, the sound card by its clock: any
+// difference lets the queue grow until it holds the whole ring (~0.5s late,
+// then garbled when the head laps the tail). Cap the queued samples.
+var NODE_SIZE = 2048;
+var MAX_QUEUED = NODE_SIZE * 3;
+var TRIM_TO = NODE_SIZE * 2;
 
 /** The audio context */
 var audioCtx = null;
@@ -12,6 +18,7 @@ var audioNode = null;
 var mixbuffer = new Array(SOUNDBUFSIZE);
 var mixhead = 0;
 var mixtail = 0;
+var lastSample = 0;
 
 function storeSound(sample, ym, length) {
   for (var i = 0; i < length; i++) {
@@ -19,6 +26,10 @@ function storeSound(sample, ym, length) {
     mixbuffer[mixhead++] = ym ? (((sample[i]/255) + (ym[i]/128)) / 2) : (sample[i]/255);
     if (mixhead == SOUNDBUFSIZE)
       mixhead = 0;
+  }
+  var queued = (mixhead - mixtail + SOUNDBUFSIZE) % SOUNDBUFSIZE;
+  if (queued > MAX_QUEUED) {
+    mixtail = (mixhead - TRIM_TO + SOUNDBUFSIZE) % SOUNDBUFSIZE;
   }
 }
 
@@ -40,7 +51,7 @@ function init() {
       sampleRate = audioCtx.sampleRate;
     }
     Sound.SetSampleRate(sampleRate);
-    audioNode = audioCtx.createScriptProcessor(2048, 0, 1);
+    audioNode = audioCtx.createScriptProcessor(NODE_SIZE, 0, 1);
     audioNode.onaudioprocess = function (e) {
       var dst = e.outputBuffer.getChannelData(0);
       var done = 0;
@@ -50,9 +61,12 @@ function init() {
         if (mixtail == SOUNDBUFSIZE)
           mixtail = 0;
       }
+      // Underrun: hold the last level (silence is not 0: a drop to 0 pops)
+      var last = done > 0 ? dst[done - 1] : lastSample;
       while (done < len) {
-        dst[done++] = 0;
+        dst[done++] = last;
       }
+      lastSample = dst[len - 1];
     }
     audioNode.connect(audioCtx.destination);
     var resumeFunc =    

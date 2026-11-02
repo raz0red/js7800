@@ -536,7 +536,7 @@ function memory_WriteROM(address, size, data, offset) {
       write_to_maria = true;
     } else if (address === 32768 || address === 49152 ||
         (type === Cartridge.CARTRIDGE_TYPE_SUPERCART_ROM && address === 16384)) {
-      maria_offset = 128 * 1024;
+      maria_offset = Cartridge.GetSize() >> 1;  // Maria's half: the second half of the image
       write_to_maria = true;
     }
   }

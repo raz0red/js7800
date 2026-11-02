@@ -79,6 +79,7 @@ var prosystem_frame = 0;
 var prosystem_scanlines = 262;
 //uint prosystem_cycles = 0;
 var prosystem_cycles = 0;
+var prosystem_mstat_adjust = 0;
 
 
 /** The current Maria scan line */
@@ -270,6 +271,10 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   // Is the lightgun enabled for the current frame?
   lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
+  // Latch input at frame start: games such as Alien Brigade read the light gun
+  // trigger before the first display line
+  riot_SetInput(input);
+
   scanlinesPerBupchipTick = ((prosystem_scanlines - 1) / 4) | 0;
 
   prosystem_extra_cycles = 0;
@@ -298,11 +303,8 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
 
     if (maria_scanline == maria_displayArea.top) {
       memory_ram[MSTAT] = 0;
-      // Input reaches the machine once per frame, at the start of the first
-      // line after VBLANK, so every VBLANK sees one consistent value.
-      riot_SetInput(input);
     }
-    else if (maria_scanline == maria_displayArea.bottom) {
+    else if (maria_scanline == (maria_displayArea.bottom - prosystem_mstat_adjust /* PPII Hack */)) {
       memory_ram[MSTAT] = 128;
     }
 
@@ -517,6 +519,10 @@ function GetMariaScanline() {
   return maria_scanline;
 }
 
+function SetMstatAdjust(adjust) {
+  prosystem_mstat_adjust = adjust;
+}
+
 function OnCartridgeLoaded() {
   cartridge_pokey = Cartridge.IsPokeyEnabled();
   cartridge_xm = Cartridge.IsXmEnabled();
@@ -550,6 +556,7 @@ export {
   GetDebugWsync,
   GetDebugCycleStealing,
   GetMariaScanline,
+  SetMstatAdjust,
   ProSystemSave,
   ProSystemLoad
 }

@@ -52,7 +52,7 @@ var POKEY_AUDC3 = 0x4005;
 var POKEY_AUDF4 = 0x4006;
 var POKEY_AUDC4 = 0x4007;
 var POKEY_AUDCTL = 0x4008;
-// var POKEY_STIMER = 0x4009;
+var POKEY_STIMER = 0x4009;
 // var POKEY_SKRES = 0x400a;
 var POKEY_POTGO = 0x400b;
 // var POKEY_SEROUT = 0x400d;
@@ -394,6 +394,15 @@ function pokey_SetRegister(address, value) {
 
     case POKEY_AUDCTL:
       pokey_audctl = value;
+      break;
+
+    case POKEY_STIMER:
+      // reset all counters (reload from AUDF), clear outputs (MAME pokey.cpp STIMER_C)
+      for (var ch = POKEY_CHANNEL1; ch <= POKEY_CHANNEL4; ch++) {
+        reset_channel(ch);
+        pokey_output[ch] = 0;
+        pokey_filter[ch] = (ch < POKEY_CHANNEL3) ? 1 : 0;
+      }
       break;
 
     default:

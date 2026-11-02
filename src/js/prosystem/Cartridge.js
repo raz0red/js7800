@@ -564,6 +564,17 @@ function cartridge_Load(data, size) {
       cartridge_buffer[offset + 1] = 0xE6; // raz fix
    }
 
+  var crc16 = Crc16(cartridge_buffer.slice((
+    cartridge_size - (16 * 1024)),
+    cartridge_size - (16 * 1024) + 1024));
+
+   // PPII Hack.
+   console.log("CRC 16: 0x" + crc16.toString(16));
+   if ((crc16 & 0xFFFF) == 0x9e8a) {
+      console.log("Applying Pole Position II hack...");
+      ProSystem.SetMstatAdjust(3);
+   }
+
 
   // Swap hi and lo
   if (cartridge_type == CARTRIDGE_TYPE_ACTIVISION && (
@@ -773,7 +784,7 @@ function cartridge_Write(address, data) {
           cartridge_souper_SetRamPageBank(1, data);
           break;
       case CARTRIDGE_SOUPER_AUDIO_CMD:
-          window.Module._bupchip_ProcessAudioCommand(data); 
+          window.Module._bupchip_ProcessAudioCommand(data);
           break;
       }
       break;
@@ -925,6 +936,8 @@ function cartridge_LoadHighScoreCart(callback) {
   // Post SRAM load callback
   var postLoadCallback = function(sram) {
     if (sram) {
+      // (Memory drops $1000-$17FF writes until the cart is marked loaded: mark it first)
+      Events.fireEvent("onHighScoreCartLoaded", true);
       for (var i = 0; i < sram.length && i < HS_SRAM_SIZE; i++) {
         memory_Write(HS_SRAM_START + i, sram[i]);
       }
