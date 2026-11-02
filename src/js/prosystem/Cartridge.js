@@ -641,6 +641,12 @@ function cartridge_Store() {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
 
+        // A 128K SuperGame board has bank 6 at $4000 (bank 7 is fixed at $C000).
+        // Klax (prototype) draws its text from there; leaving it empty reads as zeros
+        // (or open bus), so skip carts that use the area (POKEY, XM, banksets)
+        if (size === 131072 && !cartridge_pokey && !cartridge_xm && !cartridge_banksets) {
+          memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(6));
+        }
         // Default to bank 0
         // banksets changes
         cartridge_StoreBank(0);

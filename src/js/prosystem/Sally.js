@@ -2726,6 +2726,10 @@ function sally_ExecuteInstruction() {
 // ExecuteRES
 // ----------------------------------------------------------------------------
 function sally_ExecuteRES() {
+  // A 6502 reset runs three dummy pushes, so S drops by 3 (0 -> $FD). Carts that
+  // never set up their own stack would otherwise push to $0100, which is a
+  // TIA/MARIA mirror, not RAM
+  sally_s = (sally_s - 3) & 0xFF;
   sally_p = SALLY_FLAG.I | SALLY_FLAG.R | SALLY_FLAG.Z;
   //sally_pc.b.l = memory_ram[SALLY_RES.L];
   sally_pc.setBL(memory_ram[SALLY_RES.L]);
