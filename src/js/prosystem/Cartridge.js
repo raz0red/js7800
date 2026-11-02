@@ -936,10 +936,11 @@ function cartridge_LoadHighScoreCart(callback) {
   // Post SRAM load callback
   var postLoadCallback = function(sram) {
     if (sram) {
-      // (Memory drops $1000-$17FF writes until the cart is marked loaded: mark it first)
-      Events.fireEvent("onHighScoreCartLoaded", true);
+      // Restore the SRAM directly: Memory drops writes to $1000-$17FF until the
+      // cart is marked loaded, and going through memory_Write would report each
+      // restored byte to the host as a new high score write
       for (var i = 0; i < sram.length && i < HS_SRAM_SIZE; i++) {
-        memory_Write(HS_SRAM_START + i, sram[i]);
+        Memory.ram[HS_SRAM_START + i] = sram[i];
       }
       for (var i = 0; i < high_score_buffer.length; i++) {
         memory_Write(0x3000 + i, high_score_buffer.charCodeAt(i));
