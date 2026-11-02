@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>JS7800 Global Leaderboard</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+  <link rel="manifest" href="../site.webmanifest">
+  <link href="../fonts/roboto/roboto.css" rel="stylesheet">
+  <script src="js/leaderboard.min.js"></script>
+</head>
+
+<body>
+  <div class="header">
+    <span class="header__label"><a href="../" target="_blank">JS7800</a> Global Leaderboard</span>
+    <a href="https://github.com/raz0red/js7800" target="_blank"><img class="header__logo"
+        src="../images/github-logo.svg" alt="GitHub: JS7800 by raz0red" title="GitHub: JS7800 by raz0red"></a>
+  </div>
+  <div id="leaderboard-content" class="content">
+    <div class="content-inner">
+      <div class="description">Select a game in the drop-down menu below to view current high scores.</div>
+      <div id="left">
+        <div id="top-players-box" class="infobox">
+          <div class="infobox-title">Top Players<br>(All games)</div>
+          <div id="top-players"></div>
+        </div>
+        <div id="recent-scores-box" class="infobox">
+          <div class="infobox-title">Latest High Scores</div>
+          <div id="recent-scores"></div>
+        </div>
+      </div>
+      <div id="center">
+        <div class="infobox infobox-scores">
+          <div class="game-select-outer">
+            <div class="controls-left"></div>
+            <div class="controls-center">
+              <div class="game-select-inner">
+                <div class="game-select-label">Game:</div>
+                <div class="game-select">
+                  <select id="games-select-select"></select>
+                </div>
+                <div class="game-select-label">Settings:</div>
+                <div class="game-select">
+                  <select id="games-select-filter"></select>
+                </div>
+              </div>
+            </div>
+            <div class="controls-right">
+              <div id="play-button"></div>      
+              <div id="restart-button"></div>      
+            </div>
+          </div>
+          <div>
+            <div id="scores-table" class="scores-table">              
+              <div id="loader-container" class="loader-container">
+                <div class="loader"></div>
+              </div>  
+              <table id="scores-table-table" class="scores-table-table">
+                <thead>
+                  <tr>
+                    <th>Settings</th>
+                    <th colspan="2">Player</th>
+                    <th>Score</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="right">
+        <div id="top-players-top-10-box" class="infobox">
+          <div class="infobox-title">Top Players<br>(Most competitive modes)</div>
+          <div id="top-players-top-10"></div>
+        </div>
+        <div id="most-competitive-box" class="infobox">
+          <div class="infobox-title">Most Competitive Modes</div>
+          <div id="most-competitive"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    leaderboard.start();    
+  </script>
+</body>
+
+</html>
