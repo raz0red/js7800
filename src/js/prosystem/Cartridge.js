@@ -97,6 +97,8 @@ var cartridge_crosshair_x = 0;
 var cartridge_crosshair_y = 0;
 //bool cartridge_dualanalog = false;
 var cartridge_dualanalog = false;
+// Session-only override (Advanced settings). Not reset on cartridge load, not persisted
+var cartridge_force_dualanalog = false;
 //bool cartridge_xm = false;
 var cartridge_xm = false;
 //bool cartridge_disable_bios = false;
@@ -1031,7 +1033,15 @@ function IsSwapButtons() {
 }
 
 function IsDualAnalog() {
-  return cartridge_dualanalog;
+  return cartridge_dualanalog || cartridge_force_dualanalog;
+}
+
+function IsForceDualAnalog() {
+  return cartridge_force_dualanalog;
+}
+
+function SetForceDualAnalog(force) {
+  cartridge_force_dualanalog = !!force;
 }
 
 function IsBupChip() {
@@ -1225,6 +1235,8 @@ export {
   IsXmEnabled,
   IsSwapButtons,
   IsDualAnalog,
+  IsForceDualAnalog,
+  SetForceDualAnalog,
   IsLightGunEnabled,
   IsComposite,
   IsBupChip,

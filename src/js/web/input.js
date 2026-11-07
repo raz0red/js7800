@@ -35,7 +35,9 @@ function updateInput() {
   // | 13       | Console      | Select
   keyboardData[13] = selectSet || Kb.isSelect() || (pad && pad.isSelect());
   // | 14       | Console      | Pause
-  keyboardData[14] = Kb.isPause() || (pad && pad.isPause());
+  // The shoulder buttons are fire buttons in dual analog mode, so they do not pause
+  keyboardData[14] = Kb.isPause() ||
+    (pad && !Cartridge.IsDualAnalog() && pad.isPause());
   // | 15       | Console      | Left Difficulty
   keyboardData[15] = Kb.isLeftDiffSet();
   // | 16       | Console      | Right Difficulty
@@ -71,11 +73,13 @@ function updateJoystick(joyIndex, keyboardData, pad0) {
   // | 04 10     | Joystick 1 2 | Button 1
   keyboardData[(swap ? 5 : 4) + offset] =
     (joyIndex ? p2KeyMap.isButton1() : p1KeyMap.isButton1()) ||
-    pad.isButton1();
+    pad.isButton1() ||
+    (dualanalog && !joyIndex && pad0.isRightShoulder()); // Dual analog
   // | 05 11     | Joystick 1 2 | Button 2
   keyboardData[(swap ? 4 : 5) + offset] =
     (joyIndex ? p2KeyMap.isButton2() : p1KeyMap.isButton2()) ||
-    pad.isButton2();
+    pad.isButton2() ||
+    (dualanalog && !joyIndex && pad0.isLeftShoulder()); // Dual analog
 }
 
 function reset() {

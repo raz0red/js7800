@@ -39,6 +39,8 @@ function StandardMapping(props) {
     isDigitalDown: function (pad) { return this.isPressed(pad, 13); },
     isButton1: function (pad) { return this.isPressed(pad, 0); },
     isButton2: function (pad) { return this.isPressed(pad, 1); },
+    isLeftShoulder: function (pad) { return this.isPressed(pad, 4); },
+    isRightShoulder: function (pad) { return this.isPressed(pad, 5); },
     isReset: function (pad) { return this.isPressed(pad, 9); },
     isSelect: function (pad) { return this.isPressed(pad, 8); },
     isPause: function (pad) { return this.isPressed(pad, 4) || this.isPressed(pad, 5); }
@@ -69,7 +71,9 @@ var iosMapping = new StandardMapping({
   isDigitalDown: function (pad) { return this.isAnalogDir(pad, 5, false); },
   isReset: function (pad) { return this.isPressed(pad, 5); },
   isSelect: function (pad) {  return this.isPressed(pad, 4); },
-  isPause: function (pad) { return false; }  
+  isPause: function (pad) { return false; },
+  isLeftShoulder: function (pad) { return false; },
+  isRightShoulder: function (pad) { return false; }
 });
 
 function PadMapping(padIn, mappingIn) {
@@ -134,6 +138,16 @@ function PadMapping(padIn, mappingIn) {
     return mapping.isButton2(pad);
   } 
 
+  function isLeftShoulder() {
+    if (!pad) return false;
+    return mapping.isLeftShoulder(pad);
+  }
+
+  function isRightShoulder() {
+    if (!pad) return false;
+    return mapping.isRightShoulder(pad);
+  }
+
   function isReset() {
     if (!pad) return false;
     return mapping.isReset(pad);
@@ -163,6 +177,8 @@ function PadMapping(padIn, mappingIn) {
     isAnalogDown: isAnalogDown,
     isButton1: isButton1,
     isButton2: isButton2,
+    isLeftShoulder: isLeftShoulder,
+    isRightShoulder: isRightShoulder,
     isReset: isReset,
     isSelect: isSelect,
     isPause: isPause
