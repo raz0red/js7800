@@ -411,6 +411,17 @@ function cartridge_ReadHeader(header) {
     }
   }
 
+  // super game bank switched and nothing at $4000
+  if ((ct1 & 0x02) && (!((ct1 & 0x01) ||  // pokey at $4000
+                         (ct1 & 0x04) ||  // supergame ram at $4000
+                         (ct1 & 0x08) ||  // rom at $4000
+                         (ct1 & 0x10) ||  // bank 6 at $4000
+                         (ct1 & 0x80) ||  // mirror ram at $4000
+                         cartridge_banksets))) {
+    console.log("Super game bank switched, and nothing at $4000, enabling bank 6 at $4000. (cartridge_type switch to 4).");
+    cartridge_type = CARTRIDGE_TYPE_SUPERCART_ROM;
+  }
+
   console.log("Header info:");
   if (ct1 & 0x01) {
     console.log("  bit0: pokey at $4000");
@@ -643,12 +654,6 @@ function cartridge_Store() {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
 
-        // A 128K SuperGame board has bank 6 at $4000 (bank 7 is fixed at $C000).
-        // Klax (prototype) draws its text from there; leaving it empty reads as zeros
-        // (or open bus), so skip carts that use the area (POKEY, XM, banksets)
-        if (size === 131072 && !cartridge_pokey && !cartridge_xm && !cartridge_banksets) {
-          memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(6));
-        }
         // Default to bank 0
         // banksets changes
         cartridge_StoreBank(0);
