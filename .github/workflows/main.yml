@@ -47,7 +47,7 @@ jobs:
         BASE_BRANCH: master
         BRANCH: gh-pages
         FOLDER: site/deploy
-        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios", "banksets", "banksets_cycleS", "tia"]'
+        CLEAN_EXCLUDE: '["staging", "mobile", "cycles", "bios", "banksets", "banksets_cycleS", "tia", "pr62"]'
 
     - name: Deploy to GitHub pages (staging)
       uses: JamesIves/github-pages-deploy-action@releases/v3
@@ -88,6 +88,16 @@ jobs:
         BRANCH: gh-pages
         FOLDER: site/deploy
         TARGET_FOLDER: banksets_cycles
+
+    - name: Deploy to GitHub pages (pr62)
+      uses: JamesIves/github-pages-deploy-action@releases/v3
+      if: github.event_name == 'push' && github.ref == 'refs/heads/pr62'
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: pr62
+        BRANCH: gh-pages
+        FOLDER: site/deploy
+        TARGET_FOLDER: pr62
 
     - name: Deploy to GitHub pages (tia)
       uses: JamesIves/github-pages-deploy-action@releases/v3

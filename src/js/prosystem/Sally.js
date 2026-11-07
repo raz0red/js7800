@@ -54,13 +54,6 @@ var sally_address = new Pair();
 //static uint sally_cycles;
 var sally_cycles = 0;
 
-// Whether the last operation resulted in a half cycle. (needs to be taken
-// into consideration by ProSystem when cycle counting). This can occur when
-// a TIA or RIOT are accessed (drops to 1.19Mhz when the TIA or RIOT chips
-// are accessed)
-//bool half_cycle = false;
-var half_cycle = false; // Global
-
 /*
 struct Flag {
   byte C;
@@ -114,22 +107,22 @@ var SALLY_IRQ = {
 
 //static const byte SALLY_CYCLES[256] = { ... }
 var SALLY_CYCLES = [
-  7, 6, 0, 0, 2, 3, 5, 0, 3, 2, 2, 2 /* ANC */, 0, 4, 6, 0, // 0 - 15
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 16 - 31
-  6, 6, 0, 0, 3, 3, 5, 0, 4, 2, 2, 2 /* ANC */, 4, 4, 6, 0, // 32 - 47
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 48 - 63
-  6, 6, 0, 0, 0, 3, 5, 0, 3, 2, 2, 2 /* ALR (ASR) */, 3, 4, 6, 0, // 64 - 79
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 80 - 95
-  6, 6, 0, 0, 0, 3, 5, 0, 4, 2, 2, 0, 5, 4, 6, 0, // 96 - 111
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 112 - 127
-  2, 6, 0, 0, 3, 3, 3, 0, 2, 0, 2, 0, 4, 4, 4, 0, // 128 - 143
+  7, 6, 0, 8 /* SLO */, 3 /* NOP zp */, 3, 5, 5 /* SLO */, 3, 2, 2, 2 /* ANC */, 4, 4, 6, 6 /* SLO */, // 0 - 15
+  2, 5, 0, 8 /* SLO */, 4, 4, 6, 6 /* SLO */, 2, 4, 2, 7 /* SLO */, 4, 4, 7, 7 /* SLO */, // 16 - 31
+  6, 6, 0, 8 /* RLA */, 3, 3, 5, 5 /* RLA */, 4, 2, 2, 2 /* ANC */, 4, 4, 6, 6 /* RLA */, // 32 - 47
+  2, 5, 0, 8 /* RLA */, 4, 4, 6, 6 /* RLA */, 2, 4, 2, 7 /* RLA */, 4, 4, 7, 7 /* RLA */, // 48 - 63
+  6, 6, 0, 8 /* SRE */, 3, 3, 5, 5 /* SRE */, 3, 2, 2, 2 /* ALR (ASR) */, 3, 4, 6, 6 /* SRE */, // 64 - 79
+  2, 5, 0, 8 /* SRE */, 4, 4, 6, 6 /* SRE */, 2, 4, 2, 7 /* SRE */, 4, 4, 7, 7 /* SRE */, // 80 - 95
+  6, 6, 0, 8 /* RRA */, 3, 3, 5, 5 /* RRA */, 4, 2, 2, 2, 5, 4, 6, 6 /* RRA */, // 96 - 111
+  2, 5, 0, 8 /* RRA */, 4, 4, 6, 6 /* RRA */, 2, 4, 2, 7 /* RRA */, 4, 4, 7, 7 /* RRA */, // 112 - 127
+  2, 6, 2, 6, 3, 3, 3, 3, 2, 2, 2, 0, 4, 4, 4, 4, // 128 - 143
   2, 6, 0, 0, 4, 4, 4, 4 /* SAX */, 2, 5, 2, 0, 0, 5, 0, 0, // 144 - 159
-  2, 6, 2, 0, 3, 3, 3, 0, 2, 2, 2, 0, 4, 4, 4, 4 /* LAX abs */, // 160 - 175
-  2, 5, 0, 6 /* LAX */, 4, 4, 4, 0, 2, 4, 2, 0, 4, 4, 4, 0, // 176 - 191
-  2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 2 /* SBX */, 4, 4, 6, 0, // 192 - 207
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 208 - 223
-  2, 6, 0, 0, 3, 3, 5, 0, 2, 2, 2, 0, 4, 4, 6, 0, // 222 - 239
-  2, 5, 0, 0, 0, 4, 6, 0, 2, 4, 0, 0, 0, 4, 7, 0, // 240 - 255
+  2, 6, 2, 6, 3, 3, 3, 3, 2, 2, 2, 2, 4, 4, 4, 4 /* LAX abs */, // 160 - 175
+  2, 5, 0, 5 /* LAX */, 4, 4, 4, 4, 2, 4, 2, 4, 4, 4, 4, 4, // 176 - 191
+  2, 6, 2, 8 /* DCP */, 3, 3, 5, 5 /* DCP */, 2, 2, 2, 2 /* SBX */, 4, 4, 6, 6 /* DCP */, // 192 - 207
+  2, 5, 0, 8 /* DCP */, 4, 4, 6, 6 /* DCP */, 2, 4, 2, 7 /* DCP */, 4, 4, 7, 7 /* DCP */, // 208 - 223
+  2, 6, 2, 8 /* ISC */, 3, 3, 5, 5 /* ISC */, 2, 2, 2, 2, 4, 4, 6, 6 /* ISC */, // 224 - 239
+  2, 5, 0, 8 /* ISC */, 4, 4, 6, 6 /* ISC */, 2, 4, 2, 7 /* ISC */, 4, 4, 7, 7 /* ISC */, // 240 - 255
 ];
 
 /*
@@ -352,9 +345,10 @@ function sally_ZeroPageY() {
 // ----------------------------------------------------------------------------
 // ADC
 // ----------------------------------------------------------------------------
-function sally_ADC() {
+// value: an operand already fetched (undocumented read-modify-write opcodes)
+function sally_ADC(value) {
   //byte data = memory_Read(sally_address.w);
-  var data = memory_Read(sally_address.getW());
+  var data = (value === undefined) ? memory_Read(sally_address.getW()) : value;
 
   if (sally_p & SALLY_FLAG.D) {
     //word al = (sally_a & 15) + (data & 15) + (sally_p & SALLY_FLAG.C);
@@ -589,9 +583,9 @@ function sally_BRK() {
 
   sally_p |= SALLY_FLAG.I;
   //sally_pc.b.l = memory_ram[SALLY_IRQ.L];
-  sally_pc.setBL(memory_ram[SALLY_IRQ.L]);
+  sally_pc.setBL(memory_Read(SALLY_IRQ.L));
   //sally_pc.b.h = memory_ram[SALLY_IRQ.H];
-  sally_pc.setBH(memory_ram[SALLY_IRQ.H]);
+  sally_pc.setBH(memory_Read(SALLY_IRQ.H));
 }
 
 // ----------------------------------------------------------------------------
@@ -643,9 +637,10 @@ function sally_CLV() {
 // ----------------------------------------------------------------------------
 // CMP
 // ----------------------------------------------------------------------------
-function sally_CMP() {
+// value: an operand already fetched (undocumented read-modify-write opcodes)
+function sally_CMP(value) {
   //byte data = memory_Read(sally_address.w);
-  var data = memory_Read(sally_address.getW());
+  var data = (value === undefined) ? memory_Read(sally_address.getW()) : value;
 
   if (sally_a >= data) {
     sally_p |= SALLY_FLAG.C;
@@ -780,25 +775,6 @@ function sally_JMP() {
 }
 
 // ----------------------------------------------------------------------------
-// JSR
-// ----------------------------------------------------------------------------
-function sally_JSR() {
-  //sally_pc.w--;
-  sally_pc.wMinusMinus();
-  //sally_Push(sally_pc.b.h);
-  sally_Push(sally_pc.getBH());
-  //sally_Push(sally_pc.b.l);
-  sally_Push(sally_pc.getBL());
-
-  //sally_pc = sally_address;
-  //sally_pc = sally_address.clone();
-  sally_pc.copy(sally_address);
-
-  // Check for known entry point of high score ROM
-//    sally_checkHighScoreSet();
-}
-
-// ----------------------------------------------------------------------------
 // LDA
 // ----------------------------------------------------------------------------
 function sally_LDA() {
@@ -868,6 +844,114 @@ function sally_NOP() {
 function sally_ORA() {
   //sally_a |= memory_Read(sally_address.w);
   sally_a |= memory_Read(sally_address.getW());
+  sally_Flags(sally_a);
+}
+
+// ----------------------------------------------------------------------------
+// Undocumented read-modify-write opcodes
+// ----------------------------------------------------------------------------
+function sally_SetCarry(set) {
+  if (set) {
+    sally_p |= SALLY_FLAG.C;
+  }
+  else {
+    sally_p = (sally_p & ~SALLY_FLAG.C) & 0xFF;
+  }
+}
+
+// SAX: store A & X
+function sally_SAX() {
+  memory_Write(sally_address.getW(), sally_a & sally_x);
+}
+
+// LAX: load A and X
+function sally_LAX() {
+  sally_a = memory_Read(sally_address.getW());
+  sally_x = sally_a;
+  sally_Flags(sally_a);
+}
+
+// Undocumented NOPs with an operand read it
+function sally_NOPRead() {
+  memory_Read(sally_address.getW());
+}
+
+// ARR: AND, then ROR A; C from bit 7, V from bits 7 ^ 6 of the AND result
+function sally_ARR() {
+  var data = memory_Read(sally_address.getW()) & sally_a;
+  sally_a = ((data >>> 1) | ((sally_p & SALLY_FLAG.C) ? 128 : 0)) & 0xFF;
+  sally_Flags(sally_a);
+  sally_SetCarry(data & 128);
+  if (((data >>> 7) ^ (data >>> 6)) & 1) {
+    sally_p |= SALLY_FLAG.V;
+  }
+  else {
+    sally_p = (sally_p & ~SALLY_FLAG.V) & 0xFF;
+  }
+}
+
+// LAS: A, X and S = memory & S
+function sally_LAS() {
+  sally_a = memory_Read(sally_address.getW()) & sally_s;
+  sally_x = sally_a;
+  sally_s = sally_a;
+  sally_Flags(sally_a);
+}
+
+// RLA: ROL memory, then AND it into A
+function sally_RLA() {
+  var data = memory_Read(sally_address.getW());
+  var carry = sally_p & SALLY_FLAG.C;
+  sally_SetCarry(data & 128);
+  data = ((data << 1) | carry) & 0xFF;
+  memory_Write(sally_address.getW(), data);
+  sally_a &= data;
+  sally_Flags(sally_a);
+}
+
+// SRE: LSR memory, then EOR it into A
+function sally_SRE() {
+  var data = memory_Read(sally_address.getW());
+  sally_SetCarry(data & 1);
+  data = data >>> 1;
+  memory_Write(sally_address.getW(), data);
+  sally_a ^= data;
+  sally_Flags(sally_a);
+}
+
+// RRA: ROR memory, then ADC it into A
+function sally_RRA() {
+  var data = memory_Read(sally_address.getW());
+  var carry = sally_p & SALLY_FLAG.C;
+  sally_SetCarry(data & 1);
+  data = ((data >>> 1) | (carry ? 128 : 0)) & 0xFF;
+  memory_Write(sally_address.getW(), data);
+  sally_ADC(data);
+}
+
+// DCP: DEC memory, then CMP it with A
+function sally_DCP() {
+  var data = (memory_Read(sally_address.getW()) - 1) & 0xFF;
+  memory_Write(sally_address.getW(), data);
+  sally_CMP(data);
+}
+
+// ISC: INC memory, then SBC it from A
+function sally_ISC() {
+  var data = (memory_Read(sally_address.getW()) + 1) & 0xFF;
+  memory_Write(sally_address.getW(), data);
+  sally_SBC(data);
+}
+
+// ----------------------------------------------------------------------------
+// SLO (undocumented): ASL memory, then ORA it into A
+// ----------------------------------------------------------------------------
+function sally_SLO() {
+  var data = memory_Read(sally_address.getW());
+  sally_SetCarry(data & 128);
+  data = (data << 1) & 0xFF;
+  memory_Write(sally_address.getW(), data);
+  sally_a |= data;
   sally_Flags(sally_a);
 }
 
@@ -1024,9 +1108,10 @@ function sally_RTS() {
 // // ----------------------------------------------------------------------------
 // SBC
 // ----------------------------------------------------------------------------
-function sally_SBC() {
+// value: an operand already fetched (undocumented read-modify-write opcodes)
+function sally_SBC(value) {
   //byte data = memory_Read(sally_address.w);
-  var data = memory_Read(sally_address.getW());
+  var data = (value === undefined) ? memory_Read(sally_address.getW()) : value;
 
   if (sally_p & SALLY_FLAG.D) {
     // Set Z flag properly in decimal mode
@@ -1334,9 +1419,6 @@ function sally_ExecuteInstruction() {
   };
   */
 
-  // Reset half cycle flag
-  half_cycle = false;
-
   //sally_opcode = memory_Read(sally_pc.w++);
   var opcodeMem = sally_pc.wPlusPlus();
   sally_opcode = memory_Read(opcodeMem);
@@ -1445,8 +1527,12 @@ function sally_ExecuteInstruction() {
       return sally_cycles;
     // l_0x20:
     case 0x20:
-      sally_Absolute();
-      sally_JSR();
+      // Bus order: ADL, push PCH, push PCL, ADH
+      sally_address.setBL(memory_Read(sally_pc.wPlusPlus()));
+      sally_Push(sally_pc.getBH());
+      sally_Push(sally_pc.getBL());
+      sally_address.setBH(memory_Read(sally_pc.getW()));
+      sally_pc.copy(sally_address);
       return sally_cycles;
     //l_0x21:
     case 0x21:
@@ -1457,14 +1543,6 @@ function sally_ExecuteInstruction() {
     case 0x24:
       sally_ZeroPage();
       sally_BIT();
-      // Add a half cycle if RIOT/TIA location is accessed. We only track
-      // INPT4 since it is the only one that is accessed during the lightgun
-      // hit detection loop. This should be extended to take into consideration
-      // all RIOT and TIA accesses.
-      //if (sally_address.w == INPT4) {
-      if (sally_address.getW() == INPT4) {
-        half_cycle = true;
-      }
       return sally_cycles;
     //l_0x25:
     case 0x25:
@@ -2141,29 +2219,280 @@ function sally_ExecuteInstruction() {
       sally_IndirectY();
       sally_LDA();
       sally_TAX();
+      sally_Delay(sally_y);
       return sally_cycles;
-    // SAX
-    // banksets changes
+    // Undocumented NOPs: no effect, but they fetch their operand bytes and read
+    // any address they form. Absolute,X takes a cycle when it crosses a page.
+    case 0x80:
+    case 0x82:
+    case 0x89:
+    case 0xc2:
+    case 0xe2:
+      sally_Immediate();
+      sally_NOPRead();
+      return sally_cycles;
+    case 0x44:
+    case 0x64:
+      sally_ZeroPage();
+      sally_NOPRead();
+      return sally_cycles;
+    case 0x14:
+    case 0x34:
+    case 0x54:
+    case 0x74:
+    case 0xd4:
+    case 0xf4:
+      sally_ZeroPageX();
+      sally_NOPRead();
+      return sally_cycles;
+    case 0x0c:
+      sally_Absolute();
+      sally_NOPRead();
+      return sally_cycles;
+    case 0x1c:
+    case 0x3c:
+    case 0x5c:
+    case 0x7c:
+    case 0xdc:
+    case 0xfc:
+      sally_AbsoluteX();
+      sally_NOPRead();
+      sally_Delay(sally_x);
+      return sally_cycles;
+    case 0x1a:
+    case 0x3a:
+    case 0x5a:
+    case 0x7a:
+    case 0xda:
+    case 0xfa:
+      return sally_cycles;
+    // SAX (undocumented)
+    case 0x83:
+      sally_IndirectX();
+      sally_SAX();
+      return sally_cycles;
+    case 0x87:
+      sally_ZeroPage();
+      sally_SAX();
+      return sally_cycles;
+    case 0x8f:
+      sally_Absolute();
+      sally_SAX();
+      return sally_cycles;
     case 0x97:
       sally_ZeroPageY();
-      sally_PHP();
-      sally_PHA();
-      sally_stx();
-      sally_AND();
-      sally_STA();
-      sally_PLA();
-      sally_PLP();
+      sally_SAX();
       return sally_cycles;
-    // UNP
-    // banksets changes
-    case 0x64:
-    // ???
-    // banksets changes
-    case 0x89:
-      // No-op
+    // LAX (undocumented)
+    case 0xa3:
+      sally_IndirectX();
+      sally_LAX();
       return sally_cycles;
-    // UNP
-    // banksets changes
+    case 0xa7:
+      sally_ZeroPage();
+      sally_LAX();
+      return sally_cycles;
+    case 0xab:
+      sally_Immediate();
+      sally_LAX();
+      return sally_cycles;
+    case 0xb7:
+      sally_ZeroPageY();
+      sally_LAX();
+      return sally_cycles;
+    case 0xbf:
+      sally_AbsoluteY();
+      sally_LAX();
+      sally_Delay(sally_y);
+      return sally_cycles;
+    // ARR, SBC, LAS (undocumented)
+    case 0x6b:
+      sally_Immediate();
+      sally_ARR();
+      return sally_cycles;
+    case 0xeb:
+      sally_Immediate();
+      sally_SBC();
+      return sally_cycles;
+    case 0xbb:
+      sally_AbsoluteY();
+      sally_LAS();
+      sally_Delay(sally_y);
+      return sally_cycles;
+    // SLO (undocumented). Indexed forms take no page-crossing cycle.
+    case 0x03:
+      sally_IndirectX();
+      sally_SLO();
+      return sally_cycles;
+    case 0x07:
+      sally_ZeroPage();
+      sally_SLO();
+      return sally_cycles;
+    case 0x0f:
+      sally_Absolute();
+      sally_SLO();
+      return sally_cycles;
+    case 0x13:
+      sally_IndirectY();
+      sally_SLO();
+      return sally_cycles;
+    case 0x17:
+      sally_ZeroPageX();
+      sally_SLO();
+      return sally_cycles;
+    case 0x1b:
+      sally_AbsoluteY();
+      sally_SLO();
+      return sally_cycles;
+    case 0x1f:
+      sally_AbsoluteX();
+      sally_SLO();
+      return sally_cycles;
+    // RLA (undocumented). Indexed forms take no page-crossing cycle.
+    case 0x23:
+      sally_IndirectX();
+      sally_RLA();
+      return sally_cycles;
+    case 0x27:
+      sally_ZeroPage();
+      sally_RLA();
+      return sally_cycles;
+    case 0x2f:
+      sally_Absolute();
+      sally_RLA();
+      return sally_cycles;
+    case 0x33:
+      sally_IndirectY();
+      sally_RLA();
+      return sally_cycles;
+    case 0x37:
+      sally_ZeroPageX();
+      sally_RLA();
+      return sally_cycles;
+    case 0x3b:
+      sally_AbsoluteY();
+      sally_RLA();
+      return sally_cycles;
+    case 0x3f:
+      sally_AbsoluteX();
+      sally_RLA();
+      return sally_cycles;
+    // SRE (undocumented). Indexed forms take no page-crossing cycle.
+    case 0x43:
+      sally_IndirectX();
+      sally_SRE();
+      return sally_cycles;
+    case 0x47:
+      sally_ZeroPage();
+      sally_SRE();
+      return sally_cycles;
+    case 0x4f:
+      sally_Absolute();
+      sally_SRE();
+      return sally_cycles;
+    case 0x53:
+      sally_IndirectY();
+      sally_SRE();
+      return sally_cycles;
+    case 0x57:
+      sally_ZeroPageX();
+      sally_SRE();
+      return sally_cycles;
+    case 0x5b:
+      sally_AbsoluteY();
+      sally_SRE();
+      return sally_cycles;
+    case 0x5f:
+      sally_AbsoluteX();
+      sally_SRE();
+      return sally_cycles;
+    // RRA (undocumented). Indexed forms take no page-crossing cycle.
+    case 0x63:
+      sally_IndirectX();
+      sally_RRA();
+      return sally_cycles;
+    case 0x67:
+      sally_ZeroPage();
+      sally_RRA();
+      return sally_cycles;
+    case 0x6f:
+      sally_Absolute();
+      sally_RRA();
+      return sally_cycles;
+    case 0x73:
+      sally_IndirectY();
+      sally_RRA();
+      return sally_cycles;
+    case 0x77:
+      sally_ZeroPageX();
+      sally_RRA();
+      return sally_cycles;
+    case 0x7b:
+      sally_AbsoluteY();
+      sally_RRA();
+      return sally_cycles;
+    case 0x7f:
+      sally_AbsoluteX();
+      sally_RRA();
+      return sally_cycles;
+    // DCP (undocumented). Indexed forms take no page-crossing cycle.
+    case 0xc3:
+      sally_IndirectX();
+      sally_DCP();
+      return sally_cycles;
+    case 0xc7:
+      sally_ZeroPage();
+      sally_DCP();
+      return sally_cycles;
+    case 0xcf:
+      sally_Absolute();
+      sally_DCP();
+      return sally_cycles;
+    case 0xd3:
+      sally_IndirectY();
+      sally_DCP();
+      return sally_cycles;
+    case 0xd7:
+      sally_ZeroPageX();
+      sally_DCP();
+      return sally_cycles;
+    case 0xdb:
+      sally_AbsoluteY();
+      sally_DCP();
+      return sally_cycles;
+    case 0xdf:
+      sally_AbsoluteX();
+      sally_DCP();
+      return sally_cycles;
+    // ISC (undocumented). Indexed forms take no page-crossing cycle.
+    case 0xe3:
+      sally_IndirectX();
+      sally_ISC();
+      return sally_cycles;
+    case 0xe7:
+      sally_ZeroPage();
+      sally_ISC();
+      return sally_cycles;
+    case 0xef:
+      sally_Absolute();
+      sally_ISC();
+      return sally_cycles;
+    case 0xf3:
+      sally_IndirectY();
+      sally_ISC();
+      return sally_cycles;
+    case 0xf7:
+      sally_ZeroPageX();
+      sally_ISC();
+      return sally_cycles;
+    case 0xfb:
+      sally_AbsoluteY();
+      sally_ISC();
+      return sally_cycles;
+    case 0xff:
+      sally_AbsoluteX();
+      sally_ISC();
+      return sally_cycles;
     case 0x04:
       // TODO: raz
       // Fix for Popeye 2.3c
@@ -2171,50 +2500,48 @@ function sally_ExecuteInstruction() {
       // $04 is an illegal opcode "nop", but technically it's "nop zp",
       // which means the following byte is part of the instruction.
       // Nothing is done with the byte, but the PC counter will advance past
-      // it.
-      sally_pc.wPlusPlus();
-      break;
-    case 0x80:
-      // Double no-op
+      // it. Like any zero page instruction, it reads that address.
+      sally_ZeroPage();
+      memory_Read(sally_address.getW());
       return sally_cycles;
     case 0xaf: // LAX abs
       sally_Absolute();
       sally_LDA();
       sally_TAX();
       return sally_cycles;
-    case 0xfc:
-    case 0xfb:
-    case 0xfa:
-    case 0xf7:
-    case 0xf4:
-    case 0xf3:
+    /*case 0xfc:*/
+    /*case 0xfb:*/
+    /*case 0xfa:*/
+    /*case 0xf7:*/
+    /*case 0xf4:*/
+    /*case 0xf3:*/
     case 0xf2:
-    case 0xef:
-    case 0xeb:
-    case 0xe7:
-    case 0xe3:
-    case 0xe2:
-    case 0xdf:
-    case 0xdc:
-    case 0xdb:
-    case 0xda:
-    case 0xd7:
-    case 0xd4:
-    case 0xd3:
+    /*case 0xef:*/
+    /*case 0xeb:*/
+    /*case 0xe7:*/
+    /*case 0xe3:*/
+    /*case 0xe2:*/
+    /*case 0xdf:*/
+    /*case 0xdc:*/
+    /*case 0xdb:*/
+    /*case 0xda:*/
+    /*case 0xd7:*/
+    /*case 0xd4:*/
+    /*case 0xd3:*/
     case 0xd2:
-    case 0xcf:
-    case 0xcb:
-    case 0xc7:
-    case 0xc3:
-    case 0xc2:
-    case 0xbf:
-    case 0xbb:
-    case 0xb7:
+    /*case 0xcf:*/
+    /*case 0xcb:*/
+    /*case 0xc7:*/
+    /*case 0xc3:*/
+    /*case 0xc2:*/
+    /*case 0xbf:*/
+    /*case 0xbb:*/
+    /*case 0xb7:*/
     /*case 0xb3:*/
     case 0xb2:
-    case 0xab:
-    case 0xa7:
-    case 0xa3:
+    /*case 0xab:*/
+    /*case 0xa7:*/
+    /*case 0xa3:*/
     case 0x9f:
     case 0x9e:
     case 0x9c:
@@ -2222,65 +2549,65 @@ function sally_ExecuteInstruction() {
     /*case 0x97:*/
     case 0x93:
     case 0x92:
-    case 0x8f:
+    /*case 0x8f:*/
     case 0x8b:
     /*case 0x89:*/
-    case 0x87:
-    case 0x83:
-    case 0x82:
+    /*case 0x87:*/
+    /*case 0x83:*/
+    /*case 0x82:*/
     /*case 0x80:*/
-    case 0x7f:
-    case 0x7c:
-    case 0x7b:
-    case 0x7a:
-    case 0x77:
-    case 0x74:
-    case 0x73:
+    /*case 0x7f:*/
+    /*case 0x7c:*/
+    /*case 0x7b:*/
+    /*case 0x7a:*/
+    /*case 0x77:*/
+    /*case 0x74:*/
+    /*case 0x73:*/
     case 0x72:
-    case 0x6f:
-    case 0x6b:
-    case 0x67:
+    /*case 0x6f:*/
+    /*case 0x6b:*/
+    /*case 0x67:*/
     /*case 0x64:*/
-    case 0x63:
+    /*case 0x63:*/
     case 0x62:
-    case 0x5f:
-    case 0x5c:
-    case 0x5b:
-    case 0x5a:
-    case 0x57:
-    case 0x54:
-    case 0x53:
+    /*case 0x5f:*/
+    /*case 0x5c:*/
+    /*case 0x5b:*/
+    /*case 0x5a:*/
+    /*case 0x57:*/
+    /*case 0x54:*/
+    /*case 0x53:*/
     case 0x52:
-    case 0x4f:
-    case 0x47:
-    case 0x44:
-    case 0x43:
+    /*case 0x4f:*/
+    /*case 0x47:*/
+    /*case 0x44:*/
+    /*case 0x43:*/
     case 0x42:
-    case 0x3f:
-    case 0x3c:
-    case 0x3b:
-    case 0x3a:
-    case 0x37:
-    case 0x34:
-    case 0x33:
+    /*case 0x3f:*/
+    /*case 0x3c:*/
+    /*case 0x3b:*/
+    /*case 0x3a:*/
+    /*case 0x37:*/
+    /*case 0x34:*/
+    /*case 0x33:*/
     case 0x32:
-    case 0x2f:
-    case 0x27:
-    case 0x23:
+    /*case 0x2f:*/
+    /*case 0x27:*/
+    /*case 0x23:*/
     case 0x22:
-    case 0x1f:
-    case 0x1c:
-    case 0x1b:
-    case 0x1a:
-    case 0x17:
-    case 0x14:
-    case 0x13:
+    /*case 0x1f:*/
+    /*case 0x1c:*/
+    /*case 0x1b:*/
+    /*case 0x1a:*/
+    /*case 0x17:*/
+    /*case 0x14:*/
+    /*case 0x13:*/
     case 0x12:
-    case 0x0f:
-    case 0x0c:
-    case 0x07:
+    /*case 0x0f:*/
+    /*case 0x0c:*/
+    /*case 0x07:*/
     /*case 0x04:*/
-    case 0x03:
+    /*case 0x03:*/
     case 0x02:
 //console.log('unmapped opcode: 0x' + opcodeMem.toString(16) + ", 0x" + sally_opcode.toString(16));
       return sally_cycles;
@@ -2399,6 +2726,10 @@ function sally_ExecuteInstruction() {
 // ExecuteRES
 // ----------------------------------------------------------------------------
 function sally_ExecuteRES() {
+  // A 6502 reset runs three dummy pushes, so S drops by 3 (0 -> $FD). Carts that
+  // never set up their own stack would otherwise push to $0100, which is a
+  // TIA/MARIA mirror, not RAM
+  sally_s = (sally_s - 3) & 0xFF;
   sally_p = SALLY_FLAG.I | SALLY_FLAG.R | SALLY_FLAG.Z;
   //sally_pc.b.l = memory_ram[SALLY_RES.L];
   sally_pc.setBL(memory_ram[SALLY_RES.L]);
@@ -2421,10 +2752,11 @@ function sally_ExecuteNMI() {
   sally_Push(sally_p);
   sally_p |= SALLY_FLAG.I;
   //sally_pc.b.l = memory_ram[SALLY_NMI.L];
-  sally_pc.setBL(memory_ram[SALLY_NMI.L]);
+  sally_pc.setBL(memory_Read(SALLY_NMI.L));
   //sally_pc.b.h = memory_ram[SALLY_NMI.H];
-  sally_pc.setBH(memory_ram[SALLY_NMI.H]);
+  sally_pc.setBH(memory_Read(SALLY_NMI.H));
   //console.log("Execute NMI: " + (memory_ram[SALLY_NMI.L] | memory_ram[SALLY_NMI.H] << 8))
+  sally_cycles = 7;
   return 7;
 }
 
@@ -2494,8 +2826,10 @@ function GetSallyPC() {
   return sally_pc;
 }
 
-function GetHalfCycle() {
-  return half_cycle;
+// Cycles of the instruction being executed (including page-crossing penalties
+// found so far)
+function GetCycles() {
+  return sally_cycles;
 }
 
 export {
@@ -2503,7 +2837,7 @@ export {
   sally_ExecuteRES as ExecuteRES,
   sally_ExecuteInstruction as ExecuteInstruction,
   sally_ExecuteNMI as ExecuteNMI,
-  GetHalfCycle,
+  GetCycles,
   GetSallyA,
   SetSallyA,
   GetSallyX,

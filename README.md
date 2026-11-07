@@ -45,6 +45,40 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
 
 ## Change log
 
+### 11/05/26 (0.1.0)
+    - DMA and timing accuracy rewrite (contributed by Mike Saarna)
+        - MARIA DMA cycle penalties, holey DMA, and WSYNC/NMI timing
+        - Slow TIA/RIOT/MARIA access cycle stretch
+        - Racing-beam style rendering (display is drawn as the CPU runs)
+        - Frame starts inside VBLANK
+        - RIOT rewrite (timer, SWCHA/SWCHB and 1/2 button mode behavior)
+        - Memory map: unmapped reads return open bus, TIA/MARIA/RAM mirrors, unmapped writes dropped
+        - Undriven TIA bits float to the last value on the data bus
+        - Undocumented 6502 opcodes (SLO, RLA, SRE, RRA, DCP, ISC, SAX, LAX, ARR, LAS, ANC, ALR, NOPs)
+          with correct cycle counts
+        - Mirror RAM at $4000 (cartridge header byte 54, bit 7)
+    - Additional changes:
+        - Stack pointer starts at $FD after reset. $0100-$013F is now a TIA/MARIA mirror, so carts
+          that never set up a stack were pushing into registers (Asterix Quest hack, Ms. Pac-Man
+          color hack)
+        - Klax prototypes: bank 6 is mapped at $4000 on 128K SuperGame carts (the game draws its
+          text from there)
+        - High score cartridge: saved scores are restored directly to RAM (the new unmapped-write
+          rules were dropping them)
+        - Banksets: MARIA's half of the image is now half the cartridge size instead of a
+          hardcoded 128K
+        - Pokey: added the STIMER register ($4009)
+        - Audio: sample queue is capped and the last sample is held on underrun (no clicks)
+        - Advanced settings: "Force twin stick" option (session only, not saved) enables dual analog mode
+          for any game. In dual analog mode, the gamepad right shoulder is button 1 and the left
+          shoulder is button 2 (shoulders no longer pause)
+    - Fixes since 0.0.9 (not previously listed):
+        - Updated NTSC/PAL palettes for modern displays (contributed by Trebor)
+        - LAX abs (Phoenix fix), SBX opcode
+        - BCD subtraction aligned with A7800
+        - 320D mode fix (reported by Playsoft)
+        - ARTI and 2048 updates
+
 ### 01/25/24 (0.0.9)
     - Souper support
     - Activision OM ROM layout support

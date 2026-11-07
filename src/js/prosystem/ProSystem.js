@@ -44,7 +44,6 @@ var pokey_Frame = Pokey.Frame;
 var pokey_Process = Pokey.Process;
 var pokey_Scanline = Pokey.Scanline;
 var riot_SetInput = Riot.SetInput;
-var riot_IsTimingEnabled = Riot.IsTimingEnabled;
 var riot_UpdateTimer = Riot.UpdateTimer;
 var maria_displayArea = Maria.displayArea;
 var maria_RenderScanline = Maria.RenderScanline;
@@ -95,10 +94,6 @@ var cartridge_hblank = 28;
 // Set the scanlines for Pokey
 Pokey.SetCyclesPerScanline(CYCLES_PER_SCANLINE);
 
-// Whether the last CPU operation resulted in a half cycle (need to take it
-// into consideration)
-//extern bool half_cycle;
-
 //#ifdef LOWTRACE
 //static char msg[512];
 //#endif
@@ -123,9 +118,21 @@ function prosystem_Reset(postResetCallback) {
     Xm.Reset();
 
     Memory.Reset();
+    // The frame starts at line 1, inside VBLANK
+    memory_ram[MSTAT] = 128;
+    Memory.SetCpuCyclesSource(Sally.GetCycles);
+    Memory.SetMariaWriteHook(Maria.RegisterWrite);
     Maria.Clear();
     Maria.Reset();
+    wsync_scanline = false;
+    wsync_next_line = false;
+    nmi_pending = false;
+    nmi_after_next_instruction = false;
+    nmi_at_dma_end = false;
+    dma_spill = false;
     Riot.Reset();
+    // Ports read as idle until the first input latch (line 16)
+    riot_SetInput(new Array(17).fill(0));
     if (Bios.IsEnabled()) {
       Bios.Store();
     }
@@ -187,6 +194,61 @@ var dbg_cycle_stealing = false;
 //extern float wii_orient_roll;
 //#endif
 
+// MARIA starts DMA 7 CPU cycles into the line
+var MARIA_DMA_START = 28;
+
+// Lightgun enabled for the current frame
+var lightgun = false;
+// The CPU is held by WSYNC (or a DMA overrun) for the rest of the line
+var wsync_scanline = false;
+// A WSYNC write that landed past the end of the line holds the next one
+var wsync_next_line = false;
+// Take an NMI at the next instruction boundary
+var nmi_pending = false;
+// Run one more instruction, then take an NMI
+var nmi_after_next_instruction = false;
+// A DLI is waiting for the current DMA to end
+var nmi_at_dma_end = false;
+// The last DMA ran past the end of its line
+var dma_spill = false;
+
+// Runs one instruction (or a pending NMI entry) and advances the line clock.
+function cpu_Step() {
+  var start = prosystem_cycles;
+  Maria.SetInstructionClock(start);
+  Memory.BeginInstruction();
+  var cycles;
+  if (nmi_pending) {
+    nmi_pending = false;
+    cycles = sally_ExecuteNMI();
+  } else {
+    var nmi_due = nmi_after_next_instruction;
+    cycles = sally_ExecuteInstruction();
+    if (nmi_due) {
+      nmi_after_next_instruction = false;
+      nmi_pending = true;
+    }
+  }
+  // Each TIA/RIOT access stretches its bus cycle by 2 MARIA clocks
+  prosystem_cycles += (cycles << 2) + (Memory.GetSlowAccesses() << 1);
+  // The RIOT timer counts CPU cycles; a RIOT access already synced it
+  if (!Memory.EndInstruction()) {
+    riot_UpdateTimer(cycles);
+  }
+  if (lightgun) prosystem_FireLightGun();
+
+  if (memory_ram[WSYNC]) {
+    dbg_wsync_count++; // debug
+    memory_ram[WSYNC] = 0;
+    // The write lands at the end of the instruction
+    if (start + (cycles << 2) >= CYCLES_PER_SCANLINE) {
+      wsync_next_line = true;
+    } else {
+      wsync_scanline = true;
+    }
+  }
+}
+
 //void prosystem_ExecuteFrame(const byte* input)
 function prosystem_ExecuteFrame(input) // TODO: input is array
 {
@@ -207,8 +269,10 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
   var currentBupchipTick   = 0;
 
   // Is the lightgun enabled for the current frame?
-  var lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
+  lightgun = (isLightGunEnabled() && (memory_ram[CTRL] & 96) != 64);
 
+  // Latch input at frame start: games such as Alien Brigade read the light gun
+  // trigger before the first display line
   riot_SetInput(input);
 
   scanlinesPerBupchipTick = ((prosystem_scanlines - 1) / 4) | 0;
@@ -244,107 +308,94 @@ function prosystem_ExecuteFrame(input) // TODO: input is array
       memory_ram[MSTAT] = 128;
     }
 
-    // Was a WSYNC performed within the current scanline?
-    //bool wsync_scanline = false;
-    var wsync_scanline = false;
+    // Keep the 0-2 clock remainder: lines alternate 113 and 114 CPU cycles
+    prosystem_cycles %= CYCLES_PER_SCANLINE;
 
-    //uint cycles = 0;
-    var cycles = 0;
+    // A WSYNC written after the end of the previous line holds this one
+    wsync_scanline = wsync_next_line;
+    wsync_next_line = false;
 
-    // Reset ProSystem cycles for current frame
-      (prosystem_cycles %= CYCLES_PER_SCANLINE) | 0;
+    Maria.StartLine(maria_scanline);
 
     // If lightgun is enabled, check to see if it should be fired
     if (lightgun) prosystem_FireLightGun();
 
-    while (prosystem_cycles < cartridge_hblank) {
-      cycles = (sally_ExecuteInstruction() << 2);
-      prosystem_cycles += cycles;
-      if (lightgun) prosystem_FireLightGun();
-
-      if (Sally.GetHalfCycle())  {
-        prosystem_cycles += 2;
-        if (lightgun) prosystem_FireLightGun();
+    // A DMA that ran past this line's DMA start is cut short: MARIA starts the
+    // new line's DMA at clock 28 (on the halted CPU's clock edge) and the rest
+    // of the old one is dropped.
+    var dma_cut = false;
+    if (dma_spill) {
+      dma_spill = false;
+      if (prosystem_cycles > MARIA_DMA_START) {
+        var dropped = (prosystem_cycles - MARIA_DMA_START) >>> 2;
+        prosystem_cycles -= dropped << 2;
+        riot_UpdateTimer(-dropped);
+        dma_cut = true;
       }
+    }
 
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles >>> 2);
-      }
-
-      if (memory_ram[WSYNC]) {
-        dbg_wsync_count++; // debug
-        memory_ram[WSYNC] = 0;
-        wsync_scanline = true;
-        break;
+    // MARIA starts DMA at the first instruction boundary at or after clock 28.
+    // A CPU waiting in WSYNC idles up to it.
+    while (prosystem_cycles < MARIA_DMA_START) {
+      if (wsync_scanline) {
+        prosystem_cycles += 4;
+        riot_UpdateTimer(1);
+      } else {
+        cpu_Step();
       }
     }
 
     Xm.setDmaActive(true);
-    cycles = (((maria_RenderScanline(maria_scanline))+3)>>>2)<<2;
-    if (cycles > MARIA_CYCLE_LIMIT) {
-      // cycles = MARIA_CYCLE_LIMIT; // TODO: This causes flicker is Scramble (is it necessary?)
+    var maria_clocks = maria_RenderScanline(maria_scanline);
+    Xm.setDmaActive(false);
+    if (maria_clocks >= MARIA_CYCLE_LIMIT) {
+      // DMA overran the line: the CPU stays halted until the line ends
       wsync_scanline = true;
     }
-    Xm.setDmaActive(false);
-
-      prosystem_cycles += cycles;
-      dbg_maria_cycles += cycles; // debug
-
-      if (riot_IsTimingEnabled()) {
-      riot_UpdateTimer((cycles) >>> 2);
+    var dma_cycles = (maria_clocks + 3) >>> 2;
+    if (dma_cut && dma_cycles == 0) {
+      // No new DMA: the halted CPU is released on the next cycle
+      dma_cycles = 1;
     }
+    prosystem_cycles += dma_cycles << 2;
+    if (wsync_scanline) {
+      // DMA fetches from TIA/RIOT addresses are slow bus cycles too; they
+      // stretch the line while the CPU is held by WSYNC
+      prosystem_cycles += Maria.GetSlowFetches() << 1;
+    }
+    dbg_maria_cycles += dma_cycles << 2; // debug
+    riot_UpdateTimer(dma_cycles);
 
-    // https://atariage.com/forums/topic/201163-the-truth-about-wsync-and-other-scanline-issues/
-    // - The 6502 requires two cycles to acknowledge the NMI.
-    // - 0-6 cycles pass as the 6502 finishes the currently executing instruction.
-    // Interrupt entry takes 7 cycles.
+    // MARIA raises the DLI as its DMA ends. A CPU waiting in WSYNC takes it at
+    // its next instruction boundary (the next line); otherwise the 6502 runs
+    // one more instruction before taking it. A DMA that is cut short by the
+    // next line's DMA ends with that one.
     if (maria_IsNMI()) {
-      if (!wsync_scanline && (prosystem_cycles < CYCLES_PER_SCANLINE)) {
-        cycles = (sally_ExecuteInstruction() << 2); // 0-6 cycles pass for current instruction
-        if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles >>> 2);
+      nmi_at_dma_end = true;
+    }
+    dma_spill = prosystem_cycles >= CYCLES_PER_SCANLINE;
+    if (nmi_at_dma_end &&
+        !(dma_spill && prosystem_cycles - CYCLES_PER_SCANLINE > MARIA_DMA_START)) {
+      nmi_at_dma_end = false;
+      if (wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
+        nmi_pending = true;
+      } else {
+        nmi_after_next_instruction = true;
       }
-        prosystem_cycles += cycles;
-
-        if (memory_ram[WSYNC]) {
-          dbg_wsync_count++; // debug
-          memory_ram[WSYNC] = 0;
-          wsync_scanline = true;
-        }
-      }
-      sally_ExecuteNMI();
     }
 
-    while (!wsync_scanline && prosystem_cycles < CYCLES_PER_SCANLINE) {
-      cycles = (sally_ExecuteInstruction() << 2);
-      prosystem_cycles += cycles;
-      if (lightgun) prosystem_FireLightGun();
-
-      if (Sally.GetHalfCycle()) {
-         prosystem_cycles += 2;
-      if (lightgun) prosystem_FireLightGun();
-      }
-
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer(cycles >>> 2);
-      }
-
-      if (memory_ram[WSYNC]) {
-        dbg_wsync_count++; // debug
-        memory_ram[WSYNC] = 0;
-        wsync_scanline = true;
+    while (prosystem_cycles < CYCLES_PER_SCANLINE) {
+      if (wsync_scanline) {
+        // WSYNC releases at the end of the line, on a CPU clock edge
+        var left = (CYCLES_PER_SCANLINE - prosystem_cycles + 3) >>> 2;
+        prosystem_cycles += left << 2;
+        riot_UpdateTimer(left);
         break;
       }
+      cpu_Step();
     }
 
-    // If a WSYNC was performed and the current cycle count is less than
-    // the cycles per scanline, add those cycles to current timers.
-    if (wsync_scanline && (prosystem_cycles < CYCLES_PER_SCANLINE)) {
-      if (riot_IsTimingEnabled()) {
-        riot_UpdateTimer((CYCLES_PER_SCANLINE - prosystem_cycles) >>> 2);
-      }
-      prosystem_cycles = CYCLES_PER_SCANLINE;
-    }
+    Maria.EndLine();
 
     dbg_p6502_cycles += prosystem_cycles; // debug
 
@@ -724,11 +775,11 @@ function ProSystemLoad(loc_buffer) {
   Riot.SetTiming(loc_buffer[offset++] === 1 ? true : false);
   let h = loc_buffer[offset++];
   let l = loc_buffer[offset++];
-  Riot.SetTimerValue(((h << 8) & 0xFF) | (l & 0xFF));
+  Riot.SetTimerValue(((h << 8) | l) & 0xFFFF);
   Riot.SetIntervalsValue(loc_buffer[offset++]);
   h = loc_buffer[offset++];
   l = loc_buffer[offset++];
-  Riot.SetClocks(((h << 8) & 0xFF) | (l & 0xFF));
+  Riot.SetClocks(((h << 8) | l) & 0xFFFF);
 
   if (Cartridge.GetCartridgeXM() /*cartridge_xm*/) {
     Xm.SetMemEnabled(loc_buffer[offset++] === 1 ? true : false);

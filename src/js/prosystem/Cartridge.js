@@ -97,6 +97,8 @@ var cartridge_crosshair_x = 0;
 var cartridge_crosshair_y = 0;
 //bool cartridge_dualanalog = false;
 var cartridge_dualanalog = false;
+// Session-only override (Advanced settings). Not reset on cartridge load, not persisted
+var cartridge_force_dualanalog = false;
 //bool cartridge_xm = false;
 var cartridge_xm = false;
 //bool cartridge_disable_bios = false;
@@ -118,6 +120,9 @@ var cartridge_banksets = false;
 var cartridge_banksets_begin = 0;
 var cartridge_banksets_end = 0;
 var cartridge_halt_banked_ram = false;
+// Header byte 54 bit 7: 8K of RAM at $4000 with A8 undecoded, so each even/odd
+// pair of pages ($4000/$4100, $4200/$4300, ...) is the same RAM
+var cartridge_mirror_ram = false;
 var cartridge_pokey_write_only = false;
 var cartridge_pokey800 = false;
 
@@ -334,6 +339,8 @@ function cartridge_ReadHeader(header) {
     cartridge_pokey_write_only = true;
   }
   cartridge_halt_banked_ram = header[53] & 0x40 ? true : false;
+  // RAM, ROM or bank 6 at $4000 (bits 2-4) win over mirror RAM
+  cartridge_mirror_ram = (header[54] & 0x80) && !(header[54] & 0x1c) ? true : false;
   cartridge_bupchip = false;
 
   // Wii: Updates to header interpretation
@@ -560,7 +567,7 @@ function cartridge_Load(data, size) {
    }
 
   var crc16 = Crc16(cartridge_buffer.slice((
-    cartridge_size - (16 * 1024)), 
+    cartridge_size - (16 * 1024)),
     cartridge_size - (16 * 1024) + 1024));
 
    // PPII Hack.
@@ -636,6 +643,12 @@ function cartridge_Store() {
         //memory_WriteROM(49152, 16384, cartridge_buffer + offset);
         memory_WriteROM(49152, 16384, cartridge_buffer, offset);
 
+        // A 128K SuperGame board has bank 6 at $4000 (bank 7 is fixed at $C000).
+        // Klax (prototype) draws its text from there; leaving it empty reads as zeros
+        // (or open bus), so skip carts that use the area (POKEY, XM, banksets)
+        if (size === 131072 && !cartridge_pokey && !cartridge_xm && !cartridge_banksets) {
+          memory_WriteROM(16384, 16384, cartridge_buffer, cartridge_GetBankOffset(6));
+        }
         // Default to bank 0
         // banksets changes
         cartridge_StoreBank(0);
@@ -708,6 +721,11 @@ function cartridge_Store() {
       memory_ClearROM(0x4000, 0x4000);
       break;
   }
+
+  if (IsMirrorRam()) {
+    // RAM at $4000 (Memory keeps each mirrored page pair in step)
+    memory_ClearROM(16384, 16384);
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -774,7 +792,7 @@ function cartridge_Write(address, data) {
           cartridge_souper_SetRamPageBank(1, data);
           break;
       case CARTRIDGE_SOUPER_AUDIO_CMD:
-          window.Module._bupchip_ProcessAudioCommand(data); 
+          window.Module._bupchip_ProcessAudioCommand(data);
           break;
       }
       break;
@@ -891,6 +909,7 @@ function cartridge_Release() {
     cartridge_banksets = false;
     cartridge_pokey_write_only = false;
     cartridge_halt_banked_ram = false;
+    cartridge_mirror_ram = false;
   }
 }
 
@@ -925,8 +944,11 @@ function cartridge_LoadHighScoreCart(callback) {
   // Post SRAM load callback
   var postLoadCallback = function(sram) {
     if (sram) {
+      // Restore the SRAM directly: Memory drops writes to $1000-$17FF until the
+      // cart is marked loaded, and going through memory_Write would report each
+      // restored byte to the host as a new high score write
       for (var i = 0; i < sram.length && i < HS_SRAM_SIZE; i++) {
-        memory_Write(HS_SRAM_START + i, sram[i]);
+        Memory.ram[HS_SRAM_START + i] = sram[i];
       }
       for (var i = 0; i < high_score_buffer.length; i++) {
         memory_Write(0x3000 + i, high_score_buffer.charCodeAt(i));
@@ -1000,12 +1022,26 @@ function IsHaltBankedRam() {
   return cartridge_halt_banked_ram;
 }
 
+// Mirror RAM applies to carts that have nothing else at $4000
+function IsMirrorRam() {
+  return cartridge_mirror_ram && !cartridge_banksets &&
+    (cartridge_type == CARTRIDGE_TYPE_NORMAL || cartridge_type == CARTRIDGE_TYPE_SUPERCART);
+}
+
 function IsSwapButtons() {
   return cartridge_swap_buttons;
 }
 
 function IsDualAnalog() {
-  return cartridge_dualanalog;
+  return cartridge_dualanalog || cartridge_force_dualanalog;
+}
+
+function IsForceDualAnalog() {
+  return cartridge_force_dualanalog;
+}
+
+function SetForceDualAnalog(force) {
+  cartridge_force_dualanalog = !!force;
 }
 
 function IsBupChip() {
@@ -1191,6 +1227,7 @@ export {
   GetRegion,
   IsBanksets,
   IsHaltBankedRam,
+  IsMirrorRam,
   IsPokeyEnabled,
   IsPokey450Enabled,
   IsPokey800Enabled,
@@ -1198,6 +1235,8 @@ export {
   IsXmEnabled,
   IsSwapButtons,
   IsDualAnalog,
+  IsForceDualAnalog,
+  SetForceDualAnalog,
   IsLightGunEnabled,
   IsComposite,
   IsBupChip,

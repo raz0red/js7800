@@ -46,24 +46,19 @@ var TIM8T       = 661;
 var TIM64T      = 662;
 var T1024T      = 663;
 
-//bool riot_timing = false;
-var riot_timing = false;
-//word riot_timer = TIM64T;
-var riot_timer = TIM64T;
-//byte riot_intervals;
-var riot_intervals = 0;
-//word riot_clocks;
-var riot_clocks = 0;
+// RIOT interval timer. INTIM is computed from the CPU cycle count when it is
+// read: after a write of N the first decrement comes 1 cycle later, then one
+// every interval; after underflow the timer counts down once per cycle.
+var riot_cycles = 0;             // CPU cycles since reset
+var riot_timer_reg = 0;          // Value last written to TIMxT
+var riot_cycles_when_set = 0;
+var riot_interval_shift = 6;     // 1T: 0, 8T: 3, 64T: 6, 1024T: 10
+var riot_read_after_int = false; // INTIM was read after underflow
 
 //byte riot_dra = 0;
 var riot_dra = 0;
 //byte riot_drb = 0;
 var riot_drb = 0;
-
-//static bool riot_elapsed;
-var riot_elapsed = 0;
-//static int riot_currentTime;
-var riot_currentTime = 0;
 
 // Debug, count the number of times a RIOT timer was used
 //unsigned int riot_timer_count = 0;
@@ -74,13 +69,11 @@ function riot_Reset() {
   riot_SetDRA(0);
   riot_SetDRB(0);
 
-  riot_timing = false;
-  riot_timer = TIM64T;
-  riot_intervals = 0;
-  riot_clocks = 0;
-
-  riot_elapsed = false;
-  riot_currentTime = 0;
+  riot_cycles = 0;
+  riot_timer_reg = 0;
+  riot_cycles_when_set = 0;
+  riot_interval_shift = 6;
+  riot_read_after_int = false;
 
   riot_timer_count = 0; // debug
 }
@@ -269,67 +262,48 @@ function riot_SetDRB(data) {
 // ----------------------------------------------------------------------------
 //void riot_SetTimer(word timer, byte intervals) {
 function riot_SetTimer(timer, intervals) {
-  riot_timer = timer;
-  riot_intervals = intervals;
-  switch (timer) {
-    case T1024T:
-      riot_clocks = 1024;
-      riot_timing = true;
-      break;
-    case TIM1T:
-      riot_clocks = 1;
-      riot_timing = true;
-      break;
-    case TIM8T:
-      riot_clocks = 8;
-      riot_timing = true;
-      break;
-    case TIM64T:
-      riot_clocks = 64;
-      riot_timing = true;
-      break;
-  }
-  if (riot_timing) {
-    //#if 1
-    riot_timer_count++; // debug
-    //#endif
-    riot_currentTime = riot_clocks * intervals;
-    riot_elapsed = false;
-  }
+  riot_timer_reg = intervals & 0xFF;
+  riot_cycles_when_set = riot_cycles;
+  riot_read_after_int = false;
+  riot_interval_shift = SHIFTS[timer & 3];
+  riot_timer_count++; // debug
 }
+
+// TIM1T, TIM8T, TIM64T, T1024T (by the low 2 address bits)
+var SHIFTS = [0, 3, 6, 10];
+var TIMERS = [TIM1T, TIM8T, TIM64T, T1024T];
 
 // ----------------------------------------------------------------------------
 // UpdateTimer
 // ----------------------------------------------------------------------------
-//void riot_UpdateTimer(byte cycles) {
+// Advances the timer by the given number of CPU cycles.
 function riot_UpdateTimer(cycles) {
-  riot_currentTime -= cycles;
-  if (!riot_elapsed && riot_currentTime > 0) {
-    memory_Write(INTIM, ((riot_currentTime / riot_clocks) | 0));
+  riot_cycles += cycles;
+}
+
+// INTIM read
+function riot_ReadIntim() {
+  var delta = riot_cycles - riot_cycles_when_set;
+  var ticks = Math.floor((delta + (1 << riot_interval_shift) - 1) / (1 << riot_interval_shift));
+  if (ticks <= riot_timer_reg) {
+    riot_read_after_int = false;
+    return riot_timer_reg - ticks;
   }
-  else {
-    if (riot_elapsed) {
-      if (riot_currentTime >= -255) {
-        //memory_Write(INTIM, riot_currentTime);
-        memory_Write(INTIM, riot_currentTime & 0xFF);
-      }
-      else {
-        memory_Write(INTIM, 0);
-        riot_timing = false;
-      }
-    }
-    else {
-      riot_currentTime = riot_clocks;
-      memory_Write(INTIM, 0);
-      memory_ram[INTFLG] |= 0x80;
-      memory_ram[INTFLG + 16] |= 0x80;
-      riot_elapsed = true;
-    }
-  }
+  // Reading INTIM after underflow acknowledges the interrupt flag
+  riot_read_after_int = true;
+  var underflow_delta = delta - riot_timer_reg * (1 << riot_interval_shift) - 1;
+  return (0xFF - (underflow_delta & 0xFF)) & 0xFF;
+}
+
+// Interrupt flag read (not cleared by reading it)
+function riot_ReadIntflg() {
+  var delta = riot_cycles - riot_cycles_when_set;
+  var expired = delta > riot_timer_reg * (1 << riot_interval_shift);
+  return (expired && !riot_read_after_int) ? 0xC0 : 0x00;
 }
 
 function IsTimingEnabled() {
-  return riot_timing;
+  return true;
 }
 
 function GetTimerCount() {
@@ -351,41 +325,46 @@ function GetDRB() {
 }
 
 function GetTiming() {
-  return riot_timing;
+  return true;
 }
 
 function SetTiming(t) {
-  riot_timing = t;
 }
 
+// Save state: the timer register written last
 function GetTimer() {
-  return riot_timer;
+  return TIMERS[SHIFTS.indexOf(riot_interval_shift)];
 }
 
 function SetTimerValue(t) {
-  riot_timer = t;
+  riot_interval_shift = SHIFTS[t & 3];
 }
 
+// Save state: the value written to the timer
 function GetIntervals() {
-  return riot_intervals;
+  return riot_timer_reg;
 }
 
 function SetIntervalsValue(i) {
-  riot_intervals = i;
+  riot_timer_reg = i & 0xFF;
 }
 
+// Save state: cycles since the timer was written (saturated)
 function GetClocks() {
-  return riot_clocks;
+  return Math.min(riot_cycles - riot_cycles_when_set, 0xFFFF);
 }
 
 function SetClocks(c) {
-  riot_clocks = c;
+  riot_cycles_when_set = riot_cycles - c;
+  riot_read_after_int = false;
 }
 
 Events.addListener(new Events.Listener("init", init));
 
 export {
   riot_UpdateTimer as UpdateTimer,
+  riot_ReadIntim as ReadIntim,
+  riot_ReadIntflg as ReadIntflg,
   riot_SetDRB as SetDRB,
   riot_SetDRA as SetDRA,
   riot_SetInput as SetInput,

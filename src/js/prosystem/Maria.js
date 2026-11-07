@@ -42,7 +42,14 @@ var CTRL        = 60;
 var MARIA_SURFACE_SIZE = 77440;
 var MARIA_LINERAM_SIZE = 160;
 
-var MARIA_CYCLE_LIMIT = 428;
+// DMA may not start a new header or byte once this many MARIA clocks have been
+// used on a line; reaching it forces WSYNC for the rest of the line.
+var MARIA_CYCLE_LIMIT = 430;
+
+// Line timing, in MARIA clocks (one 320-mode pixel each). Active display is the
+// last 320 clocks of the 454-clock line.
+var MARIA_LINE_CLOCKS = 454;
+var MARIA_ACTIVE_START = MARIA_LINE_CLOCKS - 320;
 
 //extern unsigned char* wii_sdl_get_blit_addr();
 //extern unsigned int wii_lightgun_flash;
@@ -65,7 +72,20 @@ var maria_lineRAM_index = 0;
 var maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
 //static uint maria_cycles;
 var maria_cycles = 0;
-var color_kill = false;
+
+// Racing beam: the line built on the previous scanline is shifted out while the
+// current one is built, using the color and CTRL registers as they stand when
+// the beam reaches each pixel.
+var maria_displayBuf = maria_lineRAM_buffers[1];
+var maria_beamX = 0;
+var maria_rowActive = false;
+var maria_rowBase = 0;
+// Clock at the start of the instruction being executed (set by ProSystem)
+var maria_instrClock = 0;
+// DL address of the current zone, latched when its DLL entry is read
+var maria_dl = new Pair();
+// DMA fetches this line from TIA/RIOT addresses (each stretches the line by 2 clocks)
+var maria_slowFetches = 0;
 //static pair maria_dpp;
 var maria_dpp = new Pair();
 //static pair maria_dp;
@@ -121,6 +141,25 @@ function ramf(address)
       return Memory.Read(address);
 }
 
+
+// A DMA fetch. MARIA's reads use the same bus as the CPU's: below $0500 they
+// reach the TIA/MARIA/RIOT registers and RIOT RAM (undriven TIA bits float to
+// the last value on the bus), and every fetch drives the bus.
+function maria_DmaRead(address) {
+  address &= 0xFFFF;
+  var data;
+  if (address < 0x500) {
+    // TIA/RIOT fetches are slow bus cycles for MARIA too
+    if (Memory.IsSlow(Memory.FoldMirror(address))) {
+      maria_slowFetches++;
+    }
+    data = Memory.ReadBus(address);
+  } else {
+    data = (dr ? ram[address] : ramf(address));
+    Memory.SetLastBus(data);
+  }
+  return data;
+}
 
 // ----------------------------------------------------------------------------
 // StoreCell
@@ -222,15 +261,15 @@ function maria_GetColor(data) {
 //static inline void maria_StoreGraphic( ) {
 function maria_StoreGraphic() {
   //byte data = memory_ram[maria_pp.w];
-  var data = (dr ? ram[maria_pp.getW()] : ramf(maria_pp.getW()));
+  // A fetch from a DMA hole reads nothing
+  var data = maria_IsHolyDMA() ? 0 : maria_DmaRead(maria_pp.getW());
   if (maria_wmode) {
     if (maria_IsHolyDMA()) {
       // #if 0 // Wii: disabled due to rendering in Kangaroo mode
       //       maria_StoreCell(0, 0);
       //       maria_StoreCell(0, 0);
       // #endif
-      //maria_horizontal += 2;
-      maria_horizontal = (maria_horizontal + 2) & 0xFF;
+      // A fetch from a DMA hole reads nothing and leaves HPOS where it is
     }
     else {
       maria_StoreCell2((data & 12), (data & 192) >>> 6);
@@ -245,8 +284,7 @@ function maria_StoreGraphic() {
       //       maria_StoreCell(0);
       //       maria_StoreCell(0);
       // #endif
-      //maria_horizontal += 4;
-      maria_horizontal = (maria_horizontal + 4) & 0xFF;
+      // A fetch from a DMA hole reads nothing and leaves HPOS where it is
     }
     else {
       maria_StoreCell1((data & 192) >>> 6);
@@ -259,103 +297,109 @@ function maria_StoreGraphic() {
   maria_pp.wPlusPlus();
 }
 
-function colorKill(buffer, index) {
-  for(var i = 0; i <8; i++) {
-    buffer[index + i] = buffer[index + i] & 0x0f;
+// ----------------------------------------------------------------------------
+// Racing beam
+// ----------------------------------------------------------------------------
+
+// Starts a scanline: the line DMA built last scanline becomes the displayed one,
+// and the other buffer is cleared for this scanline's DMA. Runs on every line,
+// whether or not DMA is enabled.
+function maria_StartLine(scanline) {
+  maria_displayBuf = maria_lineRAM_buffers[maria_lineRAM_index];
+  maria_lineRAM_index ^= 1;
+  maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
+  maria_lineRAM.fill(0);
+  maria_beamX = 0;
+  maria_rowActive = maria_surface !== null &&
+    scanline >= maria_visibleArea.top && scanline <= maria_visibleArea.bottom;
+  maria_rowBase = (scanline - maria_displayArea.top) * maria_displayArea.GetLength();
+}
+
+// Shifts the displayed line out up to line clock clk, applying the read mode,
+// color kill and colors as they are now.
+function maria_CatchUp(clk) {
+  var target = clk - MARIA_ACTIVE_START;
+  if (target > 320) target = 320;
+  if (target <= maria_beamX) return;
+  if (maria_rowActive) {
+    var ctrl = ram[CTRL];
+    var rmode = ctrl & 3;
+    var kill = ctrl & 0x80;
+    var buf = maria_displayBuf;
+    var base = maria_rowBase;
+    for (var x = maria_beamX; x < target; x++) {
+      var c = buf[x >> 1];
+      var code;
+      if (rmode < 2) {
+        // 160A/B (modes 0 and 1): both pixels of a cell show its code
+        code = c;
+      } else if (rmode == 2) {
+        // 320B/D
+        code = (x & 1) ?
+          ((c & 16) | ((c & 4) >>> 2) | ((c & 1) << 1)) :
+          ((c & 16) | ((c & 8) >>> 3) | (c & 2));
+      } else {
+        // 320A/C
+        code = (x & 1) ? ((c & 28) | ((c & 1) << 1)) : (c & 30);
+      }
+      var color = maria_GetColor(code);
+      maria_surface[base + x] = kill ? (color & 0x0f) : color;
+    }
+  }
+  maria_beamX = target;
+}
+
+// Finishes the displayed line at the end of the scanline.
+function maria_EndLine() {
+  maria_CatchUp(MARIA_LINE_CLOCKS);
+  if (maria_rowActive) {
+    var rmode = ram[CTRL] & 3;
+    // Apply "composite" smoothing filter...
+    if (Cart.IsComposite() && ((rmode == 2) || (rmode == 3))) {
+      var buffer = maria_surface;
+      var offset = maria_rowBase;
+      var lum1 = 0;
+      var lum2 = 0;
+      var lum3 = buffer[offset + 1] & 0x0f;
+      for (var pixel = offset + 2;
+        pixel < (MARIA_LINERAM_SIZE * 2 + offset - 1); pixel += 1) {
+        lum1 = lum2;
+        lum2 = lum3;
+        lum3 = buffer[pixel] & 0x0f;
+        // a proper composite artifact would shift chroma for even-position
+        // bright pixels differently from odd-position bright pixels. We
+        // don't do that (1) for performance reasons, (2) because it doesn't
+        // actually enhance Tower Toppler, and (3) there's very wide variance
+        // in how the shift works, depending on the TV.
+        if ((lum1 == 0) && (lum2 > 5) && (lum3 == 0)) {
+          buffer[pixel - 1] =
+            (buffer[pixel - 1] & 0xF0) | ((lum2 >> 1) + 1);
+          buffer[pixel - 2] = buffer[pixel - 1];
+        }
+      }
+    }
   }
 }
 
-// ----------------------------------------------------------------------------
-// WriteLineRAM
-// ----------------------------------------------------------------------------
-//static inline void maria_WriteLineRAM(byte * buffer) {
-function maria_WriteLineRAM(buffer, offset) {  // TODO JS: What is buffer?
-  //byte rmode = memory_ram[CTRL] & 3;
-  var rmode = ram[CTRL] & 3;
-  var pixel = offset;
-  if (rmode == 0) {
-    // 160A/B
-    //int pixel = 0;
-    //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
-    for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
-      //word color;
-      var color;
-      color = maria_GetColor(maria_lineRAM[index + 0]);
-      buffer[pixel++] = color;
-      buffer[pixel++] = color;
-      color = maria_GetColor(maria_lineRAM[index + 1]);
-      buffer[pixel++] = color;
-      buffer[pixel++] = color;
-      color = maria_GetColor(maria_lineRAM[index + 2]);
-      buffer[pixel++] = color;
-      buffer[pixel++] = color;
-      color = maria_GetColor(maria_lineRAM[index + 3]);
-      buffer[pixel++] = color;
-      buffer[pixel++] = color;
-      if (color_kill) {
-        colorKill(buffer, pixel - 8);
-      }
-    }
-  }
-  else if (rmode == 2) {
-    // 320B/D
-    //int pixel = 0;
-    //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
-    for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 16) | ((maria_lineRAM[index + 0] & 8) >>> 3) | ((maria_lineRAM[index + 0] & 2)));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 16) | ((maria_lineRAM[index + 0] & 4) >>> 2) | ((maria_lineRAM[index + 0] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 1] & 16) | ((maria_lineRAM[index + 1] & 8) >>> 3) | ((maria_lineRAM[index + 1] & 2)));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 1] & 16) | ((maria_lineRAM[index + 1] & 4) >>> 2) | ((maria_lineRAM[index + 1] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 16) | ((maria_lineRAM[index + 2] & 8) >>> 3) | ((maria_lineRAM[index + 2] & 2)));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 16) | ((maria_lineRAM[index + 2] & 4) >>> 2) | ((maria_lineRAM[index + 2] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 8) >>> 3) | ((maria_lineRAM[index + 3] & 2)));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 16) | ((maria_lineRAM[index + 3] & 4) >>> 2) | ((maria_lineRAM[index + 3] & 1) << 1));
-      if (color_kill) {
-        colorKill(buffer, pixel - 8);
-      }
-    }
-  }
-  else if (rmode == 3) {
-    // 320A/C
-    //int pixel = 0;
-    //for (int index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
-    for (var index = 0; index < MARIA_LINERAM_SIZE; index += 4) {
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 30));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 0] & 28) | ((maria_lineRAM[index + 0] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 1] & 30));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 1] & 28) | ((maria_lineRAM[index + 1] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 30));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 2] & 28) | ((maria_lineRAM[index + 2] & 1) << 1));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 30));
-      buffer[pixel++] = maria_GetColor((maria_lineRAM[index + 3] & 28) | ((maria_lineRAM[index + 3] & 1) << 1));
-      if (color_kill) {
-        colorKill(buffer, pixel - 8);
-      }
-    }
-  }
+// Called by ProSystem before each instruction with the current line clock.
+function maria_SetInstructionClock(clk) {
+  maria_instrClock = clk;
+}
 
-  // Apply "composite" smoothing filter...
-  if (Cart.IsComposite() && ((rmode == 2) || (rmode == 3))) {
-    var lum1 = 0;
-    var lum2 = 0;
-    var lum3 = 0;
-    lum3 = buffer[offset + 1] & 0x0f;
-    for (var pixel = offset + 2;
-      pixel < (MARIA_LINERAM_SIZE * 2 + offset - 1); pixel += 1) {
-      lum1 = lum2;
-      lum2 = lum3;
-      lum3 = buffer[pixel] & 0x0f;
-      // a proper composite artifact would shift chroma for even-position
-      // bright pixels differently from odd-position bright pixels. We
-      // don't do that (1) for performance reasons, (2) because it doesn't
-      // actually enhance Tower Toppler, and (3) there's very wide variance
-      // in how the shift works, depending on the TV.
-      if ((lum1 == 0) && (lum2 > 5) && (lum3 == 0)) {
-        buffer[pixel - 1] =
-          (buffer[pixel - 1] & 0xF0) | ((lum2 >> 1) + 1);
-        buffer[pixel - 2] = buffer[pixel - 1];
-      }
-    }
+// A CPU write lands at the end of the instruction doing it.
+function maria_WriteClock() {
+  return maria_instrClock + (Sally.GetCycles() << 2);
+}
+
+// CPU write to a MARIA register (address normalized to $20-$3F), before it is
+// stored. Color and CTRL writes take effect at the racing beam.
+function maria_RegisterWrite(address, data) {
+  var reg = address & 0x1F;
+  if (reg == 0x18) {
+    // OFFSET: the write loads the live zone line counter
+    maria_offset = data;
+  } else if ((reg == 0x00 || (reg & 3) != 0 || reg == 0x1C) && ram[address] != data) {
+    maria_CatchUp(maria_WriteClock());
   }
 }
 
@@ -365,35 +409,40 @@ var basePP = new Pair();
 // StoreLineRAM
 // ----------------------------------------------------------------------------
 //static inline void maria_StoreLineRAM() {
-function maria_StoreLineRAM() {
+function maria_StoreLineRAM(firstLine) {
   //for (int index = 0; index < MARIA_LINERAM_SIZE; index++) {
   // for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
   //   maria_lineRAM[index] = 0;
   // }
 
   maria_cycles += 16; // Maria cycles (DMA Startup)
+  if (firstLine) maria_cycles += 8; // Extra startup on the frame's first DMA line
 
-  //byte mode = memory_ram[maria_dp.w + 1];
-  var mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
-  while (mode & 0x5f && (maria_cycles < MARIA_CYCLE_LIMIT)) {
+  // Each header byte is fetched once, byte 1 first (it gives the header's
+  // length), and only while there is DMA time left.
+  while (maria_cycles < MARIA_CYCLE_LIMIT) {
+    //byte mode = memory_ram[maria_dp.w + 1];
+    var mode = maria_DmaRead(maria_dp.getW() + 1);
+    if (!(mode & 0x5f)) break;
+
     //byte width;
     var width = 0;
     //byte indirect = 0;
     var indirect = 0;
 
     //maria_pp.b.l = memory_ram[maria_dp.w];
-    maria_pp.setBL((dr ? ram[maria_dp.getW()] : ramf(maria_dp.getW())));
+    maria_pp.setBL(maria_DmaRead(maria_dp.getW()));
     //maria_pp.b.h = memory_ram[maria_dp.w + 2];
-    maria_pp.setBH((dr ? ram[maria_dp.getW() + 2] : ramf(maria_dp.getW() + 2)));
+    maria_pp.setBH(maria_DmaRead(maria_dp.getW() + 2));
 
     if (mode & 31) {
       maria_cycles += 8; // Maria cycles (Header 4 byte)
       //maria_palette = (memory_ram[maria_dp.w + 1] & 224) >> 3;
-      maria_palette = (((dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 224) >>> 3) & 0xFF;
+      maria_palette = ((mode & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 3];
-      maria_horizontal = (dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3));
+      maria_horizontal = maria_DmaRead(maria_dp.getW() + 3);
       //width = memory_ram[maria_dp.w + 1] & 31;
-      width = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 31;
+      width = mode & 31;
       //width = ((~width) & 31) + 1;
       width = (((~width) & 31) + 1) & 0xFF;
       //maria_dp.w += 4;
@@ -401,16 +450,17 @@ function maria_StoreLineRAM() {
     }
     else {
       maria_cycles += 10; // Maria cycles (Header 5 byte)
+      var palWidth = maria_DmaRead(maria_dp.getW() + 3);
       //maria_palette = (memory_ram[maria_dp.w + 3] & 224) >> 3;
-      maria_palette = (((dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3)) & 224) >>> 3) & 0xFF;
+      maria_palette = ((palWidth & 224) >>> 3) & 0xFF;
       //maria_horizontal = memory_ram[maria_dp.w + 4];
-      maria_horizontal = (dr ? ram[maria_dp.getW() + 4] : ramf(maria_dp.getW() + 4));
+      maria_horizontal = maria_DmaRead(maria_dp.getW() + 4);
       //indirect = memory_ram[maria_dp.w + 1] & 32;
-      indirect = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 32;
+      indirect = mode & 32;
       //maria_wmode = memory_ram[maria_dp.w + 1] & 128;
-      maria_wmode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1)) & 128;
+      maria_wmode = mode & 128;
       //width = memory_ram[maria_dp.w + 3] & 31;
-      width = (dr ? ram[maria_dp.getW() + 3] : ramf(maria_dp.getW() + 3)) & 31;
+      width = palWidth & 31;
       //width = (width == 0) ? 32 : ((~width) & 31) + 1;
       width = ((width == 0) ? 32 : ((~width) & 31) + 1) & 0xFF;
       //maria_dp.w += 5;
@@ -450,13 +500,14 @@ function maria_StoreLineRAM() {
           break;
 
         //maria_pp.b.l = memory_ram[basePP.w++];
-        maria_pp.setBL((dr ? ram[basePP.wPlusPlus()] : ramf(basePP.wPlusPlus())));
+        maria_pp.setBL(maria_DmaRead(basePP.wPlusPlus()));
         //maria_pp.b.h = memory_ram[CHARBASE] + maria_offset;
         maria_pp.setBH(ram[CHARBASE] + maria_offset);
 
         if (maria_IsHolyDMA()) {
+          // The object's first hole costs as much as a real fetch
           if (!dma_hole_known) {
-            maria_cycles += 3;
+            maria_cycles += cwidth ? 9 : 6;
             dma_hole_known = true;
           }
         } else {
@@ -472,16 +523,12 @@ function maria_StoreLineRAM() {
         }
       }
     }
-    //mode = memory_ram[maria_dp.w + 1];
-    mode = (dr ? ram[maria_dp.getW() + 1] : ramf(maria_dp.getW() + 1));
   }
 
 	// Last Line post-render DMA cycle penalties...
+  // (A DLI costs no DMA time)
   if (maria_offset == 0) {
-    maria_cycles += 6; // extra shutdown time
-    if ((dr ? ram[maria_dpp.getW() + 3] : ramf(maria_dpp.getW() + 3)) & 128) {
-      maria_cycles += 17; // interrupt overhead
-    }
+    maria_cycles += 8; // extra shutdown time
   }
 }
 
@@ -509,9 +556,18 @@ function maria_Reset() {
   // This appears to be a bug in the ProSystem emulator.
   //
   maria_cycles = 0;
-  color_kill = false;
+  maria_lineRAM_index = 0;
+  maria_lineRAM = maria_lineRAM_buffers[0];
+  maria_displayBuf = maria_lineRAM_buffers[1];
+  maria_beamX = 0;
+  maria_rowActive = false;
+  maria_instrClock = 0;
+  maria_dl.setW(0);
   //maria_dpp.w = 0;
-  maria_dpp.setW(0);
+  // The DLL pointer the BIOS leaves behind. MARIA only reloads it from DPPH/DPPL
+  // when DMA is on at the first DMA line, so a game that enables DMA later in
+  // the frame keeps walking from here.
+  maria_dpp.setW(0x1FF3);
   //maria_dp.w = 0;
   maria_dp.setW(0);
   //maria_pp.w = 0;
@@ -536,89 +592,34 @@ function maria_RenderScanline(maria_scanline) {
 
 
   maria_cycles = 0;
-  color_kill = (ram[CTRL] & 0x80);
+  maria_slowFetches = 0;
   nmi = false;
 
-  //
-  // Displays the background color when Maria is disabled (if applicable)
-  //
-  if (((ram[CTRL] & 96) != 64) &&
-    maria_scanline >= maria_visibleArea.top &&
-    maria_scanline <= maria_visibleArea.bottom /*&&
-  (!lightgun_enabled || wii_lightgun_flash)*/) {
-    //byte bgcolor = maria_GetColor(0);
-    var bgcolor = maria_GetColor(0);
-    //byte * bgstart = maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength());
-    var bgstart_idx = ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength());
-    //for (uint index = 0; index < MARIA_LINERAM_SIZE; index++ ) {
-    for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
-      //* bgstart++ = bgcolor;
-      maria_surface[bgstart_idx++] = bgcolor;
-      //* bgstart++ = bgcolor;
-      maria_surface[bgstart_idx++] = bgcolor;
-    }
-  } else if ((ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {
+  // DMA runs only when enabled; the racing beam shows the (cleared) line RAM
+  // as background otherwise.
+  if ((ram[CTRL] & 96) == 64 && maria_scanline >= maria_displayArea.top && maria_scanline <= maria_displayArea.bottom) {
     if (maria_scanline == maria_displayArea.top) {
       //maria_dpp.b.l = memory_ram[DPPL];
       maria_dpp.setBL(ram[DPPL]);
       //maria_dpp.b.h = memory_ram[DPPH];
       maria_dpp.setBH(ram[DPPH]);
-      //maria_h08 = memory_ram[maria_dpp.w] & 32;
-      maria_h08 = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 32;
-      //maria_h16 = memory_ram[maria_dpp.w] & 64;
-      maria_h16 = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 64;
-      //maria_offset = memory_ram[maria_dpp.w] & 15;
-      maria_offset = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 15;
-      //maria_dp.b.l = memory_ram[maria_dpp.w + 2];
-      maria_dp.setBL((dr ? ram[maria_dpp.getW() + 2] : ramf(maria_dpp.getW() + 2)));
-      //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
-      maria_dp.setBH((dr ? ram[maria_dpp.getW() + 1] : ramf(maria_dpp.getW() + 1)));
-      //if (memory_ram[maria_dpp.w] & 128) {
-      if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
-        nmi = true;
-      }
+      maria_LoadDLL();
     }
 
     if (maria_scanline >= maria_displayArea.top && maria_scanline != maria_displayArea.bottom) {
-      //maria_cycles += 4;
-      //maria_dp.b.l = memory_ram[maria_dpp.w + 2];
-      maria_dp.setBL((dr ? ram[maria_dpp.getW() + 2] : ramf(maria_dpp.getW() + 2)));
-      //maria_dp.b.h = memory_ram[maria_dpp.w + 1];
-      maria_dp.setBH((dr ? ram[maria_dpp.getW() + 1] : ramf(maria_dpp.getW() + 1)));
+      // The DL address was latched when the zone's DLL entry was read
+      maria_dp.copy(maria_dl);
 
-      maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
-      maria_StoreLineRAM();
-
-      // Swap buffers
-      maria_lineRAM_index = (maria_lineRAM_index == 1 ? 0 : 1);
-      maria_lineRAM = maria_lineRAM_buffers[maria_lineRAM_index];
-
-      if (maria_scanline >= maria_visibleArea.top && maria_scanline <= maria_visibleArea.bottom) {
-        //maria_WriteLineRAM(maria_surface + ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
-        maria_WriteLineRAM(maria_surface, ((maria_scanline - maria_displayArea.top) * maria_displayArea.GetLength()));
-      }
-
-      for (var index = 0; index < MARIA_LINERAM_SIZE; index++) {
-        maria_lineRAM[index] = 0;
-      }
+      maria_StoreLineRAM(maria_scanline == maria_displayArea.top);
 
       if (maria_scanline > maria_displayArea.top) {
         if (maria_offset == 0) {
-        //maria_dpp.w += 3;
-        maria_dpp.wPlusEqual(3);
-        //maria_h08 = memory_ram[maria_dpp.w] & 32;
-        maria_h08 = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 32;
-        //maria_h16 = memory_ram[maria_dpp.w] & 64;
-        maria_h16 = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 64;
-        //maria_offset = memory_ram[maria_dpp.w] & 15;
-        maria_offset = (dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 15;
-        //if (memory_ram[maria_dpp.w] & 128) {
-        if ((dr ? ram[maria_dpp.getW()] : ramf(maria_dpp.getW())) & 128) {
-            nmi = true;
-        }
+          //maria_dpp.w += 3;
+          maria_dpp.wPlusEqual(3);
+          maria_LoadDLL();
         } else {
           maria_offset--;
-      }
+        }
       }
     }
   }
@@ -627,6 +628,20 @@ function maria_RenderScanline(maria_scanline) {
   if (banksets) maria_read = false;
 
   return maria_cycles;
+}
+
+// Reads the DLL entry at maria_dpp: zone height, DMA holes, DLI flag and the
+// zone's DL address (latched for every line of the zone).
+function maria_LoadDLL() {
+  var mode = maria_DmaRead(maria_dpp.getW());
+  maria_h08 = mode & 32;
+  maria_h16 = mode & 64;
+  maria_offset = mode & 15;
+  maria_dl.setBH(maria_DmaRead(maria_dpp.getW() + 1));
+  maria_dl.setBL(maria_DmaRead(maria_dpp.getW() + 2));
+  if (mode & 128) {
+    nmi = true;
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -649,6 +664,10 @@ function IsNMI() {
   return nmi;
 }
 
+function GetSlowFetches() {
+  return maria_slowFetches;
+}
+
 Events.addListener(
   new Events.Listener("onCartridgeLoaded", function(cart) {
     // banksets changes
@@ -665,7 +684,13 @@ export {
   maria_Reset as Reset,
   maria_displayArea as displayArea,
   maria_visibleArea as visibleArea,
+  maria_StartLine as StartLine,
+  maria_EndLine as EndLine,
+  maria_CatchUp as CatchUp,
+  maria_SetInstructionClock as SetInstructionClock,
+  maria_RegisterWrite as RegisterWrite,
   IsNMI,
+  GetSlowFetches,
   SetSurface,
   MARIA_CYCLE_LIMIT
 }

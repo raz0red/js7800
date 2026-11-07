@@ -101,6 +101,7 @@ var cartridge_pokey800 = false;
 var cartridge_pokey_write_only = false;
 var cartridge_banksets = false;
 var cartridge_halt_banked_ram = false;
+var cartridge_mirror_ram = false;
 
 var cartridge_flags = 0;
 var cartridge_xm = false;
@@ -109,6 +110,75 @@ var cartridge_type = 0;
 var lock = false;
 
 var maria_read = false;
+
+// CPU bus timing. TIA and RIOT (I/O and RAM) accesses stretch their bus cycle
+// from 4 to 6 MARIA clocks; ProSystem adds 2 clocks per counted access.
+var slow_accesses = 0;
+// Last byte driven onto the data bus. Undriven TIA read bits float to it.
+var last_bus = 0;
+// The RIOT timer was already brought up to the end of the current instruction
+var riot_synced = false;
+// Cycles of the instruction being executed (set by ProSystem)
+var cpu_cycles_fn = null;
+// MARIA register write hook (set by ProSystem)
+var maria_write_fn = null;
+
+// Bits driven by TIA reads ($00-$0F); the rest float to the last bus value.
+// $00-$07 (collisions on the 2600) drive D7/D6, INPT0-5 drive D7.
+var TIA_READ_DRIVEN = [
+  0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0xC0, 0x80, 0xC0,
+  0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x00, 0x00
+];
+
+// TIA and MARIA repeat at $0100, $0200 and $0300.
+function memory_FoldMirror(address) {
+  return (address < 0x400 && (address & 0xC0) == 0) ? (address & 0x3F) : address;
+}
+
+// RIOT registers repeat every 8 bytes through $0280-$02FF when read.
+function memory_FoldRiotRead(address) {
+  return (address >= 0x280 && address < 0x300) ? (0x280 | (address & 7)) : address;
+}
+
+function memory_IsSlow(address) {
+  return address < 0x20 ||                          // TIA (after mirror folding)
+    (address >= 0x280 && address < 0x300) ||        // RIOT I/O
+    (address >= 0x480 && address < 0x500);          // RIOT RAM
+}
+
+// The RIOT is accessed at the end of the instruction: bring its timer there first.
+function memory_SyncRiot() {
+  if (!riot_synced) {
+    riot_synced = true;
+    if (cpu_cycles_fn) {
+      Riot.UpdateTimer(cpu_cycles_fn());
+    }
+  }
+}
+
+function BeginInstruction() {
+  slow_accesses = 0;
+  riot_synced = false;
+}
+
+// Returns whether the RIOT timer already covers the instruction's cycles.
+function EndInstruction() {
+  var synced = riot_synced;
+  riot_synced = false;
+  return synced;
+}
+
+function GetSlowAccesses() {
+  return slow_accesses;
+}
+
+function SetCpuCyclesSource(fn) {
+  cpu_cycles_fn = fn;
+}
+
+function SetMariaWriteHook(fn) {
+  maria_write_fn = fn;
+}
 
 // ----------------------------------------------------------------------------
 // Reset
@@ -124,6 +194,10 @@ function memory_Reset() {
   }
   for (index = 0; index < 16384; index++) {
     memory_rom[index] = 0;
+  }
+  // Cartridge space the cartridge doesn't populate reads $FF
+  for (index = 16384; index < MEMORY_SIZE; index++) {
+    memory_ram[index] = 0xFF;
   }
 
   // Debug, reset write count to High Score SRAM
@@ -170,14 +244,11 @@ function _memory_Read(address) {
   switch (address) {
     case INTIM:
     case INTIM | 0x2:
-      memory_ram[INTFLG] &= 0x7f;
-      return memory_ram[INTIM];
+      return Riot.ReadIntim();
       break;
     case INTFLG:
     case INTFLG | 0x2:
-      tmp_byte = memory_ram[INTFLG];
-      memory_ram[INTFLG] &= 0x7f;
-      return tmp_byte;
+      return Riot.ReadIntflg();
       break;
     default:
 
@@ -213,11 +284,40 @@ function _memory_Read(address) {
 
 //byte memory_Read(word address) {
 function memory_Read(address) {
-  var data = _memory_Read(address);
+  address = memory_FoldRiotRead(memory_FoldMirror(address));
+  if (memory_IsSlow(address)) {
+    slow_accesses++;
+  }
+  if (address == INTIM || address == (INTIM | 0x2) ||
+      address == INTFLG || address == (INTFLG | 0x2)) {
+    memory_SyncRiot();
+  }
+  var data = memory_ReadBus(address);
   if (data < 0) {
     console.error("Less than zero memory read: %d %d", address, data);
   }
   return data;
+}
+
+// A read as seen on the data bus (CPU or MARIA DMA), without CPU timing side
+// effects. Undriven TIA bits float to the last value on the bus.
+function memory_ReadBus(address) {
+  address = memory_FoldRiotRead(memory_FoldMirror(address));
+  var data;
+  if (address < 0x20) {
+    // TIA: registers decode 4 address bits and drive only some data bits
+    var reg = address & 0x0F;
+    var mask = TIA_READ_DRIVEN[reg];
+    data = (memory_ram[reg] & mask) | (last_bus & ~mask & 0xFF);
+  } else {
+    data = _memory_Read(address);
+  }
+  last_bus = data;
+  return data;
+}
+
+function SetLastBus(data) {
+  last_bus = data;
 }
 
 //byte memory_Read(word address) {
@@ -239,6 +339,17 @@ function memory_ReadMaria(address) {
 function memory_Write(address, data) {
   if (data < 0) {
     console.error("Less than zero memory write: %d %d", address, data);
+  }
+  address = memory_FoldMirror(address);
+  if (memory_IsSlow(address)) {
+    slow_accesses++;
+  }
+  last_bus = data;
+  if (address >= 0x20 && address < 0x40) {
+    // MARIA: color/CTRL writes catch the racing beam up first
+    if (maria_write_fn) maria_write_fn(address, data);
+  } else if (address >= TIM1T && address <= (T1024T | 0x8)) {
+    memory_SyncRiot();
   }
 
   if (cartridge_xm &&
@@ -262,6 +373,14 @@ function memory_Write(address, data) {
     return;
   }
 
+  // Nothing responds here: writes go nowhere (and reads stay 0)
+  if ((address >= 0x0240 && address < 0x0280) ||
+      (address >= 0x0340 && address < 0x0480) ||
+      (address >= 0x0500 && address < 0x1000) ||
+      (!highScoreCartEnabled && address >= 0x1000 && address < 0x1800)) {
+    return;
+  }
+
   if (!memory_rom[address] || (cartridge_halt_banked_ram && (address >= 49152 && address <= 65535))) {
 
     // Track writes to high score SRAM
@@ -282,7 +401,6 @@ function memory_Write(address, data) {
         if (data & 1) {
           lock = true;
           console.log("Lock: " + data);
-          memory_ram[MSTAT] = 0x80; // Required for Bouncing Balls demo
         }
         if ((data & 4) && Cartridge.IsLoaded()) {
           // Cartridge.RestoreFromTmp(Bios.Size(), memory_ram, memory_rom);
@@ -366,6 +484,10 @@ function memory_Write(address, data) {
             maria_memory_ram[16384 + (address - 49152)] = data;
           } else {
             memory_ram[address] = data;
+            if (cartridge_mirror_ram && address >= 0x4000 && address < 0x8000) {
+              // Mirror RAM: A8 isn't decoded, so both pages of the pair change
+              memory_ram[address ^ 0x100] = data;
+            }
             if (address >= 8256 && address <= 8447) {
               memory_ram[address - 8192] = data;
             }
@@ -414,7 +536,7 @@ function memory_WriteROM(address, size, data, offset) {
       write_to_maria = true;
     } else if (address === 32768 || address === 49152 ||
         (type === Cartridge.CARTRIDGE_TYPE_SUPERCART_ROM && address === 16384)) {
-      maria_offset = 128 * 1024;
+      maria_offset = Cartridge.GetSize() >> 1;  // Maria's half: the second half of the image
       write_to_maria = true;
     }
   }
@@ -474,6 +596,7 @@ function OnCartridgeLoaded() {
   cartridge_pokey_write_only = Cartridge.IsPokeyWriteOnly();
   cartridge_banksets = Cartridge.IsBanksets();
   cartridge_halt_banked_ram = Cartridge.IsHaltBankedRam();
+  cartridge_mirror_ram = Cartridge.IsMirrorRam();
   cartridge_type = Cartridge.GetType();
 }
 
@@ -496,6 +619,15 @@ Events.addListener(
 
 export {
   memory_ClearROM as ClearROM,
+  BeginInstruction,
+  memory_ReadBus as ReadBus,
+  memory_FoldMirror as FoldMirror,
+  memory_IsSlow as IsSlow,
+  SetLastBus,
+  EndInstruction,
+  GetSlowAccesses,
+  SetCpuCyclesSource,
+  SetMariaWriteHook,
   memory_WriteROM as WriteROM,
   memory_Write as Write,
   memory_Read as Read,

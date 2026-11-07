@@ -729,20 +729,24 @@ addProps(advancedTab, {
   xmSelect: null,
   vsyncSwitch: null,
   skipSelect: null,
+  twinStickSwitch: null,
   onShow: function () {    
     this.xmSelect.setValue(Cartridge.GetXmMode().toString());
     this.vsyncSwitch.setValue(js7800.Main.isVsyncEnabled()); 
     this.skipSelect.setValue(js7800.Main.getSkipLevel().toString());   
+    this.twinStickSwitch.setValue(Cartridge.IsForceDualAnalog());
   },
   onOk: function () {    
     Cartridge.SetXmMode(parseInt(this.xmSelect.getValue()));
     js7800.Main.setVsyncEnabled(this.vsyncSwitch.getValue());
     js7800.Main.setSkipLevel(parseInt(this.skipSelect.getValue()));   
+    Cartridge.SetForceDualAnalog(this.twinStickSwitch.getValue());
   },
   onDefaults: function () {    
     this.xmSelect.setValue(Cartridge.GetXmModeDefault().toString());
     this.vsyncSwitch.setValue(js7800.Main.getVsyncEnabledDefault());
     this.skipSelect.setValue(js7800.Main.getSkipLevelDefault().toString());   
+    this.twinStickSwitch.setValue(false);
   },
   createTabContent: function (rootEl) {
     var desc = document.createElement("div");
@@ -772,6 +776,23 @@ addProps(advancedTab, {
     grid.addCell(new LabelCell("Vertical sync:"));
     this.vsyncSwitch = new ToggleSwitch("Vertical Sync");
     grid.addCell(new ContentCell(this.vsyncSwitch));    
+    grid.addCell(new LabelCell("Force twin stick:"));
+    this.twinStickSwitch = new ToggleSwitch("Force Twin Stick");
+    var twinStickSwitch = this.twinStickSwitch;
+    grid.addCell(new ContentCell({
+      createElement: function () {
+        var el = document.createElement("div");
+        el.style.display = "flex";
+        el.style.alignItems = "center";
+        el.appendChild(twinStickSwitch.createElement());
+        var note = document.createElement("span");
+        note.style.marginLeft = "10px";
+        note.style.color = "#777";
+        note.textContent = "(session only)";
+        el.appendChild(note);
+        return el;
+      }
+    }));
     rootEl.appendChild(grid.createElement());
   }
 });
