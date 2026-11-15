@@ -1,0 +1,76 @@
+<div class="docs">
+    <div class="tabcontent__title">High Scores</div>
+    <div class="dropdown">
+        <button class="dropbtn" onclick="this.blur();">Jump to section <span class="down-arrow">&#x25BC;</span></button>
+        <div class="dropdown-content">
+            <div onclick="window.location.href='#global-leaderboard'">Global Leaderboard</div>
+            <div onclick="window.location.href='#local-leaderboard'">Local Leaderboard</div>
+        </div>
+    </div>
+    <p>
+        JS7800 supports persisting high scores both globally and locally for compatible cartridges. For a 
+        cartridge to be considered compatible, it must identify itself as supporting the High Score Cartridge (HSC)
+        via its header (<span class="fixed">.a78</span> file extension). By default, global persistence of high
+        scores is enabled. 
+    </p>
+    <div class="docs-center">
+        <img class="docs-centered-image" style="border-width: .5em;" src="help/images/highscore.png"></img>
+    </div>
+    <p>
+        By default, the "Cartridge Drop-Down Menu" (See "Cartridge Menu" in "Cartridges" help tab on the left) contains
+        a set of homebrew games that support high scores. These cartridges are contained in a 
+        group titled, "High Score Compatible", near the bottom of the menu list.
+    </p>
+    <p>
+        It is also important to note that when a high score is obtained, the game will prompt the player to enter a set 
+        of initials to associate with the score. Entering the initials is done via the Atari 7800 controller
+        (keyboard controller mappings or gamepad) versus using keyboard keys directly. In addition to letters, 
+        several special characters are also present during high score entry that allow for operations such as 
+        deleting characters and accepting the current initials. For example, in the screen shot above, the 
+        "white square" translates to accepting the initials that have been entered.
+    </p>
+    <p>
+        High score related settings can be modified via the "High Scores" tab within the "Settings" dialog. 
+        For more information on high score-related settings, see the "High Scores" section of the 
+        "Settings Dialog" help tab on the left.
+    </p>    
+    <a name="global-leaderboard"></a>
+    <div class="docs-section-title">Global Leaderboard</div>
+    <p>
+        JS7800 supports a global high score leaderboard. When a game that supports high scores is loaded,
+        the game's current high scores are retrieved from a central high score server. If any new high scores are 
+        achieved while playing the game, those scores will be published back to the central server. 
+    </p>    
+    <p>
+        It is important to note that there is a lag when detecting that a new high score has been set and
+        recording it with the central server. Therefore, it is highly recommended to wait some period of 
+        time (10 seconds or so) prior to exiting the current game to ensure that the new high score is successfully
+        recorded.
+    </p>
+    <p>
+        When loading a game that does support high scores, a message stating, 
+        "Global leaderboard not currently supported for this game", may be displayed. This message indicates 
+        that while this particular games does indeed support high scores, it is not currently 
+        registered with the global high score server. There are multiple reasons why this might be the case.
+        It is possible that the game is too new and has yet to be registered with the server. But, it is most
+        likely that there are multiple versions of the game, and this particular variant is not supported. 
+        Multiple variants of a given game are typically not supported as each variant could have different
+        scoring models, etc. A raw dump of supported games and variants (identified by cartridge MD5 hash
+        without header) can be found 
+        <a href="https://twitchasylum.com/x/gamelist.php" target="_blank">here</a>.
+    </p>
+    <p>
+        The <a href="leaderboard" target="_blank">JS7800 Global Leaderboard</a> page provides the 
+        ability to view global high scores and top players.
+    </p>
+    <a name="local-leaderboard"></a>
+    <div class="docs-section-title">Local Leaderboard</div>
+    <p>
+        In addition to the global leaderboard, JS7800 supports the ability to save high scores to a local 
+        leaderboard. Local leaderboard scores are persisted on the local device and available between
+        different browser sessions (unless cookies have been explicitly disabled). 
+    </p>
+    <p>Unlike the global leaderboard, which limits compatibility with game variants, 
+        the local leaderboard supports all high score-enabled games and variants.
+    </p>
+</div>

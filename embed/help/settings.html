@@ -1,0 +1,221 @@
+<div class="docs">
+    <div class="tabcontent__title">Settings Dialog</div>
+    <div class="dropdown">
+        <button class="dropbtn" onclick="this.blur();">Jump to section <span class="down-arrow">&#x25BC;</span></button>
+        <div class="dropdown-content">
+            <div onclick="window.location.href='#display-settings'">Display</div>
+            <div onclick="window.location.href='#keyboard-settings'">Keyboard</div>
+            <div onclick="window.location.href='#gamepads-settings'">Gamepads</div>
+            <div onclick="window.location.href='#hs-settings'">High Scores</div>
+            <div onclick="window.location.href='#advanced-settings'">Advanced</div>
+        </div>
+    </div>
+    <p>
+        The "Settings" dialog allows for the viewing and modification of various aspects of the JS7800 emulator. 
+        Any changes that are made in the dialog can be persisted by clicking the "OK" button. Clicking the "Cancel"
+        button will discard any pending changes that have been made. The "Defaults" button can be used to revert all 
+        settings back to their original default values.
+    </p>
+    <p>
+        Setting values will persist between sessions unless cookies have been explicitly disabled.
+    </p>
+    <a name="display-settings"></a>
+    <div class="docs-section-title">Display Settings</div>
+    <p>
+        The "Display" settings tab (shown below) is used to control how the JS7800 screen will be displayed.        
+    </p>
+    <div class="docs-center">
+        <img class="docs-loading-controls-image" style="border-color: #1f1f1f" src="help/images/display.png"></img>
+    </div>
+    <p>
+        Each of the fields present on the "Display" settings tab are described below.
+    </p>
+    <p>
+        <div class="dialog-grid docs-grid">
+            <div class="dialog-cell-label">
+                Screen size
+            </div>
+            <div class="dialog-cell-value">
+                The screen size setting controls the size of the JS7800 screen. While there are many size 
+                settings available, use of an integer-based value (2x, 3x, etc.) is recommended as it 
+                supports a crisp display (apply filtering disabled) without fractional pixels. 
+            </div>
+            <div class="dialog-cell-label">
+                Aspect ratio
+            </div>
+            <div class="dialog-cell-value">
+                The aspect ratio (AR) setting controls the ratio of the screen width to its height. By default,
+                a 1:1 pixel aspect ratio (PAR) is selected that supports a crisp display (apply filtering disabled) 
+                without fractional pixels. Other aspect ratios are available, including a 6:7 PAR option that 
+                attempts to mimic the original ratio of the Atari 7800 console. However, ratios other than a 1:1 PAR 
+                will result in fractional pixels, therefore filtering of the display (apply filter) is recommended.
+            </div>
+            <div class="dialog-cell-label">
+                Fullscreen
+            </div>
+            <div class="dialog-cell-value">
+                The fullscreen setting controls how the screen is scaled when in fullscreen mode. By default, 
+                "fill screen" is selected, which causes the screen to scale to fill the entire screen 
+                (while still maintaining the selected aspect ratio). While this option will consume the entire
+                screen, it will most likely result in fractional pixels. To eliminate unwanted artifacts due 
+                to fractional pixels, the "apply filter" setting can be enabled. The other available option,
+                "integer scaling", causes the screen to scale vertically using an integer multiple of the 
+                Atari 7800 display resolution. This setting combined with a "1:1 pixel aspect ratio" ensures
+                that no fractional pixels will be present when in fullscreen mode.
+            </div>
+            <div class="dialog-cell-label">
+                Palette
+            </div>
+            <div class="dialog-cell-value">
+                The palette setting controls the set of colors (color palette) used to render each frame being displayed. 
+                The "ProSystem default" palette is the original palette included with the ProSystem emulator. This 
+                particular palette is composed of colors that are bright and vivid, and may be preferred on 
+                modern displays, but are not representative of what is actually achievable with an Atari 7800 
+                connected to a CRT display. The second set of palettes (Cool, Warm, and Hot) attempt to recreate the 
+                colors that would actually be experienced when connecting an Atari 7800 console to a CRT. "Cool, Warm, and Hot"
+                represent the various stages of the console, from power on through having been running 
+                continuously for 15-30 minutes, and its effect on the colors being displayed. Finally, the "Cool, Warm, and Hot"
+                palettes are organized into two group based on the overall brightness level of the palettes.
+            </div>
+            <div class="dialog-cell-label">
+                Apply filter
+            </div>
+            <div class="dialog-cell-value">
+                This setting controls whether a filter is applied to the display. The actual filter applied depends
+                on the particular browser and version (typically a bilinear filter). Applying a filter
+                will cause the screen to have a slightly blurred appearance, but eliminates the majority of 
+                artifacts that result from fractional pixels. 
+            </div>
+        </div>
+    </p>
+    <a name="keyboard-settings"></a>
+    <div class="docs-section-title">Keyboard</div>
+    <p>
+        The "Keyboard Mappings" tab (shown below) is used to view and/or modify the keyboard mappings (bindings) for JS7800.         
+    </p>
+    <div class="docs-center">
+        <img class="docs-loading-controls-image" style="border-color: #191919" src="help/images/keyboard.png"></img>
+    </div>
+    <p>
+        Each of the red boxes indicates the key that is currently bound to a controller input or console button. 
+        To modify a mapping, simply click on the red box near the input to change. Once clicked, the box will turn
+        white, as shown above for button 1 of controller 1. Once the box turns white, the next key pressed will
+        be mapped to that particular input. 
+    </p>
+    <a name="gamepads-settings"></a>
+    <div class="docs-section-title">Gamepads</div>
+    <p>
+        The "Gamepad Compatibilty" tab (shown below) is used to determine the compatibility of the gamepads 
+        (controllers) currently connected to the device running JS7800. The gamepads tab does not contain 
+        any settings that can be modified.
+    </p>    
+    <div class="docs-center">
+        <img class="docs-loading-controls-image" style="border-color: #191919" src="help/images/gamepads.png"></img>
+    </div>
+    <p>
+        JS7800 supports up to two gamepads (for player 1 and player 2). The information boxes above each of the 
+        controllers (shown in the screenshot above), indicates the type of controller that is connected, and 
+        the mapping model the browser has detected. Unless the mapping is detected as, "standard", it is unlikely
+        that the gamepad will be compatible with JS7800 at this time. 
+    </p>
+    <p>
+        In addition to detecting the type and mapping model of the gamepad, JS7800 will show how the inputs
+        of the connected gamepad translate to JS7800. When the different controls on the gamepad are pressed
+        (D-pad, analog sticks, buttons), a white dot (shown in the screenshot above) will appear to show what
+        JS7800 control that particular input is mapped to.
+    </p>
+    <p>
+        Most modern gamepads should be compatible with JS7800. Xbox One, Xbox 360, PS4, PS3, and Switch 
+        controllers have been tested. The D-pad and left analog stick map to the joystick (or D-pad) of
+        the Atari 7800 controller. The "A", "B", "X", and "O" buttons map to the Atari 7800 controller
+        buttons. The "Select", "Back", and "Start" style buttons are mapped to the "SELECT" and 
+        "RESET" buttons of the Atari 7800 console. Finally, the shoulder buttons are mapped to the 
+        "PAUSE" button of the Atari 7800 console.
+    </p>
+    <p>
+        It is also worth noting that Robotron-style games (Robotron and TiME Salvo) support dual analog sticks
+        on controller 1 (left stick for move and right stick for fire).
+    </p>
+    <a name="hs-settings"></a>
+    <div class="docs-section-title">High Score Settings</div>
+    <p>
+        The "High Score" settings tab (shown below) is used to control the persistence of high scores for 
+        compatible cartridges. For a cartridge to be considered compatible, it must identify itself as 
+        supporting the High Score Cartridge (HSC) via its header (<span class="fixed">.a78</span> file extension).         
+    <div class="docs-center">
+        <img class="docs-loading-controls-image" style="border-color: #222222" src="help/images/hssettings.png"></img>
+    </div>
+    <p>
+        See the "High Scores" help tab on the left for detailed information regarding the use of 
+        high scores within JS7800.
+    </p>
+    <p>
+        <div class="dialog-grid docs-grid">
+            <div class="dialog-cell-label">
+                Save scores
+            </div>
+            <div class="dialog-cell-value">
+                The save scores switch controls whether high scores are persisted for compatible cartridges.
+            </div>
+            <div class="dialog-cell-label">
+                Save location
+            </div>
+            <div class="dialog-cell-value">
+                The save location pull-down is used to select where high scores are 
+                read from and persisted to. High scores can be retained locally (on the local device only) 
+                or globally (on the central high score server).
+            </div>
+            <div class="dialog-cell-label">
+                Local fallback
+            </div>
+            <div class="dialog-cell-value">
+                The local fallback switch controls whether high scores should be stored locally for games
+                that are not supported by the global high score server. This option is only available when 
+                the save location has been set to global (see "Save location" above).
+            </div>
+        </div>
+    </p>
+    <a name="advanced-settings"></a>
+    <div class="docs-section-title">Advanced Settings</div>
+    <p>
+        The "Advanced" settings tab (shown below) is used to control the configuration of advanced features.         
+    <div class="docs-center">
+        <img class="docs-loading-controls-image" style="border-color: #222222" src="help/images/advanced.png"></img>
+    </div>
+    <p>
+        Each of the fields present on the "Advanced" settings tab are described below.
+    </p>
+    <p>
+        <div class="dialog-grid docs-grid">
+            <div class="dialog-cell-label">
+                Expansion module (XM)
+            </div>
+            <div class="dialog-cell-value">
+                The expansion module setting controls whether the Atari 7800 Expansion Module (XM) is enabled.
+                There are three possible values for this setting, "(Automatic)", "Enabled", and "Disabled".
+                "(Automatic)" determines whether to enable or disable the expansion
+                module based on the cartridge header and JS7800 internal cartridge
+                database. See <a href="http://www.atarimuseum.com/videogames/consoles/7800/expansion/" target="_blank">this page</a> 
+                for more details on the Atari 7800 Expansion Module (XM).             
+            </div>
+            <div class="dialog-cell-label">
+                Frame skipping
+            </div>
+            <div class="dialog-cell-value">
+                The frame skipping setting controls the quantity of frames that should be skipped (not rendered). 
+                By default, frame skipping is disabled (no frames are skipped). Frame skipping can be 
+                utilized as a means of addressing performance issues experienced with JS7800. This setting
+                is typically combined with disabling of the "vertical sync" setting (see below).
+            </div>
+            <div class="dialog-cell-label">
+                Vertical sync
+            </div>
+            <div class="dialog-cell-value">
+                The vertical sync setting controls whether the frame rate of JS7800 is synchronized with the 
+                refresh rate of the monitor. Vertical sync attempts to eliminate display artifacts such as 
+                screen tearing. This setting can be disabled as a means of addressing performance issues
+                experienced with JS7800.
+            </div>
+        </div>
+    </p>
+</div>
