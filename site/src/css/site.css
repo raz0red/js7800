@@ -839,11 +839,15 @@ input:checked+.dialog-switch-slider:before {
 }
 
 
-/* Embedded (embed=1): just the player on black, scaled by script to fit the window */
+/* Embedded (embed=1): just the player on black; the script zooms the page so it fills the window */
+.js7800-embed,
+.js7800-embed body {
+  overflow: hidden;
+}
+
 .js7800-embed body {
   margin: 0;
   background-color: #000;
-  overflow: hidden;
 }
 
 .js7800-embed .header,
@@ -852,23 +856,30 @@ input:checked+.dialog-switch-slider:before {
   display: none;
 }
 
-/* the player sits at the centre of the window; the script scales it to fit */
+/* the player sits at the centre of the window (no transforms, so the dialogs stay window-sized) */
 .js7800-embed #js7800__target {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .js7800-embed .js7800 {
-  position: absolute;
-  left: 50%;
-  top: 50%;
   margin: 0;
   box-shadow: none;
   border-radius: 0;
   padding: 0;
-  transform: translate(-50%, -50%);
-  transform-origin: center center;
+}
+
+/* the settings and help dialogs (65em wide) shrunk to fit the player-sized window */
+.js7800-embed .modal {
+  padding-top: 1.5em;
+}
+
+.js7800-embed .modal-content {
+  zoom: .78;
 }

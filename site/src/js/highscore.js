@@ -150,10 +150,12 @@ function loadSramGlobal(success, failure) {
 
       console.log(msg);
       success(localSram);
-      // (not shown when embedded in another page)
+      // (not shown when embedded in another page: just take down the "Loading" message)
       if (!document.documentElement.classList.contains("js7800-embed")) {
         mid = Message.showMessage(msg);
         Message.hideMessage(mid, curGlobal ? 1500 : 3000);
+      } else {
+        Message.hideMessage(mid, 0);
       }
     } else {
       failure("Error reading global leaderboard (" + 

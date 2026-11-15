@@ -181,7 +181,8 @@ function handleRequestParameters() {
   }
 }
 
-// Embedded: no page header, cartridge controls or instructions; the player is scaled to fill the window
+// Embedded: no page header, cartridge controls or instructions; the page is zoomed so the player fills the window
+// (zoom, not a transform: a transformed ancestor would trap the settings and help dialogs inside the player)
 function setupEmbed() {
   embed = isParamTrue("embed");
   if (!embed) return;
@@ -189,10 +190,10 @@ function setupEmbed() {
   var fit = function () {
     var player = document.querySelector("#js7800__target .js7800");
     if (!player) return;
-    player.style.transform = "translate(-50%, -50%)";
     var w = player.offsetWidth, h = player.offsetHeight;
     if (!w || !h) return;
-    player.style.transform = "translate(-50%, -50%) scale(" + Math.min(window.innerWidth / w, window.innerHeight / h) + ")";
+    var zoom = String(Math.min(window.innerWidth / w, window.innerHeight / h));
+    if (document.documentElement.style.zoom !== zoom) document.documentElement.style.zoom = zoom;
   };
   window.addEventListener("resize", fit);
   window.addEventListener("load", fit);
