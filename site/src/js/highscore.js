@@ -148,10 +148,13 @@ function loadSramGlobal(success, failure) {
         msg += "<br><br>Using local storage for high scores.";
       }
 
-      mid = Message.showMessage(msg);
       console.log(msg);
       success(localSram);
-      Message.hideMessage(mid, curGlobal ? 1500 : 3000);
+      // (not shown when embedded in another page)
+      if (!document.documentElement.classList.contains("js7800-embed")) {
+        mid = Message.showMessage(msg);
+        Message.hideMessage(mid, curGlobal ? 1500 : 3000);
+      }
     } else {
       failure("Error reading global leaderboard (" + 
         xhr.status + ": " + xhr.statusText +")");

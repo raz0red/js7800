@@ -838,3 +838,37 @@ input:checked+.dialog-switch-slider:before {
   margin-top:1em;
 }
 
+
+/* Embedded (embed=1): just the player on black, scaled by script to fit the window */
+.js7800-embed body {
+  margin: 0;
+  background-color: #000;
+  overflow: hidden;
+}
+
+.js7800-embed .header,
+.js7800-embed .controls,
+.js7800-embed .instructs {
+  display: none;
+}
+
+/* the player sits at the centre of the window; the script scales it to fit */
+.js7800-embed #js7800__target {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.js7800-embed .js7800 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+}

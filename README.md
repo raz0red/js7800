@@ -72,6 +72,10 @@ For information on the ["cartridge list"](https://github.com/raz0red/js7800/wiki
         - Advanced settings: "Force twin stick" option (session only, not saved) enables dual analog mode
           for any game. In dual analog mode, the gamepad right shoulder is button 1 and the left
           shoulder is button 2 (shoulders no longer pause)
+        - Request parameters (put them before "cart", whose value runs to the end of the URL):
+            - "twinstick=1" turns on "Force twin stick" (e.g. for Robotron, Wolfenstein 3D)
+            - "embed=1" shows just the player, scaled to fit the window, for embedding in an iframe
+              (no page header, cartridge controls or instructions)
     - Fixes since 0.0.9 (not previously listed):
         - Updated NTSC/PAL palettes for modern displays (contributed by Trebor)
         - LAX abs (Phoenix fix), SBX opcode

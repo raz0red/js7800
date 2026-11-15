@@ -20,6 +20,7 @@ var getRequestParameter = Util.getRequestParameter;
 var getRequestParameterToEnd = Util.getRequestParameterToEnd;
 var highScoreCartEnabled = false;
 var debug = false;
+var embed = false;
 
 var js7800 = null;
 var romList = null;
@@ -145,20 +146,64 @@ function createFullscreenSelect() {
   return fsSelectSel;
 }
 
+function isParamTrue(name) {
+  var value = getRequestParameter(name);
+  if (value) {
+    value = value.toLowerCase();
+    return (value === "1" || value === "true");
+  }
+  return false;
+}
+
+// Request parameters (cart must be the last one: its value runs to the end of the URL)
+//   embed=1      just the player, scaled to fit the window (for showing js7800 in an iframe)
+//   twinstick=1  force twin stick (dual analog) mode, as the "Force twin stick" setting
 function handleRequestParameters() {
   var main = js7800.Main;
 
-  // ROM list
-  var rlist = getRequestParameter("cartlist");
-  if (!rlist) {
-    rlist = 'roms/romlist-homebrew.json';
+  if (isParamTrue("twinstick")) {
+    js7800.Cartridge.SetForceDualAnalog(true);
   }
-  romList.loadListFromUrl(rlist);
+
+  // ROM list (not shown when embedded)
+  if (!embed) {
+    var rlist = getRequestParameter("cartlist");
+    if (!rlist) {
+      rlist = 'roms/romlist-homebrew.json';
+    }
+    romList.loadListFromUrl(rlist);
+  }
 
   // ROM
   var rom = getRequestParameterToEnd("cart");
   if (rom) {
     loadFromUrl(rom);
+  }
+}
+
+// Embedded: no page header, cartridge controls or instructions; the player is scaled to fill the window
+function setupEmbed() {
+  embed = isParamTrue("embed");
+  if (!embed) return;
+  document.documentElement.classList.add("js7800-embed");
+  var fit = function () {
+    var player = document.querySelector("#js7800__target .js7800");
+    if (!player) return;
+    player.style.transform = "translate(-50%, -50%)";
+    var w = player.offsetWidth, h = player.offsetHeight;
+    if (!w || !h) return;
+    player.style.transform = "translate(-50%, -50%) scale(" + Math.min(window.innerWidth / w, window.innerHeight / h) + ")";
+  };
+  window.addEventListener("resize", fit);
+  window.addEventListener("load", fit);
+  setTimeout(fit, 0);
+  // the controls bar and the screen size can arrive after start-up: fit again whenever the player changes size
+  if (window.ResizeObserver) {
+    var watch = function () {
+      var player = document.querySelector("#js7800__target .js7800");
+      if (player) new ResizeObserver(fit).observe(player); else setTimeout(watch, 100);
+    };
+    watch();
   }
 }
 
@@ -183,6 +228,9 @@ function init(in7800) {
 
   // Check whether debug has been set
   debug = checkDebugParam();
+
+  // Embedded in another page?
+  setupEmbed();
 
   // Configure and init js7800 module
   main.setErrorHandler(errorHandler);
