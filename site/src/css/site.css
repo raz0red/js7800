@@ -904,7 +904,8 @@ input:checked+.dialog-switch-slider:before {
 
 /* the settings and help dialogs (65em wide), moved to the page by the script: centred, scaled to fit */
 .js7800-embed .modal {
-  padding-top: 0;
+  /* dialog.js centres with an inline padding-top; here the content centres itself */
+  padding-top: 0 !important;
   z-index: 10;
 }
 
