@@ -839,7 +839,7 @@ input:checked+.dialog-switch-slider:before {
 }
 
 
-/* Embedded (embed=1): just the player on black; the script zooms the page so it fills the window */
+/* Embedded (embed=1): just the player on black, centred; the script scales it (and the dialogs) to fit */
 .js7800-embed,
 .js7800-embed body {
   overflow: hidden;
@@ -856,28 +856,56 @@ input:checked+.dialog-switch-slider:before {
   display: none;
 }
 
-/* the player sits at the centre of the window (no transforms, so the dialogs stay window-sized) */
 .js7800-embed #js7800__target {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .js7800-embed .js7800 {
+  position: absolute;
+  left: 50%;
+  top: 50%;
   margin: 0;
   box-shadow: none;
   border-radius: 0;
   padding: 0;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
 }
 
-/* the settings and help dialogs (65em wide): centred in the window; the script shrinks each to fit as it opens */
+/* messages sit near the top of the player (their usual offset clears the page header, which is hidden here),
+   and fade in and out there */
+.js7800-embed .message {
+  top: 1.6em;
+}
+
+.js7800-embed #snackbar.show,
+.js7800-embed #errormsg.show {
+  animation-name: message--embed-in;
+}
+
+.js7800-embed #snackbar.hide,
+.js7800-embed #errormsg.hide {
+  animation-name: message--embed-out;
+}
+
+@keyframes message--embed-in {
+  from { top: 0; opacity: 0; }
+  to { top: 1.6em; opacity: .98; }
+}
+
+@keyframes message--embed-out {
+  from { top: 1.6em; opacity: .98; }
+  to { top: 0; opacity: 0; }
+}
+
+/* the settings and help dialogs (65em wide), moved to the page by the script: centred, scaled to fit */
 .js7800-embed .modal {
   padding-top: 0;
+  z-index: 10;
 }
 
 .js7800-embed .modal-content {
@@ -886,5 +914,6 @@ input:checked+.dialog-switch-slider:before {
   top: 50%;
   margin: 0;
   transform: translate(-50%, -50%);
+  transform-origin: center center;
   animation: none;
 }

@@ -181,42 +181,48 @@ function handleRequestParameters() {
   }
 }
 
-// Embedded: no page header, cartridge controls or instructions; the page is zoomed so the player fills the window
-// (zoom, not a transform: a transformed ancestor would trap the settings and help dialogs inside the player)
+// Embedded: no page header, cartridge controls or instructions; the player is centred and scaled to fill the
+// window. Its settings and help dialogs are moved out of the scaled player (a transformed ancestor would trap
+// them) and each is centred and scaled to fit the window as it shows. Transforms only: CSS zoom measures and
+// positions differently between browser versions.
 function setupEmbed() {
   embed = isParamTrue("embed");
   if (!embed) return;
   document.documentElement.classList.add("js7800-embed");
+  var scaleTo = function (el, w, h, maxScale) {
+    var s = Math.min(maxScale, (window.innerWidth - 16) / w, (window.innerHeight - 16) / h);
+    var t = "translate(-50%, -50%) scale(" + s.toFixed(4) + ")";
+    if (el.style.transform !== t) el.style.transform = t;
+  };
   var fit = function () {
     var player = document.querySelector("#js7800__target .js7800");
-    if (!player) return;
-    var w = player.offsetWidth, h = player.offsetHeight;
-    if (!w || !h) return;
-    var zoom = String(Math.min(window.innerWidth / w, window.innerHeight / h));
-    if (document.documentElement.style.zoom !== zoom) document.documentElement.style.zoom = zoom;
+    if (!player || !player.offsetWidth || !player.offsetHeight) return;
+    var s = Math.min(window.innerWidth / player.offsetWidth, window.innerHeight / player.offsetHeight);
+    var t = "translate(-50%, -50%) scale(" + s.toFixed(4) + ")";
+    if (player.style.transform !== t) player.style.transform = t;
   };
-  // the settings and help dialogs are built for a full page: whenever one shows, shrink it to fit the window
-  // (measured at its current zoom and only written when it changes, so the observer below never loops)
   var fitDialogs = function () {
+    var modals = document.querySelectorAll(".modal");
+    for (var i = 0; i < modals.length; i++) {
+      if (modals[i].parentNode !== document.body) document.body.appendChild(modals[i]);
+    }
     var dialogs = document.querySelectorAll(".modal-content");
-    for (var i = 0; i < dialogs.length; i++) {
-      var d = dialogs[i];
-      if (!d.offsetParent) continue;
-      var r = d.getBoundingClientRect();
-      if (!r.width || !r.height) continue;
-      var cur = parseFloat(d.style.zoom) || 1;
-      var zoom = Math.min(1, cur * Math.min((window.innerWidth - 16) / r.width, (window.innerHeight - 24) / r.height));
-      if (Math.abs(zoom - cur) > 0.005) d.style.zoom = String(zoom);
+    for (var j = 0; j < dialogs.length; j++) {
+      var d = dialogs[j];
+      if (d.offsetParent && d.offsetWidth && d.offsetHeight) scaleTo(d, d.offsetWidth, d.offsetHeight, 1);
     }
   };
+  // dialogs show and switch tabs by changing styles and classes: refit then (but not on the transforms written here)
   new MutationObserver(function (changes) {
     for (var i = 0; i < changes.length; i++) {
       var t = changes[i].target;
-      if (!(t.classList && t.classList.contains("modal-content"))) { setTimeout(fitDialogs, 0); return; }
+      if (t.classList && (t.classList.contains("modal-content") || t.classList.contains("js7800"))) continue;
+      setTimeout(fitDialogs, 0);
+      return;
     }
-  }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ["style", "class"] });
+  }).observe(document.body, { attributes: true, childList: true, subtree: true, attributeFilter: ["style", "class"] });
   window.addEventListener("resize", function () { fit(); fitDialogs(); });
-  window.addEventListener("load", fit);
+  window.addEventListener("load", function () { fit(); fitDialogs(); });
   setTimeout(fit, 0);
   // the controls bar and the screen size can arrive after start-up: fit again whenever the player changes size
   if (window.ResizeObserver) {
