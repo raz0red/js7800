@@ -195,7 +195,27 @@ function setupEmbed() {
     var zoom = String(Math.min(window.innerWidth / w, window.innerHeight / h));
     if (document.documentElement.style.zoom !== zoom) document.documentElement.style.zoom = zoom;
   };
-  window.addEventListener("resize", fit);
+  // the settings and help dialogs are built for a full page: whenever one shows, shrink it to fit the window
+  // (measured at its current zoom and only written when it changes, so the observer below never loops)
+  var fitDialogs = function () {
+    var dialogs = document.querySelectorAll(".modal-content");
+    for (var i = 0; i < dialogs.length; i++) {
+      var d = dialogs[i];
+      if (!d.offsetParent) continue;
+      var r = d.getBoundingClientRect();
+      if (!r.width || !r.height) continue;
+      var cur = parseFloat(d.style.zoom) || 1;
+      var zoom = Math.min(1, cur * Math.min((window.innerWidth - 16) / r.width, (window.innerHeight - 24) / r.height));
+      if (Math.abs(zoom - cur) > 0.005) d.style.zoom = String(zoom);
+    }
+  };
+  new MutationObserver(function (changes) {
+    for (var i = 0; i < changes.length; i++) {
+      var t = changes[i].target;
+      if (!(t.classList && t.classList.contains("modal-content"))) { setTimeout(fitDialogs, 0); return; }
+    }
+  }).observe(document.body, { attributes: true, subtree: true, attributeFilter: ["style", "class"] });
+  window.addEventListener("resize", function () { fit(); fitDialogs(); });
   window.addEventListener("load", fit);
   setTimeout(fit, 0);
   // the controls bar and the screen size can arrive after start-up: fit again whenever the player changes size

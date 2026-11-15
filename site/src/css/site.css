@@ -875,11 +875,16 @@ input:checked+.dialog-switch-slider:before {
   padding: 0;
 }
 
-/* the settings and help dialogs (65em wide) shrunk to fit the player-sized window */
+/* the settings and help dialogs (65em wide): centred in the window; the script shrinks each to fit as it opens */
 .js7800-embed .modal {
-  padding-top: 1.5em;
+  padding-top: 0;
 }
 
 .js7800-embed .modal-content {
-  zoom: .78;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  animation: none;
 }
