@@ -856,6 +856,11 @@ input:checked+.dialog-switch-slider:before {
   display: none;
 }
 
+/* the full screen cartridge select: no cartridge list when embedded */
+.js7800-embed .fsselect {
+  display: none !important;
+}
+
 .js7800-embed #js7800__target {
   position: fixed;
   top: 0;
