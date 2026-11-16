@@ -292,13 +292,15 @@ function init(in7800) {
     }
     window.open(url, '_blank'/*,'noopener'*/);
   }
+  // No leaderboard link when embedded
+  if (embed) lbBUtton.getElement().style.display = "none";
 
   // Listen for full screen change events
   Events.addListener(
     new Events.Listener("fullscreen",
       function (isFullscreen) {
         lbBUtton.getElement().style.display =
-          isFullscreen ? "none" : "block";
+          isFullscreen || embed ? "none" : "block";
         fsSelect.parentElement.style.display =
           isFullscreen ? "flex" : "none";
       }));
